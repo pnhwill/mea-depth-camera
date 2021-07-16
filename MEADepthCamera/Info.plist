@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MEADepthCamera saves captured videos to your photo library.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>MEADepthCamera uses the microphone to record audio during videos.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>MEADepthCamera uses the camera to take video.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
