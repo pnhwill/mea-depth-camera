@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */; };
+		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796581269DED5F0070C294 /* AppDelegate.swift */; };
 		B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796583269DED5F0070C294 /* SceneDelegate.swift */; };
 		B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796585269DED5F0070C294 /* CameraViewController.swift */; };
@@ -37,6 +39,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthDataProcessor.swift; sourceTree = "<group>"; };
+		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B579657E269DED5F0070C294 /* MEADepthCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MEADepthCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5796581269DED5F0070C294 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5796583269DED5F0070C294 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 				B5796581269DED5F0070C294 /* AppDelegate.swift */,
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
+				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
+				B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */,
 				B57965B526A096B10070C294 /* VideoFileWriter.swift */,
 				B57965B1269E68D10070C294 /* PreviewView.swift */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
@@ -264,8 +270,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
 				B57965B2269E68D10070C294 /* PreviewView.swift in Sources */,
+				B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,

@@ -24,6 +24,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     @IBOutlet private weak var recordButton: UIButton!
     
     @IBOutlet private weak var qualityLabel: UILabel!
+    @IBOutlet private weak var confidenceLabel: UILabel!
+    
+    @IBOutlet private weak var indicatorImage: UIImageView!
     
     // AVCapture session
     private var session = AVCaptureSession()
@@ -65,6 +68,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var videoResolution: CGSize = CGSize()
     private var depthResolution: CGSize = CGSize()
     
+    var faceLandmarksFileWriter: FaceLandmarksFileWriter?
+    var isCollectingData: Bool = false
+    
     // Vision requests
     var detectionRequests: [VNDetectFaceRectanglesRequest]?
     var trackingRequests: [VNTrackObjectRequest]?
@@ -78,6 +84,10 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     // Vision face analysis
     var faceCaptureQuality: Float?
+    var faceLandmarksConfidence: VNConfidence?
+    
+    // Face guidelines alignment
+    private var isAligned: Bool = false
     
     // Dispatch queues
     private var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
@@ -375,6 +385,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             return
         }
 
+        // Use the same dispatch queue as the video data for now
+        depthDataOutput.setDelegate(self, callbackQueue: dataOutputQueue)
+        
         // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)
         if let (deviceFormat, frameRateRange, resolution) = bestDeviceFormat(for: videoDevice) {
             do {
@@ -489,6 +502,10 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         let videoSettings = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: fileType)
         let audioSettings = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: fileType)
         videoFileConfiguration = VideoFileConfiguration(fileType: fileType, videoSettings: videoSettings, audioSettings: audioSettings)
+        
+        // Initialize landmarks file writer
+        // Move to viewWillAppear() probably also
+        faceLandmarksFileWriter = FaceLandmarksFileWriter(resolution: videoResolution)
         
         session.commitConfiguration()
     }
@@ -749,10 +766,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     }
     
     @IBAction private func toggleRecording(_ sender: UIButton) {
+        // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
         
-        guard let outputURL = createFileURL(nameLabel: "video", fileType: videoFileExtension) else {
+        guard let videoURL = createFileURL(nameLabel: "video", fileType: videoFileExtension) else {
             print("Failed to create video file")
             //recordButton.isEnabled = true
             return
@@ -765,13 +783,15 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
             }
             do {
-                videoFileWriter = try VideoFileWriter(outputURL: outputURL, configuration: videoFileConfiguration!)
+                videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoFileConfiguration!)
             } catch {
                 print("Error creating video file writer: \(error)")
             }
             recordingState = .start
+            isCollectingData = true
         case .recording:
             recordingState = .finish
+            isCollectingData = false
         default:
             break
         }
@@ -801,6 +821,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             }
         }
         */
+        
+        guard (faceLandmarksFileWriter?.toggleDataCollection(isCollectingData: isCollectingData)) != nil else {
+            print("No face landmarks file writer found, failed to access toggleDataCollection().")
+            return
+        }
     }
     
     /*
@@ -1052,6 +1077,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 // Hide the label when no face is observed
                 DispatchQueue.main.async {
                     self.qualityLabel.isHidden = true
+                    self.confidenceLabel.isHidden = true
                 }
                 // Nothing to track, so abort.
                 return
@@ -1076,18 +1102,37 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                         return
                     }
                     
+                    // Get face landmarks confidence metric
+                    self.faceLandmarksConfidence = results[0].landmarks?.confidence
+                    let confidenceText = String(format: "%.3f", self.faceLandmarksConfidence!)
+                    // Update UI label on the main queue
+                    DispatchQueue.main.async {
+                        self.confidenceLabel.isHidden = false
+                        self.confidenceLabel.text = "Face Landmarks Confidence: " + confidenceText
+                    }
+                    
+                    // Write face observation results to file if collecting data.
+                    // Perform data collection in background queue so that it does not hold up the UI.
+                    if self.isCollectingData {
+                        // NOTE: this only calls for the first observation in the array if there multiple
+                        // Could make this so each face observation goes into a separate file (not necessary but safer)
+                        if let depthData = self.depthData {
+                            if self.faceLandmarksFileWriter != nil {
+                                self.faceLandmarksFileWriter?.writeToCSV(faceObservation: results[0], depthData: depthData)
+                            } else {
+                                print("No face landmarks file writer found, failed to access writeToCSV().")
+                            }
+                        } else {
+                            print("No depth data found.")
+                        }
+                    }
+                    
+                    //self.isAligned = self.checkAlignment(of: results[0])
+                    
                     // Perform all UI updates (drawing) on the main queue, not the background queue on which this handler is being called.
                     DispatchQueue.main.async {
-                        // Write face observation results to file if collecting data.
-                        // Data collection should be in background queue!
-                        /*
-                         if self.isCollectingData {
-                         // NOTE: this only calls for the first observation in the array if there multiple
-                         // Could make this so each face observation goes into a separate file (not necessary but safer)
-                         self.writeToCSV(faceObservation: results[0])
-                         }
-                         */
                         self.drawFaceObservations(results)
+                        self.updateIndicator()
                     }
                 })
                 
@@ -1115,6 +1160,19 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                     NSLog("Failed to perform FaceLandmarkRequest: %@", error)
                 }
                 
+                // Get face rectangles request containing roll & yaw for alignment checking
+                let faceRectanglesRequest = VNDetectFaceRectanglesRequest()
+                do {
+                    try imageRequestHandler.perform([faceRectanglesRequest])
+                } catch let error as NSError {
+                    NSLog("Failed to perform FaceRectanglesRequest: %@", error)
+                }
+                guard let face = faceRectanglesRequest.results?.first as? VNFaceObservation else {
+                    print("Failed to produce face capture quality metric")
+                    return
+                }
+                self.isAligned = self.checkAlignment(of: face)
+                
                 // Get face capture quality metric
                 let faceCaptureQualityRequest = VNDetectFaceCaptureQualityRequest()
                 faceCaptureQualityRequest.inputFaceObservations = [faceObservation]
@@ -1129,6 +1187,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                     print("Failed to produce face capture quality metric")
                     return
                 }
+                
                 self.faceCaptureQuality = faceCaptureQuality
                 let qualityText = String(format: "%.2f", faceCaptureQuality)
                 // Update UI label on the main queue
@@ -1377,6 +1436,61 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         self.updateLayerGeometry()
         
         CATransaction.commit()
+    }
+    
+    // MARK: - Face Guidelines and Indicator
+    
+    private func updateIndicator() {
+        if isAligned {
+            indicatorImage.image = UIImage(systemName: "checkmark.square.fill")
+            indicatorImage.tintColor = UIColor.systemGreen
+        } else {
+            indicatorImage.image = UIImage(systemName: "xmark.square")
+            indicatorImage.tintColor = UIColor.systemRed
+        }
+    }
+    
+    private func checkAlignment(of faceObservation: VNFaceObservation) -> Bool {
+        let faceBounds = faceObservation.boundingBox
+        //print("x: \(faceBounds.midX)")
+        //print("y: \(faceBounds.midY)")
+        //print("size: \(faceBounds.size)")
+        
+        // Check if face is centered on the screen
+        let centerPoint = CGPoint(x: 0.5, y: 0.43)
+        let centerErrorMargin: CGFloat = 0.1
+        let xError = (faceBounds.midX - centerPoint.x).magnitude
+        let yError = (faceBounds.midY - centerPoint.y).magnitude
+        let centeredCondition = xError <= centerErrorMargin && yError <= centerErrorMargin
+        //print("x error: \(xError) y error: \(yError)")
+        
+        // Check if face is correct size on screen
+        let size = CGSize(width: 0.6, height: 0.48)
+        let sizeErrorMargin: CGFloat = 0.15
+        let widthError = (faceBounds.width - size.width).magnitude
+        let heightError = (faceBounds.height - size.height).magnitude
+        let sizeCondition = widthError <= sizeErrorMargin && heightError <= sizeErrorMargin
+        //print("width error: \(widthError) height error: \(heightError)")
+        
+        // Get face rotation
+        /*if faceObservation.yaw != nil, faceObservation.roll != nil {
+            print("rotation found")
+        } else {
+            print("rotation not found")
+        }*/
+        // If the roll and/or yaw is not found, it will default to 0.0 so that the rotation condition is true (i.e. it doesn't check the rotation)
+        let faceRoll = CGFloat(truncating: faceObservation.roll ?? 0.0)
+        let faceYaw = CGFloat(truncating: faceObservation.yaw ?? 0.0)
+        //print("roll: \(faceRoll) yaw: \(faceYaw)")
+        
+        // Check if face is facing screen
+        let rotation: CGFloat = 10
+        let rotationErrorMargin = rotation.radiansForDegrees()
+        let rotationCondition = faceRoll.magnitude <= rotationErrorMargin && faceYaw.magnitude <= rotationErrorMargin
+        
+        let isAligned: Bool = centeredCondition && sizeCondition && rotationCondition
+        
+        return isAligned
     }
     
     // MARK: - Helper Methods for Error Presentation
