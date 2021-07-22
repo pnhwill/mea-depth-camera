@@ -27,8 +27,8 @@ class VideoFileWriter {
     
     init(outputURL: URL, configuration: VideoFileConfiguration) throws {
         videoWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
-        audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioCompressionSettings)
-        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoCompressionSettings)
+        audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
+        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings)
         //pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: nil)
         
         audioWriterInput.expectsMediaDataInRealTime = true
@@ -52,6 +52,7 @@ class VideoFileWriter {
     }
     
     // MARK: Lifecycle Methods
+    
     func start(at startTime: CMTime) {
         guard videoWriter.startWriting() else {
             print("Failed to start writing to video file")
@@ -113,7 +114,7 @@ struct VideoFileConfiguration {
     
     let outputFileType: AVFileType
     
-    let videoCompressionSettings: [String: Any]?
+    let videoSettings: [String: Any]?
         /*= [
         AVVideoCodecKey: AVVideoCodecType.h264,
         // For simplicity, assume 16:9 aspect ratio.
@@ -128,7 +129,7 @@ struct VideoFileConfiguration {
     
     // Specify preserve 60fps
     
-    let audioCompressionSettings: [String: Any]?
+    let audioSettings: [String: Any]?
         /*= [
         AVFormatIDKey: kAudioFormatMPEG4AAC,
         // For simplicity, hard-code a common sample rate.
@@ -139,9 +140,9 @@ struct VideoFileConfiguration {
     ]*/
     
     init(fileType: AVFileType, videoSettings: [String: Any]?, audioSettings: [AnyHashable: Any]?) {
-        outputFileType = fileType
-        videoCompressionSettings = videoSettings
-        //audioCompressionSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
-        audioCompressionSettings = audioSettings as? [String: Any]
+        self.outputFileType = fileType
+        self.videoSettings = videoSettings
+        //self.audioSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
+        self.audioSettings = audioSettings as? [String: Any]
     }
 }

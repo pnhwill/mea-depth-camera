@@ -19,7 +19,13 @@
 		B57965A4269DED600070C294 /* MEADepthCameraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */; };
 		B57965B2269E68D10070C294 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B1269E68D10070C294 /* PreviewView.swift */; };
 		B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B526A096B10070C294 /* VideoFileWriter.swift */; };
+		B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
+		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
+		B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */; };
+		B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5ABE86026AA076F003D2AFD /* LICENSE.txt */; };
+		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
+		B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,7 +64,15 @@
 		B57965A5269DED600070C294 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B57965B1269E68D10070C294 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
+		B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DepthToGrayscale.metal; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
+		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
+		B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterRenderer.swift; sourceTree = "<group>"; };
+		B5ABE86026AA076F003D2AFD /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+		B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthToGrayscaleConverter.swift; sourceTree = "<group>"; };
+		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
+		B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = minMaxFromBuffer.m; sourceTree = "<group>"; };
+		B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = minMaxFromBuffer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +107,7 @@
 				B5796597269DED600070C294 /* MEADepthCameraTests */,
 				B57965A2269DED600070C294 /* MEADepthCameraUITests */,
 				B579657F269DED5F0070C294 /* Products */,
+				B5ABE86226AA0778003D2AFD /* LICENSE */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,15 +127,17 @@
 				B5796581269DED5F0070C294 /* AppDelegate.swift */,
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
+				B57965B1269E68D10070C294 /* PreviewView.swift */,
+				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
+				B5ABE85926A9CC9B003D2AFD /* AV File Writers */,
 				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
 				B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */,
-				B57965B526A096B10070C294 /* VideoFileWriter.swift */,
-				B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */,
-				B57965B1269E68D10070C294 /* PreviewView.swift */,
+				B5886DF626AA168B00EB344C /* Shaders */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
 				B579658A269DED600070C294 /* Assets.xcassets */,
 				B579658C269DED600070C294 /* LaunchScreen.storyboard */,
 				B579658F269DED600070C294 /* Info.plist */,
+				B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */,
 			);
 			path = MEADepthCamera;
 			sourceTree = "<group>";
@@ -141,6 +158,43 @@
 				B57965A5269DED600070C294 /* Info.plist */,
 			);
 			path = MEADepthCameraUITests;
+			sourceTree = "<group>";
+		};
+		B5886DF626AA168B00EB344C /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		B5ABE85926A9CC9B003D2AFD /* AV File Writers */ = {
+			isa = PBXGroup;
+			children = (
+				B57965B526A096B10070C294 /* VideoFileWriter.swift */,
+				B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */,
+				B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */,
+			);
+			path = "AV File Writers";
+			sourceTree = "<group>";
+		};
+		B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */,
+				B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */,
+				B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */,
+				B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */,
+			);
+			path = "Depth Map Rendering";
+			sourceTree = "<group>";
+		};
+		B5ABE86226AA0778003D2AFD /* LICENSE */ = {
+			isa = PBXGroup;
+			children = (
+				B5ABE86026AA076F003D2AFD /* LICENSE.txt */,
+			);
+			path = LICENSE;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -210,6 +264,7 @@
 				TargetAttributes = {
 					B579657D269DED5F0070C294 = {
 						CreatedOnToolsVersion = 12.5.1;
+						LastSwiftMigration = 1250;
 					};
 					B5796593269DED600070C294 = {
 						CreatedOnToolsVersion = 12.5.1;
@@ -246,6 +301,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */,
 				B579658E269DED600070C294 /* LaunchScreen.storyboard in Resources */,
 				B579658B269DED600070C294 /* Assets.xcassets in Resources */,
 				B5796589269DED5F0070C294 /* Main.storyboard in Resources */,
@@ -279,7 +335,12 @@
 				B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
+				B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
+				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
+				B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */,
+				B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */,
+				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -456,6 +517,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W5ML5VAV94;
 				INFOPLIST_FILE = MEADepthCamera/Info.plist;
@@ -465,6 +527,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mea-lab.MEADepthCamera";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "MEADepthCamera/MEADepthCamera-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -475,6 +539,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W5ML5VAV94;
 				INFOPLIST_FILE = MEADepthCamera/Info.plist;
@@ -484,6 +549,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.mea-lab.MEADepthCamera";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "MEADepthCamera/MEADepthCamera-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

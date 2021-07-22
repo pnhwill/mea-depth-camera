@@ -53,6 +53,13 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     }
     private var recordingState = RecordingState.idle
     
+    private enum WriteState {
+        case inactive, active
+    }
+    private var videoWriteState = WriteState.inactive
+    private var audioWriteState = WriteState.inactive
+    private var depthMapWriteState = WriteState.inactive
+    
     private var videoFileConfiguration: VideoFileConfiguration?
     private var videoFileWriter: VideoFileWriter?
     private var videoFileType: AVFileType = .mov
@@ -66,6 +73,16 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     // Depth processing
     var depthData: AVDepthData?
+    
+    private let videoDepthConverter = DepthToGrayscaleConverter()
+    private var renderingEnabled = true
+    private var currentDepthPixelBuffer: CVPixelBuffer?
+    
+    // Depth map recording (to video file)
+    private var depthMapFileConfiguration: DepthMapFileConfiguration?
+    private var depthMapFileWriter: DepthMapFileWriter?
+    private var depthMapFileType: AVFileType = .mov
+    private var depthMapFileExtension: String = "mov"
     
     // Data collection
     private var videoResolution: CGSize = CGSize()
@@ -95,6 +112,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
     private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -168,6 +186,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                     self.prepareVisionRequest()
                 }
                 self.addObservers()
+                
+                self.depthOutputQueue.async {
+                    self.renderingEnabled = true
+                }
+                
                 self.session.startRunning()
                 self.isSessionRunning = self.session.isRunning
                 
@@ -207,6 +230,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        self.depthOutputQueue.async {
+            self.renderingEnabled = false
+        }
         sessionQueue.async {
             if self.setupResult == .success {
                 self.session.stopRunning()
@@ -216,6 +242,8 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
         super.viewWillDisappear(animated)
     }
+    
+    // Add didEnterBackground(notification: NSNotification) as in AVCamFilter and an observer
     
     // You can use this opportunity to take corrective action to help cool the system down.
     @objc
@@ -357,6 +385,13 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
             if let connection = videoDataOutput.connection(with: .video) {
                 connection.isEnabled = true
+                /*
+                if connection.isVideoOrientationSupported {
+                    connection.videoOrientation = .portrait
+                } else {
+                    print("Changing video orientation not supported")
+                }
+                */
                 if connection.isCameraIntrinsicMatrixDeliverySupported {
                     connection.isCameraIntrinsicMatrixDeliveryEnabled = true
                 } else {
@@ -375,9 +410,16 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         // Add a depth data output
         if session.canAddOutput(depthDataOutput) {
             session.addOutput(depthDataOutput)
-            depthDataOutput.isFilteringEnabled = true
+            depthDataOutput.isFilteringEnabled = false
             if let connection = depthDataOutput.connection(with: .depthData) {
                 connection.isEnabled = true
+                /*
+                if connection.isVideoOrientationSupported {
+                    connection.videoOrientation = .portrait
+                } else {
+                    print("Changing depth orientation not supported")
+                }
+                */
             } else {
                 print("No AVCaptureConnection")
             }
@@ -388,8 +430,8 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             return
         }
 
-        // Use the same dispatch queue as the video data for now
-        depthDataOutput.setDelegate(self, callbackQueue: videoOutputQueue)
+        // Use independent dispatch queue from the video data since the depth processing is much more intensive
+        depthDataOutput.setDelegate(self, callbackQueue: depthOutputQueue)
         
         // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)
         if let (deviceFormat, frameRateRange, resolution) = bestDeviceFormat(for: videoDevice) {
@@ -510,6 +552,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         let audioType = audioFileType
         let audioSettingsForAudioFile = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioType)
         audioFileConfiguration = AudioFileConfiguration(fileType: audioType, audioSettings: audioSettingsForAudioFile)
+        
+        // Initialize depth map file writer configuration
+        let depthMapType = depthMapFileType
+        let depthMapSettings = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapType)
+        depthMapFileConfiguration = DepthMapFileConfiguration(fileType: depthMapType, videoSettings: depthMapSettings)
         
         // Initialize landmarks file writer
         // Move to viewWillAppear() probably also
@@ -739,7 +786,8 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     func depthDataOutput(_ output: AVCaptureDepthDataOutput, didOutput depthData: AVDepthData, timestamp: CMTime, connection: AVCaptureConnection) {
         // Ensure depth data is of the correct type
-        let depthDataType = kCVPixelFormatType_DepthFloat32
+        //let depthDataType = kCVPixelFormatType_DepthFloat32
+        let depthDataType = kCVPixelFormatType_DisparityFloat32
         var convertedDepth: AVDepthData
         
         if depthData.depthDataType != depthDataType {
@@ -751,9 +799,48 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         DispatchQueue.main.async {
             self.depthData = convertedDepth
         }
+        
+        convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
+        
+        //print(convertedDepth.depthDataQuality.rawValue)
+        
+        guard let depthDataMap = processDepth(depthData: convertedDepth) else {
+            print("Failed to get depth map")
+            return
+        }
+        
+        if recordingState != .idle {
+            writeDepthMapToFile(depthMap: depthDataMap, timeStamp: timestamp)
+        }
+        
+    }
+
+    func processDepth(depthData: AVDepthData) -> CVPixelBuffer? {
+        if !renderingEnabled {
+            return nil
+        }
+        
+        if !videoDepthConverter.isPrepared {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: depthData.depthDataMap,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+            }
+        }
+        
+        guard let depthPixelBuffer = videoDepthConverter.render(pixelBuffer: depthData.depthDataMap) else {
+            print("Unable to process depth")
+            return nil
+        }
+        
+        //currentDepthPixelBuffer = depthPixelBuffer
+        
+        return depthPixelBuffer
     }
     
-    // MARK: - Recording Video, Audio, and Landmarks
+    // MARK: - Recording Video, Audio, Depth Map, and Landmarks
     
     private func createFolder() -> URL? {
         // Get or create documents directory
@@ -826,6 +913,10 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 print("Failed to create video file")
                 return
             }
+            guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: "depth", fileType: depthMapFileExtension) else {
+                print("Failed to create depth map file")
+                return
+            }
             guard let landmarksURL = createFileURL(in: saveFolder, nameLabel: "landmarks", fileType: "csv") else {
                 print("Failed to create landmarks file")
                 return
@@ -844,6 +935,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             } catch {
                 print("Error creating audio file writer: \(error)")
             }
+            do {
+                depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapFileConfiguration!)
+            } catch {
+                print("Error creating depth map file writer: \(error)")
+            }
             guard (faceLandmarksFileWriter?.startDataCollection(path: landmarksURL)) != nil else {
                 print("No face landmarks file writer found, failed to access startDataCollection().")
                 return
@@ -858,6 +954,71 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     //Setting up Asset Writer to save videos
 
+    private func writeDepthMapToFile(depthMap: CVPixelBuffer, timeStamp: CMTime) {
+        guard let depthMapWriter = depthMapFileWriter else {
+            print("No depth map file writer found")
+            return
+        }
+        
+        switch recordingState {
+        case .start:
+            // If all file writers are already active, change the recording state and fall through to record the frame
+            if depthMapWriteState == .active && videoWriteState == .active && audioWriteState == .active {
+                recordingState = .recording
+                fallthrough
+            }
+            // If this file writer is inactive, start it and change it's state to active
+            if depthMapWriteState == .inactive {
+                depthMapWriteState = .active
+                depthMapWriter.start(at: timeStamp)
+            }
+            // Enable the Record button to let the user stop recording.
+            DispatchQueue.main.async {
+                if !self.recordButton.isEnabled {
+                    self.recordButton.isEnabled = true
+                    self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
+                }
+            }
+            //fallthrough
+        case .recording:
+            depthMapWriter.writeVideo(depthMap, timeStamp: timeStamp)
+        case .finish:
+            // If this file writer is active, finish writing and change it's state to inactive when the finish operation completes
+            if depthMapWriteState == .active {
+                depthMapWriter.finish(at: timeStamp, { result in
+                    switch result {
+                    case .success:
+                        print("depth map file success")
+                        // we can add code to export or save the depth map video file to Photos library here
+                    case .failed(let error):
+                        print("depth map file failure: \(error!.localizedDescription)")
+                    }
+                    self.depthMapWriteState = .inactive
+                })
+            }
+            // If all file writers are already inactive, change recording state to idle and end the background task
+            if depthMapWriteState == .inactive && videoWriteState == .inactive && audioWriteState == .inactive {
+                recordingState = .idle
+                if let currentBackgroundRecordingID = self.backgroundRecordingID {
+                    self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
+                    
+                    if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
+                        UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
+                    }
+                }
+            }
+            // Enable the Record button to let the user start another recording.
+            DispatchQueue.main.async {
+                if !self.recordButton.isEnabled {
+                    self.recordButton.isEnabled = true
+                    self.recordButton.setBackgroundImage(UIImage(systemName: "record.circle.fill"), for: [])
+                }
+            }
+        default:
+            break
+        }
+    }
+    
     private func writeOutputToFile(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
         guard let videoWriter = videoFileWriter else {
             print("No video file writer found")
@@ -872,14 +1033,28 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         
         switch recordingState {
         case .start:
-            recordingState = .recording
-            videoWriter.start(at: presentationTime)
-            audioWriter.start(at: presentationTime)
+            // If all file writers are already active, change the recording state and fall through to record the frame
+            if depthMapWriteState == .active && videoWriteState == .active && audioWriteState == .active {
+                recordingState = .recording
+                fallthrough
+            }
+            // If these file writers are inactive, start them and change their state to active
+            if videoWriteState == .inactive {
+                videoWriteState = .active
+                videoWriter.start(at: presentationTime)
+            }
+            if audioWriteState == .inactive {
+                audioWriteState = .active
+                audioWriter.start(at: presentationTime)
+            }
             // Enable the Record button to let the user stop recording.
             DispatchQueue.main.async {
-                self.recordButton.isEnabled = true
-                self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
+                if !self.recordButton.isEnabled {
+                    self.recordButton.isEnabled = true
+                    self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
+                }
             }
+            //fallthrough
         case .recording:
             // Alternatively we could check the connection instead, but since there's just one connection to each output this is equivalent
             if output === videoDataOutput {
@@ -889,37 +1064,48 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 audioWriter.writeAudio(sampleBuffer)
             }
         case .finish:
-            videoWriter.finish(at: presentationTime, { result in
-                switch result {
-                case .success:
-                    print("video file success")
-                    // we can add code to export or save the video file to Photos library here
-                case .failed(let error):
-                    print("video file failure: \(error!.localizedDescription)")
-                }
-            })
-            audioWriter.finish(at: presentationTime, { result in
-                switch result {
-                case .success:
-                    print("audio file success")
-                    // we can add code to export or save the video file to Photos library here
-                case .failed(let error):
-                    print("audio file failure: \(error!.localizedDescription)")
-                }
-            })
-            
-            if let currentBackgroundRecordingID = self.backgroundRecordingID {
-                self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-                
-                if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                    UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
+            // If these file writers are active, finish writing and change their state to inactive when the finish operation completes
+            if videoWriteState == .active {
+                videoWriter.finish(at: presentationTime, { result in
+                    switch result {
+                    case .success:
+                        print("video file success")
+                        // we can add code to export or save the video file to Photos library here
+                    case .failed(let error):
+                        print("video file failure: \(error!.localizedDescription)")
+                    }
+                    self.videoWriteState = .inactive
+                })
+            }
+            if audioWriteState == .active {
+                audioWriter.finish(at: presentationTime, { result in
+                    switch result {
+                    case .success:
+                        print("audio file success")
+                        // we can add code to export the audio file here
+                    case .failed(let error):
+                        print("audio file failure: \(error!.localizedDescription)")
+                    }
+                    self.audioWriteState = .inactive
+                })
+            }
+            // If all file writers are already inactive, change recording state to idle and end the background task
+            if depthMapWriteState == .inactive && videoWriteState == .inactive && audioWriteState == .inactive {
+                recordingState = .idle
+                if let currentBackgroundRecordingID = self.backgroundRecordingID {
+                    self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
+                    
+                    if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
+                        UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
+                    }
                 }
             }
-            self.recordingState = .idle
             // Enable the Record button to let the user start another recording.
             DispatchQueue.main.async {
-                self.recordButton.isEnabled = true
-                self.recordButton.setBackgroundImage(UIImage(systemName: "record.circle.fill"), for: [])
+                if !self.recordButton.isEnabled {
+                    self.recordButton.isEnabled = true
+                    self.recordButton.setBackgroundImage(UIImage(systemName: "record.circle.fill"), for: [])
+                }
             }
         default:
             break

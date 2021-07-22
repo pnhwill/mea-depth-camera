@@ -24,7 +24,7 @@ class AudioFileWriter {
     
     init(outputURL: URL, configuration: AudioFileConfiguration) throws {
         audioWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
-        audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioCompressionSettings)
+        audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
         
         audioWriterInput.expectsMediaDataInRealTime = true
         
@@ -85,7 +85,7 @@ struct AudioFileConfiguration {
     
     // Specify preserve 60fps
     
-    let audioCompressionSettings: [String: Any]?
+    let audioSettings: [String: Any]?
         /*= [
         AVFormatIDKey: kAudioFormatMPEG4AAC,
         // For simplicity, hard-code a common sample rate.
@@ -96,8 +96,8 @@ struct AudioFileConfiguration {
     ]*/
     
     init(fileType: AVFileType, audioSettings: [AnyHashable: Any]?) {
-        outputFileType = fileType
-        //audioCompressionSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
-        audioCompressionSettings = audioSettings as? [String: Any]
+        self.outputFileType = fileType
+        //self.audioSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
+        self.audioSettings = audioSettings as? [String: Any]
     }
 }
