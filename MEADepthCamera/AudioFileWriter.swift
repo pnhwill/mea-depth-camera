@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import Photos
 
 enum AudioWriteResult {
     case success
@@ -22,8 +21,6 @@ class AudioFileWriter {
     
     private let audioWriter: AVAssetWriter // Audio only
     private let audioWriterInput: AVAssetWriterInput
-    
-    var location: CLLocation?
     
     init(outputURL: URL, configuration: AudioFileConfiguration) throws {
         audioWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
@@ -52,7 +49,7 @@ class AudioFileWriter {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("AudioFileWriter: Error appending sample buffer to audio input: \(self.audioWriter.error?.localizedDescription as String?)")
+                    print("AudioFileWriter: Error appending sample buffer to audio input: \(self.audioWriter.error!.localizedDescription)")
                     return
                 }
             } else {
@@ -74,7 +71,7 @@ class AudioFileWriter {
                 completion(.success)
             } else {
                 completion(.failed(self.audioWriter.error))
-                print("Error writing audio to file: \(self.audioWriter.error?.localizedDescription as String?)")
+                print("Error writing audio to file: \(self.audioWriter.error!.localizedDescription)")
             }
         }
     }

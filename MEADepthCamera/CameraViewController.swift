@@ -7,8 +7,6 @@
 
 import UIKit
 import AVFoundation
-//import CoreLocation
-import Photos
 import Vision
 
 class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
@@ -49,7 +47,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
-    let locationManager = CLLocationManager()
     
     private enum RecordingState {
         case idle, start, recording, finish
@@ -61,6 +58,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var videoFileType: AVFileType = .mov
     private var videoFileExtension: String = "mov"
     
+    // Audio recording (to separate audio file)
     private var audioFileConfiguration: AudioFileConfiguration?
     private var audioFileWriter: AudioFileWriter?
     private var audioFileType: AVFileType = .wav
@@ -757,22 +755,49 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     // MARK: - Recording Video, Audio, and Landmarks
     
-    func createFileURL(nameLabel: String, fileType: String) -> URL? {
-        // Get current datetime and format the file name
+    private func createFolder() -> URL? {
+        // Get or create documents directory
+        var docURL: URL?
+        do {
+            docURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        } catch {
+            print("Error getting documents directory: \(error)")
+            return nil
+        }
+        // Get current datetime and format the folder name
         let date = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
         let timeStamp = formatter.string(from: date)
-        let fileName = timeStamp + "_" + nameLabel
-        
-        // Create new file in the iOS Documents directory
-        var path: URL?
-        do {
-            path = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(fileName).appendingPathExtension(fileType)
-        } catch {
-            print("Error creating \(fileName).\(fileType) in documents folder: \(error)")
+        // Create URL for folder inside documents path
+        guard let dataURL = docURL?.appendingPathComponent(timeStamp, isDirectory: true) else {
+            print("Failed to append folder name to documents URL")
+            return nil
         }
-        return path
+        // Create folder at desired path if it does not already exist
+        if !FileManager.default.fileExists(atPath: dataURL.path) {
+            do {
+                try FileManager.default.createDirectory(at: dataURL, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("Error creating folder in documents directory: \(error.localizedDescription)")
+            }
+        }
+        return dataURL
+    }
+    
+    private func createFileURL(in folderURL: URL, nameLabel: String, fileType: String) -> URL? {
+        let folderName = folderURL.lastPathComponent
+        let fileName = folderName + "_" + nameLabel
+        
+        let fileURL = folderURL.appendingPathComponent(fileName).appendingPathExtension(fileType)
+        
+        // Create new file in the desired folder
+        /*guard FileManager.default.createFile(atPath: fileURL.path, contents: nil, attributes: nil) else {
+            print("Error creating \(fileName).\(fileType) in documents folder")
+            return nil
+        }*/
+        
+        return fileURL
     }
     
     @IBAction private func toggleRecording(_ sender: UIButton) {
@@ -788,15 +813,20 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 print("Face is not aligned")
                 return
             }
-            guard let audioURL = createFileURL(nameLabel: "audio", fileType: audioFileExtension) else {
+            // Create folder for all data files
+            guard let saveFolder = createFolder() else {
+                print("Failed to create save folder")
+                return
+            }
+            guard let audioURL = createFileURL(in: saveFolder, nameLabel: "audio", fileType: audioFileExtension) else {
                 print("Failed to create audio file")
                 return
             }
-            guard let videoURL = createFileURL(nameLabel: "video", fileType: videoFileExtension) else {
+            guard let videoURL = createFileURL(in: saveFolder, nameLabel: "video", fileType: videoFileExtension) else {
                 print("Failed to create video file")
                 return
             }
-            guard let landmarksURL = createFileURL(nameLabel: "landmarks", fileType: "csv") else {
+            guard let landmarksURL = createFileURL(in: saveFolder, nameLabel: "landmarks", fileType: "csv") else {
                 print("Failed to create landmarks file")
                 return
             }
@@ -865,7 +895,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                     print("video file success")
                     // we can add code to export or save the video file to Photos library here
                 case .failed(let error):
-                    print("video file failure: \(error?.localizedDescription as String?)")
+                    print("video file failure: \(error!.localizedDescription)")
                 }
             })
             audioWriter.finish(at: presentationTime, { result in
@@ -874,7 +904,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                     print("audio file success")
                     // we can add code to export or save the video file to Photos library here
                 case .failed(let error):
-                    print("audio file failure: \(error?.localizedDescription as String?)")
+                    print("audio file failure: \(error!.localizedDescription)")
                 }
             })
             
@@ -893,20 +923,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             }
         default:
             break
-        }
-    }
-
-    private func saveInPhotoLibrary(_ url: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            
-            // Add video to PhotoLibrary here
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-        }) { completed, error in
-            if completed {
-                print("save complete! path : " + url.absoluteString)
-            } else {
-                print("save failed")
-            }
         }
     }
     

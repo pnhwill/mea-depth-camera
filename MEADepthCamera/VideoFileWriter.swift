@@ -6,7 +6,6 @@
 //
 
 import AVFoundation
-import Photos
 
 enum VideoWriteResult {
     case success
@@ -25,8 +24,6 @@ class VideoFileWriter {
     private let audioWriterInput: AVAssetWriterInput
     private let videoWriterInput: AVAssetWriterInput
     //private let pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor
-    
-    var location: CLLocation?
     
     init(outputURL: URL, configuration: VideoFileConfiguration) throws {
         videoWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
@@ -68,7 +65,7 @@ class VideoFileWriter {
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.videoWriterInput.append(sampleBuffer) else {
-                    debugPrint("Error appending sample buffer to video input: \(self.videoWriter.error?.localizedDescription as String?)")
+                    print("Error appending sample buffer to video input: \(self.videoWriter.error!.localizedDescription)")
                     return
                 }
             } else {
@@ -81,7 +78,7 @@ class VideoFileWriter {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to audio input: \(self.videoWriter.error?.localizedDescription as String?)")
+                    print("Error appending sample buffer to audio input: \(self.videoWriter.error!.localizedDescription)")
                     return
                 }
             } else {
@@ -104,7 +101,7 @@ class VideoFileWriter {
                 completion(.success)
             } else {
                 completion(.failed(self.videoWriter.error))
-                print("Error writing video/audio to file: \(self.videoWriter.error?.localizedDescription as String?)")
+                print("Error writing video/audio to file: \(self.videoWriter.error!.localizedDescription)")
             }
         }
     }
