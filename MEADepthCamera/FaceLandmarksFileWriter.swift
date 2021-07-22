@@ -14,13 +14,13 @@ class FaceLandmarksFileWriter {
     
     struct DataCollector {
         // Simple type to keep track of current file path, initial time, and frame while recording
-        let savePath: NSURL
+        let savePath: URL
         let startTime: Date
         var frameCount: Int
         
-        init(path: NSURL, date: Date) {
+        init(path: URL) {
             self.savePath = path
-            self.startTime = date
+            self.startTime = Date()
             self.frameCount = 0
         }
     }
@@ -36,20 +36,14 @@ class FaceLandmarksFileWriter {
         depthDataProcessor = DepthDataProcessor(resolution: resolution)
     }
     
-    private func createCSV() -> (NSURL, Date)? {
-        // Get current datetime and format the file name
-        let date = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
-        let timeStamp = formatter.string(from: date)
-        let fileName = timeStamp + "_landmarks.csv"
-        
-        // Create new file in the iOS Documents directory
-        guard let path = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(fileName) as NSURL else {
-            print("Failed to create file in documents path.")
-            return nil
-        }
-        
+    func startDataCollection(path: URL) {
+        // Create and write column labels
+        createLabels(fileURL: path)
+        // Instantiate a new DataCollector object
+        dataCollector = DataCollector(path: path)
+    }
+    
+    private func createLabels(fileURL: URL) {
         // Create string with appropriate column labels
         var columnLabels = "Frame,Timestamp(s),BBox_x,BBox_y,BBox_width,BBox_height,"
         for i in 0..<numLandmarks {
@@ -58,12 +52,10 @@ class FaceLandmarksFileWriter {
         columnLabels.append("\n")
         // Write columns labels to first row in file
         do {
-            try columnLabels.write(to: path as URL, atomically: true, encoding: String.Encoding.utf8)
+            try columnLabels.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
         } catch {
             print("Failed to write to file: \(error)")
         }
-        
-        return (path, date)
     }
     
     func writeToCSV(faceObservation: VNFaceObservation?, depthData: AVDepthData) {
@@ -125,21 +117,5 @@ class FaceLandmarksFileWriter {
         }
         // Update the frame count
         self.dataCollector!.frameCount += 1
-    }
-    
-    func toggleDataCollection(isCollectingData: Bool) {
-        if isCollectingData {
-            // Create new file
-            if let (path, date) = createCSV() {
-                // Instantiate a new DataCollector object
-                dataCollector = DataCollector(path: path, date: date)
-                // Start data collection
-                print("data collector instantiated")
-            } else {
-                print("Failed to start data collection.")
-            }
-        } else {
-            // Stop data collection
-        }
     }
 }

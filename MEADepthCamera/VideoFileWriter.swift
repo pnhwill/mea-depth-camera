@@ -18,10 +18,10 @@ class VideoFileWriter {
     
     // MARK: Properties
     
-    private let audioQueue = DispatchQueue(label: "audio write", qos: .utility, autoreleaseFrequency: .workItem)
-    private let videoQueue = DispatchQueue(label: "video write", qos: .utility, autoreleaseFrequency: .workItem)
+    private let audioQueue = DispatchQueue(label: "audio write to video file", qos: .utility, autoreleaseFrequency: .workItem)
+    private let videoQueue = DispatchQueue(label: "video write to video file", qos: .utility, autoreleaseFrequency: .workItem)
     
-    private let assetWriter: AVAssetWriter
+    private let videoWriter: AVAssetWriter // Audio and video
     private let audioWriterInput: AVAssetWriterInput
     private let videoWriterInput: AVAssetWriterInput
     //private let pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor
@@ -29,7 +29,7 @@ class VideoFileWriter {
     var location: CLLocation?
     
     init(outputURL: URL, configuration: VideoFileConfiguration) throws {
-        assetWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
+        videoWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
         audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioCompressionSettings)
         videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoCompressionSettings)
         //pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: nil)
@@ -42,35 +42,37 @@ class VideoFileWriter {
         let affineTransform = CGAffineTransform(rotationAngle: rotation.radiansForDegrees())
         videoWriterInput.transform = affineTransform
         
-        if assetWriter.canAdd(videoWriterInput) {
-            assetWriter.add(videoWriterInput)
+        if videoWriter.canAdd(videoWriterInput) {
+            videoWriter.add(videoWriterInput)
         } else {
-            print("no video input added to the asset writer")
+            print("no video input added to the video asset writer")
         }
-        if assetWriter.canAdd(audioWriterInput) {
-            assetWriter.add(audioWriterInput)
+        if videoWriter.canAdd(audioWriterInput) {
+            videoWriter.add(audioWriterInput)
         } else {
-            print("no audio input added to the asset writer")
+            print("no audio input added to the video asset writer")
         }
     }
     
+    // MARK: Lifecycle Methods
     func start(at startTime: CMTime) {
-        guard assetWriter.startWriting() else {
+        guard videoWriter.startWriting() else {
             print("Failed to start writing to video file")
             return
         }
-        assetWriter.startSession(atSourceTime: startTime)
+        //videoWriter.startSession(atSourceTime: CMTime.zero)
+        videoWriter.startSession(atSourceTime: startTime)
     }
     
     func writeVideo(_ sampleBuffer: CMSampleBuffer) {
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.videoWriterInput.append(sampleBuffer) else {
-                    debugPrint("Error appending pixel buffer to adaptor: \(self.assetWriter.error?.localizedDescription as String?)")
+                    debugPrint("Error appending sample buffer to video input: \(self.videoWriter.error?.localizedDescription as String?)")
                     return
                 }
             } else {
-                print("Video writer input not ready for more media data. Sample dropped without writing to file")
+                print("Video writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }
@@ -79,11 +81,11 @@ class VideoFileWriter {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to input: \(self.assetWriter.error?.localizedDescription as String?)")
+                    print("Error appending sample buffer to audio input: \(self.videoWriter.error?.localizedDescription as String?)")
                     return
                 }
             } else {
-                print("Audio writer input not ready for more media data. Sample dropped without writing to file")
+                print("Audio writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }
@@ -97,17 +99,18 @@ class VideoFileWriter {
         audioWriterInput.markAsFinished()
         videoWriterInput.markAsFinished()
         //assetWriter.endSession(atSourceTime: endTime)
-        assetWriter.finishWriting {
-            if self.assetWriter.status == .completed {
+        videoWriter.finishWriting {
+            if self.videoWriter.status == .completed {
                 completion(.success)
             } else {
-                completion(.failed(self.assetWriter.error))
-                print("Error writing video/audio to file: \(self.assetWriter.error?.localizedDescription as String?)")
+                completion(.failed(self.videoWriter.error))
+                print("Error writing video/audio to file: \(self.videoWriter.error?.localizedDescription as String?)")
             }
         }
     }
-    
 }
+
+// MARK: File Compression Settings
 
 struct VideoFileConfiguration {
     

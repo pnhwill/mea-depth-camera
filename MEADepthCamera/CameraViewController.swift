@@ -61,6 +61,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var videoFileType: AVFileType = .mov
     private var videoFileExtension: String = "mov"
     
+    private var audioFileConfiguration: AudioFileConfiguration?
+    private var audioFileWriter: AudioFileWriter?
+    private var audioFileType: AVFileType = .wav
+    private var audioFileExtension: String = "wav"
+    
     // Depth processing
     var depthData: AVDepthData?
     
@@ -69,7 +74,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var depthResolution: CGSize = CGSize()
     
     var faceLandmarksFileWriter: FaceLandmarksFileWriter?
-    var isCollectingData: Bool = false
     
     // Vision requests
     var detectionRequests: [VNDetectFaceRectanglesRequest]?
@@ -91,7 +95,8 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     // Dispatch queues
     private var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
-    private var dataOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -346,7 +351,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         session.addInput(videoDeviceInput)
         
         // Set video data output sample buffer delegate
-        videoDataOutput.setSampleBufferDelegate(self, queue: dataOutputQueue)
+        videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
         
         // Add a video data output
         if session.canAddOutput(videoDataOutput) {
@@ -386,7 +391,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
 
         // Use the same dispatch queue as the video data for now
-        depthDataOutput.setDelegate(self, callbackQueue: dataOutputQueue)
+        depthDataOutput.setDelegate(self, callbackQueue: videoOutputQueue)
         
         // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)
         if let (deviceFormat, frameRateRange, resolution) = bestDeviceFormat(for: videoDevice) {
@@ -479,7 +484,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
         
         // Set audio data output sample buffer delegate
-        audioDataOutput.setSampleBufferDelegate(self, queue: dataOutputQueue)
+        audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
         
         // Add an audio data output
         if session.canAddOutput(audioDataOutput) {
@@ -498,10 +503,15 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
 
         // Initialize video file writer configuration
         // Move this to viewWillAppear() probably
-        let fileType = videoFileType
-        let videoSettings = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: fileType)
-        let audioSettings = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: fileType)
-        videoFileConfiguration = VideoFileConfiguration(fileType: fileType, videoSettings: videoSettings, audioSettings: audioSettings)
+        let videoType = videoFileType
+        let videoSettings = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoType)
+        let audioSettings = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoType)
+        videoFileConfiguration = VideoFileConfiguration(fileType: videoType, videoSettings: videoSettings, audioSettings: audioSettings)
+        
+        // Initialize audio file writer configuration
+        let audioType = audioFileType
+        let audioSettingsForAudioFile = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioType)
+        audioFileConfiguration = AudioFileConfiguration(fileType: audioType, audioSettings: audioSettingsForAudioFile)
         
         // Initialize landmarks file writer
         // Move to viewWillAppear() probably also
@@ -745,7 +755,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
     }
     
-    // MARK: - Recording Video
+    // MARK: - Recording Video, Audio, and Landmarks
     
     func createFileURL(nameLabel: String, fileType: String) -> URL? {
         // Get current datetime and format the file name
@@ -770,14 +780,26 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
         
-        guard let videoURL = createFileURL(nameLabel: "video", fileType: videoFileExtension) else {
-            print("Failed to create video file")
-            //recordButton.isEnabled = true
-            return
-        }
-        
         switch recordingState {
         case .idle:
+            // Only let recording start if the face is aligned
+            guard isAligned else {
+                recordButton.isEnabled = true
+                print("Face is not aligned")
+                return
+            }
+            guard let audioURL = createFileURL(nameLabel: "audio", fileType: audioFileExtension) else {
+                print("Failed to create audio file")
+                return
+            }
+            guard let videoURL = createFileURL(nameLabel: "video", fileType: videoFileExtension) else {
+                print("Failed to create video file")
+                return
+            }
+            guard let landmarksURL = createFileURL(nameLabel: "landmarks", fileType: "csv") else {
+                print("Failed to create landmarks file")
+                return
+            }
             // Ideally this should be done on a background thread I'm not yet sure how to handle the error in an async context
             if UIDevice.current.isMultitaskingSupported {
                 self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
@@ -787,126 +809,32 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             } catch {
                 print("Error creating video file writer: \(error)")
             }
+            do {
+                audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioFileConfiguration!)
+            } catch {
+                print("Error creating audio file writer: \(error)")
+            }
+            guard (faceLandmarksFileWriter?.startDataCollection(path: landmarksURL)) != nil else {
+                print("No face landmarks file writer found, failed to access startDataCollection().")
+                return
+            }
             recordingState = .start
-            isCollectingData = true
         case .recording:
             recordingState = .finish
-            isCollectingData = false
         default:
             break
         }
-        /*
-        sessionQueue.async {
-            if !movieFileOutput.isRecording {
-                if UIDevice.current.isMultitaskingSupported {
-                    self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
-                }
-                
-                // Update the orientation on the movie file output video connection before recording.
-                let movieFileOutputConnection = movieFileOutput.connection(with: .video)
-                movieFileOutputConnection?.videoOrientation = videoPreviewLayerOrientation!
-                
-                let availableVideoCodecTypes = movieFileOutput.availableVideoCodecTypes
-                
-                if availableVideoCodecTypes.contains(.hevc) {
-                    movieFileOutput.setOutputSettings([AVVideoCodecKey: AVVideoCodecType.hevc], for: movieFileOutputConnection!)
-                }
-                
-                // Start recording video to a temporary file.
-                let outputFileName = NSUUID().uuidString
-                let outputFilePath = (NSTemporaryDirectory() as NSString).appendingPathComponent((outputFileName as NSString).appendingPathExtension("mov")!)
-                movieFileOutput.startRecording(to: URL(fileURLWithPath: outputFilePath), recordingDelegate: self)
-            } else {
-                movieFileOutput.stopRecording()
-            }
-        }
-        */
-        
-        guard (faceLandmarksFileWriter?.toggleDataCollection(isCollectingData: isCollectingData)) != nil else {
-            print("No face landmarks file writer found, failed to access toggleDataCollection().")
-            return
-        }
     }
-    
-    /*
-    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
-        // Enable the Record button to let the user stop recording.
-        DispatchQueue.main.async {
-            self.recordButton.isEnabled = true
-            self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
-        }
-    }
-    
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        
-        // Note: Because we use a unique file path for each recording, a new recording won't overwrite a recording mid-save.
-        func cleanup() {
-            let path = outputFileURL.path
-            if FileManager.default.fileExists(atPath: path) {
-                do {
-                    try FileManager.default.removeItem(atPath: path)
-                } catch {
-                    print("Could not remove file at url: \(outputFileURL)")
-                }
-            }
-            
-            if let currentBackgroundRecordingID = backgroundRecordingID {
-                backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-                
-                if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                    UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
-                }
-            }
-        }
-        
-        var success = true
-        
-        if error != nil {
-            print("Movie file finishing error: \(String(describing: error))")
-            success = (((error! as NSError).userInfo[AVErrorRecordingSuccessfullyFinishedKey] as AnyObject).boolValue)!
-        }
-        
-        if success {
-            // Check the authorization status.
-            PHPhotoLibrary.requestAuthorization { status in
-                if status == .authorized {
-                    // Save the movie file to the photo library and cleanup.
-                    PHPhotoLibrary.shared().performChanges({
-                        let options = PHAssetResourceCreationOptions()
-                        options.shouldMoveFile = true
-                        let creationRequest = PHAssetCreationRequest.forAsset()
-                        creationRequest.addResource(with: .video, fileURL: outputFileURL, options: options)
-                        
-                        // Specify the location the movie was recorded
-                        creationRequest.location = self.locationManager.location
-                    }, completionHandler: { success, error in
-                        if !success {
-                            print("MEADepthCamera couldn't save the movie to your photo library: \(String(describing: error))")
-                        }
-                        cleanup()
-                    }
-                    )
-                } else {
-                    cleanup()
-                }
-            }
-        } else {
-            cleanup()
-        }
-        
-        // Enable the Record button to let the user start another recording.
-        DispatchQueue.main.async {
-            self.recordButton.isEnabled = true
-            self.recordButton.setBackgroundImage(UIImage(systemName: "record.circle.fill"), for: [])
-        }
-    }
-    */
     
     //Setting up Asset Writer to save videos
 
     private func writeOutputToFile(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
-        guard let fileWriter = videoFileWriter else {
+        guard let videoWriter = videoFileWriter else {
             print("No video file writer found")
+            return
+        }
+        guard let audioWriter = audioFileWriter else {
+            print("No audio file writer found")
             return
         }
         
@@ -914,8 +842,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         
         switch recordingState {
         case .start:
-            fileWriter.start(at: presentationTime)
             recordingState = .recording
+            videoWriter.start(at: presentationTime)
+            audioWriter.start(at: presentationTime)
             // Enable the Record button to let the user stop recording.
             DispatchQueue.main.async {
                 self.recordButton.isEnabled = true
@@ -924,12 +853,13 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         case .recording:
             // Alternatively we could check the connection instead, but since there's just one connection to each output this is equivalent
             if output === videoDataOutput {
-                fileWriter.writeVideo(sampleBuffer)
+                videoWriter.writeVideo(sampleBuffer)
             } else if output === audioDataOutput {
-                fileWriter.writeAudio(sampleBuffer)
+                videoWriter.writeAudio(sampleBuffer)
+                audioWriter.writeAudio(sampleBuffer)
             }
         case .finish:
-            fileWriter.finish(at: presentationTime, { result in
+            videoWriter.finish(at: presentationTime, { result in
                 switch result {
                 case .success:
                     print("video file success")
@@ -937,44 +867,25 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 case .failed(let error):
                     print("video file failure: \(error?.localizedDescription as String?)")
                 }
-                if let currentBackgroundRecordingID = self.backgroundRecordingID {
-                    self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-                    
-                    if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                        UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
-                    }
-                }
-                self.recordingState = .idle
             })
-            /*
-            finishWriting({ url in
-                self.recordingState = .idle
-                //self.assetWriter = nil
-                //self.assetWriterInput = nil
-                /*
-                 DispatchQueue.main.async {
-                 let activity = UIActivityViewController(activityItems: [url], applicationActivities: nil)
-                 self?.present(activity, animated: true, completion: nil)
-                 }
-                 */
-                let status = PHPhotoLibrary.authorizationStatus()
+            audioWriter.finish(at: presentationTime, { result in
+                switch result {
+                case .success:
+                    print("audio file success")
+                    // we can add code to export or save the video file to Photos library here
+                case .failed(let error):
+                    print("audio file failure: \(error?.localizedDescription as String?)")
+                }
+            })
+            
+            if let currentBackgroundRecordingID = self.backgroundRecordingID {
+                self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
                 
-                // No access granted yet
-                if status == .notDetermined || status == .denied {
-                    PHPhotoLibrary.requestAuthorization({ auth in
-                        if auth == .authorized {
-                            self.saveInPhotoLibrary(url)
-                        } else {
-                            print("user denied access to photo Library")
-                        }
-                    })
-                    
-                    // Access granted by user already
-                } else {
-                    self.saveInPhotoLibrary(url)
+                if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
+                    UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
                 }
-            })
-            */
+            }
+            self.recordingState = .idle
             // Enable the Record button to let the user start another recording.
             DispatchQueue.main.async {
                 self.recordButton.isEnabled = true
@@ -999,7 +910,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
     }
     
-    // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+    // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate and AVCaptureAudioDataOutputSampleBufferDelegate
     
     // Handle delegate method callback on receiving a sample buffer.
     public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
@@ -1113,7 +1024,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                     
                     // Write face observation results to file if collecting data.
                     // Perform data collection in background queue so that it does not hold up the UI.
-                    if self.isCollectingData {
+                    if self.recordingState == .recording {
                         // NOTE: this only calls for the first observation in the array if there multiple
                         // Could make this so each face observation goes into a separate file (not necessary but safer)
                         if let depthData = self.depthData {
