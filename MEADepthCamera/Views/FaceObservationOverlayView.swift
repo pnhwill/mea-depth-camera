@@ -96,7 +96,7 @@ class FaceObservationOverlayView: UIView {
         }
     }
     
-    // MARK: - Drawing Vision Observations
+    // MARK: Drawing Vision Observations
     
     fileprivate func setupVisionDrawingLayers() {
         let captureDeviceResolution = self.videoResolution
