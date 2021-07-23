@@ -20,6 +20,7 @@
 		B57965B2269E68D10070C294 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B1269E68D10070C294 /* PreviewView.swift */; };
 		B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B526A096B10070C294 /* VideoFileWriter.swift */; };
 		B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */; };
+		B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
 		B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */; };
@@ -65,6 +66,7 @@
 		B57965B1269E68D10070C294 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
 		B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DepthToGrayscale.metal; sourceTree = "<group>"; };
+		B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservationOverlayView.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterRenderer.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
 				B57965B1269E68D10070C294 /* PreviewView.swift */,
+				B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */,
 				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
 				B5ABE85926A9CC9B003D2AFD /* AV File Writers */,
 				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
@@ -341,6 +344,7 @@
 				B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */,
 				B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */,
 				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,
+				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
