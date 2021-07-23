@@ -7,26 +7,21 @@
 
 import AVFoundation
 
-enum VideoWriteResult {
-    case success
-    case failed(Error?)
-}
-
 // Helper object that uses AVAssetWriter to record the video and audio output streams to a file
-class VideoFileWriter {
+class VideoFileWriter: FileWriter {
     
     // MARK: Properties
     
     private let audioQueue = DispatchQueue(label: "audio write to video file", qos: .utility, autoreleaseFrequency: .workItem)
     private let videoQueue = DispatchQueue(label: "video write to video file", qos: .utility, autoreleaseFrequency: .workItem)
     
-    private let videoWriter: AVAssetWriter // Audio and video
+    let assetWriter: AVAssetWriter // Audio and video
     private let audioWriterInput: AVAssetWriterInput
     private let videoWriterInput: AVAssetWriterInput
     //private let pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor
     
-    init(outputURL: URL, configuration: VideoFileConfiguration) throws {
-        videoWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
+    required init(outputURL: URL, configuration: VideoFileConfiguration) throws {
+        assetWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
         audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
         videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings)
         //pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: nil)
@@ -39,13 +34,13 @@ class VideoFileWriter {
         let affineTransform = CGAffineTransform(rotationAngle: rotation.radiansForDegrees())
         videoWriterInput.transform = affineTransform
         
-        if videoWriter.canAdd(videoWriterInput) {
-            videoWriter.add(videoWriterInput)
+        if assetWriter.canAdd(videoWriterInput) {
+            assetWriter.add(videoWriterInput)
         } else {
             print("no video input added to the video asset writer")
         }
-        if videoWriter.canAdd(audioWriterInput) {
-            videoWriter.add(audioWriterInput)
+        if assetWriter.canAdd(audioWriterInput) {
+            assetWriter.add(audioWriterInput)
         } else {
             print("no audio input added to the video asset writer")
         }
@@ -54,19 +49,19 @@ class VideoFileWriter {
     // MARK: Lifecycle Methods
     
     func start(at startTime: CMTime) {
-        guard videoWriter.startWriting() else {
+        guard assetWriter.startWriting() else {
             print("Failed to start writing to video file")
             return
         }
         //videoWriter.startSession(atSourceTime: CMTime.zero)
-        videoWriter.startSession(atSourceTime: startTime)
+        assetWriter.startSession(atSourceTime: startTime)
     }
     
     func writeVideo(_ sampleBuffer: CMSampleBuffer) {
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.videoWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to video input: \(self.videoWriter.error!.localizedDescription)")
+                    print("Error appending sample buffer to video input: \(self.assetWriter.error!.localizedDescription)")
                     return
                 }
             } else {
@@ -79,7 +74,7 @@ class VideoFileWriter {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to audio input: \(self.videoWriter.error!.localizedDescription)")
+                    print("Error appending sample buffer to audio input: \(self.assetWriter.error!.localizedDescription)")
                     return
                 }
             } else {
@@ -90,59 +85,21 @@ class VideoFileWriter {
     
     // Call this when done transferring audio and video data.
     // Here you evaluate the final status of the AVAssetWriter.
-    func finish(at endTime: CMTime, _ completion: @escaping (VideoWriteResult) -> Void) {
+    func finish(at endTime: CMTime, _ completion: @escaping (FileWriteResult) -> Void) {
         guard videoWriterInput.isReadyForMoreMediaData, audioWriterInput.isReadyForMoreMediaData else {
             return
         }
         audioWriterInput.markAsFinished()
         videoWriterInput.markAsFinished()
         //assetWriter.endSession(atSourceTime: endTime)
-        videoWriter.finishWriting {
-            if self.videoWriter.status == .completed {
+        assetWriter.finishWriting {
+            if self.assetWriter.status == .completed {
                 completion(.success)
             } else {
-                completion(.failed(self.videoWriter.error))
-                print("Error writing video/audio to file: \(self.videoWriter.error!.localizedDescription)")
+                completion(.failed(self.assetWriter.error))
+                print("Error writing video/audio to file: \(self.assetWriter.error!.localizedDescription)")
             }
         }
     }
 }
 
-// MARK: File Compression Settings
-
-struct VideoFileConfiguration {
-    
-    let outputFileType: AVFileType
-    
-    let videoSettings: [String: Any]?
-        /*= [
-        AVVideoCodecKey: AVVideoCodecType.h264,
-        // For simplicity, assume 16:9 aspect ratio.
-        // For a production use case, modify this as necessary to match the source content.
-        AVVideoWidthKey: 1920,
-        AVVideoHeightKey: 1080,
-        AVVideoCompressionPropertiesKey: [
-            kVTCompressionPropertyKey_AverageBitRate: 6_000_000,
-            kVTCompressionPropertyKey_ProfileLevel: kVTProfileLevel_H264_High_4_2
-        ]
-    ]*/
-    
-    // Specify preserve 60fps
-    
-    let audioSettings: [String: Any]?
-        /*= [
-        AVFormatIDKey: kAudioFormatMPEG4AAC,
-        // For simplicity, hard-code a common sample rate.
-        // For a production use case, modify this as necessary to get the desired results given the source content.
-        AVSampleRateKey: 44_100,
-        AVNumberOfChannelsKey: 2,
-        AVEncoderBitRateKey: 160_000
-    ]*/
-    
-    init(fileType: AVFileType, videoSettings: [String: Any]?, audioSettings: [AnyHashable: Any]?) {
-        self.outputFileType = fileType
-        self.videoSettings = videoSettings
-        //self.audioSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
-        self.audioSettings = audioSettings as? [String: Any]
-    }
-}

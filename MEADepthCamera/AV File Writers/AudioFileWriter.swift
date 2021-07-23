@@ -7,29 +7,24 @@
 
 import AVFoundation
 
-enum AudioWriteResult {
-    case success
-    case failed(Error?)
-}
-
 // Helper object that uses AVAssetWriter to record the audio output streams to a file
-class AudioFileWriter {
+class AudioFileWriter: FileWriter {
     
     // MARK: Properties
     
     private let audioQueue = DispatchQueue(label: "audio write to audio file", qos: .utility, autoreleaseFrequency: .workItem)
     
-    private let audioWriter: AVAssetWriter // Audio only
+    let assetWriter: AVAssetWriter // Audio only
     private let audioWriterInput: AVAssetWriterInput
     
-    init(outputURL: URL, configuration: AudioFileConfiguration) throws {
-        audioWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
+    required init(outputURL: URL, configuration: AudioFileConfiguration) throws {
+        assetWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
         audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
         
         audioWriterInput.expectsMediaDataInRealTime = true
         
-        if audioWriter.canAdd(audioWriterInput) {
-            audioWriter.add(audioWriterInput)
+        if assetWriter.canAdd(audioWriterInput) {
+            assetWriter.add(audioWriterInput)
         } else {
             print("no audio input added to the audio asset writer")
         }
@@ -37,19 +32,19 @@ class AudioFileWriter {
     
     // MARK: Lifecycle Methods
     func start(at startTime: CMTime) {
-        guard audioWriter.startWriting() else {
+        guard assetWriter.startWriting() else {
             print("Failed to start writing to audio file")
             return
         }
         //audioWriter.startSession(atSourceTime: CMTime.zero)
-        audioWriter.startSession(atSourceTime: startTime)
+        assetWriter.startSession(atSourceTime: startTime)
     }
 
     func writeAudio(_ sampleBuffer: CMSampleBuffer) {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("AudioFileWriter: Error appending sample buffer to audio input: \(self.audioWriter.error!.localizedDescription)")
+                    print("AudioFileWriter: Error appending sample buffer to audio input: \(self.assetWriter.error!.localizedDescription)")
                     return
                 }
             } else {
@@ -60,44 +55,20 @@ class AudioFileWriter {
     
     // Call this when done transferring audio data.
     // Here you evaluate the final status of the AVAssetWriter.
-    func finish(at endTime: CMTime, _ completion: @escaping (AudioWriteResult) -> Void) {
+    func finish(at endTime: CMTime, _ completion: @escaping (FileWriteResult) -> Void) {
         guard audioWriterInput.isReadyForMoreMediaData else {
             return
         }
         audioWriterInput.markAsFinished()
         //assetWriter.endSession(atSourceTime: endTime)
-        audioWriter.finishWriting {
-            if self.audioWriter.status == .completed {
+        assetWriter.finishWriting {
+            if self.assetWriter.status == .completed {
                 completion(.success)
             } else {
-                completion(.failed(self.audioWriter.error))
-                print("Error writing audio to file: \(self.audioWriter.error!.localizedDescription)")
+                completion(.failed(self.assetWriter.error))
+                print("Error writing audio to file: \(self.assetWriter.error!.localizedDescription)")
             }
         }
     }
 }
 
-// MARK: File Compression Settings
-
-struct AudioFileConfiguration {
-    
-    let outputFileType: AVFileType
-    
-    // Specify preserve 60fps
-    
-    let audioSettings: [String: Any]?
-        /*= [
-        AVFormatIDKey: kAudioFormatMPEG4AAC,
-        // For simplicity, hard-code a common sample rate.
-        // For a production use case, modify this as necessary to get the desired results given the source content.
-        AVSampleRateKey: 44_100,
-        AVNumberOfChannelsKey: 2,
-        AVEncoderBitRateKey: 160_000
-    ]*/
-    
-    init(fileType: AVFileType, audioSettings: [AnyHashable: Any]?) {
-        self.outputFileType = fileType
-        //self.audioSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
-        self.audioSettings = audioSettings as? [String: Any]
-    }
-}

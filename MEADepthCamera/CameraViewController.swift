@@ -53,6 +53,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     }
     private var recordingState = RecordingState.idle
     
+    // AV file writing
     private enum WriteState {
         case inactive, active
     }
@@ -60,16 +61,26 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var audioWriteState = WriteState.inactive
     private var depthMapWriteState = WriteState.inactive
     
-    private var videoFileConfiguration: VideoFileConfiguration?
-    private var videoFileWriter: VideoFileWriter?
-    private var videoFileType: AVFileType = .mov
-    private var videoFileExtension: String = "mov"
+    private struct FileWriterSettings {
+        let fileExtensions: [AVFileType: String] = [.mov: "mov", .wav: "wav"]
+        
+        var configuration: FileConfiguration?
+        let fileType: AVFileType
+        let fileExtension: String
+        
+        init(fileType: AVFileType) {
+            self.fileType = fileType
+            self.fileExtension = fileExtensions[fileType]!
+        }
+    }
     
-    // Audio recording (to separate audio file)
-    private var audioFileConfiguration: AudioFileConfiguration?
+    private var videoFileSettings = FileWriterSettings(fileType: .mov)
+    private var audioFileSettings = FileWriterSettings(fileType: .wav)
+    private var depthMapFileSettings = FileWriterSettings(fileType: .mov)
+    
+    private var videoFileWriter: VideoFileWriter?
     private var audioFileWriter: AudioFileWriter?
-    private var audioFileType: AVFileType = .wav
-    private var audioFileExtension: String = "wav"
+    private var depthMapFileWriter: DepthMapFileWriter?
     
     // Depth processing
     var depthData: AVDepthData?
@@ -77,12 +88,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private let videoDepthConverter = DepthToGrayscaleConverter()
     private var renderingEnabled = true
     private var currentDepthPixelBuffer: CVPixelBuffer?
-    
-    // Depth map recording (to video file)
-    private var depthMapFileConfiguration: DepthMapFileConfiguration?
-    private var depthMapFileWriter: DepthMapFileWriter?
-    private var depthMapFileType: AVFileType = .mov
-    private var depthMapFileExtension: String = "mov"
     
     // Data collection
     private var videoResolution: CGSize = CGSize()
@@ -121,10 +126,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
     }
     
-    // Vision face analysis
-    var faceCaptureQuality: Float?
-    var faceLandmarksConfidence: VNConfidence?
-    
     // Face guidelines alignment
     private var isAligned: Bool = false
     
@@ -133,7 +134,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     private var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    private var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    //private var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -209,9 +210,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 self.visionProcessor = VisionTrackerProcessor()
                 self.visionProcessor?.delegate = self
                 
-                self.visionTrackingQueue.async {
+                //self.visionTrackingQueue.async {
                     self.visionProcessor?.prepareVisionRequest()
-                }
+                //}
                 
                 self.addObservers()
                 
@@ -576,20 +577,17 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
 
         // Initialize video file writer configuration
         // Move this to viewWillAppear() probably
-        let videoType = videoFileType
-        let videoSettings = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoType)
-        let audioSettings = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoType)
-        videoFileConfiguration = VideoFileConfiguration(fileType: videoType, videoSettings: videoSettings, audioSettings: audioSettings)
+        let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
+        let audioSettingsForVideo = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
+        videoFileSettings.configuration = VideoFileConfiguration(fileType: videoFileSettings.fileType, videoSettings: videoSettingsForVideo, audioSettings: audioSettingsForVideo)
         
         // Initialize audio file writer configuration
-        let audioType = audioFileType
-        let audioSettingsForAudioFile = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioType)
-        audioFileConfiguration = AudioFileConfiguration(fileType: audioType, audioSettings: audioSettingsForAudioFile)
+        let audioSettingsForAudio = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioFileSettings.fileType)
+        audioFileSettings.configuration = AudioFileConfiguration(fileType: audioFileSettings.fileType, audioSettings: audioSettingsForAudio)
         
         // Initialize depth map file writer configuration
-        let depthMapType = depthMapFileType
-        let depthMapSettings = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapType)
-        depthMapFileConfiguration = DepthMapFileConfiguration(fileType: depthMapType, videoSettings: depthMapSettings)
+        let videoSettingsForDepthMap = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapFileSettings.fileType)
+        depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType, videoSettings: videoSettingsForDepthMap)
         
         // Initialize landmarks file writer
         // Move to viewWillAppear() probably also
@@ -849,7 +847,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     }
 
     func processDepth(depthData: AVDepthData) -> CVPixelBuffer? {
-        if !renderingEnabled {
+        guard renderingEnabled else {
             return nil
         }
         
@@ -938,15 +936,15 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
                 print("Failed to create save folder")
                 return
             }
-            guard let audioURL = createFileURL(in: saveFolder, nameLabel: "audio", fileType: audioFileExtension) else {
+            guard let audioURL = createFileURL(in: saveFolder, nameLabel: "audio", fileType: audioFileSettings.fileExtension) else {
                 print("Failed to create audio file")
                 return
             }
-            guard let videoURL = createFileURL(in: saveFolder, nameLabel: "video", fileType: videoFileExtension) else {
+            guard let videoURL = createFileURL(in: saveFolder, nameLabel: "video", fileType: videoFileSettings.fileExtension) else {
                 print("Failed to create video file")
                 return
             }
-            guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: "depth", fileType: depthMapFileExtension) else {
+            guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: "depth", fileType: depthMapFileSettings.fileExtension) else {
                 print("Failed to create depth map file")
                 return
             }
@@ -958,18 +956,25 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
             if UIDevice.current.isMultitaskingSupported {
                 self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
             }
+            guard let videoConfiguration = videoFileSettings.configuration,
+                  let audioConfiguration = audioFileSettings.configuration,
+                  let depthMapConfiguration = depthMapFileSettings.configuration else {
+                print("AV file configurations not found")
+                recordButton.isEnabled = true
+                return
+            }
             do {
-                videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoFileConfiguration!)
+                videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration)
             } catch {
                 print("Error creating video file writer: \(error)")
             }
             do {
-                audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioFileConfiguration!)
+                audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration)
             } catch {
                 print("Error creating audio file writer: \(error)")
             }
             do {
-                depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapFileConfiguration!)
+                depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration)
             } catch {
                 print("Error creating depth map file writer: \(error)")
             }

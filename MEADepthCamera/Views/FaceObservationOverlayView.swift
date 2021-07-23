@@ -63,19 +63,6 @@ class FaceObservationOverlayView: UIView {
     }
     
     func updateFrame() {
-        /*
-        guard let superView = superview, let faceObservation = faceObservation else {
-            frame = .zero
-            return
-        }
-        // Transform from normalized coordinates to coordinates of super view.
-        let superFrameWidth = superView.frame.width
-        let superFrameHeight = superView.frame.height
-        let coordTransform = CGAffineTransform(scaleX: superFrameWidth, y: superFrameHeight)
-        // Vision-to-UIKit coordinate transform. Vision is always relative to LLC.
-        let finalTransform = coordTransform.scaledBy(x: 1, y: -1).translatedBy(x: 0, y: -1)
-        frame = faceObservation.boundingBox.applying(finalTransform)
-        */
         guard let superView = superview, faceObservation != nil else {
             frame = .zero
             return
