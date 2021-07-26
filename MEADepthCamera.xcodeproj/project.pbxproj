@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
+		B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA626AB654B00998C27 /* PointCloud.metal */; };
+		B56F2EA926AB7E5300998C27 /* PointCloudMetalRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA826AB7E5300998C27 /* PointCloudMetalRenderer.mm */; };
 		B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796581269DED5F0070C294 /* AppDelegate.swift */; };
 		B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796583269DED5F0070C294 /* SceneDelegate.swift */; };
 		B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796585269DED5F0070C294 /* CameraViewController.swift */; };
@@ -51,8 +53,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthDataProcessor.swift; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
+		B56F2EA626AB654B00998C27 /* PointCloud.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PointCloud.metal; sourceTree = "<group>"; };
+		B56F2EA826AB7E5300998C27 /* PointCloudMetalRenderer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PointCloudMetalRenderer.mm; sourceTree = "<group>"; };
+		B56F2EAB26AB7EE100998C27 /* PointCloudMetalRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PointCloudMetalRenderer.h; sourceTree = "<group>"; };
 		B579657E269DED5F0070C294 /* MEADepthCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MEADepthCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5796581269DED5F0070C294 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5796583269DED5F0070C294 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -110,6 +116,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B56F2EAA26AB7EC300998C27 /* Point Cloud */ = {
+			isa = PBXGroup;
+			children = (
+				B56F2EA826AB7E5300998C27 /* PointCloudMetalRenderer.mm */,
+				B56F2EAB26AB7EE100998C27 /* PointCloudMetalRenderer.h */,
+				B518049126ACBB0F0036F104 /* ShaderTypes.h */,
+			);
+			path = "Point Cloud";
+			sourceTree = "<group>";
+		};
 		B5796575269DED5F0070C294 = {
 			isa = PBXGroup;
 			children = (
@@ -143,6 +159,7 @@
 				B5ABE85926A9CC9B003D2AFD /* AV File Writers */,
 				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
 				B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */,
+				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
 				B5886E0026AA7F8500EB344C /* Extensions.swift */,
 				B5886DF626AA168B00EB344C /* Shaders */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
@@ -176,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */,
+				B56F2EA626AB654B00998C27 /* PointCloud.metal */,
 			);
 			path = Shaders;
 			sourceTree = "<group>";
@@ -354,10 +372,12 @@
 			files = (
 				B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
+				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
 				B57965B2269E68D10070C294 /* PreviewView.swift in Sources */,
 				B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
+				B56F2EA926AB7E5300998C27 /* PointCloudMetalRenderer.mm in Sources */,
 				B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */,
 				B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,

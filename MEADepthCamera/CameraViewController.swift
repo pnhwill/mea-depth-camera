@@ -9,7 +9,7 @@ import UIKit
 import AVFoundation
 import Vision
 
-class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAudioDataOutputSampleBufferDelegate {
+class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDelegate {
     
     // MARK: - Properties
     
@@ -44,6 +44,9 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     private var depthDataOutput = AVCaptureDepthDataOutput()
     private var metadataOutput = AVCaptureMetadataOutput()
     private var audioDataOutput = AVCaptureAudioDataOutput()
+    
+    // Synchronized data capture
+    private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
@@ -87,7 +90,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     private let videoDepthConverter = DepthToGrayscaleConverter()
     private var renderingEnabled = true
-    private var currentDepthPixelBuffer: CVPixelBuffer?
     
     // Data collection
     private var videoResolution: CGSize = CGSize()
@@ -116,10 +118,8 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     // Layer UI for drawing Vision results
     var previewLayer: AVCaptureVideoPreviewLayer?
     
-    var observationsOverlay = UIView() // Not necessary, can remove and change references to previewView
-    
     var reusableFaceObservationOverlayViews: [FaceObservationOverlayView] {
-        if let existingViews = observationsOverlay.subviews as? [FaceObservationOverlayView] {
+        if let existingViews = previewView.subviews as? [FaceObservationOverlayView] {
             return existingViews
         } else {
             return [FaceObservationOverlayView]()
@@ -131,10 +131,11 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
     
     // Dispatch queues
     private var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
-    private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var dataOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    //private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    //private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     private var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    //private var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -411,7 +412,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         session.addInput(videoDeviceInput)
         
         // Set video data output sample buffer delegate
-        videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
+        //videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
         
         // Add a video data output
         if session.canAddOutput(videoDataOutput) {
@@ -465,7 +466,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
 
         // Use independent dispatch queue from the video data since the depth processing is much more intensive
-        depthDataOutput.setDelegate(self, callbackQueue: depthOutputQueue)
+        //depthDataOutput.setDelegate(self, callbackQueue: depthOutputQueue)
         
         // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)
         if let (deviceFormat, frameRateRange, resolution) = bestDeviceFormat(for: videoDevice) {
@@ -558,7 +559,7 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
         
         // Set audio data output sample buffer delegate
-        audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
+        //audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
         
         // Add an audio data output
         if session.canAddOutput(audioDataOutput) {
@@ -592,6 +593,12 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         // Initialize landmarks file writer
         // Move to viewWillAppear() probably also
         faceLandmarksFileWriter = FaceLandmarksFileWriter(resolution: videoResolution)
+        
+        
+        // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
+        // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
+        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
+        outputSynchronizer!.setDelegate(self, queue: dataOutputQueue)
         
         session.commitConfiguration()
     }
@@ -813,9 +820,62 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
     }
     
-    // MARK: - Depth Data Output Delegate
+    // MARK: - Data Output Synchronizer Delegate
     
-    func depthDataOutput(_ output: AVCaptureDepthDataOutput, didOutput depthData: AVDepthData, timestamp: CMTime, connection: AVCaptureConnection) {
+    func dataOutputSynchronizer(_ synchronizer: AVCaptureDataOutputSynchronizer, didOutput synchronizedDataCollection: AVCaptureSynchronizedDataCollection) {
+        
+        //let dataCount = synchronizedDataCollection.count
+        //print("\(dataCount) data outputs received")
+        
+        if let syncedDepthData: AVCaptureSynchronizedDepthData = synchronizedDataCollection.synchronizedData(for: depthDataOutput) as? AVCaptureSynchronizedDepthData {
+            
+            let depthTimestamp = syncedDepthData.timestamp
+            //print("depth output received at \(CMTimeGetSeconds(depthTimestamp))")
+            
+            if !syncedDepthData.depthDataWasDropped {
+                let depthData = syncedDepthData.depthData
+                
+                processDepth(depthData: depthData, timestamp: depthTimestamp)
+            } else {
+                print("depth frame dropped for reason: \(syncedDepthData.droppedReason.rawValue)")
+            }
+            
+        }
+        
+        if let syncedVideoData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: videoDataOutput) as? AVCaptureSynchronizedSampleBufferData {
+            
+            let videoTimestamp = syncedVideoData.timestamp
+            //print("video output received at \(CMTimeGetSeconds(videoTimestamp))")
+            
+            if !syncedVideoData.sampleBufferWasDropped {
+                let videoSampleBuffer = syncedVideoData.sampleBuffer
+                
+                processVideo(sampleBuffer: videoSampleBuffer, timestamp: videoTimestamp)
+            } else {
+                print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
+            }
+            
+        }
+        
+        if let syncedAudioData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: audioDataOutput) as? AVCaptureSynchronizedSampleBufferData {
+            
+            let audioTimestamp = syncedAudioData.timestamp
+            //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
+            
+            if !syncedAudioData.sampleBufferWasDropped {
+                let audioSampleBuffer = syncedAudioData.sampleBuffer
+                
+                processAudio(sampleBuffer: audioSampleBuffer, timestamp: audioTimestamp)
+            } else {
+                print("audio frame dropped for reason: \(syncedAudioData.droppedReason.rawValue)")
+            }
+            
+        }
+        
+    }
+    
+    func processDepth(depthData: AVDepthData, timestamp: CMTime) {
+        
         // Ensure depth data is of the correct type
         //let depthDataType = kCVPixelFormatType_DepthFloat32
         let depthDataType = kCVPixelFormatType_DisparityFloat32
@@ -832,43 +892,52 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
         
         //convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
-        
         //print(convertedDepth.depthDataQuality.rawValue)
-        
-        guard let depthDataMap = processDepth(depthData: convertedDepth) else {
-            print("Failed to get depth map")
+        /*
+        guard renderingEnabled else {
             return
         }
+        */
         
         if recordingState != .idle {
-            writeDepthMapToFile(depthMap: depthDataMap, timeStamp: timestamp)
+            if !videoDepthConverter.isPrepared {
+                var depthFormatDescription: CMFormatDescription?
+                CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                             imageBuffer: depthData.depthDataMap,
+                                                             formatDescriptionOut: &depthFormatDescription)
+                if let unwrappedDepthFormatDescription = depthFormatDescription {
+                    videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+                }
+            }
+            
+            guard let depthPixelBuffer = videoDepthConverter.render(pixelBuffer: depthData.depthDataMap) else {
+                print("Unable to process depth")
+                return
+            }
+            
+            writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
         }
         
     }
-
-    func processDepth(depthData: AVDepthData) -> CVPixelBuffer? {
-        guard renderingEnabled else {
-            return nil
+    
+    func processVideo(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
+        
+        let output = videoDataOutput
+        if recordingState != .idle {
+            writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
         
-        if !videoDepthConverter.isPrepared {
-            var depthFormatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                         imageBuffer: depthData.depthDataMap,
-                                                         formatDescriptionOut: &depthFormatDescription)
-            if let unwrappedDepthFormatDescription = depthFormatDescription {
-                videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
-            }
+        self.visionProcessor?.performVisionRequests(on: sampleBuffer)
+        
+    }
+    
+    func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
+        
+        let output = audioDataOutput
+        if recordingState != .idle {
+            writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
         
-        guard let depthPixelBuffer = videoDepthConverter.render(pixelBuffer: depthData.depthDataMap) else {
-            print("Unable to process depth")
-            return nil
-        }
-        
-        //currentDepthPixelBuffer = depthPixelBuffer
-        
-        return depthPixelBuffer
     }
     
     // MARK: - Recording Video, Audio, Depth Map, and Landmarks
@@ -1150,23 +1219,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         }
     }
     
-    // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate and AVCaptureAudioDataOutputSampleBufferDelegate
-    
-    // Handle delegate method callback on receiving a sample buffer.
-    public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        //print("sample buffer received")
-        
-        if recordingState != .idle {
-            writeOutputToFile(output, sampleBuffer: sampleBuffer)
-        }
-        
-        if output === videoDataOutput {
-            //visionTrackingQueue.async {
-                self.visionProcessor?.performVisionRequests(on: sampleBuffer)
-            //}
-        }
-    }
-    
     // MARK: - Vision Preview Setup
     
     fileprivate func designatePreviewLayer() {
@@ -1178,10 +1230,6 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
         videoPreviewLayer.videoGravity = AVLayerVideoGravity.resizeAspect
         
         videoPreviewLayer.masksToBounds = true
-        
-        observationsOverlay = previewView
-        
-        //previewView.insertSubview(observationsOverlay, at: 0)
     }
     
     /*
@@ -1219,7 +1267,10 @@ class CameraViewController: UIViewController, AVCaptureDepthDataOutputDelegate, 
 extension CameraViewController: VisionTrackerProcessorDelegate {
     
     func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        let overlay = observationsOverlay
+        guard let rootView = previewView else {
+            print("Preview view not found")
+            return
+        }
         DispatchQueue.main.async {
             var reusableViews = self.reusableFaceObservationOverlayViews
             for observation in faceObservations {
@@ -1228,7 +1279,7 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
                     existingView.faceObservation = observation
                 } else {
                     let newView = FaceObservationOverlayView(faceObservation: observation, videoResolution: self.videoResolution)
-                    overlay.addSubview(newView)
+                    rootView.addSubview(newView)
                 }
             }
             // Remove previously existing views that were not reused.
@@ -1237,7 +1288,6 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
             }
         }
     }
-    
     
     func displayMetrics(confidence: VNConfidence, captureQuality: Float) {
         let confidenceText = String(format: "%.3f", confidence)

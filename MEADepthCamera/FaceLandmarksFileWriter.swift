@@ -31,6 +31,11 @@ class FaceLandmarksFileWriter {
     
     var depthDataProcessor: DepthDataProcessor
     
+    // Temporary variable for testing
+    private var metalRenderEnabled: Bool = false
+    // Point cloud Metal renderer
+    private var pointCloudMetalRenderer = PointCloudMetalRenderer()
+    
     init(resolution: CGSize) {
         captureDeviceResolution = resolution
         depthDataProcessor = DepthDataProcessor(resolution: resolution)
@@ -78,18 +83,39 @@ class FaceLandmarksFileWriter {
             // Get face bounding box in image coordinates and add to string
             let boundingBox = VNImageRectForNormalizedRect(faceObservation!.boundingBox, Int(imageSize.width), Int(imageSize.height))
             data.append("\(boundingBox.origin.x),\(boundingBox.origin.y),\(boundingBox.size.width),\(boundingBox.size.height),")
-            // Get all face landmarks and add point cloud locations to string
-            let landmarkPoints = depthDataProcessor.calculatePointCloud(faceObservation: faceObservation!, depthData: depthData)
-            if let landmarks = faceObservation!.landmarks?.allPoints {
-                for (index, _) in landmarks.normalizedPoints.enumerated() {
-                    let landmarkX = landmarkPoints[3*index]
-                    let landmarkY = landmarkPoints[3*index + 1]
-                    let landmarkZ = landmarkPoints[3*index + 2]
-                    data.append("\(landmarkX),\(landmarkY),\(landmarkZ),")
+            
+            if metalRenderEnabled {
+                
+                guard let landmarksPointer = metalRender(faceObservation: faceObservation!, depthData: depthData) else {
+                    print("metal rendering failed")
+                    return
                 }
+                if let landmarks = faceObservation!.landmarks?.allPoints {
+                    for (index, _) in landmarks.normalizedPoints.enumerated() {
+                        let landmarkX = landmarksPointer[index].x
+                        let landmarkY = landmarksPointer[index].y
+                        let landmarkZ = landmarksPointer[index].z
+                        data.append("\(landmarkX),\(landmarkY),\(landmarkZ),")
+                    }
+                } else {
+                    print("Invalid face detection request.")
+                }
+                
             } else {
-                print("Invalid face detection request.")
+                // Get all face landmarks and add point cloud locations to string
+                let landmarkPoints = depthDataProcessor.calculatePointCloud(faceObservation: faceObservation!, depthData: depthData)
+                if let landmarks = faceObservation!.landmarks?.allPoints {
+                    for (index, _) in landmarks.normalizedPoints.enumerated() {
+                        let landmarkX = landmarkPoints[3*index]
+                        let landmarkY = landmarkPoints[3*index + 1]
+                        let landmarkZ = landmarkPoints[3*index + 2]
+                        data.append("\(landmarkX),\(landmarkY),\(landmarkZ),")
+                    }
+                } else {
+                    print("Invalid face detection request.")
+                }
             }
+            
         } else {
             // In case the face is lost in the middle of collecting data, this prevents empty or nil-valued cells in the file so it can still be parsed later
             print("No face observation found. Inserting zeros for all values.")
@@ -118,4 +144,36 @@ class FaceLandmarksFileWriter {
         // Update the frame count
         self.dataCollector!.frameCount += 1
     }
+    
+    private func metalRender(faceObservation: VNFaceObservation, depthData: AVDepthData) -> UnsafeMutablePointer<vector_float3>? {
+        // Get depth map pixel buffer
+        let depthDataMap = depthData.depthDataMap
+        
+        // Get video and depth stream resolutions to convert between coordinate systems
+        let depthMapWidth = CVPixelBufferGetWidth(depthDataMap)
+        let depthMapHeight = CVPixelBufferGetHeight(depthDataMap)
+        let depthMapSize = CGSize(width: depthMapWidth, height: depthMapHeight)
+        
+        // Declare output array of 3D points
+        var landmarksPointCloud: [vector_float3]
+        
+        // Get face landmarks
+        guard let landmarks = faceObservation.landmarks?.allPoints else {
+            print("No landmarks found.")
+            return nil
+        }
+        let landmarkPoints = landmarks.pointsInImage(imageSize: depthMapSize)
+        let landmarkVectors = landmarkPoints.map { simd_float2(Float($0.x), Float($0.y)) }
+        
+        pointCloudMetalRenderer.setDepthFrame(depthData, withLandmarks: landmarkVectors)
+        
+        let outputPointer: UnsafeMutablePointer<vector_float3> = pointCloudMetalRenderer.getOutput()
+        
+        return outputPointer
+    }
+    
+    
+    
+    
+    
 }

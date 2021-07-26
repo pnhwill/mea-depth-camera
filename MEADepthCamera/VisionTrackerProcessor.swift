@@ -148,7 +148,7 @@ class VisionTrackerProcessor {
 
                 // Perform all UI updates (drawing) on the main queue, not the background queue on which this handler is being called.
                 DispatchQueue.main.async {
-                    self.delegate?.displayFaceObservations(results)
+                    //self.delegate?.displayFaceObservations(results)
                 }
             })
             
