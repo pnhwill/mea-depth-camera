@@ -47,6 +47,10 @@ class PointCloudProcessor {
         outputBufferSize = MemoryLayout<vector_float3>.stride * numLandmarks
     }
     
+    static private func allocateOutputBuffers() {
+        
+    }
+    
     func prepare(with formatDescription: CMFormatDescription) {
         reset()
         

@@ -9,7 +9,7 @@ import UIKit
 import AVFoundation
 import Vision
 
-class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDelegate {
+class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDelegate, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
     
     // MARK: - Properties
     
@@ -47,6 +47,9 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     
     // Synchronized data capture
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
+    
+    // Video frame buffer pool allocation
+    private(set) var videoFormatDescription: CMFormatDescription?
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
@@ -131,9 +134,9 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     
     // Dispatch queues
     private var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
-    private var dataOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    //private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    //private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     private var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     private var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
@@ -411,8 +414,10 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
         session.addInput(videoDeviceInput)
         
+        videoDataOutput.alwaysDiscardsLateVideoFrames = false
+        
         // Set video data output sample buffer delegate
-        //videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
+        videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
         
         // Add a video data output
         if session.canAddOutput(videoDataOutput) {
@@ -559,7 +564,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
         
         // Set audio data output sample buffer delegate
-        //audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
+        audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
         
         // Add an audio data output
         if session.canAddOutput(audioDataOutput) {
@@ -597,8 +602,8 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
         // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
-        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
-        outputSynchronizer!.setDelegate(self, queue: dataOutputQueue)
+        //outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput])
+        //outputSynchronizer!.setDelegate(self, queue: dataOutputQueue)
         
         session.commitConfiguration()
     }
@@ -849,57 +854,59 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             
             if !syncedVideoData.sampleBufferWasDropped {
                 let videoSampleBuffer = syncedVideoData.sampleBuffer
-                
+                //CMSampleBufferCreateCopy
                 processVideo(sampleBuffer: videoSampleBuffer, timestamp: videoTimestamp)
+                
             } else {
                 print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
             }
             
         }
-        
+        /*
         if let syncedAudioData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: audioDataOutput) as? AVCaptureSynchronizedSampleBufferData {
-            
             let audioTimestamp = syncedAudioData.timestamp
             //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
-            
             if !syncedAudioData.sampleBufferWasDropped {
                 let audioSampleBuffer = syncedAudioData.sampleBuffer
-                
                 processAudio(sampleBuffer: audioSampleBuffer, timestamp: audioTimestamp)
             } else {
                 print("audio frame dropped for reason: \(syncedAudioData.droppedReason.rawValue)")
             }
-            
         }
-        
+        */
     }
     
     func processDepth(depthData: AVDepthData, timestamp: CMTime) {
         
-        // Ensure depth data is of the correct type
-        //let depthDataType = kCVPixelFormatType_DepthFloat32
-        let depthDataType = kCVPixelFormatType_DisparityFloat32
-        var convertedDepth: AVDepthData
-        
-        if depthData.depthDataType != depthDataType {
-            convertedDepth = depthData.converting(toDepthDataType: depthDataType)
-        } else {
-            convertedDepth = depthData
-        }
-        
-        DispatchQueue.main.async {
-            self.depthData = convertedDepth
-        }
-        
-        //convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
-        //print(convertedDepth.depthDataQuality.rawValue)
-        /*
-        guard renderingEnabled else {
-            return
-        }
-        */
+
         
         if recordingState != .idle {
+            
+            // Ensure depth data is of the correct type
+            //let depthDataType = kCVPixelFormatType_DepthFloat32
+            let depthDataType = kCVPixelFormatType_DisparityFloat32
+            var convertedDepth: AVDepthData
+            
+            if depthData.depthDataType != depthDataType {
+                convertedDepth = depthData.converting(toDepthDataType: depthDataType)
+            } else {
+                convertedDepth = depthData
+            }
+            
+            DispatchQueue.main.async {
+                self.depthData = convertedDepth
+            }
+            
+            //convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
+            //print(convertedDepth.depthDataQuality.rawValue)
+            /*
+            guard renderingEnabled else {
+                return
+            }
+            */
+            
+            
+            
             if !videoDepthConverter.isPrepared {
                 var depthFormatDescription: CMFormatDescription?
                 CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
@@ -927,8 +934,61 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
         
-        self.visionProcessor?.performVisionRequests(on: sampleBuffer)
+        //autoreleasepool {
+        guard let visionProcessor = self.visionProcessor else {
+            print("Vision tracking processor not found.")
+            return
+        }
         
+        var attachmentMode = kCMAttachmentMode_ShouldPropagate
+        let cameraIntrinsicData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: &attachmentMode)
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer),
+              let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) else {
+            print("Failed to obtain a CVPixelBuffer for the current output frame.")
+            return
+        }
+        
+        if !visionProcessor.isPrepared {
+            /*
+             outputRetainedBufferCountHint is the number of pixel buffers the renderer retains.
+             This value informs the renderer how to size its buffer pool and how many pixel buffers to preallocate.
+             Allow 3 frames of latency to cover the dispatch_async call.
+             */
+            visionProcessor.prepare(with: formatDescription, outputRetainedBufferCountHint: 3)
+        }
+        
+        guard let pixelBufferCopy = visionProcessor.copyPixelBuffer(inputBuffer: pixelBuffer) else {
+            print("Failed to copy pixel buffer.")
+            return
+        }
+        
+        //visionTrackingQueue.async {
+        visionProcessor.performVisionRequests(on: pixelBuffer, cameraIntrinsicData: cameraIntrinsicData as? AVCameraCalibrationData)
+        //}
+        //}
+    }
+    
+
+    
+    // MARK: - AVCaptureAudioDataOutputSampleBufferDelegate
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if output == videoDataOutput{
+            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
+        } else {
+            let audioTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
+            processAudio(sampleBuffer: sampleBuffer, timestamp: audioTimestamp)
+        }
+    }
+    
+    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        var attachmentMode = kCMAttachmentMode_ShouldPropagate
+        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: &attachmentMode)
+        let droppedReasonInfo = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReasonInfo, attachmentModeOut: &attachmentMode)
+        
+        print("Video frame dropped with reason: \(droppedReason!). Info: \(droppedReasonInfo)")
     }
     
     func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {

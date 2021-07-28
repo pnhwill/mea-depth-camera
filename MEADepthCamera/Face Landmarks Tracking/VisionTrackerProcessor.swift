@@ -25,6 +25,12 @@ protocol VisionTrackerProcessorDelegate: AnyObject {
 
 class VisionTrackerProcessor {
     
+    var description: String = "Vision Tracker Processor"
+    // // Video frame buffer pool allocation
+    var isPrepared = false
+    //private(set) var inputFormatDescription: CMFormatDescription?
+    private var inputPixelBufferPool: CVPixelBufferPool!
+    
     var trackingLevel = VNRequestTrackingLevel.accurate
     
     weak var delegate: VisionTrackerProcessorDelegate?
@@ -40,10 +46,60 @@ class VisionTrackerProcessor {
     var faceCaptureQuality: Float?
     var faceLandmarksConfidence: VNConfidence?
     
+    // MARK: Allocate Pixel Buffer Pool
+    func prepare(with formatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) {
+        reset()
+        
+        (inputPixelBufferPool, _, _) = allocateOutputBufferPool(with: formatDescription, outputRetainedBufferCountHint: outputRetainedBufferCountHint)
+        if inputPixelBufferPool == nil {
+            print("Failed to allocation pixel buffer pool")
+            return
+        }
+        //inputFormatDescription = formatDescription
+        isPrepared = true
+    }
+    
+    func reset() {
+        inputPixelBufferPool = nil
+        //inputFormatDescription = nil
+        isPrepared = false
+    }
+    
+    func copyPixelBuffer(inputBuffer: CVPixelBuffer) -> CVPixelBuffer? {
+        //autoreleasepool {
+        var newPixelBuffer: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, inputPixelBufferPool!, &newPixelBuffer)
+        guard let copyBuffer = newPixelBuffer else {
+            print("Allocation failure: Could not get pixel buffer from pool (\(self.description))")
+            return nil
+        }
+        
+        CVBufferPropagateAttachments(inputBuffer as CVBuffer, copyBuffer as CVBuffer)
+        
+        CVPixelBufferLockBaseAddress(inputBuffer, CVPixelBufferLockFlags.readOnly)
+        CVPixelBufferLockBaseAddress(copyBuffer, CVPixelBufferLockFlags(rawValue: 0))
+
+        let inputBaseAddress = CVPixelBufferGetBaseAddress(inputBuffer)
+        let copyBaseAddress = CVPixelBufferGetBaseAddress(copyBuffer)
+
+        defer {
+            CVPixelBufferUnlockBaseAddress(inputBuffer, CVPixelBufferLockFlags.readOnly)
+            CVPixelBufferUnlockBaseAddress(copyBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            newPixelBuffer = nil
+        }
+        
+        //print("copy data size: \(CVPixelBufferGetDataSize(copyBuffer))")
+        //print("input data size: \(CVPixelBufferGetDataSize(inputBuffer))")
+        memcpy(copyBaseAddress, inputBaseAddress, CVPixelBufferGetDataSize(copyBuffer))
+        
+        return copyBuffer
+        //}
+    }
+    
     // MARK: Performing Vision Requests
     
-    func performVisionRequests(on sampleBuffer: CMSampleBuffer) {
-        
+    func performVisionRequests(on pixelBuffer: CVPixelBuffer, cameraIntrinsicData: AVCameraCalibrationData?) {
+        //autoreleasepool{
         guard cancelRequested == false else {
             delegate?.didFinishTracking()
             return
@@ -51,14 +107,9 @@ class VisionTrackerProcessor {
         
         var requestHandlerOptions: [VNImageOption: AnyObject] = [:]
         
-        let cameraIntrinsicData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: nil)
         if cameraIntrinsicData != nil {
+            print("VisionTrackerProcessor: Camera intrinsic data not found.")
             requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsicData
-        }
-        
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            print("Failed to obtain a CVPixelBuffer for the current output frame.")
-            return
         }
         
         let exifOrientation = self.exifOrientationForCurrentDeviceOrientation()
@@ -147,9 +198,9 @@ class VisionTrackerProcessor {
                 }
 
                 // Perform all UI updates (drawing) on the main queue, not the background queue on which this handler is being called.
-                DispatchQueue.main.async {
-                    //self.delegate?.displayFaceObservations(results)
-                }
+                //DispatchQueue.main.async {
+                    self.delegate?.displayFaceObservations(results)
+                //}
             })
             
             guard let trackingResults = trackingRequest.results else {
@@ -209,6 +260,7 @@ class VisionTrackerProcessor {
                 delegate?.displayMetrics(confidence: confidence, captureQuality: captureQuality)
             }
         }
+        //}
     }
     
     func prepareVisionRequest() {
