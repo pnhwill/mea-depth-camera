@@ -1098,7 +1098,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                         print("depth map file success")
                         // we can add code to export or save the depth map video file to Photos library here
                     case .failed(let error):
-                        print("depth map file failure: \(error!.localizedDescription)")
+                        print("depth map file failure: \(error?.localizedDescription ?? "error unknown")")
                     }
                     self.depthMapWriteState = .inactive
                 })
@@ -1179,7 +1179,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                         print("video file success")
                         // we can add code to export or save the video file to Photos library here
                     case .failed(let error):
-                        print("video file failure: \(error!.localizedDescription)")
+                        print("video file failure: \(error?.localizedDescription ?? "error unknown")")
                     }
                     self.videoWriteState = .inactive
                 })
@@ -1191,7 +1191,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                         print("audio file success")
                         // we can add code to export the audio file here
                     case .failed(let error):
-                        print("audio file failure: \(error!.localizedDescription)")
+                        print("audio file failure: \(error?.localizedDescription ?? "error unknown")")
                     }
                     self.audioWriteState = .inactive
                 })

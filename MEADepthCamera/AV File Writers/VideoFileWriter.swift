@@ -61,7 +61,7 @@ class VideoFileWriter: FileWriter {
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.videoWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to video input: \(self.assetWriter.error!.localizedDescription)")
+                    print("Error appending sample buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     return
                 }
             } else {
@@ -74,7 +74,7 @@ class VideoFileWriter: FileWriter {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to audio input: \(self.assetWriter.error!.localizedDescription)")
+                    print("Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     return
                 }
             } else {
@@ -97,7 +97,7 @@ class VideoFileWriter: FileWriter {
                 completion(.success)
             } else {
                 completion(.failed(self.assetWriter.error))
-                print("Error writing video/audio to file: \(self.assetWriter.error!.localizedDescription)")
+                print("Error writing video/audio to file: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
             }
         }
     }

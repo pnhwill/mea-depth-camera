@@ -44,7 +44,7 @@ class AudioFileWriter: FileWriter {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("AudioFileWriter: Error appending sample buffer to audio input: \(self.assetWriter.error!.localizedDescription)")
+                    print("AudioFileWriter: Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     return
                 }
             } else {
@@ -66,7 +66,7 @@ class AudioFileWriter: FileWriter {
                 completion(.success)
             } else {
                 completion(.failed(self.assetWriter.error))
-                print("Error writing audio to file: \(self.assetWriter.error!.localizedDescription)")
+                print("Error writing audio to file: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
             }
         }
     }

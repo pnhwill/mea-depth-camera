@@ -32,9 +32,11 @@ class FaceLandmarksFileWriter {
     var depthDataProcessor: DepthDataProcessor
     
     // Temporary variable for testing
-    private var metalRenderEnabled: Bool = false
-    // Point cloud Metal renderer
-    private var pointCloudMetalRenderer = PointCloudMetalRenderer()
+    private var metalRenderEnabled: Bool = true
+    // Point cloud Metal renderer with vertex shader
+    //private var pointCloudMetalRenderer = PointCloudMetalRenderer()
+    // Point cloud Metal renderer with compute kernel
+    private var pointCloudProcessor = PointCloudProcessor()
     
     init(resolution: CGSize) {
         captureDeviceResolution = resolution
@@ -85,16 +87,18 @@ class FaceLandmarksFileWriter {
             data.append("\(boundingBox.origin.x),\(boundingBox.origin.y),\(boundingBox.size.width),\(boundingBox.size.height),")
             
             if metalRenderEnabled {
+                metalRender(faceObservation: faceObservation!, depthData: depthData)
                 
-                guard let landmarksPointer = metalRender(faceObservation: faceObservation!, depthData: depthData) else {
-                    print("metal rendering failed")
-                    return
-                }
                 if let landmarks = faceObservation!.landmarks?.allPoints {
                     for (index, _) in landmarks.normalizedPoints.enumerated() {
-                        let landmarkX = landmarksPointer[index].x
-                        let landmarkY = landmarksPointer[index].y
-                        let landmarkZ = landmarksPointer[index].z
+                        guard let landmarkPoint = pointCloudProcessor.getOutput(index: index) else {
+                            print("Metal point cloud processor failed to output landmark position")
+                            return
+                        }
+                        
+                        let landmarkX = landmarkPoint.x//[index].x
+                        let landmarkY = landmarkPoint.y//[index].y
+                        let landmarkZ = landmarkPoint.z//[index].z
                         data.append("\(landmarkX),\(landmarkY),\(landmarkZ),")
                     }
                 } else {
@@ -145,7 +149,7 @@ class FaceLandmarksFileWriter {
         self.dataCollector!.frameCount += 1
     }
     
-    private func metalRender(faceObservation: VNFaceObservation, depthData: AVDepthData) -> UnsafeMutablePointer<vector_float3>? {
+    private func metalRender(faceObservation: VNFaceObservation, depthData: AVDepthData) {
         // Get depth map pixel buffer
         let depthDataMap = depthData.depthDataMap
         
@@ -155,25 +159,31 @@ class FaceLandmarksFileWriter {
         let depthMapSize = CGSize(width: depthMapWidth, height: depthMapHeight)
         
         // Declare output array of 3D points
-        var landmarksPointCloud: [vector_float3]
+        //var landmarksPointCloud: [vector_float3]
         
         // Get face landmarks
         guard let landmarks = faceObservation.landmarks?.allPoints else {
             print("No landmarks found.")
-            return nil
+            return
         }
         let landmarkPoints = landmarks.pointsInImage(imageSize: depthMapSize)
         let landmarkVectors = landmarkPoints.map { simd_float2(Float($0.x), Float($0.y)) }
         
-        pointCloudMetalRenderer.setDepthFrame(depthData, withLandmarks: landmarkVectors)
+        //pointCloudMetalRenderer.setDepthFrame(depthData, withLandmarks: landmarkVectors)
+        //let outputPointer: UnsafeMutablePointer<vector_float3> = pointCloudMetalRenderer.getOutput()
         
-        let outputPointer: UnsafeMutablePointer<vector_float3> = pointCloudMetalRenderer.getOutput()
+        if !pointCloudProcessor.isPrepared {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: depthData.depthDataMap,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                pointCloudProcessor.prepare(with: unwrappedDepthFormatDescription)
+            }
+        }
         
-        return outputPointer
+        pointCloudProcessor.render(landmarks: landmarkVectors, depthData: depthData)
+
     }
-    
-    
-    
-    
     
 }

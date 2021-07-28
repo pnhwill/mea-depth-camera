@@ -52,7 +52,7 @@ class DepthMapFileWriter: FileWriter {
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: timeStamp) else {
-                    print("DepthMapFileWriter: Error appending pixel buffer to video input: \(self.assetWriter.error!.localizedDescription)")
+                    print("DepthMapFileWriter: Error appending pixel buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     return
                 }
             } else {
@@ -74,7 +74,7 @@ class DepthMapFileWriter: FileWriter {
                 completion(.success)
             } else {
                 completion(.failed(self.assetWriter.error))
-                print("DepthMapFileWriter: Error writing video/audio to file: \(self.assetWriter.error!.localizedDescription)")
+                print("DepthMapFileWriter: Error writing video/audio to file: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
             }
         }
     }

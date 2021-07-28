@@ -175,10 +175,10 @@ class DepthToGrayscaleConverter: FilterRenderer {
         
         commandEncoder.label = "Depth to Grayscale"
         commandEncoder.setComputePipelineState(computePipelineState!)
-        commandEncoder.setTexture(inputTexture, index: 0)
-        commandEncoder.setTexture(outputTexture, index: 1)
+        commandEncoder.setTexture(inputTexture, index: Int(TextureIndexDepthInput.rawValue))
+        commandEncoder.setTexture(outputTexture, index: Int(TextureIndexGrayscaleOutput.rawValue))
         // use 'withUnsafeMutableBytes' to get rid of the warning below
-        commandEncoder.setBytes( UnsafeMutableRawPointer(&range), length: MemoryLayout<DepthRenderParam>.size, index: 0)
+        commandEncoder.setBytes( UnsafeMutableRawPointer(&range), length: MemoryLayout<DepthRenderParam>.size, index: Int(BufferIndexConverterParameters.rawValue))
         
         // Set up the thread groups.
         let width = computePipelineState!.threadExecutionWidth

@@ -14,15 +14,18 @@ Metal compute shader that translates depth values to grayscale RGB values.
 #include <metal_stdlib>
 using namespace metal;
 
+// Include header shared between this Metal shader code and C code executing Metal API commands
+#import "ShaderTypes.h"
+
 struct converterParameters {
     float offset;
     float range;
 };
 
 // Compute kernel
-kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [[ texture(0) ]],
-                             texture2d<float, access::write> outputTexture     [[ texture(1) ]],
-                             constant converterParameters& converterParameters [[ buffer(0) ]],
+kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [[ texture(TextureIndexDepthInput) ]],
+                             texture2d<float, access::write> outputTexture     [[ texture(TextureIndexGrayscaleOutput) ]],
+                             constant converterParameters& converterParameters [[ buffer(BufferIndexConverterParameters) ]],
                              uint2 gid [[ thread_position_in_grid ]])
 {
     // Don't read or write outside of the texture.

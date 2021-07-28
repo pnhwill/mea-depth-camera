@@ -8,22 +8,22 @@
 #ifndef ShaderTypes_h
 #define ShaderTypes_h
 
-//#include <simd/simd.h>
-
 // Buffer index values shared between the Metal shader and C code ensure the shader buffer
 // inputs match the Metal API buffer set calls.
-typedef enum VertexInputIndex
+typedef enum BufferIndex
 {
-    VertexInputIndexLandmarks     = 0,
-    VertexInputIndexCameraIntrinsics = 1,
-    VertexInputIndexPointCloud
-} VertexInputIndex;
+    BufferIndexConverterParameters   = 0,
+    BufferIndexLandmarksInput        = 1,
+    BufferIndexCameraIntrinsicsInput = 2,
+    BufferIndexPointCloudOutput      = 3,
+} BufferIndex;
 
 // Texture index values shared between the Metal shader and C code ensure the shader buffer
 // inputs match the Metal API texture set calls.
 typedef enum TextureIndex
 {
-    TextureIndexDepthInput  = 0,
+    TextureIndexDepthInput      = 0,
+    TextureIndexGrayscaleOutput = 1,
 } TextureIndex;
 
 

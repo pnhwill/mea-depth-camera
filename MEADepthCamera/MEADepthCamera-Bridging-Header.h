@@ -9,4 +9,4 @@ Bridging header for MEADepthCamera.
 */
 
 #import "minMaxFromBuffer.h"
-#import "PointCloudMetalRenderer.h"
+#import "ShaderTypes.h"
