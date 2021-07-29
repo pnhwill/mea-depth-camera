@@ -22,7 +22,7 @@ class FaceObservationOverlayView: UIView {
     private var videoResolution: CGSize = CGSize()
     
     // Layer UI for drawing Vision results
-    var rootLayer: AVCaptureVideoPreviewLayer?
+    var rootLayer: CAMetalLayer?
     var detectionOverlayLayer: CALayer?
     var detectedFaceRectangleShapeLayer: CAShapeLayer?
     var detectedFaceLandmarksShapeLayer: CAShapeLayer?
@@ -54,7 +54,7 @@ class FaceObservationOverlayView: UIView {
             return
         }
         
-        if let previewRootLayer = superView.layer as? AVCaptureVideoPreviewLayer {
+        if let previewRootLayer = superView.layer as? CAMetalLayer {
             self.rootLayer = previewRootLayer
             previewRootLayer.masksToBounds = true
         } else {
@@ -67,7 +67,11 @@ class FaceObservationOverlayView: UIView {
             frame = .zero
             return
         }
+        
+        // Transform from normalized coordinates to coordinates of super view.
+        
         frame = superView.bounds
+        
         setNeedsDisplay()
     }
     
@@ -156,7 +160,10 @@ class FaceObservationOverlayView: UIView {
         
         CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
         
-        let videoPreviewRect = rootLayer.layerRectConverted(fromMetadataOutputRect: CGRect(x: 0, y: 0, width: 1, height: 1))
+        let videoAspectRatio = captureDeviceResolution.width / captureDeviceResolution.height
+        let videoPreviewWidth = rootLayer.bounds.width
+        let videoPreviewHeight = videoPreviewWidth * videoAspectRatio
+        let videoPreviewRect = VNImageRectForNormalizedRect(CGRect(x: 0, y: 0, width: 1, height: 1), Int(videoPreviewWidth), Int(videoPreviewHeight))
         
         var rotation: CGFloat
         var scaleX: CGFloat

@@ -14,7 +14,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     // MARK: - Properties
     
     // Video preview view
-    @IBOutlet private weak var previewView: PreviewView!
+    @IBOutlet private weak var previewView: PreviewMetalView!
     
     // UI buttons/labels
     @IBOutlet private weak var cameraUnavailableLabel: UILabel!
@@ -119,7 +119,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     private var visionProcessor: VisionTrackerProcessor?
     
     // Layer UI for drawing Vision results
-    var previewLayer: AVCaptureVideoPreviewLayer?
+    var previewLayer: CALayer?
     
     var reusableFaceObservationOverlayViews: [FaceObservationOverlayView] {
         if let existingViews = previewView.subviews as? [FaceObservationOverlayView] {
@@ -152,7 +152,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         recordButton.isEnabled = false
         
         // Set up the video preview view.
-        previewView.session = session
+        //previewView.session = session
         
         /*
          Check the video authorization status. Video access is required and audio
@@ -198,10 +198,16 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        let interfaceOrientation = mainWindowScene?.interfaceOrientation ?? .portrait
+        //statusBarOrientation = interfaceOrientation
+        
         let initialThermalState = ProcessInfo.processInfo.thermalState
         if initialThermalState == .serious || initialThermalState == .critical {
             showThermalState(state: initialThermalState)
         }
+        
+        UIApplication.shared.isIdleTimerDisabled = true
         
         sessionQueue.async {
             switch self.setupResult {
@@ -209,6 +215,18 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                 // Only setup observers and start the session running if setup succeeded
                 DispatchQueue.main.async {
                     self.designatePreviewLayer()
+                }
+                
+                // Set up preview Metal View orientation
+                if let unwrappedVideoDataOutputConnection = self.videoDataOutput.connection(with: .video) {
+                    let videoDevicePosition = self.videoDeviceInput.device.position
+                    let rotation = PreviewMetalView.Rotation(with: interfaceOrientation,
+                                                             videoOrientation: unwrappedVideoDataOutputConnection.videoOrientation,
+                                                             cameraPosition: videoDevicePosition)
+                    self.previewView.mirroring = (videoDevicePosition == .front)
+                    if let rotation = rotation {
+                        self.previewView.rotation = rotation
+                    }
                 }
                 
                 self.visionProcessor = VisionTrackerProcessor()
@@ -281,7 +299,25 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         super.viewDidLayoutSubviews()
     }
     */
-    // Add didEnterBackground(notification: NSNotification) as in AVCamFilter and an observer
+
+    @objc
+    func didEnterBackground(notification: NSNotification) {
+        // Free up resources.
+        dataOutputQueue.async {
+            self.renderingEnabled = false
+            self.visionProcessor?.reset()
+            //self.videoDepthConverter.reset()
+            self.previewView.pixelBuffer = nil
+            self.previewView.flushTextureCache()
+        }
+    }
+    
+    @objc
+    func willEnterForeground(notification: NSNotification) {
+        dataOutputQueue.async {
+            self.renderingEnabled = true
+        }
+    }
     
     // You can use this opportunity to take corrective action to help cool the system down.
     @objc
@@ -338,6 +374,14 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
         keyValueObservations.append(systemPressureStateObservation)
         
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(didEnterBackground),
+                                               name: UIApplication.didEnterBackgroundNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(willEnterForeground),
+                                               name: UIApplication.willEnterForegroundNotification,
+                                               object: nil)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(subjectAreaDidChange),
                                                name: .AVCaptureDeviceSubjectAreaDidChange,
@@ -414,7 +458,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
         session.addInput(videoDeviceInput)
         
-        videoDataOutput.alwaysDiscardsLateVideoFrames = false
+        videoDataOutput.alwaysDiscardsLateVideoFrames = true
         
         // Set video data output sample buffer delegate
         videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
@@ -947,7 +991,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             print("Failed to obtain a CVPixelBuffer for the current output frame.")
             return
         }
-        
+        /*
         if !visionProcessor.isPrepared {
             /*
              outputRetainedBufferCountHint is the number of pixel buffers the renderer retains.
@@ -961,11 +1005,17 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             print("Failed to copy pixel buffer.")
             return
         }
+        */
+
         
         //visionTrackingQueue.async {
         visionProcessor.performVisionRequests(on: pixelBuffer, cameraIntrinsicData: cameraIntrinsicData as? AVCameraCalibrationData)
         //}
         //}
+        
+        // Change this to only update every other frame if necessary
+        previewView.pixelBuffer = pixelBuffer
+        
     }
     
 
@@ -986,9 +1036,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         var attachmentMode = kCMAttachmentMode_ShouldPropagate
         let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: &attachmentMode)
-        let droppedReasonInfo = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReasonInfo, attachmentModeOut: &attachmentMode)
-        
-        print("Video frame dropped with reason: \(droppedReason!). Info: \(droppedReasonInfo)")
+        print("Video frame dropped with reason: \(droppedReason!).")
     }
     
     func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
@@ -1282,12 +1330,12 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     // MARK: - Vision Preview Setup
     
     fileprivate func designatePreviewLayer() {
-        let videoPreviewLayer = previewView.videoPreviewLayer
+        let videoPreviewLayer = previewView.layer
         self.previewLayer = videoPreviewLayer
         
         videoPreviewLayer.name = "CameraPreview"
         videoPreviewLayer.backgroundColor = UIColor.black.cgColor
-        videoPreviewLayer.videoGravity = AVLayerVideoGravity.resizeAspect
+        videoPreviewLayer.contentsGravity = .resizeAspect
         
         videoPreviewLayer.masksToBounds = true
     }
@@ -1438,3 +1486,100 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
         }
     }
 }
+
+extension AVCaptureVideoOrientation {
+    init?(interfaceOrientation: UIInterfaceOrientation) {
+        switch interfaceOrientation {
+        case .portrait: self = .portrait
+        case .portraitUpsideDown: self = .portraitUpsideDown
+        case .landscapeLeft: self = .landscapeLeft
+        case .landscapeRight: self = .landscapeRight
+        default: return nil
+        }
+    }
+}
+
+// MARK: - PreviewMetalView.Rotation Extension
+
+extension PreviewMetalView.Rotation {
+    
+    init?(with interfaceOrientation: UIInterfaceOrientation, videoOrientation: AVCaptureVideoOrientation, cameraPosition: AVCaptureDevice.Position) {
+        /*
+         Calculate the rotation between the videoOrientation and the interfaceOrientation.
+         The direction of the rotation depends upon the camera position.
+         */
+        switch videoOrientation {
+            
+        case .portrait:
+            switch interfaceOrientation {
+            case .landscapeRight:
+                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
+                
+            case .landscapeLeft:
+                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
+                
+            case .portrait:
+                self = .rotate0Degrees
+                
+            case .portraitUpsideDown:
+                self = .rotate180Degrees
+                
+            default: return nil
+            }
+            
+        case .portraitUpsideDown:
+            switch interfaceOrientation {
+            case .landscapeRight:
+                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
+                
+            case .landscapeLeft:
+                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
+                
+            case .portrait:
+                self = .rotate180Degrees
+                
+            case .portraitUpsideDown:
+                self = .rotate0Degrees
+                
+            default: return nil
+            }
+            
+        case .landscapeRight:
+            switch interfaceOrientation {
+            case .landscapeRight:
+                self = .rotate0Degrees
+                
+            case .landscapeLeft:
+                self = .rotate180Degrees
+                
+            case .portrait:
+                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
+                
+            case .portraitUpsideDown:
+                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
+                
+            default: return nil
+            }
+            
+        case .landscapeLeft:
+            switch interfaceOrientation {
+            case .landscapeLeft:
+                self = .rotate0Degrees
+                
+            case .landscapeRight:
+                self = .rotate180Degrees
+                
+            case .portrait:
+                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
+                
+            case .portraitUpsideDown:
+                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
+                
+            default: return nil
+            }
+        @unknown default:
+            fatalError("Unknown orientation. Can't continue.")
+        }
+    }
+}
+
