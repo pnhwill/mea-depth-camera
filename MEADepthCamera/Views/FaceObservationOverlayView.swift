@@ -160,6 +160,7 @@ class FaceObservationOverlayView: UIView {
         
         CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
         
+        // using AVMakeRect() would be easier here
         let videoAspectRatio = captureDeviceResolution.width / captureDeviceResolution.height
         let videoPreviewWidth = rootLayer.bounds.width
         let videoPreviewHeight = videoPreviewWidth * videoAspectRatio

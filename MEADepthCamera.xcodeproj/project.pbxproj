@@ -11,6 +11,9 @@
 		B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
+		B53CD4B326B38EF3003BBFD9 /* DataOutputProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */; };
+		B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */; };
+		B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */; };
 		B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA626AB654B00998C27 /* PointCloud.metal */; };
 		B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796581269DED5F0070C294 /* AppDelegate.swift */; };
 		B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796583269DED5F0070C294 /* SceneDelegate.swift */; };
@@ -21,6 +24,7 @@
 		B5796599269DED600070C294 /* MEADepthCameraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796598269DED600070C294 /* MEADepthCameraTests.swift */; };
 		B57965A4269DED600070C294 /* MEADepthCameraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */; };
 		B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B526A096B10070C294 /* VideoFileWriter.swift */; };
+		B587706026B4ADAC00E26C7D /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B587705F26B4ADAC00E26C7D /* Functions.swift */; };
 		B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */; };
 		B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */; };
 		B5886DFD26AA61E100EB344C /* VisionTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DFC26AA61E100EB344C /* VisionTrackerProcessor.swift */; };
@@ -62,6 +66,9 @@
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
 		B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensDistortionPointForPoint.h; sourceTree = "<group>"; };
+		B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataOutputProcessor.swift; sourceTree = "<group>"; };
+		B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enumerations.swift; sourceTree = "<group>"; };
+		B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSessionManager.swift; sourceTree = "<group>"; };
 		B56F2EA626AB654B00998C27 /* PointCloud.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PointCloud.metal; sourceTree = "<group>"; };
 		B579657E269DED5F0070C294 /* MEADepthCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MEADepthCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5796581269DED5F0070C294 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -78,6 +85,7 @@
 		B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEADepthCameraUITests.swift; sourceTree = "<group>"; };
 		B57965A5269DED600070C294 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
+		B587705F26B4ADAC00E26C7D /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DepthToGrayscale.metal; sourceTree = "<group>"; };
 		B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservationOverlayView.swift; sourceTree = "<group>"; };
 		B5886DFC26AA61E100EB344C /* VisionTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionTrackerProcessor.swift; sourceTree = "<group>"; };
@@ -127,6 +135,7 @@
 			children = (
 				B5886DFC26AA61E100EB344C /* VisionTrackerProcessor.swift */,
 				B50787D526AF73D60077ACCB /* FaceLandmarksProcessor.swift */,
+				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
 			);
 			path = "Face Landmarks Tracking";
 			sourceTree = "<group>";
@@ -135,6 +144,8 @@
 			isa = PBXGroup;
 			children = (
 				B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */,
+				B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */,
+				B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */,
 			);
 			path = "Point Cloud";
 			sourceTree = "<group>";
@@ -166,16 +177,15 @@
 				B5796581269DED5F0070C294 /* AppDelegate.swift */,
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
+				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
+				B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */,
 				B50787D726AF74330077ACCB /* Face Landmarks Tracking */,
 				B5886DFB26AA5FB900EB344C /* Views */,
 				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
 				B5ABE85926A9CC9B003D2AFD /* AV File Writers */,
-				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
 				B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */,
-				B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */,
-				B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */,
 				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
-				B5886E0026AA7F8500EB344C /* Extensions.swift */,
+				B587705E26B4AD8900E26C7D /* Utilities */,
 				B5886DF626AA168B00EB344C /* Shaders */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
 				B579658A269DED600070C294 /* Assets.xcassets */,
@@ -202,6 +212,16 @@
 				B57965A5269DED600070C294 /* Info.plist */,
 			);
 			path = MEADepthCameraUITests;
+			sourceTree = "<group>";
+		};
+		B587705E26B4AD8900E26C7D /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */,
+				B5886E0026AA7F8500EB344C /* Extensions.swift */,
+				B587705F26B4ADAC00E26C7D /* Functions.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 		B5886DF626AA168B00EB344C /* Shaders */ = {
@@ -398,12 +418,16 @@
 				B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
+				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
 				B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */,
 				B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */,
+				B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
 				B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */,
+				B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */,
 				B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */,
+				B53CD4B326B38EF3003BBFD9 /* DataOutputProcessor.swift in Sources */,
 				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
 				B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */,
 				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,

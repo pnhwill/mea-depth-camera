@@ -9,12 +9,12 @@ import UIKit
 import AVFoundation
 import Vision
 
-class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
+class CameraViewController: UIViewController {
     
     // MARK: - Properties
     
     // Video preview view
-    @IBOutlet private weak var previewView: PreviewMetalView!
+    @IBOutlet private(set) weak var previewView: PreviewMetalView!
     
     // UI buttons/labels
     @IBOutlet private weak var cameraUnavailableLabel: UILabel!
@@ -26,27 +26,19 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     
     @IBOutlet private weak var indicatorImage: UIImageView!
     
-    // AVCapture session
-    private var session = AVCaptureSession()
-    private var videoDevice: AVCaptureDevice!
-    @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
+    // Capture data output delegate
+    private var dataOutputProcessor: DataOutputProcessor!
     
-    private enum SessionSetupResult {
+    // AVCapture session
+    @objc private var sessionManager: CaptureSessionManager!
+    
+    enum SessionSetupResult {
         case success
         case notAuthorized
         case configurationFailed
     }
-    private var setupResult: SessionSetupResult = .success
+    var setupResult: SessionSetupResult = .success
     private var isSessionRunning = false
-    
-    // Data output
-    private var videoDataOutput = AVCaptureVideoDataOutput()
-    private var depthDataOutput = AVCaptureDepthDataOutput()
-    private var metadataOutput = AVCaptureMetadataOutput()
-    private var audioDataOutput = AVCaptureAudioDataOutput()
-    
-    // Synchronized data capture
-    private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
     
     // Video frame buffer pool allocation
     private(set) var videoFormatDescription: CMFormatDescription?
@@ -54,44 +46,9 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     
-    private enum RecordingState {
-        case idle, start, recording, finish
-    }
-    private var recordingState = RecordingState.idle
-    
-    // AV file writing
-    private enum WriteState {
-        case inactive, active
-    }
-    private var videoWriteState = WriteState.inactive
-    private var audioWriteState = WriteState.inactive
-    private var depthMapWriteState = WriteState.inactive
-    
-    private struct FileWriterSettings {
-        let fileExtensions: [AVFileType: String] = [.mov: "mov", .wav: "wav"]
-        
-        var configuration: FileConfiguration?
-        let fileType: AVFileType
-        let fileExtension: String
-        
-        init(fileType: AVFileType) {
-            self.fileType = fileType
-            self.fileExtension = fileExtensions[fileType]!
-        }
-    }
-    
-    private var videoFileSettings = FileWriterSettings(fileType: .mov)
-    private var audioFileSettings = FileWriterSettings(fileType: .wav)
-    private var depthMapFileSettings = FileWriterSettings(fileType: .mov)
-    
-    private var videoFileWriter: VideoFileWriter?
-    private var audioFileWriter: AudioFileWriter?
-    private var depthMapFileWriter: DepthMapFileWriter?
-    
-    // Depth processing
+    // Depth processing (needs removing after moving record function)
     var depthData: AVDepthData?
     
-    private let videoDepthConverter = DepthToGrayscaleConverter()
     private var renderingEnabled = true
     
     // Data collection
@@ -101,6 +58,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     var faceProcessor: FaceLandmarksProcessor?
     var faceLandmarksFileWriter: FaceLandmarksFileWriter?
     
+    // TODO: Initialize this using Vision constellation property
     let numLandmarks = 76
     
     // Vision requests
@@ -112,14 +70,12 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         case tracking
         case stopped
     }
-    
     private var trackingState: TrackingState = .stopped {
         didSet {
             self.handleTrackingStateChange()
         }
     }
     */
-    private var visionProcessor: VisionTrackerProcessor?
     
     // Layer UI for drawing Vision results
     var previewLayer: CALayer?
@@ -136,12 +92,12 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     private var isAligned: Bool = false
     
     // Dispatch queues
-    private var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
-    private var dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    private var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    private var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    private var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    private var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
+    var dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -191,7 +147,10 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
          that the main queue isn't blocked, which keeps the UI responsive.
          */
         sessionQueue.async {
-            self.configureSession()
+            self.sessionManager = CaptureSessionManager(cameraViewController: self)
+            self.sessionManager.configureSession()
+            self.dataOutputProcessor = self.sessionManager.dataOutputProcessor
+            (self.videoResolution, self.depthResolution) = (self.sessionManager.videoResolution, self.sessionManager.depthResolution)
         }
     }
     
@@ -212,14 +171,15 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         sessionQueue.async {
             switch self.setupResult {
             case .success:
+                
                 // Only setup observers and start the session running if setup succeeded
                 DispatchQueue.main.async {
                     self.designatePreviewLayer()
                 }
                 
                 // Set up preview Metal View orientation
-                if let unwrappedVideoDataOutputConnection = self.videoDataOutput.connection(with: .video) {
-                    let videoDevicePosition = self.videoDeviceInput.device.position
+                if let unwrappedVideoDataOutputConnection = self.sessionManager.videoDataOutput.connection(with: .video) {
+                    let videoDevicePosition = self.sessionManager.videoDeviceInput.device.position
                     let rotation = PreviewMetalView.Rotation(with: interfaceOrientation,
                                                              videoOrientation: unwrappedVideoDataOutputConnection.videoOrientation,
                                                              cameraPosition: videoDevicePosition)
@@ -229,12 +189,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                     }
                 }
                 
-                self.visionProcessor = VisionTrackerProcessor()
-                self.visionProcessor?.delegate = self
-                
-                //self.visionTrackingQueue.async {
-                    self.visionProcessor?.prepareVisionRequest()
-                //}
+                self.dataOutputProcessor.configureProcessors()
                 
                 self.addObservers()
                 
@@ -242,8 +197,8 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                     self.renderingEnabled = true
                 }
                 
-                self.session.startRunning()
-                self.isSessionRunning = self.session.isRunning
+                self.sessionManager.session.startRunning()
+                self.isSessionRunning = self.sessionManager.session.isRunning
                 
             case .notAuthorized:
                 DispatchQueue.main.async {
@@ -281,14 +236,14 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        visionProcessor?.cancelTracking()
+        dataOutputProcessor.visionProcessor?.cancelTracking()
         self.depthOutputQueue.async {
             self.renderingEnabled = false
         }
         sessionQueue.async {
             if self.setupResult == .success {
-                self.session.stopRunning()
-                self.isSessionRunning = self.session.isRunning
+                self.sessionManager.session.stopRunning()
+                self.isSessionRunning = self.sessionManager.session.isRunning
                 self.removeObservers()
             }
         }
@@ -305,8 +260,8 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         // Free up resources.
         dataOutputQueue.async {
             self.renderingEnabled = false
-            self.visionProcessor?.reset()
-            //self.videoDepthConverter.reset()
+            self.dataOutputProcessor.visionProcessor?.reset()
+            //self.dataOutputProcessor.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
             self.previewView.flushTextureCache()
         }
@@ -359,7 +314,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     
     private func addObservers() {
         
-        let sessionRunningObservation = session.observe(\.isRunning, options: .new) { _, change in
+        let sessionRunningObservation = sessionManager.session.observe(\.isRunning, options: .new) { _, change in
             guard let isSessionRunning = change.newValue else { return }
             
             DispatchQueue.main.async {
@@ -368,7 +323,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
         keyValueObservations.append(sessionRunningObservation)
         
-        let systemPressureStateObservation = observe(\.videoDeviceInput.device.systemPressureState, options: .new) { _, change in
+        let systemPressureStateObservation = observe(\.sessionManager.videoDeviceInput.device.systemPressureState, options: .new) { _, change in
             guard let systemPressureState = change.newValue else { return }
             self.setRecommendedFrameRateRangeForPressureState(systemPressureState: systemPressureState)
         }
@@ -385,7 +340,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(subjectAreaDidChange),
                                                name: .AVCaptureDeviceSubjectAreaDidChange,
-                                               object: videoDeviceInput.device)
+                                               object: sessionManager.videoDeviceInput.device)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(thermalStateChanged),
                                                name: ProcessInfo.thermalStateDidChangeNotification,
@@ -393,7 +348,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(sessionRuntimeError),
                                                name: NSNotification.Name.AVCaptureSessionRuntimeError,
-                                               object: session)
+                                               object: sessionManager.session)
         /*
          A session can only run when the app is full screen. It will be interrupted
          in a multi-app layout, introduced in iOS 9, see also the documentation of
@@ -404,11 +359,11 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(sessionWasInterrupted),
                                                name: NSNotification.Name.AVCaptureSessionWasInterrupted,
-                                               object: session)
+                                               object: sessionManager.session)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(sessionInterruptionEnded),
                                                name: NSNotification.Name.AVCaptureSessionInterruptionEnded,
-                                               object: session)
+                                               object: sessionManager.session)
     }
     
     private func removeObservers() {
@@ -422,239 +377,6 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     
     // MARK: - Session Management
     
-    private func configureSession() {
-        if setupResult != .success {
-            return
-        }
-        
-        // Configure front TrueDepth camera as an AVCaptureDevice
-        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera], mediaType: .video, position: .front)
-        
-        guard let captureDevice = deviceDiscoverySession.devices.first else {
-            print("Could not find any video device")
-            setupResult = .configurationFailed
-            return
-        }
-        
-        videoDevice = captureDevice
-        
-        // Ensure we can create a valid device input
-        do {
-            videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
-        } catch {
-            print("Could not create video device input: \(error)")
-            setupResult = .configurationFailed
-            return
-        }
-        
-        session.beginConfiguration()
-        
-        // Add a video input
-        guard session.canAddInput(videoDeviceInput) else {
-            print("Could not add video device input to the session")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        session.addInput(videoDeviceInput)
-        
-        videoDataOutput.alwaysDiscardsLateVideoFrames = true
-        
-        // Set video data output sample buffer delegate
-        videoDataOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
-        
-        // Add a video data output
-        if session.canAddOutput(videoDataOutput) {
-            session.addOutput(videoDataOutput)
-            videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
-            if let connection = videoDataOutput.connection(with: .video) {
-                connection.isEnabled = true
-                /*
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = .portrait
-                } else {
-                    print("Changing video orientation not supported")
-                }
-                */
-                if connection.isCameraIntrinsicMatrixDeliverySupported {
-                    connection.isCameraIntrinsicMatrixDeliveryEnabled = true
-                } else {
-                    print("Camera intrinsic matrix delivery not supported")
-                }
-            } else {
-                print("No AVCaptureConnection for video data output")
-            }
-        } else {
-            print("Could not add video data output to the session")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        
-        // Add a depth data output
-        if session.canAddOutput(depthDataOutput) {
-            session.addOutput(depthDataOutput)
-            depthDataOutput.isFilteringEnabled = false
-            if let connection = depthDataOutput.connection(with: .depthData) {
-                connection.isEnabled = true
-                /*
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = .portrait
-                } else {
-                    print("Changing depth orientation not supported")
-                }
-                */
-            } else {
-                print("No AVCaptureConnection")
-            }
-        } else {
-            print("Could not add depth data output to the session")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-
-        // Use independent dispatch queue from the video data since the depth processing is much more intensive
-        //depthDataOutput.setDelegate(self, callbackQueue: depthOutputQueue)
-        
-        // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)
-        if let (deviceFormat, frameRateRange, resolution) = bestDeviceFormat(for: videoDevice) {
-            do {
-                try videoDevice.lockForConfiguration()
-                
-                // Set the device's active format.
-                videoDevice.activeFormat = deviceFormat
-                
-                // Set the device's min/max frame duration.
-                let duration = frameRateRange.minFrameDuration
-                videoDevice.activeVideoMinFrameDuration = duration
-                videoDevice.activeVideoMaxFrameDuration = duration
-                
-                videoDevice.unlockForConfiguration()
-            } catch {
-                print("Failed to set video device format")
-                setupResult = .configurationFailed
-                session.commitConfiguration()
-                return
-            }
-            self.videoResolution = resolution
-        } else {
-            print("Failed to find valid device format")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        
-        // Search for highest resolution with floating-point depth values
-        let depthFormats = videoDevice.activeFormat.supportedDepthDataFormats
-        
-        let depth32formats = depthFormats.filter({
-            CMFormatDescriptionGetMediaSubType($0.formatDescription) == kCVPixelFormatType_DepthFloat32
-        })
-        if depth32formats.isEmpty {
-            print("Device does not support Float32 depth format")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        
-        let selectedFormat = depth32formats.max(by: { first, second in
-                                                    CMVideoFormatDescriptionGetDimensions(first.formatDescription).width <
-                                                        CMVideoFormatDescriptionGetDimensions(second.formatDescription).width })
-        
-        
-        if let selectedFormatDescription = selectedFormat?.formatDescription {
-            let depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
-            depthResolution = CGSize(width: CGFloat(depthDimensions.width), height: CGFloat(depthDimensions.height))
-        } else {
-            print("Failed to obtain depth data resolution")
-        }
-        
-        do {
-            try videoDevice.lockForConfiguration()
-            videoDevice.activeDepthDataFormat = selectedFormat
-            videoDevice.unlockForConfiguration()
-        } catch {
-            print("Could not lock device for configuration: \(error)")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        /*
-         if self.session.canAddOutput(metadataOutput) {
-         self.session.addOutput(metadataOutput)
-         if metadataOutput.availableMetadataObjectTypes.contains(.face) {
-         metadataOutput.metadataObjectTypes = [.face]
-         }
-         } else {
-         print("Could not add face detection output to the session")
-         setupResult = .configurationFailed
-         session.commitConfiguration()
-         return
-         }
-         */
-        // Add an audio input device.
-        do {
-            let audioDevice = AVCaptureDevice.default(for: .audio)
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice!)
-            
-            if session.canAddInput(audioDeviceInput) {
-                session.addInput(audioDeviceInput)
-            } else {
-                print("Could not add audio device input to the session")
-            }
-        } catch {
-            print("Could not create audio device input: \(error)")
-        }
-        
-        // Set audio data output sample buffer delegate
-        //audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
-        
-        // Add an audio data output
-        if session.canAddOutput(audioDataOutput) {
-            session.addOutput(audioDataOutput)
-            if let connection = audioDataOutput.connection(with: .audio) {
-                connection.isEnabled = true
-            } else {
-                print("No AVCaptureConnection for audio data output")
-            }
-        } else {
-            print("Could not add audio data output to the session")
-            setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-
-        // Initialize video file writer configuration
-        // Move this to viewWillAppear() probably
-        let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
-        let audioSettingsForVideo = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
-        videoFileSettings.configuration = VideoFileConfiguration(fileType: videoFileSettings.fileType, videoSettings: videoSettingsForVideo, audioSettings: audioSettingsForVideo)
-        
-        // Initialize audio file writer configuration
-        let audioSettingsForAudio = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioFileSettings.fileType)
-        audioFileSettings.configuration = AudioFileConfiguration(fileType: audioFileSettings.fileType, audioSettings: audioSettingsForAudio)
-        
-        // Initialize depth map file writer configuration
-        let videoSettingsForDepthMap = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapFileSettings.fileType)
-        depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType, videoSettings: videoSettingsForDepthMap)
-        
-        // Initialize landmarks file writer
-        // Move to viewWillAppear() probably also
-        faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: numLandmarks)
-        faceProcessor = FaceLandmarksProcessor(videoResolution: videoResolution, depthResolution: depthResolution, numLandmarks: numLandmarks)
-        
-        // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
-        // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
-        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [depthDataOutput, audioDataOutput])
-        outputSynchronizer!.setDelegate(self, queue: dataOutputQueue)
-        
-        print(videoResolution)
-        print(depthResolution)
-        
-        session.commitConfiguration()
-    }
-    
     @IBAction private func resumeInterruptedSession(_ sender: UIButton) {
         sessionQueue.async {
             /*
@@ -664,9 +386,9 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
              only try to restart the session in the error handler if you aren't
              trying to resume the session.
              */
-            self.session.startRunning()
-            self.isSessionRunning = self.session.isRunning
-            if !self.session.isRunning {
+            self.sessionManager.session.startRunning()
+            self.isSessionRunning = self.sessionManager.session.isRunning
+            if !self.sessionManager.session.isRunning {
                 DispatchQueue.main.async {
                     let message = NSLocalizedString("Unable to resume", comment: "Alert message when unable to resume the session running")
                     let alertController = UIAlertController(title: "MEADepthCamera", message: message, preferredStyle: .alert)
@@ -763,8 +485,8 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         if error.code == .mediaServicesWereReset {
             sessionQueue.async {
                 if self.isSessionRunning {
-                    self.session.startRunning()
-                    self.isSessionRunning = self.session.isRunning
+                    self.sessionManager.session.startRunning()
+                    self.isSessionRunning = self.sessionManager.session.isRunning
                 } else {
                     DispatchQueue.main.async {
                         self.resumeButton.isHidden = false
@@ -798,48 +520,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         print("System pressure state is now \(pressureLevel.rawValue)")
     }
     
-    // MARK: - Device Configuration
-    
-    private func bestDeviceFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, frameRateRange: AVFrameRateRange, resolution: CGSize)? {
-        var bestFormat: AVCaptureDevice.Format?
-        var bestFrameRateRange: AVFrameRateRange?
-        var highestResolutionDimensions = CMVideoDimensions(width: 0, height: 0)
-        
-        // Search only formats that support depth data
-        let supportsDepthFormats = device.formats.filter({
-            !$0.supportedDepthDataFormats.isEmpty
-        })
-        
-        // Search for highest possible framerate
-        for format in supportsDepthFormats {
-            for range in format.videoSupportedFrameRateRanges {
-                if range.maxFrameRate > bestFrameRateRange?.maxFrameRate ?? 0 {
-                    bestFrameRateRange = range
-                }
-            }
-        }
-        
-        // Search for highest resolution with best framerate
-        for format in supportsDepthFormats {
-            if format.videoSupportedFrameRateRanges.contains(bestFrameRateRange!) {
-                let formatDescription = format.formatDescription
-                let candidateDimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
-                // Search full color range pixel formats
-                if CMFormatDescriptionGetMediaSubType(formatDescription) == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange {
-                    if (bestFormat == nil) || (candidateDimensions.width > highestResolutionDimensions.width) {
-                        bestFormat = format
-                        highestResolutionDimensions = candidateDimensions
-                    }
-                }
-            }
-        }
-        
-        if bestFormat != nil {
-            let resolution = CGSize(width: CGFloat(highestResolutionDimensions.width), height: CGFloat(highestResolutionDimensions.height))
-            return (bestFormat!, bestFrameRateRange!, resolution)
-        }
-        return nil
-    }
+    // MARK: - Device Control
     
     private func focus(with focusMode: AVCaptureDevice.FocusMode,
                        exposureMode: AVCaptureDevice.ExposureMode,
@@ -847,7 +528,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                        monitorSubjectAreaChange: Bool) {
         
         sessionQueue.async {
-            let device = self.videoDeviceInput.device
+            let device = self.sessionManager.videoDeviceInput.device
             do {
                 try device.lockForConfiguration()
                 /*
@@ -872,218 +553,14 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
     }
     
-    // MARK: - Data Output Synchronizer Delegate
-    
-    func dataOutputSynchronizer(_ synchronizer: AVCaptureDataOutputSynchronizer, didOutput synchronizedDataCollection: AVCaptureSynchronizedDataCollection) {
-        
-        //let dataCount = synchronizedDataCollection.count
-        //print("\(dataCount) data outputs received")
-        
-        if let syncedDepthData: AVCaptureSynchronizedDepthData = synchronizedDataCollection.synchronizedData(for: depthDataOutput) as? AVCaptureSynchronizedDepthData {
-            let depthTimestamp = syncedDepthData.timestamp
-            //print("depth output received at \(CMTimeGetSeconds(depthTimestamp))")
-            if !syncedDepthData.depthDataWasDropped {
-                let depthData = syncedDepthData.depthData
-                processDepth(depthData: depthData, timestamp: depthTimestamp)
-            } else {
-                print("depth frame dropped for reason: \(syncedDepthData.droppedReason.rawValue)")
-            }
-        }
-        
-        if let syncedVideoData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: videoDataOutput) as? AVCaptureSynchronizedSampleBufferData {
-            let videoTimestamp = syncedVideoData.timestamp
-            //print("video output received at \(CMTimeGetSeconds(videoTimestamp))")
-            if !syncedVideoData.sampleBufferWasDropped {
-                let videoSampleBuffer = syncedVideoData.sampleBuffer
-                //CMSampleBufferCreateCopy
-                processVideo(sampleBuffer: videoSampleBuffer, timestamp: videoTimestamp)
-            } else {
-                print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
-            }
-        }
-        
-        if let syncedAudioData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: audioDataOutput) as? AVCaptureSynchronizedSampleBufferData {
-            let audioTimestamp = syncedAudioData.timestamp
-            //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
-            if !syncedAudioData.sampleBufferWasDropped {
-                let audioSampleBuffer = syncedAudioData.sampleBuffer
-                processAudio(sampleBuffer: audioSampleBuffer, timestamp: audioTimestamp)
-            } else {
-                print("audio frame dropped for reason: \(syncedAudioData.droppedReason.rawValue)")
-            }
-        }
-        
-    }
-    
-    func processDepth(depthData: AVDepthData, timestamp: CMTime) {
-        
-        if recordingState != .idle {
-            
-            // Ensure depth data is of the correct type
-            //let depthDataType = kCVPixelFormatType_DepthFloat32
-            let depthDataType = kCVPixelFormatType_DisparityFloat32
-            var convertedDepth: AVDepthData
-            
-            if depthData.depthDataType != depthDataType {
-                convertedDepth = depthData.converting(toDepthDataType: depthDataType)
-            } else {
-                convertedDepth = depthData
-            }
-            
-            DispatchQueue.main.async {
-                self.depthData = convertedDepth
-            }
-            
-            //convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
-            //print(convertedDepth.depthDataQuality.rawValue)
-            /*
-            guard renderingEnabled else {
-                return
-            }
-            */
-            
-            if !videoDepthConverter.isPrepared {
-                var depthFormatDescription: CMFormatDescription?
-                CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                             imageBuffer: depthData.depthDataMap,
-                                                             formatDescriptionOut: &depthFormatDescription)
-                if let unwrappedDepthFormatDescription = depthFormatDescription {
-                    videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
-                }
-            }
-            
-            guard let depthPixelBuffer = videoDepthConverter.render(pixelBuffer: depthData.depthDataMap) else {
-                print("Unable to process depth")
-                return
-            }
-            
-            writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
-        }
-        
-    }
-    
-    func processVideo(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
-        
-        let output = videoDataOutput
-        if recordingState != .idle {
-            writeOutputToFile(output, sampleBuffer: sampleBuffer)
-        }
-        
-        //autoreleasepool {
-        guard let visionProcessor = self.visionProcessor else {
-            print("Vision tracking processor not found.")
-            return
-        }
-        
-        var attachmentMode = kCMAttachmentMode_ShouldPropagate
-        let cameraIntrinsicData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: &attachmentMode)
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer),
-              let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) else {
-            print("Failed to obtain a CVPixelBuffer for the current output frame.")
-            return
-        }
-        /*
-        if !visionProcessor.isPrepared {
-            /*
-             outputRetainedBufferCountHint is the number of pixel buffers the renderer retains.
-             This value informs the renderer how to size its buffer pool and how many pixel buffers to preallocate.
-             Allow 3 frames of latency to cover the dispatch_async call.
-             */
-            visionProcessor.prepare(with: formatDescription, outputRetainedBufferCountHint: 3)
-        }
-        
-        guard let pixelBufferCopy = visionProcessor.copyPixelBuffer(inputBuffer: pixelBuffer) else {
-            print("Failed to copy pixel buffer.")
-            return
-        }
-        */
-        
-        //visionTrackingQueue.async {
-        visionProcessor.performVisionRequests(on: pixelBuffer, cameraIntrinsicData: cameraIntrinsicData as? AVCameraCalibrationData)
-        //}
-        //}
-        
-        // Change this to only update every other frame if necessary
-        previewView.pixelBuffer = pixelBuffer
-        
-    }
-    
-    func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
-        
-        let output = audioDataOutput
-        if recordingState != .idle {
-            writeOutputToFile(output, sampleBuffer: sampleBuffer)
-        }
-        
-    }
-    
-    // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-    
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        if output == videoDataOutput{
-            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
-        }
-    }
-    
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
-        //print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
-    }
-    
-    // MARK: - Recording Video, Audio, Depth Map, and Landmarks
-    
-    private func createFolder() -> URL? {
-        // Get or create documents directory
-        var docURL: URL?
-        do {
-            docURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        } catch {
-            print("Error getting documents directory: \(error)")
-            return nil
-        }
-        // Get current datetime and format the folder name
-        let date = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
-        let timeStamp = formatter.string(from: date)
-        // Create URL for folder inside documents path
-        guard let dataURL = docURL?.appendingPathComponent(timeStamp, isDirectory: true) else {
-            print("Failed to append folder name to documents URL")
-            return nil
-        }
-        // Create folder at desired path if it does not already exist
-        if !FileManager.default.fileExists(atPath: dataURL.path) {
-            do {
-                try FileManager.default.createDirectory(at: dataURL, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                print("Error creating folder in documents directory: \(error.localizedDescription)")
-            }
-        }
-        return dataURL
-    }
-    
-    private func createFileURL(in folderURL: URL, nameLabel: String, fileType: String) -> URL? {
-        let folderName = folderURL.lastPathComponent
-        let fileName = folderName + "_" + nameLabel
-        
-        let fileURL = folderURL.appendingPathComponent(fileName).appendingPathExtension(fileType)
-        
-        // Create new file in the desired folder
-        /*guard FileManager.default.createFile(atPath: fileURL.path, contents: nil, attributes: nil) else {
-            print("Error creating \(fileName).\(fileType) in documents folder")
-            return nil
-        }*/
-        
-        return fileURL
-    }
+    // MARK: - Toggle Recording
     
     @IBAction private func toggleRecording(_ sender: UIButton) {
         // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
         
-        switch recordingState {
+        switch dataOutputProcessor.recordingState {
         case .idle:
             // Only let recording start if the face is aligned
             guard isAligned else {
@@ -1091,119 +568,25 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                 print("Face is not aligned")
                 return
             }
-            // Create folder for all data files
-            guard let saveFolder = createFolder() else {
-                print("Failed to create save folder")
-                return
-            }
-            guard let audioURL = createFileURL(in: saveFolder, nameLabel: "audio", fileType: audioFileSettings.fileExtension) else {
-                print("Failed to create audio file")
-                return
-            }
-            guard let videoURL = createFileURL(in: saveFolder, nameLabel: "video", fileType: videoFileSettings.fileExtension) else {
-                print("Failed to create video file")
-                return
-            }
-            guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: "depth", fileType: depthMapFileSettings.fileExtension) else {
-                print("Failed to create depth map file")
-                return
-            }
-            guard let landmarksURL = createFileURL(in: saveFolder, nameLabel: "landmarks", fileType: "csv") else {
-                print("Failed to create landmarks file")
-                return
-            }
             // Ideally this should be done on a background thread I'm not yet sure how to handle the error in an async context
             if UIDevice.current.isMultitaskingSupported {
                 self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
             }
-            guard let videoConfiguration = videoFileSettings.configuration,
-                  let audioConfiguration = audioFileSettings.configuration,
-                  let depthMapConfiguration = depthMapFileSettings.configuration else {
-                print("AV file configurations not found")
-                recordButton.isEnabled = true
-                return
+            dataOutputProcessor?.startRecording()
+            // Enable the Record button to let the user stop recording.
+            DispatchQueue.main.async {
+                if !self.recordButton.isEnabled {
+                    self.recordButton.isEnabled = true
+                    self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
+                }
             }
-            do {
-                videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration)
-            } catch {
-                print("Error creating video file writer: \(error)")
-            }
-            do {
-                audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration)
-            } catch {
-                print("Error creating audio file writer: \(error)")
-            }
-            do {
-                depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration)
-            } catch {
-                print("Error creating depth map file writer: \(error)")
-            }
-            guard (faceLandmarksFileWriter?.startDataCollection(path: landmarksURL)) != nil else {
-                print("No face landmarks file writer found, failed to access startDataCollection().")
-                return
-            }
-            recordingState = .start
         case .recording:
-            recordingState = .finish
+            dataOutputProcessor?.stopRecording()
             faceLandmarksFileWriter?.reset()
-        default:
-            break
-        }
-    }
-    
-    //Setting up Asset Writer to save videos
-
-    private func writeDepthMapToFile(depthMap: CVPixelBuffer, timeStamp: CMTime) {
-        guard let depthMapWriter = depthMapFileWriter else {
-            print("No depth map file writer found")
-            return
-        }
-        
-        switch recordingState {
-        case .start:
-            // If all file writers are already active, change the recording state and fall through to record the frame
-            if depthMapWriteState == .active && videoWriteState == .active && audioWriteState == .active {
-                recordingState = .recording
-                fallthrough
-            }
-            // If this file writer is inactive, start it and change it's state to active
-            if depthMapWriteState == .inactive {
-                depthMapWriteState = .active
-                depthMapWriter.start(at: timeStamp)
-            }
-            // Enable the Record button to let the user stop recording.
-            DispatchQueue.main.async {
-                if !self.recordButton.isEnabled {
-                    self.recordButton.isEnabled = true
-                    self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
-                }
-            }
-            //fallthrough
-        case .recording:
-            depthMapWriter.writeVideo(depthMap, timeStamp: timeStamp)
-        case .finish:
-            // If this file writer is active, finish writing and change it's state to inactive when the finish operation completes
-            if depthMapWriteState == .active {
-                depthMapWriter.finish(at: timeStamp, { result in
-                    switch result {
-                    case .success:
-                        print("depth map file success")
-                        // we can add code to export or save the depth map video file to Photos library here
-                    case .failed(let error):
-                        print("depth map file failure: \(error?.localizedDescription ?? "error unknown")")
-                    }
-                    self.depthMapWriteState = .inactive
-                })
-            }
-            // If all file writers are already inactive, change recording state to idle and end the background task
-            if depthMapWriteState == .inactive && videoWriteState == .inactive && audioWriteState == .inactive {
-                recordingState = .idle
-                if let currentBackgroundRecordingID = self.backgroundRecordingID {
-                    self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-                    
-                    if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                        UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
-                    }
+            if let currentBackgroundRecordingID = self.backgroundRecordingID {
+                self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
+                if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
+                    UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
                 }
             }
             // Enable the Record button to let the user start another recording.
@@ -1214,100 +597,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                 }
             }
         default:
-            break
-        }
-    }
-    
-    private func writeOutputToFile(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
-        guard let videoWriter = videoFileWriter else {
-            print("No video file writer found")
             return
-        }
-        guard let audioWriter = audioFileWriter else {
-            print("No audio file writer found")
-            return
-        }
-        
-        let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-        
-        switch recordingState {
-        case .start:
-            // If all file writers are already active, change the recording state and fall through to record the frame
-            if depthMapWriteState == .active && videoWriteState == .active && audioWriteState == .active {
-                recordingState = .recording
-                fallthrough
-            }
-            // If these file writers are inactive, start them and change their state to active
-            if videoWriteState == .inactive {
-                videoWriteState = .active
-                videoWriter.start(at: presentationTime)
-            }
-            if audioWriteState == .inactive {
-                audioWriteState = .active
-                audioWriter.start(at: presentationTime)
-            }
-            // Enable the Record button to let the user stop recording.
-            DispatchQueue.main.async {
-                if !self.recordButton.isEnabled {
-                    self.recordButton.isEnabled = true
-                    self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
-                }
-            }
-            //fallthrough
-        case .recording:
-            // Alternatively we could check the connection instead, but since there's just one connection to each output this is equivalent
-            if output === videoDataOutput {
-                videoWriter.writeVideo(sampleBuffer)
-            } else if output === audioDataOutput {
-                videoWriter.writeAudio(sampleBuffer)
-                audioWriter.writeAudio(sampleBuffer)
-            }
-        case .finish:
-            // If these file writers are active, finish writing and change their state to inactive when the finish operation completes
-            if videoWriteState == .active {
-                videoWriter.finish(at: presentationTime, { result in
-                    switch result {
-                    case .success:
-                        print("video file success")
-                        // we can add code to export or save the video file to Photos library here
-                    case .failed(let error):
-                        print("video file failure: \(error?.localizedDescription ?? "error unknown")")
-                    }
-                    self.videoWriteState = .inactive
-                })
-            }
-            if audioWriteState == .active {
-                audioWriter.finish(at: presentationTime, { result in
-                    switch result {
-                    case .success:
-                        print("audio file success")
-                        // we can add code to export the audio file here
-                    case .failed(let error):
-                        print("audio file failure: \(error?.localizedDescription ?? "error unknown")")
-                    }
-                    self.audioWriteState = .inactive
-                })
-            }
-            // If all file writers are already inactive, change recording state to idle and end the background task
-            if depthMapWriteState == .inactive && videoWriteState == .inactive && audioWriteState == .inactive {
-                recordingState = .idle
-                if let currentBackgroundRecordingID = self.backgroundRecordingID {
-                    self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-                    
-                    if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                        UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
-                    }
-                }
-            }
-            // Enable the Record button to let the user start another recording.
-            DispatchQueue.main.async {
-                if !self.recordButton.isEnabled {
-                    self.recordButton.isEnabled = true
-                    self.recordButton.setBackgroundImage(UIImage(systemName: "record.circle.fill"), for: [])
-                }
-            }
-        default:
-            break
         }
     }
     
@@ -1445,7 +735,7 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
     func recordLandmarks(of faceObservation: VNFaceObservation) {
         // Write face observation results to file if collecting data.
         // Perform data collection in background queue so that it does not hold up the UI.
-        if self.recordingState == .recording {
+        if self.dataOutputProcessor.recordingState == .recording {
             guard let landmarksProcessor = self.faceProcessor,
                   let landmarksFileWriter = self.faceLandmarksFileWriter else {
                 print("No face landmarks processor and/or file writer found, failed to write to file.")
@@ -1471,18 +761,6 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
 }
 
 // MARK: - PreviewMetalView.Rotation Extension
-
-extension AVCaptureVideoOrientation {
-    init?(interfaceOrientation: UIInterfaceOrientation) {
-        switch interfaceOrientation {
-        case .portrait: self = .portrait
-        case .portraitUpsideDown: self = .portraitUpsideDown
-        case .landscapeLeft: self = .landscapeLeft
-        case .landscapeRight: self = .landscapeRight
-        default: return nil
-        }
-    }
-}
 
 extension PreviewMetalView.Rotation {
     

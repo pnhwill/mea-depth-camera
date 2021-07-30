@@ -99,6 +99,8 @@ class VisionTrackerProcessor {
     // MARK: Performing Vision Requests
     
     func performVisionRequests(on pixelBuffer: CVPixelBuffer, cameraIntrinsicData: AVCameraCalibrationData?) {
+        // guard isPrepared else { return }
+        
         //autoreleasepool{
         guard cancelRequested == false else {
             delegate?.didFinishTracking()
