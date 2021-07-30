@@ -10,7 +10,7 @@ import Metal
 
 class PointCloudProcessor {
     
-    let numLandmarks = 76
+    var numLandmarks: Int
     
     var description: String = "Point Cloud Processor"
     
@@ -35,7 +35,8 @@ class PointCloudProcessor {
     var inputBufferSize: Int
     var outputBufferSize: Int
     
-    required init() {
+    required init(numLandmarks: Int) {
+        self.numLandmarks = numLandmarks
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
         let kernelFunction = defaultLibrary.makeFunction(name: "pointCloudKernel")
         do {
@@ -46,11 +47,10 @@ class PointCloudProcessor {
         inputBufferSize = MemoryLayout<vector_float2>.stride * numLandmarks
         outputBufferSize = MemoryLayout<vector_float3>.stride * numLandmarks
     }
-    
+    /*
     static private func allocateOutputBuffers() {
-        
     }
-    
+    */
     func prepare(with formatDescription: CMFormatDescription) {
         reset()
         
@@ -117,11 +117,6 @@ class PointCloudProcessor {
         intrinsics[1][1] /= ratio
         intrinsics[2][0] /= ratio
         intrinsics[2][1] /= ratio
-        
-        
-
-        //let inputBuffer = metalDevice.makeBuffer(bytes: landmarks, length: inputBufferSize, options: [])
-
 
         // Set up command queue, buffer, and encoder
         guard let commandQueue = commandQueue,

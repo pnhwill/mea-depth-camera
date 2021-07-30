@@ -10,3 +10,4 @@ Bridging header for MEADepthCamera.
 
 #import "minMaxFromBuffer.h"
 #import "ShaderTypes.h"
+#import "lensDistortionPointForPoint.h"

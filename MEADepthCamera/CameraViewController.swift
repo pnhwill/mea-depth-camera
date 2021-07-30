@@ -9,7 +9,7 @@ import UIKit
 import AVFoundation
 import Vision
 
-class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDelegate, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
+class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
     
     // MARK: - Properties
     
@@ -98,7 +98,10 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
     private var videoResolution: CGSize = CGSize()
     private var depthResolution: CGSize = CGSize()
     
+    var faceProcessor: FaceLandmarksProcessor?
     var faceLandmarksFileWriter: FaceLandmarksFileWriter?
+    
+    let numLandmarks = 76
     
     // Vision requests
     var detectionRequests: [VNDetectFaceRectanglesRequest]?
@@ -150,9 +153,6 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
-        
-        // Set up the video preview view.
-        //previewView.session = session
         
         /*
          Check the video authorization status. Video access is required and audio
@@ -608,7 +608,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         }
         
         // Set audio data output sample buffer delegate
-        audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
+        //audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
         
         // Add an audio data output
         if session.canAddOutput(audioDataOutput) {
@@ -641,13 +641,16 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         
         // Initialize landmarks file writer
         // Move to viewWillAppear() probably also
-        faceLandmarksFileWriter = FaceLandmarksFileWriter(resolution: videoResolution)
-        
+        faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: numLandmarks)
+        faceProcessor = FaceLandmarksProcessor(videoResolution: videoResolution, depthResolution: depthResolution, numLandmarks: numLandmarks)
         
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
         // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
-        //outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput])
-        //outputSynchronizer!.setDelegate(self, queue: dataOutputQueue)
+        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [depthDataOutput, audioDataOutput])
+        outputSynchronizer!.setDelegate(self, queue: dataOutputQueue)
+        
+        print(videoResolution)
+        print(depthResolution)
         
         session.commitConfiguration()
     }
@@ -877,36 +880,28 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         //print("\(dataCount) data outputs received")
         
         if let syncedDepthData: AVCaptureSynchronizedDepthData = synchronizedDataCollection.synchronizedData(for: depthDataOutput) as? AVCaptureSynchronizedDepthData {
-            
             let depthTimestamp = syncedDepthData.timestamp
             //print("depth output received at \(CMTimeGetSeconds(depthTimestamp))")
-            
             if !syncedDepthData.depthDataWasDropped {
                 let depthData = syncedDepthData.depthData
-                
                 processDepth(depthData: depthData, timestamp: depthTimestamp)
             } else {
                 print("depth frame dropped for reason: \(syncedDepthData.droppedReason.rawValue)")
             }
-            
         }
         
         if let syncedVideoData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: videoDataOutput) as? AVCaptureSynchronizedSampleBufferData {
-            
             let videoTimestamp = syncedVideoData.timestamp
             //print("video output received at \(CMTimeGetSeconds(videoTimestamp))")
-            
             if !syncedVideoData.sampleBufferWasDropped {
                 let videoSampleBuffer = syncedVideoData.sampleBuffer
                 //CMSampleBufferCreateCopy
                 processVideo(sampleBuffer: videoSampleBuffer, timestamp: videoTimestamp)
-                
             } else {
                 print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
             }
-            
         }
-        /*
+        
         if let syncedAudioData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: audioDataOutput) as? AVCaptureSynchronizedSampleBufferData {
             let audioTimestamp = syncedAudioData.timestamp
             //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
@@ -917,12 +912,10 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                 print("audio frame dropped for reason: \(syncedAudioData.droppedReason.rawValue)")
             }
         }
-        */
+        
     }
     
     func processDepth(depthData: AVDepthData, timestamp: CMTime) {
-        
-
         
         if recordingState != .idle {
             
@@ -948,8 +941,6 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
                 return
             }
             */
-            
-            
             
             if !videoDepthConverter.isPrepared {
                 var depthFormatDescription: CMFormatDescription?
@@ -1006,7 +997,6 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             return
         }
         */
-
         
         //visionTrackingQueue.async {
         visionProcessor.performVisionRequests(on: pixelBuffer, cameraIntrinsicData: cameraIntrinsicData as? AVCameraCalibrationData)
@@ -1018,27 +1008,6 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
         
     }
     
-
-    
-    // MARK: - AVCaptureAudioDataOutputSampleBufferDelegate
-    
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        if output == videoDataOutput{
-            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
-        } else {
-            let audioTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
-            processAudio(sampleBuffer: sampleBuffer, timestamp: audioTimestamp)
-        }
-    }
-    
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        var attachmentMode = kCMAttachmentMode_ShouldPropagate
-        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: &attachmentMode)
-        print("Video frame dropped with reason: \(droppedReason!).")
-    }
-    
     func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
         
         let output = audioDataOutput
@@ -1046,6 +1015,20 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
         
+    }
+    
+    // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if output == videoDataOutput{
+            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
+        }
+    }
+    
+    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
+        //print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
     }
     
     // MARK: - Recording Video, Audio, Depth Map, and Landmarks
@@ -1162,6 +1145,7 @@ class CameraViewController: UIViewController, AVCaptureDataOutputSynchronizerDel
             recordingState = .start
         case .recording:
             recordingState = .finish
+            faceLandmarksFileWriter?.reset()
         default:
             break
         }
@@ -1462,15 +1446,14 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
         // Write face observation results to file if collecting data.
         // Perform data collection in background queue so that it does not hold up the UI.
         if self.recordingState == .recording {
-            if let depthData = self.depthData {
-                if self.faceLandmarksFileWriter != nil {
-                    self.faceLandmarksFileWriter?.writeToCSV(faceObservation: faceObservation, depthData: depthData)
-                } else {
-                    print("No face landmarks file writer found, failed to access writeToCSV().")
-                }
-            } else {
-                print("No depth data found.")
+            guard let landmarksProcessor = self.faceProcessor,
+                  let landmarksFileWriter = self.faceLandmarksFileWriter else {
+                print("No face landmarks processor and/or file writer found, failed to write to file.")
+                return
             }
+            
+            let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData)
+            landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
         }
     }
     
@@ -1487,6 +1470,8 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
     }
 }
 
+// MARK: - PreviewMetalView.Rotation Extension
+
 extension AVCaptureVideoOrientation {
     init?(interfaceOrientation: UIInterfaceOrientation) {
         switch interfaceOrientation {
@@ -1498,8 +1483,6 @@ extension AVCaptureVideoOrientation {
         }
     }
 }
-
-// MARK: - PreviewMetalView.Rotation Extension
 
 extension PreviewMetalView.Rotation {
     
