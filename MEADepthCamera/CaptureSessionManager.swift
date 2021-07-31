@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-class CaptureSessionManager: NSObject, ObservableObject { // check if observable object is needed?
+class CaptureSessionManager: NSObject {
     
     // Weak reference to owner
     private weak var cameraViewController: CameraViewController!
@@ -29,8 +29,15 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
     // Synchronized data capture
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
     
-    private(set) var videoResolution: CGSize = CGSize()
-    private(set) var depthResolution: CGSize = CGSize()
+    // Struct to hold video/depth resolutions & number of landmarks
+    private(set) var processorSettings = ProcessorSettings()
+    
+    enum SessionSetupResult {
+        case success
+        case notAuthorized
+        case configurationFailed
+    }
+    var setupResult: SessionSetupResult = .success
     
     init(cameraViewController: CameraViewController) {
         self.cameraViewController = cameraViewController
@@ -39,19 +46,83 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
     // MARK: - Session Configuration
     
     func configureSession() {
-        if cameraViewController.setupResult != .success {
+        if setupResult != .success {
             return
         }
         
+        // Initialize the data output processor
+        self.dataOutputProcessor = DataOutputProcessor(sessionManager: self, cameraViewController: cameraViewController)
+        
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
+        // Configure inputs
+        guard configureFrontCamera() else {
+            setupResult = .configurationFailed
+            return
+        }
+        guard configureMicrophone() else {
+            setupResult = .configurationFailed
+            return
+        }
+        // Configure outputs
+        guard configureVideoDataOutput() else {
+            setupResult = .configurationFailed
+            return
+        }
+        guard configureDepthDataOutput() else {
+            setupResult = .configurationFailed
+            return
+        }
+        guard configureAudioDataOutput() else {
+            setupResult = .configurationFailed
+            return
+        }
+        // Configure device format
+        guard configureDeviceFormat() else {
+            setupResult = .configurationFailed
+            return
+        }
+        /*
+         if self.session.canAddOutput(metadataOutput) {
+         self.session.addOutput(metadataOutput)
+         if metadataOutput.availableMetadataObjectTypes.contains(.face) {
+         metadataOutput.metadataObjectTypes = [.face]
+         }
+         } else {
+         print("Could not add face detection output to the session")
+         cameraViewController.setupResult = .configurationFailed
+         session.commitConfiguration()
+         return
+         }
+         */
+        // Set video data output sample buffer delegate
+        videoDataOutput.setSampleBufferDelegate(dataOutputProcessor, queue: cameraViewController.videoOutputQueue)
+        
+        // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
+        // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
+        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [depthDataOutput, audioDataOutput])
+        outputSynchronizer?.setDelegate(dataOutputProcessor, queue: cameraViewController.dataOutputQueue)
+        
+        // Set the processor settings once the video and depth resolutions are known
+        dataOutputProcessor?.processorSettings = processorSettings
+    }
+    
+    // MARK: - Capture Device Configuration
+    
+    private func configureFrontCamera() -> Bool {
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
         // Configure front TrueDepth camera as an AVCaptureDevice
         let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInTrueDepthCamera], mediaType: .video, position: .front)
         
         guard let captureDevice = deviceDiscoverySession.devices.first else {
             print("Could not find any video device")
-            cameraViewController.setupResult = .configurationFailed
-            return
+            return false
         }
-        
         videoDevice = captureDevice
         
         // Ensure we can create a valid device input
@@ -59,28 +130,49 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
             videoDeviceInput = try AVCaptureDeviceInput(device: videoDevice)
         } catch {
             print("Could not create video device input: \(error)")
-            cameraViewController.setupResult = .configurationFailed
-            return
+            return false
         }
-        
-        self.dataOutputProcessor = DataOutputProcessor(sessionManager: self, cameraViewController: cameraViewController)
-        
-        session.beginConfiguration()
         
         // Add a video input
         guard session.canAddInput(videoDeviceInput) else {
             print("Could not add video device input to the session")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
+            return false
         }
         session.addInput(videoDeviceInput)
         
-        videoDataOutput.alwaysDiscardsLateVideoFrames = true
-        
-        // Set video data output sample buffer delegate
-        videoDataOutput.setSampleBufferDelegate(dataOutputProcessor, queue: cameraViewController.videoOutputQueue)
-        
+        return true
+    }
+    
+    private func configureMicrophone() -> Bool {
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
+        // Add an audio input device.
+        do {
+            let audioDevice = AVCaptureDevice.default(for: .audio)
+            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice!)
+            
+            if session.canAddInput(audioDeviceInput) {
+                session.addInput(audioDeviceInput)
+            } else {
+                print("Could not add audio device input to the session")
+                return false
+            }
+        } catch {
+            print("Could not create audio device input: \(error)")
+            return false
+        }
+        return true
+    }
+    
+    // MARK: - Data Output Configuration
+    
+    private func configureVideoDataOutput() -> Bool {
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
         // Add a video data output
         if session.canAddOutput(videoDataOutput) {
             session.addOutput(videoDataOutput)
@@ -98,17 +190,25 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
                     connection.isCameraIntrinsicMatrixDeliveryEnabled = true
                 } else {
                     print("Camera intrinsic matrix delivery not supported")
+                    return false
                 }
             } else {
                 print("No AVCaptureConnection for video data output")
+                return false
             }
         } else {
             print("Could not add video data output to the session")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
+            return false
         }
-        
+        videoDataOutput.alwaysDiscardsLateVideoFrames = true
+        return true
+    }
+    
+    private func configureDepthDataOutput() -> Bool {
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
         // Add a depth data output
         if session.canAddOutput(depthDataOutput) {
             session.addOutput(depthDataOutput)
@@ -123,18 +223,45 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
                 }
                 */
             } else {
-                print("No AVCaptureConnection")
+                print("No AVCaptureConnection for depth data output")
+                return false
             }
         } else {
             print("Could not add depth data output to the session")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
+            return false
         }
-
-        // Use independent dispatch queue from the video data since the depth processing is much more intensive
-        //depthDataOutput.setDelegate(self, callbackQueue: depthOutputQueue)
         
+        return true
+    }
+    
+    private func configureAudioDataOutput() -> Bool {
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
+        // Add an audio data output
+        if session.canAddOutput(audioDataOutput) {
+            session.addOutput(audioDataOutput)
+            if let connection = audioDataOutput.connection(with: .audio) {
+                connection.isEnabled = true
+            } else {
+                print("No AVCaptureConnection for audio data output")
+                return false
+            }
+        } else {
+            print("Could not add audio data output to the session")
+            return false
+        }
+        return true
+    }
+    
+    // MARK: - Device Format Configuration
+    
+    private func configureDeviceFormat() -> Bool {
+        session.beginConfiguration()
+        defer {
+            session.commitConfiguration()
+        }
         // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)
         if let (deviceFormat, frameRateRange, resolution) = bestDeviceFormat(for: videoDevice) {
             do {
@@ -151,16 +278,12 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
                 videoDevice.unlockForConfiguration()
             } catch {
                 print("Failed to set video device format")
-                cameraViewController.setupResult = .configurationFailed
-                session.commitConfiguration()
-                return
+                return false
             }
-            self.videoResolution = resolution
+            processorSettings.videoResolution = resolution
         } else {
             print("Failed to find valid device format")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
+            return false
         }
         
         // Search for highest resolution with floating-point depth values
@@ -171,9 +294,7 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
         })
         if depth32formats.isEmpty {
             print("Device does not support Float32 depth format")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
+            return false
         }
         
         let selectedFormat = depth32formats.max(by: { first, second in
@@ -183,7 +304,7 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
         
         if let selectedFormatDescription = selectedFormat?.formatDescription {
             let depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
-            depthResolution = CGSize(width: CGFloat(depthDimensions.width), height: CGFloat(depthDimensions.height))
+            processorSettings.depthResolution = CGSize(width: CGFloat(depthDimensions.width), height: CGFloat(depthDimensions.height))
         } else {
             print("Failed to obtain depth data resolution")
         }
@@ -194,67 +315,11 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
             videoDevice.unlockForConfiguration()
         } catch {
             print("Could not lock device for configuration: \(error)")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        /*
-         if self.session.canAddOutput(metadataOutput) {
-         self.session.addOutput(metadataOutput)
-         if metadataOutput.availableMetadataObjectTypes.contains(.face) {
-         metadataOutput.metadataObjectTypes = [.face]
-         }
-         } else {
-         print("Could not add face detection output to the session")
-         cameraViewController.setupResult = .configurationFailed
-         session.commitConfiguration()
-         return
-         }
-         */
-        // Add an audio input device.
-        do {
-            let audioDevice = AVCaptureDevice.default(for: .audio)
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice!)
-            
-            if session.canAddInput(audioDeviceInput) {
-                session.addInput(audioDeviceInput)
-            } else {
-                print("Could not add audio device input to the session")
-            }
-        } catch {
-            print("Could not create audio device input: \(error)")
+            return false
         }
         
-        // Set audio data output sample buffer delegate
-        //audioDataOutput.setSampleBufferDelegate(self, queue: audioOutputQueue)
-        
-        // Add an audio data output
-        if session.canAddOutput(audioDataOutput) {
-            session.addOutput(audioDataOutput)
-            if let connection = audioDataOutput.connection(with: .audio) {
-                connection.isEnabled = true
-            } else {
-                print("No AVCaptureConnection for audio data output")
-            }
-        } else {
-            print("Could not add audio data output to the session")
-            cameraViewController.setupResult = .configurationFailed
-            session.commitConfiguration()
-            return
-        }
-        
-        // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
-        // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
-        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [depthDataOutput, audioDataOutput])
-        outputSynchronizer!.setDelegate(dataOutputProcessor, queue: cameraViewController.dataOutputQueue)
-        
-        session.commitConfiguration()
-        
-        dataOutputProcessor?.videoResolution = videoResolution
-        dataOutputProcessor?.depthResolution = depthResolution
+        return true
     }
-    
-    // MARK: - Device Configuration
     
     private func bestDeviceFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, frameRateRange: AVFrameRateRange, resolution: CGSize)? {
         var bestFormat: AVCaptureDevice.Format?
@@ -296,7 +361,4 @@ class CaptureSessionManager: NSObject, ObservableObject { // check if observable
         }
         return nil
     }
-    
-    
-    
 }

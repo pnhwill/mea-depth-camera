@@ -32,12 +32,6 @@ class CameraViewController: UIViewController {
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
     
-    enum SessionSetupResult {
-        case success
-        case notAuthorized
-        case configurationFailed
-    }
-    var setupResult: SessionSetupResult = .success
     private var isSessionRunning = false
     
     // Video frame buffer pool allocation
@@ -51,15 +45,8 @@ class CameraViewController: UIViewController {
     
     private var renderingEnabled = true
     
-    // Data collection
-    private var videoResolution: CGSize = CGSize()
-    private var depthResolution: CGSize = CGSize()
-    
     var faceProcessor: FaceLandmarksProcessor?
     var faceLandmarksFileWriter: FaceLandmarksFileWriter?
-    
-    // TODO: Initialize this using Vision constellation property
-    let numLandmarks = 76
     
     // Vision requests
     var detectionRequests: [VNDetectFaceRectanglesRequest]?
@@ -127,13 +114,13 @@ class CameraViewController: UIViewController {
             sessionQueue.suspend()
             AVCaptureDevice.requestAccess(for: .video) { granted in
                 if !granted {
-                    self.setupResult = .notAuthorized
+                    self.sessionManager.setupResult = .notAuthorized
                 }
                 self.sessionQueue.resume()
             }
         default:
             // The user has previously denied access.
-            setupResult = .notAuthorized
+            sessionManager.setupResult = .notAuthorized
             return
         }
         /*
@@ -150,7 +137,6 @@ class CameraViewController: UIViewController {
             self.sessionManager = CaptureSessionManager(cameraViewController: self)
             self.sessionManager.configureSession()
             self.dataOutputProcessor = self.sessionManager.dataOutputProcessor
-            (self.videoResolution, self.depthResolution) = (self.sessionManager.videoResolution, self.sessionManager.depthResolution)
         }
     }
     
@@ -169,7 +155,7 @@ class CameraViewController: UIViewController {
         UIApplication.shared.isIdleTimerDisabled = true
         
         sessionQueue.async {
-            switch self.setupResult {
+            switch self.sessionManager.setupResult {
             case .success:
                 
                 // Only setup observers and start the session running if setup succeeded
@@ -241,7 +227,7 @@ class CameraViewController: UIViewController {
             self.renderingEnabled = false
         }
         sessionQueue.async {
-            if self.setupResult == .success {
+            if self.sessionManager.setupResult == .success {
                 self.sessionManager.session.stopRunning()
                 self.isSessionRunning = self.sessionManager.session.isRunning
                 self.removeObservers()
@@ -660,7 +646,7 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
                 if let existingView = reusableViews.popLast() {
                     existingView.faceObservation = observation
                 } else {
-                    let newView = FaceObservationOverlayView(faceObservation: observation, videoResolution: self.videoResolution)
+                    let newView = FaceObservationOverlayView(faceObservation: observation, settings: self.sessionManager.processorSettings)
                     rootView.addSubview(newView)
                 }
             }
@@ -742,7 +728,7 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
                 return
             }
             
-            let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData)
+            let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData, settings: sessionManager.processorSettings)
             landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
         }
     }

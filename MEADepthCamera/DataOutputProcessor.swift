@@ -9,9 +9,8 @@ import AVFoundation
 
 class DataOutputProcessor: NSObject {
     
-    var videoResolution: CGSize = CGSize()
-    var depthResolution: CGSize = CGSize()
-    let numLandmarks = 76
+    var processorSettings: ProcessorSettings?
+
     var faceProcessor: FaceLandmarksProcessor?
     
     // Weak reference to camera view controller
@@ -21,13 +20,13 @@ class DataOutputProcessor: NSObject {
     private weak var sessionManager: CaptureSessionManager!
     
     // Preview view
-    private var previewView: PreviewMetalView?
+    private weak var previewView: PreviewMetalView?
     
     // Data outputs
-    private unowned var videoDataOutput: AVCaptureVideoDataOutput!
-    private unowned var depthDataOutput: AVCaptureDepthDataOutput!
+    private unowned var videoDataOutput: AVCaptureVideoDataOutput
+    private unowned var depthDataOutput: AVCaptureDepthDataOutput
     //private unowned var metadataOutput: AVCaptureMetadataOutput
-    private unowned var audioDataOutput: AVCaptureAudioDataOutput!
+    private unowned var audioDataOutput: AVCaptureAudioDataOutput
     
     // Recording
     var recordingState = RecordingState.idle
@@ -82,7 +81,6 @@ class DataOutputProcessor: NSObject {
             self.visionProcessor?.prepareVisionRequest()
         //}
         // Initialize video file writer configuration
-        // Move this to viewWillAppear() probably
         let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
         let audioSettingsForVideo = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
         videoFileSettings.configuration = VideoFileConfiguration(fileType: videoFileSettings.fileType, videoSettings: videoSettingsForVideo, audioSettings: audioSettingsForVideo)
@@ -96,10 +94,14 @@ class DataOutputProcessor: NSObject {
         depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType, videoSettings: videoSettingsForDepthMap)
         
         // Initialize landmarks file writer
-        // Move to viewWillAppear() probably also
-        faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: numLandmarks)
+        guard let processorSettings = processorSettings else {
+            print("No processor settings found, cannot initialize face landmarks processor.")
+            return
+        }
+        
+        faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
         cameraViewController?.faceLandmarksFileWriter = faceLandmarksFileWriter
-        faceProcessor = FaceLandmarksProcessor(videoResolution: videoResolution, depthResolution: depthResolution, numLandmarks: numLandmarks)
+        faceProcessor = FaceLandmarksProcessor(settings: processorSettings)
         cameraViewController?.faceProcessor = faceProcessor
     }
     
@@ -153,7 +155,7 @@ class DataOutputProcessor: NSObject {
     
     func processVideo(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
         
-        let output = videoDataOutput!
+        let output = videoDataOutput
         if recordingState != .idle {
             writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
@@ -201,7 +203,7 @@ class DataOutputProcessor: NSObject {
     
     func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
         
-        let output = audioDataOutput!
+        let output = audioDataOutput
         if recordingState != .idle {
             writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }

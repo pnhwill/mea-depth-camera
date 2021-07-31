@@ -15,8 +15,4 @@ enum WriteState {
     case inactive, active
 }
 
-struct ProcessorSettings {
-    var videoResolution: CGSize = CGSize()
-    var depthResolution: CGSize = CGSize()
-    var numLandmarks: Int = 76
-}
+

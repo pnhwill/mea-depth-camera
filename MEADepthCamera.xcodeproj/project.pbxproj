@@ -25,6 +25,7 @@
 		B57965A4269DED600070C294 /* MEADepthCameraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */; };
 		B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B526A096B10070C294 /* VideoFileWriter.swift */; };
 		B587706026B4ADAC00E26C7D /* Functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B587705F26B4ADAC00E26C7D /* Functions.swift */; };
+		B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B587706126B4AEAC00E26C7D /* CommonTypes.swift */; };
 		B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */; };
 		B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */; };
 		B5886DFD26AA61E100EB344C /* VisionTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DFC26AA61E100EB344C /* VisionTrackerProcessor.swift */; };
@@ -86,6 +87,7 @@
 		B57965A5269DED600070C294 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
 		B587705F26B4ADAC00E26C7D /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		B587706126B4AEAC00E26C7D /* CommonTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTypes.swift; sourceTree = "<group>"; };
 		B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DepthToGrayscale.metal; sourceTree = "<group>"; };
 		B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservationOverlayView.swift; sourceTree = "<group>"; };
 		B5886DFC26AA61E100EB344C /* VisionTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionTrackerProcessor.swift; sourceTree = "<group>"; };
@@ -179,8 +181,8 @@
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
 				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
 				B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */,
-				B50787D726AF74330077ACCB /* Face Landmarks Tracking */,
 				B5886DFB26AA5FB900EB344C /* Views */,
+				B50787D726AF74330077ACCB /* Face Landmarks Tracking */,
 				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
 				B5ABE85926A9CC9B003D2AFD /* AV File Writers */,
 				B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */,
@@ -217,6 +219,7 @@
 		B587705E26B4AD8900E26C7D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				B587706126B4AEAC00E26C7D /* CommonTypes.swift */,
 				B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */,
 				B5886E0026AA7F8500EB344C /* Extensions.swift */,
 				B587705F26B4ADAC00E26C7D /* Functions.swift */,
@@ -429,6 +432,7 @@
 				B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */,
 				B53CD4B326B38EF3003BBFD9 /* DataOutputProcessor.swift in Sources */,
 				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
+				B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */,
 				B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */,
 				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,
 				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,

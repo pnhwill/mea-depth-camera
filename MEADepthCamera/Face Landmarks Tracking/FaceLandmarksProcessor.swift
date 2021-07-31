@@ -10,29 +10,27 @@ import Vision
 
 class FaceLandmarksProcessor {
     
-    private var numLandmarks: Int
-    private var videoResolution: CGSize
-    private var depthResolution: CGSize
+    private var processorSettings: ProcessorSettings?
     
     // Point cloud Metal renderer with compute kernel
     private var pointCloudProcessor: PointCloudProcessor
     
-    init(videoResolution: CGSize, depthResolution: CGSize, numLandmarks: Int) {
-        self.videoResolution = videoResolution
-        self.depthResolution = depthResolution
-        self.numLandmarks = numLandmarks
-        self.pointCloudProcessor = PointCloudProcessor(numLandmarks: numLandmarks)
+    init(settings: ProcessorSettings) {
+        self.processorSettings = settings
+        self.pointCloudProcessor = PointCloudProcessor(numLandmarks: settings.numLandmarks)
     }
     
     //var lookupTable: [Float]?
     
     // MARK: - Methods to get depth data for landmarks
     
-    func processFace(_ faceObservation: VNFaceObservation?, with depthData: AVDepthData?) -> (CGRect, [vector_float3]) {
+    func processFace(_ faceObservation: VNFaceObservation?, with depthData: AVDepthData?, settings: ProcessorSettings) -> (CGRect, [vector_float3]) {
         // This method combines a face observation and depth data to produce a bounding box and face landmarks in 3D space.
         // If no depth is provided, it returns the 2D landmarks in image coordinates.
         // If no landmarks are provided, it returns just the bounding box.
         // If no face observation is provided, it returns all zeros.
+        
+        let (numLandmarks, videoResolution, depthResolution) = settings.getProperties()
         
         // In case the face is lost in the middle of collecting data, this prevents empty or nil-valued cells in the file so it can still be parsed later
         var boundingBox = CGRect.zero

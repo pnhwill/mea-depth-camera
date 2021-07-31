@@ -19,7 +19,7 @@ import Vision
 class FaceObservationOverlayView: UIView {
     
     // Data collection
-    private var videoResolution: CGSize = CGSize()
+    private var processorSettings: ProcessorSettings?
     
     // Layer UI for drawing Vision results
     var rootLayer: CAMetalLayer?
@@ -33,11 +33,11 @@ class FaceObservationOverlayView: UIView {
         }
     }
     
-    init(faceObservation: VNFaceObservation, videoResolution: CGSize) {
+    init(faceObservation: VNFaceObservation, settings: ProcessorSettings) {
         super.init(frame: .zero)
         self.backgroundColor = .clear
         self.faceObservation = faceObservation
-        self.videoResolution = videoResolution
+        self.processorSettings = settings
     }
     
     private override init(frame: CGRect) {
@@ -90,7 +90,10 @@ class FaceObservationOverlayView: UIView {
     // MARK: Drawing Vision Observations
     
     fileprivate func setupVisionDrawingLayers() {
-        let captureDeviceResolution = self.videoResolution
+        guard let captureDeviceResolution = processorSettings?.videoResolution else {
+            print("No video resolution found")
+            return
+        }
         
         let captureDeviceBounds = CGRect(x: 0,
                                          y: 0,
@@ -153,10 +156,14 @@ class FaceObservationOverlayView: UIView {
         guard let overlayLayer = self.detectionOverlayLayer,
               let rootLayer = self.rootLayer
         else {
+            print("No root and/or overlay layer found")
             return
         }
         
-        let captureDeviceResolution = self.videoResolution
+        guard let captureDeviceResolution = processorSettings?.videoResolution else {
+            print("No video resolution found")
+            return
+        }
         
         CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
         
@@ -218,7 +225,10 @@ class FaceObservationOverlayView: UIView {
     }
     
     fileprivate func addIndicators(to faceRectanglePath: CGMutablePath, faceLandmarksPath: CGMutablePath, for faceObservation: VNFaceObservation) {
-        let displaySize = self.videoResolution
+        guard let displaySize = processorSettings?.videoResolution else {
+            print("No video resolution found")
+            return
+        }
         
         let faceBounds = VNImageRectForNormalizedRect(faceObservation.boundingBox, Int(displaySize.width), Int(displaySize.height))
         faceRectanglePath.addRect(faceBounds)
