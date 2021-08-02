@@ -27,7 +27,7 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var indicatorImage: UIImageView!
     
     // Capture data output delegate
-    private var dataOutputProcessor: DataOutputProcessor!
+    private var dataOutputProcessor: DataOutputProcessor?
     
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
@@ -43,7 +43,7 @@ class CameraViewController: UIViewController {
     // Depth processing (needs removing after moving record function)
     var depthData: AVDepthData?
     
-    private var renderingEnabled = true
+    var renderingEnabled = true
     
     var faceProcessor: FaceLandmarksProcessor?
     var faceLandmarksFileWriter: FaceLandmarksFileWriter?
@@ -175,7 +175,7 @@ class CameraViewController: UIViewController {
                     }
                 }
                 
-                self.dataOutputProcessor.configureProcessors()
+                self.dataOutputProcessor?.configureProcessors()
                 
                 self.addObservers()
                 
@@ -222,7 +222,7 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        dataOutputProcessor.visionProcessor?.cancelTracking()
+        dataOutputProcessor?.visionProcessor?.cancelTracking()
         self.depthOutputQueue.async {
             self.renderingEnabled = false
         }
@@ -246,7 +246,7 @@ class CameraViewController: UIViewController {
         // Free up resources.
         dataOutputQueue.async {
             self.renderingEnabled = false
-            self.dataOutputProcessor.visionProcessor?.reset()
+            self.dataOutputProcessor?.visionProcessor?.reset()
             //self.dataOutputProcessor.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
             self.previewView.flushTextureCache()
@@ -545,46 +545,60 @@ class CameraViewController: UIViewController {
         // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
-        
-        switch dataOutputProcessor.recordingState {
-        case .idle:
-            // Only let recording start if the face is aligned
-            guard isAligned else {
-                recordButton.isEnabled = true
-                print("Face is not aligned")
+        dataOutputQueue.async {
+            defer {
+                DispatchQueue.main.async {
+                    // Enable the Record button to let the user stop or start another recording
+                    self.recordButton.isEnabled = true
+                    if let dataProcessor = self.dataOutputProcessor {
+                        self.updateRecordButtonWithRecordingState(dataProcessor.recordingState)
+                    }
+                }
+            }
+            
+            switch self.dataOutputProcessor?.recordingState {
+            case .idle:
+                // Only let recording start if the face is aligned
+                guard self.isAligned else {
+                    print("Face is not aligned")
+                    return
+                }
+                // Start background task so that recording can always finish in the background
+                if UIDevice.current.isMultitaskingSupported {
+                    self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+                }
+                self.dataOutputProcessor?.startRecording()
+                
+            case .recording:
+                self.dataOutputProcessor?.stopRecording()
+                if let currentBackgroundRecordingID = self.backgroundRecordingID {
+                    self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
+                    if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
+                        UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
+                    }
+                }
+            default:
                 return
             }
-            // Ideally this should be done on a background thread I'm not yet sure how to handle the error in an async context
-            if UIDevice.current.isMultitaskingSupported {
-                self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
-            }
-            dataOutputProcessor?.startRecording()
-            // Enable the Record button to let the user stop recording.
-            DispatchQueue.main.async {
-                if !self.recordButton.isEnabled {
-                    self.recordButton.isEnabled = true
-                    self.recordButton.setBackgroundImage(UIImage(systemName: "stop.circle"), for: [])
-                }
-            }
-        case .recording:
-            dataOutputProcessor?.stopRecording()
-            faceLandmarksFileWriter?.reset()
-            if let currentBackgroundRecordingID = self.backgroundRecordingID {
-                self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
-                if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
-                    UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
-                }
-            }
-            // Enable the Record button to let the user start another recording.
-            DispatchQueue.main.async {
-                if !self.recordButton.isEnabled {
-                    self.recordButton.isEnabled = true
-                    self.recordButton.setBackgroundImage(UIImage(systemName: "record.circle.fill"), for: [])
-                }
-            }
-        default:
-            return
         }
+    }
+    
+    private func updateRecordButtonWithRecordingState(_ recordingState: RecordingState) {
+        var isRecording: Bool {
+            switch recordingState {
+            case .idle:
+                return false
+            default:
+                return true
+            }
+        }
+        //let color = isRecording ? UIColor.red : UIColor.yellow
+        //let title = isRecording ? "Stop" : "Record"
+        //recordButton.tintColor = color
+        //recordButton.setTitleColor(color, for: .normal)
+        //recordButton.setTitle(title, for: .normal)
+        let image = isRecording ? UIImage(systemName: "stop.circle") : UIImage(systemName: "record.circle.fill")
+        recordButton.setBackgroundImage(image, for: [])
     }
     
     // MARK: - Vision Preview Setup
@@ -635,8 +649,8 @@ class CameraViewController: UIViewController {
 extension CameraViewController: VisionTrackerProcessorDelegate {
     
     func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        guard let rootView = previewView else {
-            print("Preview view not found")
+        guard let rootView = previewView, renderingEnabled else {
+            print("Preview view not found/rendering disabled")
             return
         }
         DispatchQueue.main.async {
@@ -650,14 +664,13 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
                     rootView.addSubview(newView)
                 }
             }
-            // Remove previously existing views that were not reused.
-            for view in reusableViews {
-                view.removeFromSuperview()
-            }
         }
     }
     
     func displayMetrics(confidence: VNConfidence, captureQuality: Float) {
+        guard renderingEnabled else {
+            return
+        }
         let confidenceText = String(format: "%.3f", confidence)
         let qualityText = String(format: "%.2f", captureQuality)
         // Update UI labels on the main queue
@@ -721,7 +734,7 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
     func recordLandmarks(of faceObservation: VNFaceObservation) {
         // Write face observation results to file if collecting data.
         // Perform data collection in background queue so that it does not hold up the UI.
-        if self.dataOutputProcessor.recordingState == .recording {
+        if self.dataOutputProcessor?.recordingState == .recording {
             guard let landmarksProcessor = self.faceProcessor,
                   let landmarksFileWriter = self.faceLandmarksFileWriter else {
                 print("No face landmarks processor and/or file writer found, failed to write to file.")
@@ -739,7 +752,11 @@ extension CameraViewController: VisionTrackerProcessorDelegate {
             // Hide the labels
             self.qualityLabel.isHidden = true
             self.confidenceLabel.isHidden = true
-            
+
+            // Remove previously existing views that were not reused.
+            for view in self.reusableFaceObservationOverlayViews {
+                view.removeFromSuperview()
+            }
             // Update tracking state
             //self.trackingState = .stopped
         }

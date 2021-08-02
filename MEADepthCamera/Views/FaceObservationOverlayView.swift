@@ -22,7 +22,7 @@ class FaceObservationOverlayView: UIView {
     private var processorSettings: ProcessorSettings?
     
     // Layer UI for drawing Vision results
-    var rootLayer: CAMetalLayer?
+    var rootLayer: CALayer?
     var detectionOverlayLayer: CALayer?
     var detectedFaceRectangleShapeLayer: CAShapeLayer?
     var detectedFaceLandmarksShapeLayer: CAShapeLayer?
@@ -38,6 +38,8 @@ class FaceObservationOverlayView: UIView {
         self.backgroundColor = .clear
         self.faceObservation = faceObservation
         self.processorSettings = settings
+        self.rootLayer = layer
+        setupVisionDrawingLayers()
     }
     
     private override init(frame: CGRect) {
@@ -48,43 +50,19 @@ class FaceObservationOverlayView: UIView {
         super.init(coder: coder)
     }
     
-    fileprivate func designateRootLayer() {
-        guard let superView = superview else {
-            print("no superview found")
-            return
-        }
-        
-        if let previewRootLayer = superView.layer as? CAMetalLayer {
-            self.rootLayer = previewRootLayer
-            previewRootLayer.masksToBounds = true
-        } else {
-            print("root layer setup failed")
-        }
-    }
-    
     func updateFrame() {
-        guard let superView = superview, faceObservation != nil else {
+        guard let superView = superview, let faceObservation = self.faceObservation  else {
             frame = .zero
             return
         }
-        
-        // Transform from normalized coordinates to coordinates of super view.
-        
+        // Set frame to bounds of super view
         frame = superView.bounds
-        
-        setNeedsDisplay()
+        // Draw the face observation with Core Animation
+        drawFaceObservation(faceObservation)
     }
     
     override func didMoveToSuperview() {
-        designateRootLayer()
-        setupVisionDrawingLayers()
         updateFrame()
-    }
-    
-    override func draw(_ rect: CGRect) {
-        if let faceObservation = self.faceObservation {
-            drawFaceObservation(faceObservation)
-        }
     }
     
     // MARK: Drawing Vision Observations
@@ -167,11 +145,13 @@ class FaceObservationOverlayView: UIView {
         
         CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
         
-        // using AVMakeRect() would be easier here
-        let videoAspectRatio = captureDeviceResolution.width / captureDeviceResolution.height
-        let videoPreviewWidth = rootLayer.bounds.width
-        let videoPreviewHeight = videoPreviewWidth * videoAspectRatio
-        let videoPreviewRect = VNImageRectForNormalizedRect(CGRect(x: 0, y: 0, width: 1, height: 1), Int(videoPreviewWidth), Int(videoPreviewHeight))
+        // Check if video resolution is in portrait and rotate 90 degrees if not
+        let isPortrait = captureDeviceResolution.width <= captureDeviceResolution.height
+        let portraitResolution = isPortrait ? captureDeviceResolution : captureDeviceResolution.applying(CGAffineTransform(rotationAngle: CGFloat(90).radiansForDegrees()))
+        // Scale the video resolution to fit within root layer bounds while maintaining the aspect ratio
+        let scaledAspectRect = AVMakeRect(aspectRatio: portraitResolution, insideRect: rootLayer.bounds)
+        // Get standardized rect with origin at 0
+        let videoPreviewRect = VNImageRectForNormalizedRect(CGRect(x: 0, y: 0, width: 1, height: 1), Int(scaledAspectRect.width), Int(scaledAspectRect.height))
         
         var rotation: CGFloat
         var scaleX: CGFloat

@@ -45,11 +45,14 @@ struct VideoFileConfiguration: FileConfiguration {
         AVEncoderBitRateKey: 160_000
     ]*/
     
-    init(fileType: AVFileType, videoSettings: [String: Any]?, audioSettings: [AnyHashable: Any]?) {
+    var videoTransform: CGAffineTransform
+    
+    init(fileType: AVFileType, videoSettings: [String: Any]?, audioSettings: [AnyHashable: Any]?, transform: CGAffineTransform) {
         self.outputFileType = fileType
         self.videoSettings = videoSettings
         //self.audioSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
         self.audioSettings = audioSettings as? [String: Any]
+        self.videoTransform = transform
     }
 }
 
@@ -101,12 +104,15 @@ struct DepthMapFileConfiguration: FileConfiguration {
     
     var pixelBufferAttributes: [String: Any]?
     
-    init(fileType: AVFileType, videoSettings: [String: Any]?) {
+    var videoTransform: CGAffineTransform
+    
+    init(fileType: AVFileType, videoSettings: [String: Any]?, transform: CGAffineTransform) {
         self.outputFileType = fileType
         self.videoSettings = videoSettings
         self.videoSettings?["AVVideoHeightKey"] = 480
         self.videoSettings?["AVVideoWidthKey"] = 640
         //print(self.videoSettings)
         self.pixelBufferAttributes = nil
+        self.videoTransform = transform
     }
 }

@@ -6,24 +6,26 @@
 //
 
 import AVFoundation
+import Combine
 
-// This implements a protocol and helper objects for all AV file writers
-
-enum FileWriteResult {
-    case success
-    case failed(Error?)
-}
+// This implements a protocol for all AV file writers
 
 protocol FileWriter: AnyObject {
     
+    associatedtype OutputSettings: FileConfiguration
+    associatedtype S: Subject
+    
     var assetWriter: AVAssetWriter { get }
     
-    associatedtype OutputSettings: FileConfiguration
+    var writeState: WriteState { get set }
     
-    init(outputURL: URL, configuration: OutputSettings) throws
+    var done: AnyCancellable? { get set }
+    var subject: S { get }
+    
+    init(outputURL: URL, configuration: OutputSettings, subject: S) throws
     
     func start(at startTime: CMTime)
     
-    func finish(at endTime: CMTime, _ completion: @escaping (FileWriteResult) -> Void)
+    func finish(completion: Subscribers.Completion<Error>)
     
 }
