@@ -16,8 +16,7 @@ import UIKit
 import Vision
 
 protocol VisionTrackerProcessorDelegate: AnyObject {
-    func displayFaceObservations(_ faceObservations: [VNFaceObservation])
-    func displayMetrics(confidence: VNConfidence, captureQuality: Float)
+    func displayFrame(_ faceObservations: VNFaceObservation, confidence: VNConfidence?, captureQuality: Float?)
     func checkAlignment(of faceObservation: VNFaceObservation)
     func recordLandmarks(of faceObservation: VNFaceObservation)
     func didFinishTracking()
@@ -101,7 +100,6 @@ class VisionTrackerProcessor {
     func performVisionRequests(on pixelBuffer: CVPixelBuffer, cameraIntrinsicData: AVCameraCalibrationData?) {
         // guard isPrepared else { return }
         
-        //autoreleasepool{
         guard cancelRequested == false else {
             delegate?.didFinishTracking()
             return
@@ -194,15 +192,14 @@ class VisionTrackerProcessor {
                 // Could make this so each face observation goes into a separate file (not necessary but safer)
                 if let face = results.first {
                     // Get face landmarks confidence metric
-                    self.faceLandmarksConfidence = face.landmarks?.confidence
+                    let confidence = face.landmarks?.confidence
+                    // Perform all UI updates (drawing) on the main queue, not the background queue on which this handler is being called.
+                    DispatchQueue.main.async {
+                        self.delegate?.displayFrame(face, confidence: confidence, captureQuality: self.faceCaptureQuality)
+                    }
                     // Send face observation to delegate for data collection
                     self.delegate?.recordLandmarks(of: face)
                 }
-
-                // Perform all UI updates (drawing) on the main queue, not the background queue on which this handler is being called.
-                //DispatchQueue.main.async {
-                    self.delegate?.displayFaceObservations(results)
-                //}
             })
             
             guard let trackingResults = trackingRequest.results else {
@@ -257,12 +254,7 @@ class VisionTrackerProcessor {
                 return
             }
             self.faceCaptureQuality = faceCaptureQuality
-            
-            if let confidence = self.faceLandmarksConfidence, let captureQuality = self.faceCaptureQuality {
-                delegate?.displayMetrics(confidence: confidence, captureQuality: captureQuality)
-            }
         }
-        //}
     }
     
     func prepareVisionRequest() {

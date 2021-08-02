@@ -40,29 +40,12 @@ class CameraViewController: UIViewController {
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     
-    // Depth processing (needs removing after moving record function)
-    var depthData: AVDepthData?
-    
     var renderingEnabled = true
-    
-    var faceProcessor: FaceLandmarksProcessor?
-    var faceLandmarksFileWriter: FaceLandmarksFileWriter?
     
     // Vision requests
     var detectionRequests: [VNDetectFaceRectanglesRequest]?
     var trackingRequests: [VNTrackObjectRequest]?
     lazy var sequenceRequestHandler = VNSequenceRequestHandler()
-    /*
-    enum TrackingState {
-        case tracking
-        case stopped
-    }
-    private var trackingState: TrackingState = .stopped {
-        didSet {
-            self.handleTrackingStateChange()
-        }
-    }
-    */
     
     // Layer UI for drawing Vision results
     var previewLayer: CALayer?
@@ -75,8 +58,18 @@ class CameraViewController: UIViewController {
         }
     }
     
+    enum TrackingState {
+        case tracking
+        case stopped
+    }
+    var trackingState: TrackingState = .stopped {
+        didSet {
+            self.handleTrackingStateChange()
+        }
+    }
+    
     // Face guidelines alignment
-    private var isAligned: Bool = false
+    var isAligned: Bool = false
     
     // Dispatch queues
     var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
@@ -614,22 +607,69 @@ class CameraViewController: UIViewController {
         videoPreviewLayer.masksToBounds = true
     }
     
-    /*
-    private func handleTrackingStateChange() {
-        
+    // MARK: - Vision Face Overlay Methods
+    
+    func displayMetrics(confidence: VNConfidence?, captureQuality: Float?) {
+        guard renderingEnabled else {
+            return
+        }
+        // Update UI labels on the main queue
+        DispatchQueue.main.async {
+            if let confidence = confidence {
+                self.confidenceLabel.isHidden = false
+                let confidenceText = String(format: "%.3f", confidence)
+                self.confidenceLabel.text = "Face Landmarks Confidence: " + confidenceText
+            }
+            
+            if let captureQuality = captureQuality {
+                self.qualityLabel.isHidden = false
+                let qualityText = String(format: "%.2f", captureQuality)
+                self.qualityLabel.text = "Face Capture Quality: " + qualityText
+            }
+        }
     }
-    */
+    
+    func displayFaceObservations(_ faceObservation: VNFaceObservation) {
+        guard let rootView = previewView, renderingEnabled else {
+            print("Preview view not found/rendering disabled")
+            return
+        }
+        DispatchQueue.main.async {
+            var reusableViews = self.reusableFaceObservationOverlayViews
+            // Reuse existing observation view if there is one.
+            if let existingView = reusableViews.popLast() {
+                existingView.faceObservation = faceObservation
+            } else {
+                let newView = FaceObservationOverlayView(faceObservation: faceObservation, settings: self.sessionManager.processorSettings)
+                rootView.addSubview(newView)
+            }
+        }
+    }
+    
+    private func handleTrackingStateChange() {
+        switch trackingState {
+        case .tracking:
+            return
+        case .stopped:
+            DispatchQueue.main.async {
+                // Hide the labels
+                self.qualityLabel.isHidden = true
+                self.confidenceLabel.isHidden = true
+
+                // Remove previously existing views that were not reused.
+                for view in self.reusableFaceObservationOverlayViews {
+                    view.removeFromSuperview()
+                }
+            }
+        }
+    }
+    
     
     // MARK: - Face Guidelines and Indicator
     
-    private func updateIndicator() {
-        if isAligned {
-            indicatorImage.image = UIImage(systemName: "checkmark.square.fill")
-            indicatorImage.tintColor = UIColor.systemGreen
-        } else {
-            indicatorImage.image = UIImage(systemName: "xmark.square")
-            indicatorImage.tintColor = UIColor.systemRed
-        }
+    func updateIndicator() {
+        indicatorImage.image = isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
+        indicatorImage.tintColor = isAligned ? UIColor.systemGreen : UIColor.systemRed
     }
     
     // MARK: - Helper Methods for Error Presentation
@@ -641,125 +681,6 @@ class CameraViewController: UIViewController {
     
     fileprivate func presentError(_ error: NSError) {
         self.presentErrorAlert(withTitle: "Failed with error \(error.code)", message: error.localizedDescription)
-    }
-}
-
-// MARK: - VisionTrackerProcessorDelegate Methods
-
-extension CameraViewController: VisionTrackerProcessorDelegate {
-    
-    func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        guard let rootView = previewView, renderingEnabled else {
-            print("Preview view not found/rendering disabled")
-            return
-        }
-        DispatchQueue.main.async {
-            var reusableViews = self.reusableFaceObservationOverlayViews
-            for observation in faceObservations {
-                // Reuse existing observation view if there is one.
-                if let existingView = reusableViews.popLast() {
-                    existingView.faceObservation = observation
-                } else {
-                    let newView = FaceObservationOverlayView(faceObservation: observation, settings: self.sessionManager.processorSettings)
-                    rootView.addSubview(newView)
-                }
-            }
-        }
-    }
-    
-    func displayMetrics(confidence: VNConfidence, captureQuality: Float) {
-        guard renderingEnabled else {
-            return
-        }
-        let confidenceText = String(format: "%.3f", confidence)
-        let qualityText = String(format: "%.2f", captureQuality)
-        // Update UI labels on the main queue
-        DispatchQueue.main.async {
-            self.confidenceLabel.isHidden = false
-            self.confidenceLabel.text = "Face Landmarks Confidence: " + confidenceText
-            
-            self.qualityLabel.isHidden = false
-            self.qualityLabel.text = "Face Capture Quality: " + qualityText
-            
-        }
-    }
-    
-    func checkAlignment(of faceObservation: VNFaceObservation) {
-        let faceBounds = faceObservation.boundingBox
-        //print("x: \(faceBounds.midX)")
-        //print("y: \(faceBounds.midY)")
-        //print("size: \(faceBounds.size)")
-        
-        // Check if face is centered on the screen
-        let centerPoint = CGPoint(x: 0.5, y: 0.43)
-        let centerErrorMargin: CGFloat = 0.1
-        let xError = (faceBounds.midX - centerPoint.x).magnitude
-        let yError = (faceBounds.midY - centerPoint.y).magnitude
-        let centeredCondition = xError <= centerErrorMargin && yError <= centerErrorMargin
-        //print("x error: \(xError) y error: \(yError)")
-        
-        // Check if face is correct size on screen
-        let size = CGSize(width: 0.6, height: 0.48)
-        let sizeErrorMargin: CGFloat = 0.15
-        let widthError = (faceBounds.width - size.width).magnitude
-        let heightError = (faceBounds.height - size.height).magnitude
-        let sizeCondition = widthError <= sizeErrorMargin && heightError <= sizeErrorMargin
-        //print("width error: \(widthError) height error: \(heightError)")
-        
-        // Get face rotation
-        /*if faceObservation.yaw != nil, faceObservation.roll != nil {
-            print("rotation found")
-        } else {
-            print("rotation not found")
-        }*/
-        // If the roll and/or yaw is not found, it will default to 0.0 so that the rotation condition is true (i.e. it doesn't check the rotation)
-        let faceRoll = CGFloat(truncating: faceObservation.roll ?? 0.0)
-        let faceYaw = CGFloat(truncating: faceObservation.yaw ?? 0.0)
-        //print("roll: \(faceRoll) yaw: \(faceYaw)")
-        
-        // Check if face is facing screen
-        let rotation: CGFloat = 10
-        let rotationErrorMargin = rotation.radiansForDegrees()
-        let rotationCondition = faceRoll.magnitude <= rotationErrorMargin && faceYaw.magnitude <= rotationErrorMargin
-        
-        let isAligned: Bool = centeredCondition && sizeCondition && rotationCondition
-        
-        self.isAligned = isAligned
-        
-        DispatchQueue.main.async {
-            self.updateIndicator()
-        }
-    }
-    
-    func recordLandmarks(of faceObservation: VNFaceObservation) {
-        // Write face observation results to file if collecting data.
-        // Perform data collection in background queue so that it does not hold up the UI.
-        if self.dataOutputProcessor?.recordingState == .recording {
-            guard let landmarksProcessor = self.faceProcessor,
-                  let landmarksFileWriter = self.faceLandmarksFileWriter else {
-                print("No face landmarks processor and/or file writer found, failed to write to file.")
-                return
-            }
-            
-            let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData, settings: sessionManager.processorSettings)
-            landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
-        }
-    }
-    
-    func didFinishTracking() {
-        // hide landmarks drawing layers?
-        DispatchQueue.main.async {
-            // Hide the labels
-            self.qualityLabel.isHidden = true
-            self.confidenceLabel.isHidden = true
-
-            // Remove previously existing views that were not reused.
-            for view in self.reusableFaceObservationOverlayViews {
-                view.removeFromSuperview()
-            }
-            // Update tracking state
-            //self.trackingState = .stopped
-        }
     }
 }
 

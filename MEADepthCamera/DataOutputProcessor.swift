@@ -7,12 +7,11 @@
 
 import AVFoundation
 import Combine
+import Vision
 
 class DataOutputProcessor: NSObject {
     
     var processorSettings: ProcessorSettings?
-
-    var faceProcessor: FaceLandmarksProcessor?
     
     // Weak reference to camera view controller
     private weak var cameraViewController: CameraViewController?
@@ -37,6 +36,10 @@ class DataOutputProcessor: NSObject {
     
     // Vision requests
     private(set) var visionProcessor: VisionTrackerProcessor?
+    var faceProcessor: FaceLandmarksProcessor?
+
+    // Depth processing (needs removing after moving record function)
+    var depthData: AVDepthData?
     
     // AV file writing
     
@@ -83,7 +86,7 @@ class DataOutputProcessor: NSObject {
     // MARK: - Data Pipeline Setup
     func configureProcessors() {
         self.visionProcessor = VisionTrackerProcessor()
-        self.visionProcessor?.delegate = cameraViewController
+        self.visionProcessor?.delegate = self
         //self.visionTrackingQueue.async {
             self.visionProcessor?.prepareVisionRequest()
         //}
@@ -111,9 +114,9 @@ class DataOutputProcessor: NSObject {
         }
         
         faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
-        cameraViewController?.faceLandmarksFileWriter = faceLandmarksFileWriter
+        //cameraViewController?.faceLandmarksFileWriter = faceLandmarksFileWriter
         faceProcessor = FaceLandmarksProcessor(settings: processorSettings)
-        cameraViewController?.faceProcessor = faceProcessor
+        //cameraViewController?.faceProcessor = faceProcessor
     }
     
     // MARK: - Data Processing Methods
@@ -133,7 +136,7 @@ class DataOutputProcessor: NSObject {
             }
             
             DispatchQueue.main.async {
-                self.cameraViewController?.depthData = convertedDepth
+                self.depthData = convertedDepth
             }
             
             //convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
@@ -474,7 +477,87 @@ extension DataOutputProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
+        //let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
         //print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
+    }
+}
+
+// MARK: - VisionTrackerProcessorDelegate Methods
+
+extension DataOutputProcessor: VisionTrackerProcessorDelegate {
+    
+    func displayFrame(_ faceObservation: VNFaceObservation, confidence: VNConfidence?, captureQuality: Float?) {
+        if cameraViewController?.trackingState != .tracking {
+            cameraViewController?.trackingState = .tracking
+        }
+        cameraViewController?.displayFaceObservations(faceObservation)
+        cameraViewController?.displayMetrics(confidence: confidence, captureQuality: captureQuality)
+    }
+    
+    func checkAlignment(of faceObservation: VNFaceObservation) {
+        let faceBounds = faceObservation.boundingBox
+        //print("x: \(faceBounds.midX)")
+        //print("y: \(faceBounds.midY)")
+        //print("size: \(faceBounds.size)")
+        
+        // Check if face is centered on the screen
+        let centerPoint = CGPoint(x: 0.5, y: 0.43)
+        let centerErrorMargin: CGFloat = 0.1
+        let xError = (faceBounds.midX - centerPoint.x).magnitude
+        let yError = (faceBounds.midY - centerPoint.y).magnitude
+        let centeredCondition = xError <= centerErrorMargin && yError <= centerErrorMargin
+        //print("x error: \(xError) y error: \(yError)")
+        
+        // Check if face is correct size on screen
+        let size = CGSize(width: 0.6, height: 0.48)
+        let sizeErrorMargin: CGFloat = 0.15
+        let widthError = (faceBounds.width - size.width).magnitude
+        let heightError = (faceBounds.height - size.height).magnitude
+        let sizeCondition = widthError <= sizeErrorMargin && heightError <= sizeErrorMargin
+        //print("width error: \(widthError) height error: \(heightError)")
+        
+        // Get face rotation
+        /*if faceObservation.yaw != nil, faceObservation.roll != nil {
+            print("rotation found")
+        } else {
+            print("rotation not found")
+        }*/
+        // If the roll and/or yaw is not found, it will default to 0.0 so that the rotation condition is true (i.e. it doesn't check the rotation)
+        let faceRoll = CGFloat(truncating: faceObservation.roll ?? 0.0)
+        let faceYaw = CGFloat(truncating: faceObservation.yaw ?? 0.0)
+        //print("roll: \(faceRoll) yaw: \(faceYaw)")
+        
+        // Check if face is facing screen
+        let rotation: CGFloat = 10
+        let rotationErrorMargin = radiansForDegrees(rotation)
+        let rotationCondition = faceRoll.magnitude <= rotationErrorMargin && faceYaw.magnitude <= rotationErrorMargin
+        
+        let isAligned: Bool = centeredCondition && sizeCondition && rotationCondition
+        
+        cameraViewController?.isAligned = isAligned
+        
+        DispatchQueue.main.async {
+            self.cameraViewController?.updateIndicator()
+        }
+    }
+    
+    func recordLandmarks(of faceObservation: VNFaceObservation) {
+        // Write face observation results to file if collecting data.
+        // Perform data collection in background queue so that it does not hold up the UI.
+        if self.recordingState == .recording {
+            guard let landmarksProcessor = self.faceProcessor,
+                  let landmarksFileWriter = self.faceLandmarksFileWriter else {
+                print("No face landmarks processor and/or file writer found, failed to write to file.")
+                return
+            }
+            
+            let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData, settings: sessionManager.processorSettings)
+            landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
+        }
+    }
+    
+    func didFinishTracking() {
+        // Update tracking state
+        cameraViewController?.trackingState = .stopped
     }
 }

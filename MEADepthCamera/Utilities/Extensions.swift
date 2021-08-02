@@ -8,12 +8,6 @@
 import AVFoundation
 import UIKit
 
-extension CGFloat {
-    func radiansForDegrees(/*_ degrees: CGFloat*/) -> CGFloat {
-        return CGFloat(Double(self) * Double.pi / 180.0)
-    }
-}
-
 extension AVCaptureVideoOrientation {
     init?(interfaceOrientation: UIInterfaceOrientation) {
         switch interfaceOrientation {
