@@ -35,7 +35,7 @@ class DataOutputProcessor: NSObject {
     private let videoDepthConverter = DepthToGrayscaleConverter()
     
     // Vision requests
-    private(set) var visionProcessor: VisionTrackerProcessor?
+    private(set) var visionProcessor: VisionFaceTracker?
     var faceProcessor: FaceLandmarksProcessor?
 
     // Depth processing (needs removing after moving record function)
@@ -85,11 +85,8 @@ class DataOutputProcessor: NSObject {
     
     // MARK: - Data Pipeline Setup
     func configureProcessors() {
-        self.visionProcessor = VisionTrackerProcessor()
+        self.visionProcessor = VisionFaceTracker()
         self.visionProcessor?.delegate = self
-        //self.visionTrackingQueue.async {
-            self.visionProcessor?.prepareVisionRequest()
-        //}
         
         // Get source media formats
         guard let videoFormat = sessionManager.videoFormatDescription, let depthFormat = sessionManager.depthDataFormatDescription else {
@@ -186,7 +183,7 @@ class DataOutputProcessor: NSObject {
         
         let output = videoDataOutput
         if recordingState != .idle {
-            writeOutputToFileOld(output, sampleBuffer: sampleBuffer)
+            writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
         
         //autoreleasepool {
@@ -195,12 +192,13 @@ class DataOutputProcessor: NSObject {
             return
         }
         
-        var attachmentMode = kCMAttachmentMode_ShouldPropagate
-        let cameraIntrinsicData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: &attachmentMode)
+        //var attachmentMode = kCMAttachmentMode_ShouldPropagate
+        //let cameraIntrinsicData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: &attachmentMode)
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             print("Failed to obtain a CVPixelBuffer for the current output frame.")
             return
         }
+        
         /*
         if !visionProcessor.isPrepared {
          guard let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) else {
@@ -221,7 +219,7 @@ class DataOutputProcessor: NSObject {
         */
         
         //visionTrackingQueue.async {
-        visionProcessor.performVisionRequests(on: pixelBuffer, cameraIntrinsicData: cameraIntrinsicData as? AVCameraCalibrationData)
+        visionProcessor.performVisionRequests(on: pixelBuffer)
         //}
         //}
         
@@ -235,7 +233,7 @@ class DataOutputProcessor: NSObject {
         
         let output = audioDataOutput
         if recordingState != .idle {
-            writeOutputToFileOld(output, sampleBuffer: sampleBuffer)
+            writeOutputToFile(output, sampleBuffer: sampleBuffer)
         }
         
     }
@@ -403,7 +401,7 @@ class DataOutputProcessor: NSObject {
         }
     }
     
-    private func writeOutputToFileOld(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
+    private func writeOutputToFile(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
         guard let videoWriter = videoFileWriter else {
             print("No video file writer found")
             return
@@ -458,7 +456,7 @@ extension DataOutputProcessor: AVCaptureDataOutputSynchronizerDelegate {
                 print("depth frame dropped for reason: \(syncedDepthData.droppedReason.rawValue)")
             }
         }
-        /*
+        
         if let syncedVideoData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: videoDataOutput) as? AVCaptureSynchronizedSampleBufferData {
             let videoTimestamp = syncedVideoData.timestamp
             //print("video output received at \(CMTimeGetSeconds(videoTimestamp))")
@@ -470,7 +468,7 @@ extension DataOutputProcessor: AVCaptureDataOutputSynchronizerDelegate {
                 print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
             }
         }
-        */
+        
         if let syncedAudioData: AVCaptureSynchronizedSampleBufferData = synchronizedDataCollection.synchronizedData(for: audioDataOutput) as? AVCaptureSynchronizedSampleBufferData {
             let audioTimestamp = syncedAudioData.timestamp
             //print("audio output received at \(CMTimeGetSeconds(audioTimestamp))")
@@ -496,21 +494,21 @@ extension DataOutputProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        //let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
-        //print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
+        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
+        print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
     }
 }
 
-// MARK: - VisionTrackerProcessorDelegate Methods
+// MARK: - VisionFaceTrackerDelegate Methods
 
-extension DataOutputProcessor: VisionTrackerProcessorDelegate {
+extension DataOutputProcessor: VisionFaceTrackerDelegate {
     
-    func displayFrame(_ faceObservation: VNFaceObservation, confidence: VNConfidence?, captureQuality: Float?) {
-        if cameraViewController?.trackingState != .tracking {
-            cameraViewController?.trackingState = .tracking
+    func displayFrame(_ faceObservations: [VNFaceObservation], confidence: VNConfidence?) {
+        if cameraViewController?.liveTrackingState != .tracking {
+            cameraViewController?.liveTrackingState = .tracking
         }
-        cameraViewController?.displayFaceObservations(faceObservation)
-        cameraViewController?.displayMetrics(confidence: confidence, captureQuality: captureQuality)
+        cameraViewController?.displayFaceObservations(faceObservations)
+        cameraViewController?.displayMetrics(confidence: confidence)
     }
     
     func checkAlignment(of faceObservation: VNFaceObservation) {
@@ -554,11 +552,17 @@ extension DataOutputProcessor: VisionTrackerProcessorDelegate {
         let isAligned: Bool = centeredCondition && sizeCondition && rotationCondition
         
         cameraViewController?.isAligned = isAligned
-        
-        DispatchQueue.main.async {
-            self.cameraViewController?.updateIndicator()
-        }
     }
+        
+    func stoppedTracking() {
+        // Update tracking state
+        cameraViewController?.liveTrackingState = .stopped
+    }
+}
+
+// MARK: - VisionTrackerProcessorDelegate Methods
+
+extension DataOutputProcessor: VisionTrackerProcessorDelegate {
     
     func recordLandmarks(of faceObservation: VNFaceObservation) {
         // Write face observation results to file if collecting data.
@@ -576,7 +580,7 @@ extension DataOutputProcessor: VisionTrackerProcessorDelegate {
     }
     
     func didFinishTracking() {
-        // Update tracking state
-        cameraViewController?.trackingState = .stopped
+        
     }
+    
 }

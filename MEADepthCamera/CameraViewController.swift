@@ -21,7 +21,6 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var resumeButton: UIButton!
     @IBOutlet private weak var recordButton: UIButton!
     
-    @IBOutlet private weak var qualityLabel: UILabel!
     @IBOutlet private weak var confidenceLabel: UILabel!
     
     @IBOutlet private weak var indicatorImage: UIImageView!
@@ -39,11 +38,6 @@ class CameraViewController: UIViewController {
     
     var renderingEnabled = true
     
-    // Vision requests
-    var detectionRequests: [VNDetectFaceRectanglesRequest]?
-    var trackingRequests: [VNTrackObjectRequest]?
-    lazy var sequenceRequestHandler = VNSequenceRequestHandler()
-    
     // Layer UI for drawing Vision results
     var previewLayer: CALayer?
     
@@ -55,18 +49,18 @@ class CameraViewController: UIViewController {
         }
     }
     
-    enum TrackingState {
-        case tracking
-        case stopped
-    }
-    var trackingState: TrackingState = .stopped {
+    var liveTrackingState: TrackingState = .stopped {
         didSet {
             self.handleTrackingStateChange()
         }
     }
     
     // Face guidelines alignment
-    var isAligned: Bool = false
+    var isAligned: Bool = false {
+        didSet {
+            self.updateIndicator()
+        }
+    }
     
     // Dispatch queues
     var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
@@ -212,7 +206,7 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        dataOutputProcessor?.visionProcessor?.cancelTracking()
+        //dataOutputProcessor?.visionProcessor?.cancelTracking()
         self.depthOutputQueue.async {
             self.renderingEnabled = false
         }
@@ -236,7 +230,7 @@ class CameraViewController: UIViewController {
         // Free up resources.
         dataOutputQueue.async {
             self.renderingEnabled = false
-            self.dataOutputProcessor?.visionProcessor?.reset()
+            //self.dataOutputProcessor?.visionProcessor?.reset()
             //self.dataOutputProcessor.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
             self.previewView.flushTextureCache()
@@ -606,7 +600,7 @@ class CameraViewController: UIViewController {
     
     // MARK: - Vision Face Overlay Methods
     
-    func displayMetrics(confidence: VNConfidence?, captureQuality: Float?) {
+    func displayMetrics(confidence: VNConfidence?) {
         guard renderingEnabled else {
             return
         }
@@ -617,46 +611,41 @@ class CameraViewController: UIViewController {
                 let confidenceText = String(format: "%.3f", confidence)
                 self.confidenceLabel.text = "Face Landmarks Confidence: " + confidenceText
             }
-            
-            if let captureQuality = captureQuality {
-                self.qualityLabel.isHidden = false
-                let qualityText = String(format: "%.2f", captureQuality)
-                self.qualityLabel.text = "Face Capture Quality: " + qualityText
-            }
         }
     }
     
-    func displayFaceObservations(_ faceObservation: VNFaceObservation) {
+    func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
         guard let rootView = previewView, renderingEnabled else {
             print("Preview view not found/rendering disabled")
             return
         }
+        // Perform all UI updates (drawing) on the main queue, not the background queue from which this is called.
         DispatchQueue.main.async {
             var reusableViews = self.reusableFaceObservationOverlayViews
-            // Reuse existing observation view if there is one.
-            if let existingView = reusableViews.popLast() {
-                existingView.faceObservation = faceObservation
-            } else {
-                let newView = FaceObservationOverlayView(faceObservation: faceObservation, settings: self.sessionManager.processorSettings)
-                rootView.addSubview(newView)
+            for observation in faceObservations {
+                // Reuse existing observation view if there is one.
+                if let existingView = reusableViews.popLast() {
+                    existingView.faceObservation = observation
+                } else {
+                    let newView = FaceObservationOverlayView(faceObservation: observation, settings: self.sessionManager.processorSettings)
+                    rootView.addSubview(newView)
+                }
+            }
+            // Remove previously existing views that were not reused.
+            for view in reusableViews {
+                view.removeFromSuperview()
             }
         }
     }
     
     private func handleTrackingStateChange() {
-        switch trackingState {
+        switch liveTrackingState {
         case .tracking:
             return
         case .stopped:
             DispatchQueue.main.async {
                 // Hide the labels
-                self.qualityLabel.isHidden = true
                 self.confidenceLabel.isHidden = true
-
-                // Remove previously existing views that were not reused.
-                for view in self.reusableFaceObservationOverlayViews {
-                    view.removeFromSuperview()
-                }
             }
         }
     }
@@ -665,8 +654,10 @@ class CameraViewController: UIViewController {
     // MARK: - Face Guidelines and Indicator
     
     func updateIndicator() {
-        indicatorImage.image = isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
-        indicatorImage.tintColor = isAligned ? UIColor.systemGreen : UIColor.systemRed
+        DispatchQueue.main.async {
+            self.indicatorImage.image = self.isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
+            self.indicatorImage.tintColor = self.isAligned ? UIColor.systemGreen : UIColor.systemRed
+        }
     }
     
     // MARK: - Helper Methods for Error Presentation
@@ -678,116 +669,5 @@ class CameraViewController: UIViewController {
     
     fileprivate func presentError(_ error: NSError) {
         self.presentErrorAlert(withTitle: "Failed with error \(error.code)", message: error.localizedDescription)
-    }
-}
-
-// MARK: - PreviewMetalView.Rotation Extension
-
-extension PreviewMetalView.Rotation {
-    
-    init?(with interfaceOrientation: UIInterfaceOrientation, videoOrientation: AVCaptureVideoOrientation, cameraPosition: AVCaptureDevice.Position) {
-        /*
-         Calculate the rotation between the videoOrientation and the interfaceOrientation.
-         The direction of the rotation depends upon the camera position.
-         */
-        switch videoOrientation {
-            
-        case .portrait:
-            switch interfaceOrientation {
-            case .landscapeRight:
-                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
-                
-            case .landscapeLeft:
-                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
-                
-            case .portrait:
-                self = .rotate0Degrees
-                
-            case .portraitUpsideDown:
-                self = .rotate180Degrees
-                
-            default: return nil
-            }
-            
-        case .portraitUpsideDown:
-            switch interfaceOrientation {
-            case .landscapeRight:
-                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
-                
-            case .landscapeLeft:
-                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
-                
-            case .portrait:
-                self = .rotate180Degrees
-                
-            case .portraitUpsideDown:
-                self = .rotate0Degrees
-                
-            default: return nil
-            }
-            
-        case .landscapeRight:
-            switch interfaceOrientation {
-            case .landscapeRight:
-                self = .rotate0Degrees
-                
-            case .landscapeLeft:
-                self = .rotate180Degrees
-                
-            case .portrait:
-                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
-                
-            case .portraitUpsideDown:
-                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
-                
-            default: return nil
-            }
-            
-        case .landscapeLeft:
-            switch interfaceOrientation {
-            case .landscapeLeft:
-                self = .rotate0Degrees
-                
-            case .landscapeRight:
-                self = .rotate180Degrees
-                
-            case .portrait:
-                self = cameraPosition == .front ? .rotate90Degrees : .rotate270Degrees
-                
-            case .portraitUpsideDown:
-                self = cameraPosition == .front ? .rotate270Degrees : .rotate90Degrees
-                
-            default: return nil
-            }
-        @unknown default:
-            fatalError("Unknown orientation. Can't continue.")
-        }
-    }
-}
-
-// MARK: VisionTrackerProcessor Extension
-
-extension VisionTrackerProcessor {
-    // MARK: Helper Methods for Handling Device Orientation & EXIF
-    
-    func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
-        
-        switch deviceOrientation {
-        case .portraitUpsideDown:
-            return .rightMirrored
-            
-        case .landscapeLeft:
-            return .downMirrored
-            
-        case .landscapeRight:
-            return .upMirrored
-            
-        default:
-            return .leftMirrored
-        }
-    }
-    
-    func exifOrientationForCurrentDeviceOrientation() -> CGImagePropertyOrientation {
-        return exifOrientationForDeviceOrientation(UIDevice.current.orientation)
     }
 }

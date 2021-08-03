@@ -50,12 +50,6 @@
                                 </connections>
                             </button>
                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fql-2c-x76">
-                                <rect key="frame" x="40" y="104" width="0.0" height="0.0"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I4t-WQ-fXg">
                                 <rect key="frame" x="40" y="84" width="0.0" height="0.0"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <nil key="textColor"/>
@@ -81,24 +75,21 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="BrA-k0-goQ" secondAttribute="bottom" id="32t-N6-N4P"/>
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="4FS-g0-YcH"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="FGY-Eh-8ox" secondAttribute="trailing" constant="40" id="5v8-ez-cpJ"/>
-                            <constraint firstItem="I4t-WQ-fXg" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="40" id="8x7-Td-Bjx"/>
                             <constraint firstItem="fWx-1M-8GV" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Doz-gE-rzT"/>
                             <constraint firstItem="FGY-Eh-8ox" firstAttribute="leading" secondItem="cK1-YN-reQ" secondAttribute="trailing" constant="70" id="FJL-Je-D07"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="fql-2c-x76" secondAttribute="trailing" constant="40" id="GDa-mz-rpd"/>
                             <constraint firstItem="6nD-kv-GLw" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="M78-yZ-dHR"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="cK1-YN-reQ" secondAttribute="bottom" constant="40" id="PIw-UZ-QAw"/>
                             <constraint firstItem="2hN-4O-nJT" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="TXn-BQ-14k"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="I4t-WQ-fXg" secondAttribute="trailing" constant="40" id="UUp-N4-C8D"/>
                             <constraint firstItem="2hN-4O-nJT" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="WWR-Sy-HFU"/>
-                            <constraint firstItem="fql-2c-x76" firstAttribute="top" secondItem="I4t-WQ-fXg" secondAttribute="bottom" constant="20" id="YnN-5f-iHf"/>
                             <constraint firstItem="6nD-kv-GLw" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="YzN-3U-teb"/>
-                            <constraint firstItem="I4t-WQ-fXg" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="40" id="fTZ-G4-eLl"/>
                             <constraint firstItem="FGY-Eh-8ox" firstAttribute="centerY" secondItem="cK1-YN-reQ" secondAttribute="centerY" id="inZ-Ab-dbM"/>
                             <constraint firstItem="fWx-1M-8GV" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="iun-qw-m35"/>
                             <constraint firstItem="6nD-kv-GLw" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="lGS-mM-2KD"/>
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="lvY-l5-m1V"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="BrA-k0-goQ" secondAttribute="trailing" id="lxL-MI-rZQ"/>
                             <constraint firstItem="cK1-YN-reQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="nKf-TV-CmL"/>
+                            <constraint firstItem="fql-2c-x76" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="40" id="nWh-i4-qyJ"/>
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="vcm-Fq-Tlf"/>
                         </constraints>
                     </view>
@@ -107,7 +98,6 @@
                         <outlet property="confidenceLabel" destination="fql-2c-x76" id="EPD-QK-UvI"/>
                         <outlet property="indicatorImage" destination="FGY-Eh-8ox" id="p3x-7M-oSi"/>
                         <outlet property="previewView" destination="BrA-k0-goQ" id="HaZ-lt-X2n"/>
-                        <outlet property="qualityLabel" destination="I4t-WQ-fXg" id="ph4-yA-gwy"/>
                         <outlet property="recordButton" destination="cK1-YN-reQ" id="VtD-5r-Jn0"/>
                         <outlet property="resumeButton" destination="fWx-1M-8GV" id="iO2-WW-wfZ"/>
                     </connections>

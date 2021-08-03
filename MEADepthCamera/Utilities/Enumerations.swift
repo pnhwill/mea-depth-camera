@@ -20,6 +20,11 @@ enum FileWriteResult {
     case failed(Error?)
 }
 
+enum TrackingState {
+    case tracking
+    case stopped
+}
+
 enum FileWriterError: Error {
     case assetWriterCancelled
     case unknown

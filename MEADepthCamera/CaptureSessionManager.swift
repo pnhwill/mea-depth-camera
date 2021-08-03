@@ -106,11 +106,11 @@ class CaptureSessionManager: NSObject {
         //print(depthDataFormatDescription)
         
         // Set video data output sample buffer delegate
-        videoDataOutput.setSampleBufferDelegate(dataOutputProcessor, queue: cameraViewController.videoOutputQueue)
+        //videoDataOutput.setSampleBufferDelegate(dataOutputProcessor, queue: cameraViewController.videoOutputQueue)
         
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
         // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
-        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [depthDataOutput, audioDataOutput])
+        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
         outputSynchronizer?.setDelegate(dataOutputProcessor, queue: cameraViewController.dataOutputQueue)
         
         // Set the processor settings once the video and depth resolutions are known
