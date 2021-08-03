@@ -579,9 +579,9 @@ class CameraViewController: UIViewController {
     private func updateRecordButtonWithRecordingState(_ recordingState: RecordingState) {
         var isRecording: Bool {
             switch recordingState {
-            case .idle:
+            case .idle, .finish:
                 return false
-            default:
+            case .recording, .start:
                 return true
             }
         }
@@ -768,3 +768,29 @@ extension PreviewMetalView.Rotation {
     }
 }
 
+// MARK: VisionTrackerProcessor Extension
+
+extension VisionTrackerProcessor {
+    // MARK: Helper Methods for Handling Device Orientation & EXIF
+    
+    func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
+        
+        switch deviceOrientation {
+        case .portraitUpsideDown:
+            return .rightMirrored
+            
+        case .landscapeLeft:
+            return .downMirrored
+            
+        case .landscapeRight:
+            return .upMirrored
+            
+        default:
+            return .leftMirrored
+        }
+    }
+    
+    func exifOrientationForCurrentDeviceOrientation() -> CGImagePropertyOrientation {
+        return exifOrientationForDeviceOrientation(UIDevice.current.orientation)
+    }
+}

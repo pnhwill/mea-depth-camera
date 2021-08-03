@@ -12,7 +12,6 @@ Contains the tracker processing logic using Vision.
 */
 
 import AVFoundation
-import UIKit
 import Vision
 
 protocol VisionTrackerProcessorDelegate: AnyObject {
@@ -289,28 +288,5 @@ class VisionTrackerProcessor {
     
     func cancelTracking() {
         cancelRequested = true
-    }
-    
-    // MARK: Helper Methods for Handling Device Orientation & EXIF
-    
-    func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
-        
-        switch deviceOrientation {
-        case .portraitUpsideDown:
-            return .rightMirrored
-            
-        case .landscapeLeft:
-            return .downMirrored
-            
-        case .landscapeRight:
-            return .upMirrored
-            
-        default:
-            return .leftMirrored
-        }
-    }
-    
-    func exifOrientationForCurrentDeviceOrientation() -> CGImagePropertyOrientation {
-        return exifOrientationForDeviceOrientation(UIDevice.current.orientation)
     }
 }

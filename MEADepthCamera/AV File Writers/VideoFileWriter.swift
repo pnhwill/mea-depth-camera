@@ -9,30 +9,25 @@ import AVFoundation
 import Combine
 
 // Helper object that uses AVAssetWriter to record the video and audio output streams to a file
-class VideoFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S.Failure == Error {
+class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == WriteState, S.Failure == Error {
     
     // MARK: Properties
     
     private let audioQueue = DispatchQueue(label: "audio write to video file", qos: .utility, autoreleaseFrequency: .workItem)
     private let videoQueue = DispatchQueue(label: "video write to video file", qos: .utility, autoreleaseFrequency: .workItem)
     
-    let assetWriter: AVAssetWriter // Audio and video
     private let audioWriterInput: AVAssetWriterInput
     private let videoWriterInput: AVAssetWriterInput
     
     // Publishers and subject
     private let audioDone = PassthroughSubject<Void, Error>()
     private let videoDone = PassthroughSubject<Void, Error>()
-    var done: AnyCancellable?
-    let subject: S
     
-    var writeState = WriteState.inactive
-    
-    required init(outputURL: URL, configuration: VideoFileConfiguration, subject: S) throws {
-        assetWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
+    init(outputURL: URL, configuration: VideoFileConfiguration, subject: S) throws {
         audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
         videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings)
-        //pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: nil)
+        
+        try super.init(name: "VideoFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)
         
         audioWriterInput.expectsMediaDataInRealTime = true
         videoWriterInput.expectsMediaDataInRealTime = true
@@ -43,15 +38,14 @@ class VideoFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
         if assetWriter.canAdd(videoWriterInput) {
             assetWriter.add(videoWriterInput)
         } else {
-            print("no video input added to the video asset writer")
+            print("\(self.description): no video input added to the video asset writer")
         }
         if assetWriter.canAdd(audioWriterInput) {
             assetWriter.add(audioWriterInput)
         } else {
-            print("no audio input added to the video asset writer")
+            print("\(self.description): no audio input added to the video asset writer")
         }
         
-        self.subject = subject
         // The audio track and video track are transfered to the writer in parallel.
         // Wait until both are finished, then finish the whole operation.
         done = audioDone.combineLatest(videoDone)
@@ -60,25 +54,7 @@ class VideoFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
             }, receiveValue: { _ in })
     }
     
-    // MARK: Lifecycle Methods
-    
-    func start(at startTime: CMTime) {
-        writeState = .active
-        guard assetWriter.startWriting() else {
-            print("Failed to start writing to video file")
-            switch self.assetWriter.status {
-            case .failed:
-                subject.send(completion: .failure(self.assetWriter.error!))
-            default:
-                let error = FileWriterError.getErrorForStatus(of: self.assetWriter)
-                subject.send(completion: .failure(error))
-            }
-            return
-        }
-        assetWriter.startSession(atSourceTime: startTime)
-        
-        subject.send(writeState)
-    }
+    // MARK: Media Writing Methods
     
     func writeVideo(_ sampleBuffer: CMSampleBuffer) {
         guard writeState == .active, assetWriter.status == .writing else {
@@ -87,12 +63,12 @@ class VideoFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.videoWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    print("\(self.description): Error appending sample buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.videoDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("Video writer input not ready for more media data. Sample dropped without writing to video file")
+                print("\(self.description): Video writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }
@@ -104,34 +80,12 @@ class VideoFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    print("\(self.description): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.audioDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("Audio writer input not ready for more media data. Sample dropped without writing to video file")
-            }
-        }
-    }
-    
-    // Call this when done transferring audio and video data.
-    // Here you evaluate the final status of the AVAssetWriter.
-    func finish(completion: Subscribers.Completion<Error>) {
-        switch completion {
-        case .failure:
-            assetWriter.cancelWriting()
-            subject.send(completion: completion)
-        default:
-            assetWriter.finishWriting {
-                switch self.assetWriter.status {
-                case .completed:
-                    self.subject.send(completion: .finished)
-                case .failed:
-                    self.subject.send(completion: .failure(self.assetWriter.error!))
-                default:
-                    let error = FileWriterError.getErrorForStatus(of: self.assetWriter)
-                    self.subject.send(completion: .failure(error))
-                }
+                print("\(self.description): Audio writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }

@@ -68,10 +68,10 @@ class DataOutputProcessor: NSObject {
     
     // Subjects and subscribers
     typealias FileWriterSubject = PassthroughSubject<WriteState, Error>
-    let videoWriterSubject = PassthroughSubject<WriteState, Error>()
-    let audioWriterSubject = PassthroughSubject<WriteState, Error>()
-    let depthWriterSubject = PassthroughSubject<WriteState, Error>()
-    let landmarksWriterSubject = PassthroughSubject<WriteState, Error>()
+    var videoWriterSubject: FileWriterSubject?
+    var audioWriterSubject: FileWriterSubject?
+    var depthWriterSubject: FileWriterSubject?
+    var landmarksWriterSubject: FileWriterSubject?
     
     var fileWritingDone: AnyCancellable?
     
@@ -255,18 +255,22 @@ class DataOutputProcessor: NSObject {
             print("AV file configurations not found")
             return
         }
+        videoWriterSubject = FileWriterSubject()
+        audioWriterSubject = FileWriterSubject()
+        depthWriterSubject = FileWriterSubject()
+        
         do {
-            videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: videoWriterSubject)
+            videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: videoWriterSubject!)
         } catch {
             print("Error creating video file writer: \(error)")
         }
         do {
-            audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration, subject: audioWriterSubject)
+            audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration, subject: audioWriterSubject!)
         } catch {
             print("Error creating audio file writer: \(error)")
         }
         do {
-            depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration, subject: depthWriterSubject)
+            depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration, subject: depthWriterSubject!)
         } catch {
             print("Error creating depth map file writer: \(error)")
         }
@@ -275,7 +279,7 @@ class DataOutputProcessor: NSObject {
             return
         }
         
-        fileWritingDone = videoWriterSubject.combineLatest(depthWriterSubject, audioWriterSubject)
+        fileWritingDone = videoWriterSubject!.combineLatest(depthWriterSubject!, audioWriterSubject!)
         .sink(receiveCompletion: { [weak self] completion in
             self?.handleRecordingFinish(completion: completion)
         }, receiveValue: { [weak self] state in

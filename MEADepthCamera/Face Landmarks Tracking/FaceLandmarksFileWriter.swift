@@ -28,6 +28,10 @@ class FaceLandmarksFileWriter {
         self.frameCount = 0
     }
     
+    private func createInfoRow() {
+        
+    }
+    
     private func createLabels(fileURL: URL) {
         // Create string with appropriate column labels
         var columnLabels = "Frame,Timestamp(s),BBox_x,BBox_y,BBox_width,BBox_height,"
