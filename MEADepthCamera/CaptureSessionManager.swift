@@ -17,7 +17,7 @@ class CaptureSessionManager: NSObject {
     
     // AVCapture session
     private(set) var session = AVCaptureSession()
-    private var videoDevice: AVCaptureDevice!
+    private(set) var videoDevice: AVCaptureDevice!
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
     
     // Data output
@@ -25,6 +25,10 @@ class CaptureSessionManager: NSObject {
     private(set) var depthDataOutput = AVCaptureDepthDataOutput()
     //private(set) var metadataOutput = AVCaptureMetadataOutput()
     private(set) var audioDataOutput = AVCaptureAudioDataOutput()
+    
+    // Source media formats
+    private(set) var videoFormatDescription: CMVideoFormatDescription?
+    private(set) var depthDataFormatDescription: CMFormatDescription?
     
     // Synchronized data capture
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
@@ -97,6 +101,10 @@ class CaptureSessionManager: NSObject {
          return
          }
          */
+        //print(videoFormatDescription)
+        //print(audioFormatDescription)
+        //print(depthDataFormatDescription)
+        
         // Set video data output sample buffer delegate
         videoDataOutput.setSampleBufferDelegate(dataOutputProcessor, queue: cameraViewController.videoOutputQueue)
         
@@ -150,9 +158,11 @@ class CaptureSessionManager: NSObject {
         }
         // Add an audio input device.
         do {
-            let audioDevice = AVCaptureDevice.default(for: .audio)
-            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice!)
-            
+            guard let audioDevice = AVCaptureDevice.default(for: .audio) else {
+                print("Could not find the microphone")
+                return false
+            }
+            let audioDeviceInput = try AVCaptureDeviceInput(device: audioDevice)
             if session.canAddInput(audioDeviceInput) {
                 session.addInput(audioDeviceInput)
             } else {
@@ -317,7 +327,8 @@ class CaptureSessionManager: NSObject {
             print("Could not lock device for configuration: \(error)")
             return false
         }
-        
+        videoFormatDescription = videoDevice.activeFormat.formatDescription
+        depthDataFormatDescription = videoDevice.activeDepthDataFormat?.formatDescription
         return true
     }
     

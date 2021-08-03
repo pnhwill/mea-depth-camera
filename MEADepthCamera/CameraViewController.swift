@@ -34,9 +34,6 @@ class CameraViewController: UIViewController {
     
     private var isSessionRunning = false
     
-    // Video frame buffer pool allocation
-    private(set) var videoFormatDescription: CMFormatDescription?
-    
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     

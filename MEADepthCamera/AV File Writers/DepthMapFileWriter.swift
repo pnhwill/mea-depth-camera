@@ -22,7 +22,7 @@ class DepthMapFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Wr
     private let videoDone = PassthroughSubject<Void, Error>()
     
     required init(outputURL: URL, configuration: DepthMapFileConfiguration, subject: S) throws {
-        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings)
+        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings, sourceFormatHint: configuration.sourceVideoFormat)
         pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: configuration.pixelBufferAttributes)
         
         try super.init(name: "DepthMapFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)

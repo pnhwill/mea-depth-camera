@@ -25,7 +25,7 @@ class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Write
     
     init(outputURL: URL, configuration: VideoFileConfiguration, subject: S) throws {
         audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
-        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings)
+        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings, sourceFormatHint: configuration.sourceVideoFormat)
         
         try super.init(name: "VideoFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)
         

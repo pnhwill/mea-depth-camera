@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B50787D626AF73D60077ACCB /* FaceLandmarksProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50787D526AF73D60077ACCB /* FaceLandmarksProcessor.swift */; };
-		B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
 		B53CD4B326B38EF3003BBFD9 /* DataOutputProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */; };
@@ -63,7 +62,6 @@
 /* Begin PBXFileReference section */
 		B50787D526AF73D60077ACCB /* FaceLandmarksProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksProcessor.swift; sourceTree = "<group>"; };
 		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
-		B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthDataProcessor.swift; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
 		B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensDistortionPointForPoint.h; sourceTree = "<group>"; };
@@ -185,7 +183,6 @@
 				B50787D726AF74330077ACCB /* Face Landmarks Tracking */,
 				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
 				B5ABE85926A9CC9B003D2AFD /* AV File Writers */,
-				B5380D0A26A1FAD4003328D8 /* DepthDataProcessor.swift */,
 				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
 				B587705E26B4AD8900E26C7D /* Utilities */,
 				B5886DF626AA168B00EB344C /* Shaders */,
@@ -418,7 +415,6 @@
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
-				B5380D0B26A1FAD4003328D8 /* DepthDataProcessor.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,

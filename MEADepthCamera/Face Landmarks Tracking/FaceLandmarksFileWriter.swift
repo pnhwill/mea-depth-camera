@@ -8,7 +8,7 @@
 import AVFoundation
 import Vision
 
-class FaceLandmarksFileWriter {
+class FaceLandmarksFileWriter: FileWriter {
     
     private var numLandmarks: Int
     

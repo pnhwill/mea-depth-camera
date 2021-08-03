@@ -23,7 +23,7 @@ protocol VisionTrackerProcessorDelegate: AnyObject {
 
 class VisionTrackerProcessor {
     
-    var description: String = "Vision Tracker Processor"
+    let description: String = "VisionTrackerProcessor"
     // // Video frame buffer pool allocation
     var isPrepared = false
     //private(set) var inputFormatDescription: CMFormatDescription?

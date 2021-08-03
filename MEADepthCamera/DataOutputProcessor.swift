@@ -90,6 +90,13 @@ class DataOutputProcessor: NSObject {
         //self.visionTrackingQueue.async {
             self.visionProcessor?.prepareVisionRequest()
         //}
+        
+        // Get source media formats
+        guard let videoFormat = sessionManager.videoFormatDescription, let depthFormat = sessionManager.depthDataFormatDescription else {
+            print("Failed to retrieve source media format descriptions")
+            return
+        }
+        
         // Initialize video file writer configuration
         let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
         let audioSettingsForVideo = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
@@ -97,15 +104,23 @@ class DataOutputProcessor: NSObject {
             print("Could not create video transform")
             return
         }
-        videoFileSettings.configuration = VideoFileConfiguration(fileType: videoFileSettings.fileType, videoSettings: videoSettingsForVideo, audioSettings: audioSettingsForVideo, transform: videoTransform)
+        videoFileSettings.configuration = VideoFileConfiguration(fileType: videoFileSettings.fileType,
+                                                                 videoSettings: videoSettingsForVideo,
+                                                                 audioSettings: audioSettingsForVideo,
+                                                                 transform: videoTransform,
+                                                                 videoFormat: videoFormat)
         
         // Initialize audio file writer configuration
         let audioSettingsForAudio = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioFileSettings.fileType)
-        audioFileSettings.configuration = AudioFileConfiguration(fileType: audioFileSettings.fileType, audioSettings: audioSettingsForAudio)
+        audioFileSettings.configuration = AudioFileConfiguration(fileType: audioFileSettings.fileType,
+                                                                 audioSettings: audioSettingsForAudio)
         
         // Initialize depth map file writer configuration
         let videoSettingsForDepthMap = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapFileSettings.fileType)
-        depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType, videoSettings: videoSettingsForDepthMap, transform: videoTransform)
+        depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType,
+                                                                       videoSettings: videoSettingsForDepthMap,
+                                                                       transform: videoTransform,
+                                                                       depthDataFormat: depthFormat)
         
         // Initialize landmarks file writer
         guard let processorSettings = processorSettings else {

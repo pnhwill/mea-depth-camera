@@ -45,13 +45,16 @@ struct VideoFileConfiguration: FileConfiguration {
         AVEncoderBitRateKey: 160_000
     ]*/
     
-    var videoTransform: CGAffineTransform
+    let sourceVideoFormat: CMVideoFormatDescription
     
-    init(fileType: AVFileType, videoSettings: [String: Any]?, audioSettings: [AnyHashable: Any]?, transform: CGAffineTransform) {
+    let videoTransform: CGAffineTransform
+    
+    init(fileType: AVFileType, videoSettings: [String: Any]?, audioSettings: [AnyHashable: Any]?, transform: CGAffineTransform, videoFormat: CMVideoFormatDescription) {
         self.outputFileType = fileType
         self.videoSettings = videoSettings
         //self.audioSettings = audioSettings?.filter { $0.key is String } as? [String:Any]
         self.audioSettings = audioSettings as? [String: Any]
+        self.sourceVideoFormat = videoFormat
         self.videoTransform = transform
     }
 }
@@ -102,11 +105,13 @@ struct DepthMapFileConfiguration: FileConfiguration {
     
     // Specify preserve 30fps
     
+    let sourceVideoFormat: CMVideoFormatDescription
+    
     var pixelBufferAttributes: [String: Any]?
     
-    var videoTransform: CGAffineTransform
+    let videoTransform: CGAffineTransform
     
-    init(fileType: AVFileType, videoSettings: [String: Any]?, transform: CGAffineTransform) {
+    init(fileType: AVFileType, videoSettings: [String: Any]?, transform: CGAffineTransform, depthDataFormat: CMFormatDescription) {
         self.outputFileType = fileType
         self.videoSettings = videoSettings
         self.videoSettings?["AVVideoHeightKey"] = 480
@@ -114,5 +119,6 @@ struct DepthMapFileConfiguration: FileConfiguration {
         //print(self.videoSettings)
         self.pixelBufferAttributes = nil
         self.videoTransform = transform
+        self.sourceVideoFormat = depthDataFormat
     }
 }
