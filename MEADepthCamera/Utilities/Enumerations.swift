@@ -7,6 +7,17 @@
 
 import AVFoundation
 
+enum OutputType: String {
+    case video
+    case audio
+    case depth
+    case landmarks
+}
+
+enum ProcessingMode {
+    case record, track
+}
+
 enum RecordingState {
     case idle, start, recording, finish
 }
@@ -46,6 +57,28 @@ extension FileWriterError: LocalizedError {
             return "AVAssetWriter cancelled writing"
         case .unknown:
             return "Unknown error occured"
+        }
+    }
+}
+
+enum VisionTrackerProcessorError: Error {
+    case readerInitializationFailed
+    case firstFrameReadFailed
+    case faceTrackingFailed
+    case faceRectangleDetectionFailed
+}
+
+extension VisionTrackerProcessorError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .readerInitializationFailed:
+            return "Cannot create a Video Reader for selected video."
+        case .firstFrameReadFailed:
+            return "Cannot read the first frame from selected video."
+        case .faceTrackingFailed:
+            return "Tracking of detected face failed."
+        case .faceRectangleDetectionFailed:
+            return " Face Rectangle Detector failed to detect face rectangle on the first frame of selected video."
         }
     }
 }

@@ -5,26 +5,18 @@
 //  Created by Will on 8/2/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-Contains the tracker post-processing logic using Vision.
-*/
+ See LICENSE folder for this sample’s licensing information.
+ 
+ Abstract:
+ Contains the face tracker post-processing logic using Vision.
+ */
 
 import AVFoundation
 import Vision
 
-enum VisionTrackerProcessorError: Error {
-    case readerInitializationFailed
-    case firstFrameReadFailed
-    case objectTrackingFailed
-    case rectangleDetectionFailed
-}
-
 protocol VisionTrackerProcessorDelegate: AnyObject {
-    func recordLandmarks(of faceObservation: VNFaceObservation)
+    func recordLandmarks(of faceObservation: VNFaceObservation, with depthMap: CVPixelBuffer?, frame: Int)
     func didFinishTracking()
-    
 }
 
 class VisionTrackerProcessor {
@@ -33,28 +25,109 @@ class VisionTrackerProcessor {
     
     weak var delegate: VisionTrackerProcessorDelegate?
     
-    var videoAsset: AVAsset!
-    
-    var videoReader: VideoReader?
+    private var videoAsset: AVAsset
+    private var videoReader: VideoReader?
+    private var depthAsset: AVAsset
+    private var depthReader: VideoReader?
     
     // Vision requests
-    var trackingLevel = VNRequestTrackingLevel.accurate
-    var detectionRequests: [VNDetectFaceRectanglesRequest]?
-    var trackingRequests: [VNTrackObjectRequest]?
-    lazy var sequenceRequestHandler = VNSequenceRequestHandler()
+    private var trackingLevel = VNRequestTrackingLevel.accurate
+    private var detectionRequests: [VNDetectFaceRectanglesRequest]?
+    private var trackingRequests: [VNTrackObjectRequest]?
+    private lazy var sequenceRequestHandler = VNSequenceRequestHandler()
     
-    var cameraIntrinsicData: AVCameraCalibrationData?
+    private var cameraIntrinsicData: AVCameraCalibrationData?
     
     private var cancelRequested = false
     
-    func prepareVisionRequest() {
+    init(videoAsset: AVAsset, depthAsset: AVAsset, cameraIntrinsicData: AVCameraCalibrationData?) {
+        self.videoAsset = videoAsset
+        self.depthAsset = depthAsset
+        self.cameraIntrinsicData = cameraIntrinsicData
+    }
+    
+    func performTracking() throws {
+        guard let videoReader = VideoReader(videoAsset: videoAsset),
+              let depthReader = VideoReader(videoAsset: depthAsset) else {
+            throw VisionTrackerProcessorError.readerInitializationFailed
+        }
+        self.videoReader = videoReader
+        self.depthReader = depthReader
+        
+        guard videoReader.nextFrame() != nil else {
+            throw VisionTrackerProcessorError.firstFrameReadFailed
+        }
+        
+        cancelRequested = false
+        
+        self.prepareVisionRequest()
+        
+        var frames = 1
+        var trackingFailed = false
+        
+        //var nextDepthFrame: CMSampleBuffer? = depthReader.nextFrame()
+        var nextDepthFrame: CMSampleBuffer? = nil
+        
+        func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?) throws {
+            try performVisionRequests(on: video, completion: { faceObservation in
+                self.delegate?.recordLandmarks(of: faceObservation, with: depth, frame: frames)
+            })
+        }
+        
+        while true {
+            guard cancelRequested == false, let videoFrame = videoReader.nextFrame() else {
+                break
+            }
+            
+            frames += 1
+            
+            guard let videoImage = CMSampleBufferGetImageBuffer(videoFrame) else {
+                print("\(description): No image found in video sample")
+                break
+            }
+            
+            // We may run out of depth frames before video frames, but we don't want to break the loop
+            if let depthFrame = nextDepthFrame, let depthImage = CMSampleBufferGetImageBuffer(depthFrame) {
+                let videoTimeStamp = videoFrame.presentationTimeStamp
+                let depthTimeStamp = depthFrame.presentationTimeStamp
+                // If there is a dropped frame, then the videos will become misaligned and it will never record the depth data, so we must compare the timestamps
+                switch (CMTimeGetSeconds(videoTimeStamp), CMTimeGetSeconds(depthTimeStamp)) {
+                case let (videoTime, depthTime) where videoTime < depthTime:
+                    // Video frame is before depth frame, so don't send the depth data to record
+                    try trackAndRecord(video: videoImage, depth: nil)
+                    // Start at beginning of next loop iteration without getting a new depth frame from the reader
+                    continue
+                case let (videoTime, depthTime) where videoTime == depthTime:
+                    // Frames match, so send the depth data to be recorded
+                    try trackAndRecord(video: videoImage, depth: depthImage)
+                //case let (videoTime, depthTime) where videoTime > depthTime:
+                default:
+                    // Video frame is after depth frame, so don't send the depth data
+                    try trackAndRecord(video: videoImage, depth: nil)
+                }
+            } else {
+                // No more depth data
+                print("\(description): No depth data found")
+                try trackAndRecord(video: videoImage, depth: nil)
+            }
+            
+            // Get the next depth frame from the reader
+            //nextDepthFrame = depthReader.nextFrame()
+            nextDepthFrame = nil
+        }
+        
+        delegate?.didFinishTracking()
+        
+    }
+    
+    private func prepareVisionRequest() {
         //self.trackingRequests = []
         var requests = [VNTrackObjectRequest]()
         
         let faceDetectionRequest = VNDetectFaceRectanglesRequest(completionHandler: { (request, error) in
             
             if error != nil {
-                print("FaceDetection error: \(String(describing: error)).")
+                print("\(self.description): FaceDetection error: \(String(describing: error)).")
             }
             
             guard let faceDetectionRequest = request as? VNDetectFaceRectanglesRequest,
@@ -77,16 +150,14 @@ class VisionTrackerProcessor {
         self.sequenceRequestHandler = VNSequenceRequestHandler()
     }
     
-    func performVisionRequests(on pixelBuffer: CVPixelBuffer) {
-        guard cancelRequested == false else {
-            return
-        }
+    private func performVisionRequests(on pixelBuffer: CVPixelBuffer, completion: @escaping (VNFaceObservation) -> Void) throws {
         
         var requestHandlerOptions: [VNImageOption: AnyObject] = [:]
         
         if cameraIntrinsicData != nil {
-            print("\(description): Camera intrinsic data not found.")
             requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsicData
+        } else {
+            print("\(description): Camera intrinsic data not found.")
         }
         
         let exifOrientation = CGImagePropertyOrientation.leftMirrored
@@ -104,6 +175,8 @@ class VisionTrackerProcessor {
                 try imageRequestHandler.perform(detectRequests)
             } catch let error as NSError {
                 NSLog("Failed to perform FaceRectangleRequest: %@", error)
+                print("\(description): Failed to perform FaceRectangleRequest: \(error.localizedDescription)")
+                throw VisionTrackerProcessorError.faceRectangleDetectionFailed
             }
             return
         }
@@ -114,6 +187,8 @@ class VisionTrackerProcessor {
                                                     orientation: exifOrientation)
         } catch let error as NSError {
             NSLog("Failed to perform SequenceRequest: %@", error)
+            print("\(description): Failed to perform SequenceRequest: \(error.localizedDescription)")
+            throw VisionTrackerProcessorError.faceTrackingFailed
         }
         
         // Setup the next round of tracking.
@@ -153,21 +228,19 @@ class VisionTrackerProcessor {
             let faceLandmarksRequest = VNDetectFaceLandmarksRequest(completionHandler: { (request, error) in
                 
                 if error != nil {
-                    print("FaceLandmarks error: \(String(describing: error)).")
+                    print("\(self.description): FaceLandmarks error: \(String(describing: error)).")
                 }
                 
-                // NOTE: currently this means nil will never be fed to writeToCSV(), so instead of putting zeros it will just record nothing at all.
-                // Missing frames can still be identified from the timestamp, though
                 guard let landmarksRequest = request as? VNDetectFaceLandmarksRequest,
                       let results = landmarksRequest.results as? [VNFaceObservation] else {
                     return
                 }
                 
-                // NOTE: this only calls for the first observation in the array if there multiple
-                // Could make this so each face observation goes into a separate file (not necessary but safer)
                 if let face = results.first {
-                    // Send face observation to delegate for data collection
-                    self.delegate?.recordLandmarks(of: face)
+                    // Send face observation to caller for data collection
+                    completion(face)
+                } else {
+                    print("\(self.description): No face observation returned from landmarks request.")
                 }
             })
             
@@ -193,6 +266,8 @@ class VisionTrackerProcessor {
                 try imageRequestHandler.perform(faceLandmarkRequests)
             } catch let error as NSError {
                 NSLog("Failed to perform FaceRectanglesRequest: %@", error)
+                print("\(description): Failed to perform FaceRectanglesRequest: \(error.localizedDescription)")
+                throw VisionTrackerProcessorError.faceTrackingFailed
             }
             
         }

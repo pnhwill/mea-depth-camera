@@ -88,25 +88,6 @@ class CaptureSessionManager: NSObject {
             setupResult = .configurationFailed
             return
         }
-        /*
-         if self.session.canAddOutput(metadataOutput) {
-         self.session.addOutput(metadataOutput)
-         if metadataOutput.availableMetadataObjectTypes.contains(.face) {
-         metadataOutput.metadataObjectTypes = [.face]
-         }
-         } else {
-         print("Could not add face detection output to the session")
-         cameraViewController.setupResult = .configurationFailed
-         session.commitConfiguration()
-         return
-         }
-         */
-        //print(videoFormatDescription)
-        //print(audioFormatDescription)
-        //print(depthDataFormatDescription)
-        
-        // Set video data output sample buffer delegate
-        //videoDataOutput.setSampleBufferDelegate(dataOutputProcessor, queue: cameraViewController.videoOutputQueue)
         
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
         // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
@@ -373,3 +354,17 @@ class CaptureSessionManager: NSObject {
         return nil
     }
 }
+
+/*
+ if self.session.canAddOutput(metadataOutput) {
+ self.session.addOutput(metadataOutput)
+ if metadataOutput.availableMetadataObjectTypes.contains(.face) {
+ metadataOutput.metadataObjectTypes = [.face]
+ }
+ } else {
+ print("Could not add face detection output to the session")
+ cameraViewController.setupResult = .configurationFailed
+ session.commitConfiguration()
+ return
+ }
+ */

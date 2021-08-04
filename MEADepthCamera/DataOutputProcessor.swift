@@ -35,7 +35,7 @@ class DataOutputProcessor: NSObject {
     private let videoDepthConverter = DepthToGrayscaleConverter()
     
     // Vision requests
-    private(set) var visionProcessor: VisionFaceTracker?
+    private(set) var faceDetectionProcessor: VisionFaceDetectionProcessor?
     var faceProcessor: FaceLandmarksProcessor?
 
     // Depth processing (needs removing after moving record function)
@@ -75,6 +75,12 @@ class DataOutputProcessor: NSObject {
     
     var fileWritingDone: AnyCancellable?
     
+    // Face landmarks post-processing
+    var visionProcessor: VisionTrackerProcessor?
+    private let savedRecordingsDataSource = SavedRecordingsDataSource()
+    var totalFrames: Int?
+    var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
     init(sessionManager: CaptureSessionManager, cameraViewController: CameraViewController) {
         self.sessionManager = sessionManager
         self.cameraViewController = cameraViewController
@@ -85,8 +91,8 @@ class DataOutputProcessor: NSObject {
     
     // MARK: - Data Pipeline Setup
     func configureProcessors() {
-        self.visionProcessor = VisionFaceTracker()
-        self.visionProcessor?.delegate = self
+        self.faceDetectionProcessor = VisionFaceDetectionProcessor()
+        self.faceDetectionProcessor?.delegate = self
         
         // Get source media formats
         guard let videoFormat = sessionManager.videoFormatDescription, let depthFormat = sessionManager.depthDataFormatDescription else {
@@ -133,6 +139,12 @@ class DataOutputProcessor: NSObject {
     
     // MARK: - Data Processing Methods
     func processDepth(depthData: AVDepthData, timestamp: CMTime) {
+        
+        if processorSettings?.cameraCalibrationData == nil {
+            print("aaaaaaaaaaa")
+            let cameraIntrinsicData = depthData.cameraCalibrationData
+            processorSettings?.cameraCalibrationData = cameraIntrinsicData
+        }
         
         if recordingState != .idle {
             
@@ -187,13 +199,12 @@ class DataOutputProcessor: NSObject {
         }
         
         //autoreleasepool {
-        guard let visionProcessor = self.visionProcessor else {
+        guard let visionProcessor = self.faceDetectionProcessor else {
             print("Vision tracking processor not found.")
             return
         }
         
-        //var attachmentMode = kCMAttachmentMode_ShouldPropagate
-        //let cameraIntrinsicData = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: &attachmentMode)
+        
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             print("Failed to obtain a CVPixelBuffer for the current output frame.")
             return
@@ -246,19 +257,19 @@ class DataOutputProcessor: NSObject {
             print("Failed to create save folder")
             return
         }
-        guard let audioURL = createFileURL(in: saveFolder, nameLabel: "audio", fileType: audioFileSettings.fileExtension) else {
+        guard let audioURL = createFileURL(in: saveFolder, nameLabel: OutputType.audio.rawValue, fileType: audioFileSettings.fileExtension) else {
             print("Failed to create audio file")
             return
         }
-        guard let videoURL = createFileURL(in: saveFolder, nameLabel: "video", fileType: videoFileSettings.fileExtension) else {
+        guard let videoURL = createFileURL(in: saveFolder, nameLabel: OutputType.video.rawValue, fileType: videoFileSettings.fileExtension) else {
             print("Failed to create video file")
             return
         }
-        guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: "depth", fileType: depthMapFileSettings.fileExtension) else {
+        guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: OutputType.depth.rawValue, fileType: depthMapFileSettings.fileExtension) else {
             print("Failed to create depth map file")
             return
         }
-        guard let landmarksURL = createFileURL(in: saveFolder, nameLabel: "landmarks", fileType: "csv") else {
+        guard let landmarksURL = createFileURL(in: saveFolder, nameLabel: OutputType.landmarks.rawValue, fileType: "csv") else {
             print("Failed to create landmarks file")
             return
         }
@@ -271,6 +282,9 @@ class DataOutputProcessor: NSObject {
         videoWriterSubject = FileWriterSubject()
         audioWriterSubject = FileWriterSubject()
         depthWriterSubject = FileWriterSubject()
+        
+        let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL, OutputType.landmarks: landmarksURL]
+        savedRecordingsDataSource.saveRecording(saveFolder, outputFiles: fileDictionary)
         
         do {
             videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: videoWriterSubject!)
@@ -307,7 +321,6 @@ class DataOutputProcessor: NSObject {
         videoFileWriter?.endRecording()
         audioFileWriter?.endRecording()
         depthMapFileWriter?.endRecording()
-        faceLandmarksFileWriter?.reset()
         recordingState = .finish
     }
     
@@ -316,6 +329,9 @@ class DataOutputProcessor: NSObject {
         case .finished:
             // update ui with success
             print("File writing success")
+            DispatchQueue.main.async {
+                self.cameraViewController?.processingMode = .track
+            }
             break
         case .failure(let error):
             // update ui with failure
@@ -435,6 +451,53 @@ class DataOutputProcessor: NSObject {
             break
         }
     }
+    
+    // MARK: - Face Landmarks Post-Processing
+    
+    func startTracking() {
+        // Load RGB and depth map video files from saved URLs
+        guard let (videoAsset, depthAsset) = loadAssets() else {
+            return
+        }
+        
+        // Initialize Vision tracker processor
+        visionProcessor = VisionTrackerProcessor(videoAsset: videoAsset, depthAsset: depthAsset, cameraIntrinsicData: processorSettings?.cameraCalibrationData)
+        visionProcessor?.delegate = self
+        visionTrackingQueue.async {
+            do {
+                try self.visionProcessor?.performTracking()
+            } catch {
+                self.cameraViewController?.handleTrackerError(error)
+            }
+        }
+    }
+    
+    private func loadAssets() -> (AVAsset, AVAsset)? {
+        guard let lastSavedRecording = savedRecordingsDataSource.savedRecordings.last else {
+            print("Last saved recording not found")
+            return nil
+        }
+        let folderURL = lastSavedRecording.folderURL
+        guard let videoFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.video }),
+              let depthFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.depth }) else {
+            print("Failed to access saved video and/or depth file")
+            return nil
+        }
+        let videoURL = folderURL.appendingPathComponent(videoFile.lastPathComponent)
+        let depthURL = folderURL.appendingPathComponent(depthFile.lastPathComponent)
+        if FileManager.default.fileExists(atPath: videoURL.path) {
+            totalFrames = Int(getNumberOfFrames(videoURL))
+            print(totalFrames!)
+        } else {
+            print("File does not exist at specified URL")
+            return nil
+        }
+        let videoAsset = AVAsset(url: videoURL)
+        let depthAsset = AVAsset(url: depthURL)
+        return (videoAsset, depthAsset)
+    }
+    
+    
 }
 
 // MARK: - AVCaptureDataOutputSynchronizerDelegate
@@ -482,33 +545,13 @@ extension DataOutputProcessor: AVCaptureDataOutputSynchronizerDelegate {
     }
 }
 
-// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+// MARK: - VisionFaceDetectionProcessorDelegate Methods
 
-extension DataOutputProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
+extension DataOutputProcessor: VisionFaceDetectionProcessorDelegate {
     
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        if output == videoDataOutput{
-            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
-        }
-    }
-    
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
-        print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
-    }
-}
-
-// MARK: - VisionFaceTrackerDelegate Methods
-
-extension DataOutputProcessor: VisionFaceTrackerDelegate {
-    
-    func displayFrame(_ faceObservations: [VNFaceObservation], confidence: VNConfidence?) {
-        if cameraViewController?.liveTrackingState != .tracking {
-            cameraViewController?.liveTrackingState = .tracking
-        }
+    func displayFrame(_ faceObservations: [VNFaceObservation]) {
         cameraViewController?.displayFaceObservations(faceObservations)
-        cameraViewController?.displayMetrics(confidence: confidence)
+        //cameraViewController?.displayMetrics(confidence: confidence)
     }
     
     func checkAlignment(of faceObservation: VNFaceObservation) {
@@ -553,34 +596,54 @@ extension DataOutputProcessor: VisionFaceTrackerDelegate {
         
         cameraViewController?.isAligned = isAligned
     }
-        
-    func stoppedTracking() {
-        // Update tracking state
-        cameraViewController?.liveTrackingState = .stopped
-    }
 }
 
 // MARK: - VisionTrackerProcessorDelegate Methods
 
 extension DataOutputProcessor: VisionTrackerProcessorDelegate {
     
-    func recordLandmarks(of faceObservation: VNFaceObservation) {
+    func recordLandmarks(of faceObservation: VNFaceObservation, with depthMap: CVPixelBuffer?, frame: Int) {
         // Write face observation results to file if collecting data.
         // Perform data collection in background queue so that it does not hold up the UI.
-        if self.recordingState == .recording {
-            guard let landmarksProcessor = self.faceProcessor,
-                  let landmarksFileWriter = self.faceLandmarksFileWriter else {
-                print("No face landmarks processor and/or file writer found, failed to write to file.")
-                return
-            }
-            
-            let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData, settings: sessionManager.processorSettings)
-            landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
+        
+        guard let landmarksProcessor = self.faceProcessor,
+              let landmarksFileWriter = self.faceLandmarksFileWriter else {
+            print("No face landmarks processor and/or file writer found, failed to write to file.")
+            return
         }
+        
+        let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData, settings: sessionManager.processorSettings)
+        landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
+        
+        // Display the frame counter on the UI
+        cameraViewController?.displayFrameCounter(frame)
     }
     
     func didFinishTracking() {
-        
+        faceLandmarksFileWriter?.reset()
+        DispatchQueue.main.async {
+            self.cameraViewController?.trackingState = .stopped
+            self.cameraViewController?.processingMode = .record
+        }
     }
     
 }
+
+/*
+// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+
+extension DataOutputProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        if output == videoDataOutput{
+            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
+        }
+    }
+    
+    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
+        print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
+    }
+}
+*/

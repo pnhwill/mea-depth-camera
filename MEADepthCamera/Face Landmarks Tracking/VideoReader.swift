@@ -90,11 +90,11 @@ class VideoReader {
         return self.assetReader.startReading()
     }
 
-    func nextFrame() -> CVPixelBuffer? {
+    func nextFrame() -> CMSampleBuffer? {
         guard let sampleBuffer = self.videoAssetReaderOutput.copyNextSampleBuffer() else {
             return nil
         }
         
-        return CMSampleBufferGetImageBuffer(sampleBuffer)
+        return sampleBuffer
     }
 }

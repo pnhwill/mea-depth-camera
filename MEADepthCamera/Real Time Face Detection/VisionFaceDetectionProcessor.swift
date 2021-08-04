@@ -1,5 +1,5 @@
 //
-//  VisionFaceTracker.swift
+//  VisionFaceDetectionProcessor.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/22/21.
@@ -8,52 +8,46 @@
 See LICENSE folder for this sample’s licensing information.
 
 Abstract:
-Detect and track faces from the selfie cam feed in real time.
+Detect faces from the selfie cam feed in real time.
 */
 
 import AVFoundation
 import Vision
 
-protocol VisionFaceTrackerDelegate: AnyObject {
-    func displayFrame(_ faceObservations: [VNFaceObservation], confidence: VNConfidence?)
+protocol VisionFaceDetectionProcessorDelegate: AnyObject {
+    func displayFrame(_ faceObservations: [VNFaceObservation])
     func checkAlignment(of faceObservation: VNFaceObservation)
-    func stoppedTracking()
 }
 
-class VisionFaceTracker {
+class VisionFaceDetectionProcessor {
     
-    let description: String = "VisionFaceTracker"
+    let description: String = "VisionFaceDetectionProcessor"
     
-    var trackingLevel = VNRequestTrackingLevel.accurate
-    
-    weak var delegate: VisionFaceTrackerDelegate?
+    weak var delegate: VisionFaceDetectionProcessorDelegate?
     
     // MARK: Performing Vision Requests
     
     func performVisionRequests(on pixelBuffer: CVPixelBuffer) {
+        // Create Vision request options dictionary containing the camera instrinsic matrix
         var requestOptions = [VNImageOption: Any]()
         if let cameraIntrinsicData = CMGetAttachment(pixelBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: nil) {
             requestOptions = [.cameraIntrinsics: cameraIntrinsicData]
         }
-        
+        // Get current device orientation for request handler
         let exifOrientation = self.exifOrientationForCurrentDeviceOrientation()
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: requestOptions)
+        // Create face rectangles and tell handler to perform the request
         let faceDetectionRequest = VNDetectFaceRectanglesRequest()
         do {
             try handler.perform([faceDetectionRequest])
             guard let faceObservations = faceDetectionRequest.results as? [VNFaceObservation] else {
                 return
             }
-            var confidence: VNConfidence?
             if let face = faceObservations.first {
-                // Get face landmarks confidence metric
-                confidence = face.confidence
                 // Get face rectangles request containing roll & yaw for alignment checking
                 self.delegate?.checkAlignment(of: face)
-            } else {
-                delegate?.stoppedTracking()
             }
-            self.delegate?.displayFrame(faceObservations, confidence: confidence)
+            self.delegate?.displayFrame(faceObservations)
         } catch {
             print("Vision error: \(error.localizedDescription)")
         }

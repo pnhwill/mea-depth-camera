@@ -8,6 +8,21 @@
 import AVFoundation
 import UIKit
 
+// MARK: Bundle
+extension Bundle {
+    // Use bundle name instead of hard-coding app name in alerts
+    var applicationName: String {
+        if let name = object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
+            return name
+        } else if let name = object(forInfoDictionaryKey: "CFBundleName") as? String {
+            return name
+        }
+        
+        return "-"
+    }
+}
+
+// MARK: AVCaptureVideoOrientation
 extension AVCaptureVideoOrientation {
     init?(interfaceOrientation: UIInterfaceOrientation) {
         switch interfaceOrientation {
@@ -35,6 +50,7 @@ extension AVCaptureVideoOrientation {
     }
 }
 
+// MARK: AVCaptureConnection
 extension AVCaptureConnection {
     func videoOrientationTransform(relativeTo destinationVideoOrientation: AVCaptureVideoOrientation) -> CGAffineTransform {
         let videoDevice: AVCaptureDevice
@@ -55,7 +71,7 @@ extension AVCaptureConnection {
     }
 }
 
-//TODO: implement interruption reason
+// MARK: AVCaptureSession.InterruptionReason
 extension AVCaptureSession.InterruptionReason: CustomStringConvertible {
     public var description: String {
         var descriptionString = ""
@@ -79,10 +95,8 @@ extension AVCaptureSession.InterruptionReason: CustomStringConvertible {
     }
 }
 
-// MARK: PreviewMetalView.Rotation Extension
-
+// MARK: PreviewMetalView.Rotation
 extension PreviewMetalView.Rotation {
-    
     init?(with interfaceOrientation: UIInterfaceOrientation, videoOrientation: AVCaptureVideoOrientation, cameraPosition: AVCaptureDevice.Position) {
         /*
          Calculate the rotation between the videoOrientation and the interfaceOrientation.
@@ -163,11 +177,9 @@ extension PreviewMetalView.Rotation {
     }
 }
 
-// MARK: VisionFaceTracker Extension
-
-extension VisionFaceTracker {
+// MARK: VisionFaceDetectionProcessor
+extension VisionFaceDetectionProcessor {
     // Helper Methods for Handling Device Orientation & EXIF
-    
     func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
         
         switch deviceOrientation {

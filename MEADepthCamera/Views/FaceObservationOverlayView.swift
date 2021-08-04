@@ -85,8 +85,6 @@ class FaceObservationOverlayView: UIView {
         
         guard let rootLayer = self.rootLayer else {
             print("view was not property initialized")
-            // move error alert to controller
-            //self.presentErrorAlert(message: "view was not property initialized")
             return
         }
         
