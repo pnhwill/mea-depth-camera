@@ -8,6 +8,13 @@
 import AVFoundation
 import UIKit
 
+// MARK: CGSize
+extension CGSize {
+    func rounded() -> CGSize {
+        return CGSize(width: self.width.rounded(), height: self.height.rounded())
+    }
+}
+
 // MARK: Bundle
 extension Bundle {
     // Use bundle name instead of hard-coding app name in alerts
@@ -17,7 +24,6 @@ extension Bundle {
         } else if let name = object(forInfoDictionaryKey: "CFBundleName") as? String {
             return name
         }
-        
         return "-"
     }
 }
@@ -199,5 +205,44 @@ extension VisionFaceDetectionProcessor {
     
     func exifOrientationForCurrentDeviceOrientation() -> CGImagePropertyOrientation {
         return exifOrientationForDeviceOrientation(UIDevice.current.orientation)
+    }
+}
+
+// MARK: ProcessInfo.ThermalState
+extension ProcessInfo.ThermalState {
+    var thermalStateString: String {
+        let state = self
+        var thermalStateString = "UNKNOWN"
+        if state == .nominal {
+            thermalStateString = "NOMINAL"
+        } else if state == .fair {
+            thermalStateString = "FAIR"
+        } else if state == .serious {
+            thermalStateString = "SERIOUS"
+        } else if state == .critical {
+            thermalStateString = "CRITICAL"
+        }
+        return thermalStateString
+    }
+}
+
+// MARK: AVCaptureDevice.SystemPressureState
+extension AVCaptureDevice.SystemPressureState {
+    var pressureLevelString: String {
+        let pressureLevel = self.level
+        var pressureLevelString = "UNKNOWN"
+        if pressureLevel == .nominal {
+            pressureLevelString = "NOMINAL"
+        } else if pressureLevel == .fair {
+            pressureLevelString = "FAIR"
+        } else if pressureLevel == .serious {
+            pressureLevelString = "SERIOUS"
+        } else if pressureLevel == .critical {
+            pressureLevelString = "CRITICAL"
+        } else if pressureLevel == .shutdown {
+            print("Session stopped running due to shutdown system pressure level.")
+            pressureLevelString = "SHUTDOWN"
+        }
+        return pressureLevelString
     }
 }

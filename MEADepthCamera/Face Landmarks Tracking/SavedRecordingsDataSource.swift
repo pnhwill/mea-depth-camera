@@ -54,4 +54,9 @@ class SavedRecordingsDataSource {
         savedRecordings.removeAll()
     }
 
+    func scanForRecordings() {
+        
+    }
+    
+    
 }

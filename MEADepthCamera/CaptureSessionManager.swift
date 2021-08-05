@@ -9,7 +9,7 @@ import AVFoundation
 
 class CaptureSessionManager: NSObject {
     
-    // Weak reference to owner
+    // Weak reference to parent
     private weak var cameraViewController: CameraViewController!
     
     // Data output processor
@@ -20,11 +20,16 @@ class CaptureSessionManager: NSObject {
     private(set) var videoDevice: AVCaptureDevice!
     @objc dynamic var videoDeviceInput: AVCaptureDeviceInput!
     
-    // Data output
+    // Data outputs
     private(set) var videoDataOutput = AVCaptureVideoDataOutput()
     private(set) var depthDataOutput = AVCaptureDepthDataOutput()
     //private(set) var metadataOutput = AVCaptureMetadataOutput()
     private(set) var audioDataOutput = AVCaptureAudioDataOutput()
+    
+    // Video output resolution and orientation for processor settings
+    private var videoDimensions: CMVideoDimensions?
+    private var depthDimensions: CMVideoDimensions?
+    private var videoOrientation: AVCaptureVideoOrientation?
     
     // Source media formats
     private(set) var videoFormatDescription: CMVideoFormatDescription?
@@ -33,8 +38,10 @@ class CaptureSessionManager: NSObject {
     // Synchronized data capture
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
     
-    // Struct to hold video/depth resolutions & number of landmarks
-    private(set) var processorSettings = ProcessorSettings()
+    // Data output synchronizer queue
+    let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
+    let discardLateFrames: Bool = false
     
     enum SessionSetupResult {
         case success
@@ -53,9 +60,6 @@ class CaptureSessionManager: NSObject {
         if setupResult != .success {
             return
         }
-        
-        // Initialize the data output processor
-        self.dataOutputProcessor = DataOutputProcessor(sessionManager: self, cameraViewController: cameraViewController)
         
         session.beginConfiguration()
         defer {
@@ -89,13 +93,23 @@ class CaptureSessionManager: NSObject {
             return
         }
         
+        if let videoDimensions = videoDimensions, let depthDimensions = depthDimensions, let videoOrientation = videoOrientation {
+            // Initialize the data output processor
+            self.dataOutputProcessor = DataOutputProcessor(sessionManager: self,
+                                                           cameraViewController: cameraViewController,
+                                                           videoDimensions: videoDimensions,
+                                                           depthDimensions: depthDimensions,
+                                                           videoOrientation: videoOrientation)
+        } else {
+            print("Failed to retrieve video dimensions/orientation. Could not initialize data output processor")
+            setupResult = .configurationFailed
+            return
+        }
+
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
         // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
         outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
-        outputSynchronizer?.setDelegate(dataOutputProcessor, queue: cameraViewController.dataOutputQueue)
-        
-        // Set the processor settings once the video and depth resolutions are known
-        dataOutputProcessor?.processorSettings = processorSettings
+        outputSynchronizer?.setDelegate(dataOutputProcessor, queue: dataOutputQueue)
     }
     
     // MARK: - Capture Device Configuration
@@ -170,19 +184,13 @@ class CaptureSessionManager: NSObject {
             videoDataOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
             if let connection = videoDataOutput.connection(with: .video) {
                 connection.isEnabled = true
-                /*
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = .portrait
-                } else {
-                    print("Changing video orientation not supported")
-                }
-                */
                 if connection.isCameraIntrinsicMatrixDeliverySupported {
                     connection.isCameraIntrinsicMatrixDeliveryEnabled = true
                 } else {
                     print("Camera intrinsic matrix delivery not supported")
                     return false
                 }
+                videoOrientation = connection.videoOrientation
             } else {
                 print("No AVCaptureConnection for video data output")
                 return false
@@ -191,7 +199,7 @@ class CaptureSessionManager: NSObject {
             print("Could not add video data output to the session")
             return false
         }
-        videoDataOutput.alwaysDiscardsLateVideoFrames = true
+        videoDataOutput.alwaysDiscardsLateVideoFrames = discardLateFrames
         return true
     }
     
@@ -206,13 +214,6 @@ class CaptureSessionManager: NSObject {
             depthDataOutput.isFilteringEnabled = false
             if let connection = depthDataOutput.connection(with: .depthData) {
                 connection.isEnabled = true
-                /*
-                if connection.isVideoOrientationSupported {
-                    connection.videoOrientation = .portrait
-                } else {
-                    print("Changing depth orientation not supported")
-                }
-                */
             } else {
                 print("No AVCaptureConnection for depth data output")
                 return false
@@ -221,7 +222,7 @@ class CaptureSessionManager: NSObject {
             print("Could not add depth data output to the session")
             return false
         }
-        
+        depthDataOutput.alwaysDiscardsLateDepthData = discardLateFrames
         return true
     }
     
@@ -271,7 +272,7 @@ class CaptureSessionManager: NSObject {
                 print("Failed to set video device format")
                 return false
             }
-            processorSettings.videoResolution = resolution
+            videoDimensions = resolution
         } else {
             print("Failed to find valid device format")
             return false
@@ -294,8 +295,8 @@ class CaptureSessionManager: NSObject {
         
         
         if let selectedFormatDescription = selectedFormat?.formatDescription {
-            let depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
-            processorSettings.depthResolution = CGSize(width: CGFloat(depthDimensions.width), height: CGFloat(depthDimensions.height))
+            depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
+            
         } else {
             print("Failed to obtain depth data resolution")
         }
@@ -313,7 +314,7 @@ class CaptureSessionManager: NSObject {
         return true
     }
     
-    private func bestDeviceFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, frameRateRange: AVFrameRateRange, resolution: CGSize)? {
+    private func bestDeviceFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, frameRateRange: AVFrameRateRange, resolution: CMVideoDimensions)? {
         var bestFormat: AVCaptureDevice.Format?
         var bestFrameRateRange: AVFrameRateRange?
         var highestResolutionDimensions = CMVideoDimensions(width: 0, height: 0)
@@ -348,8 +349,8 @@ class CaptureSessionManager: NSObject {
         }
         
         if bestFormat != nil {
-            let resolution = CGSize(width: CGFloat(highestResolutionDimensions.width), height: CGFloat(highestResolutionDimensions.height))
-            return (bestFormat!, bestFrameRateRange!, resolution)
+            //let resolution = CGSize(width: CGFloat(highestResolutionDimensions.width), height: CGFloat(highestResolutionDimensions.height))
+            return (bestFormat!, bestFrameRateRange!, highestResolutionDimensions)
         }
         return nil
     }

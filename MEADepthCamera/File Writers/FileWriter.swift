@@ -53,9 +53,9 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
         self.subject = subject
     }
     
-    deinit {
-        print("deinitializing \(description)")
-    }
+//    deinit {
+//        print("deinitializing \(description)")
+//    }
     
     // MARK: Lifecycle Methods
     

@@ -36,7 +36,7 @@ kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [
     float depth = inputTexture.read(gid).x;
     
     // Normalize the value between 0 and 1.
-    depth = (depth - converterParameters.offset) / (converterParameters.range);
+    //depth = (depth - converterParameters.offset) / (converterParameters.range);
     
     float4 outputColor = float4(float3(depth), 1.0);
     

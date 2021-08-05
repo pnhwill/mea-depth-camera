@@ -36,14 +36,14 @@ class VisionTrackerProcessor {
     private var trackingRequests: [VNTrackObjectRequest]?
     private lazy var sequenceRequestHandler = VNSequenceRequestHandler()
     
-    private var cameraIntrinsicData: AVCameraCalibrationData?
+    private let processorSettings: ProcessorSettings
     
     private var cancelRequested = false
     
-    init(videoAsset: AVAsset, depthAsset: AVAsset, cameraIntrinsicData: AVCameraCalibrationData?) {
+    init(videoAsset: AVAsset, depthAsset: AVAsset, processorSettings: ProcessorSettings) {
         self.videoAsset = videoAsset
         self.depthAsset = depthAsset
-        self.cameraIntrinsicData = cameraIntrinsicData
+        self.processorSettings = processorSettings
     }
     
     func performTracking() throws {
@@ -63,10 +63,8 @@ class VisionTrackerProcessor {
         self.prepareVisionRequest()
         
         var frames = 1
-        var trackingFailed = false
         
-        //var nextDepthFrame: CMSampleBuffer? = depthReader.nextFrame()
-        var nextDepthFrame: CMSampleBuffer? = nil
+        var nextDepthFrame: CMSampleBuffer? = depthReader.nextFrame()
         
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?) throws {
             try performVisionRequests(on: video, completion: { faceObservation in
@@ -91,18 +89,22 @@ class VisionTrackerProcessor {
                 let videoTimeStamp = videoFrame.presentationTimeStamp
                 let depthTimeStamp = depthFrame.presentationTimeStamp
                 // If there is a dropped frame, then the videos will become misaligned and it will never record the depth data, so we must compare the timestamps
+                // This doesn't exactly work if many frames are dropped early, so we need another way to check (frame index?)
                 switch (CMTimeGetSeconds(videoTimeStamp), CMTimeGetSeconds(depthTimeStamp)) {
                 case let (videoTime, depthTime) where videoTime < depthTime:
                     // Video frame is before depth frame, so don't send the depth data to record
                     try trackAndRecord(video: videoImage, depth: nil)
                     // Start at beginning of next loop iteration without getting a new depth frame from the reader
+                    print("<")
                     continue
                 case let (videoTime, depthTime) where videoTime == depthTime:
                     // Frames match, so send the depth data to be recorded
                     try trackAndRecord(video: videoImage, depth: depthImage)
+                    print("=")
                 //case let (videoTime, depthTime) where videoTime > depthTime:
                 default:
                     // Video frame is after depth frame, so don't send the depth data
+                    print(">")
                     try trackAndRecord(video: videoImage, depth: nil)
                 }
             } else {
@@ -112,8 +114,7 @@ class VisionTrackerProcessor {
             }
             
             // Get the next depth frame from the reader
-            //nextDepthFrame = depthReader.nextFrame()
-            nextDepthFrame = nil
+            nextDepthFrame = depthReader.nextFrame()
         }
         
         delegate?.didFinishTracking()
@@ -138,6 +139,7 @@ class VisionTrackerProcessor {
                 // Add the observations to the tracking list
                 for observation in results {
                     let faceTrackingRequest = VNTrackObjectRequest(detectedObjectObservation: observation)
+                    
                     requests.append(faceTrackingRequest)
                 }
                 self.trackingRequests = requests
@@ -154,8 +156,10 @@ class VisionTrackerProcessor {
         
         var requestHandlerOptions: [VNImageOption: AnyObject] = [:]
         
-        if cameraIntrinsicData != nil {
-            requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsicData
+
+        
+        if let cameraIntrinsics = processorSettings.cameraCalibrationData?.intrinsicMatrix {
+            requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsics as AnyObject
         } else {
             print("\(description): Camera intrinsic data not found.")
         }
@@ -209,6 +213,7 @@ class VisionTrackerProcessor {
                 } else {
                     trackingRequest.isLastFrame = true
                 }
+                
                 newTrackingRequests.append(trackingRequest)
             }
         }

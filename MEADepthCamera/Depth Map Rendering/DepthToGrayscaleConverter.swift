@@ -162,6 +162,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
         if max > highest {
             highest = max
         }
+        
         range = DepthRenderParam(offset: lowest, range: highest - lowest)
         
         // Set up command queue, buffer, and encoder

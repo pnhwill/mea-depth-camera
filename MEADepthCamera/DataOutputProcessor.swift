@@ -11,13 +11,11 @@ import Vision
 
 class DataOutputProcessor: NSObject {
     
-    var processorSettings: ProcessorSettings?
+    // Capture session manager (parent)
+    private weak var sessionManager: CaptureSessionManager!
     
     // Weak reference to camera view controller
     private weak var cameraViewController: CameraViewController?
-    
-    // Capture session manager
-    private weak var sessionManager: CaptureSessionManager!
     
     // Preview view
     private weak var previewView: PreviewMetalView?
@@ -28,18 +26,17 @@ class DataOutputProcessor: NSObject {
     //private unowned var metadataOutput: AVCaptureMetadataOutput
     private unowned var audioDataOutput: AVCaptureAudioDataOutput
     
+    private(set) var processorSettings: ProcessorSettings
+    
     // Recording
     var recordingState = RecordingState.idle
     
     // Depth processing
-    private let videoDepthConverter = DepthToGrayscaleConverter()
+    let videoDepthConverter = DepthToGrayscaleConverter()
     
-    // Vision requests
+    // Real time Vision requests
     private(set) var faceDetectionProcessor: VisionFaceDetectionProcessor?
-    var faceProcessor: FaceLandmarksProcessor?
 
-    // Depth processing (needs removing after moving record function)
-    var depthData: AVDepthData?
     
     // AV file writing
     
@@ -64,29 +61,35 @@ class DataOutputProcessor: NSObject {
     private var audioFileSettings = FileWriterSettings(fileType: .wav)
     private var depthMapFileSettings = FileWriterSettings(fileType: .mov)
     
-    var faceLandmarksFileWriter: FaceLandmarksFileWriter?
-    
     // Subjects and subscribers
     typealias FileWriterSubject = PassthroughSubject<WriteState, Error>
     var videoWriterSubject: FileWriterSubject?
     var audioWriterSubject: FileWriterSubject?
     var depthWriterSubject: FileWriterSubject?
-    var landmarksWriterSubject: FileWriterSubject?
+    //var landmarksWriterSubject: FileWriterSubject?
     
     var fileWritingDone: AnyCancellable?
     
     // Face landmarks post-processing
     var visionProcessor: VisionTrackerProcessor?
+    private var faceLandmarksProcessor: FaceLandmarksProcessor?
     private let savedRecordingsDataSource = SavedRecordingsDataSource()
     var totalFrames: Int?
-    var visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
-    init(sessionManager: CaptureSessionManager, cameraViewController: CameraViewController) {
+    let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
+    init(sessionManager: CaptureSessionManager,
+         cameraViewController: CameraViewController,
+         videoDimensions: CMVideoDimensions,
+         depthDimensions: CMVideoDimensions,
+         videoOrientation: AVCaptureVideoOrientation) {
         self.sessionManager = sessionManager
         self.cameraViewController = cameraViewController
         self.videoDataOutput = sessionManager.videoDataOutput
         self.depthDataOutput = sessionManager.depthDataOutput
         self.audioDataOutput = sessionManager.audioDataOutput
+        self.processorSettings = ProcessorSettings(videoDimensions: videoDimensions, depthDimensions: depthDimensions, videoOrientation: videoOrientation)
     }
     
     // MARK: - Data Pipeline Setup
@@ -124,92 +127,90 @@ class DataOutputProcessor: NSObject {
                                                                        videoSettings: videoSettingsForDepthMap,
                                                                        transform: videoTransform,
                                                                        depthDataFormat: depthFormat)
-        
-        // Initialize landmarks file writer
-        guard let processorSettings = processorSettings else {
-            print("No processor settings found, cannot initialize face landmarks processor.")
-            return
+        // Initialize face landmarks processor
+        if let cameraViewController = cameraViewController {
+            faceLandmarksProcessor = FaceLandmarksProcessor(cameraViewController: cameraViewController, settings: processorSettings)
+        } else {
+            print("Failed to initialize face landmarks processor: camera view controller not found")
+        }
+    }
+    
+    private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
+        guard let connection = output.connection(with: .video) else {
+            print("Could not find the camera video connection")
+            return nil
+        }
+        // We set the desired destination video orientation here. The interface orientation is locked in portrait for this version
+        guard let destinationVideoOrientation = AVCaptureVideoOrientation(interfaceOrientation: .portrait) else {
+            print("Unsupported interface orientation")
+            return nil
         }
         
-        faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
-        //cameraViewController?.faceLandmarksFileWriter = faceLandmarksFileWriter
-        faceProcessor = FaceLandmarksProcessor(settings: processorSettings)
-        //cameraViewController?.faceProcessor = faceProcessor
+        // Compute transforms from the front camera's video orientation to the desired orientation
+        let cameraTransform = connection.videoOrientationTransform(relativeTo: destinationVideoOrientation)
+
+        return cameraTransform
     }
     
     // MARK: - Data Processing Methods
     func processDepth(depthData: AVDepthData, timestamp: CMTime) {
         
-        if processorSettings?.cameraCalibrationData == nil {
-            print("aaaaaaaaaaa")
-            let cameraIntrinsicData = depthData.cameraCalibrationData
-            processorSettings?.cameraCalibrationData = cameraIntrinsicData
+        // Upon receiving the first depth frame, set the camera calibration data in the processor settings
+        if processorSettings.cameraCalibrationData == nil {
+            if let cameraCalibrationData = depthData.cameraCalibrationData {
+                processorSettings.cameraCalibrationData = cameraCalibrationData
+            } else {
+                print("Failed to retrieve camera calibration data")
+            }
         }
         
         if recordingState != .idle {
             
-            // Ensure depth data is of the correct type
-            //let depthDataType = kCVPixelFormatType_DepthFloat32
-            let depthDataType = kCVPixelFormatType_DisparityFloat32
-            var convertedDepth: AVDepthData
-            
-            if depthData.depthDataType != depthDataType {
-                convertedDepth = depthData.converting(toDepthDataType: depthDataType)
-            } else {
-                convertedDepth = depthData
-            }
-            
-            DispatchQueue.main.async {
-                self.depthData = convertedDepth
-            }
-            
-            //convertedDepth.applyingExifOrientation(exifOrientationForCurrentDeviceOrientation())
-            //print(convertedDepth.depthDataQuality.rawValue)
-            /*
-            guard renderingEnabled else {
-                return
-            }
-            */
-            
-            if !videoDepthConverter.isPrepared {
-                var depthFormatDescription: CMFormatDescription?
-                CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                             imageBuffer: convertedDepth.depthDataMap,
-                                                             formatDescriptionOut: &depthFormatDescription)
-                if let unwrappedDepthFormatDescription = depthFormatDescription {
-                    videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+            recordingQueue.async {
+                // Ensure depth data is of the correct type
+                let depthDataType = kCVPixelFormatType_DepthFloat32
+                //let depthDataType = kCVPixelFormatType_DisparityFloat32
+                var convertedDepth: AVDepthData
+                
+                if depthData.depthDataType != depthDataType {
+                    convertedDepth = depthData.converting(toDepthDataType: depthDataType)
+                } else {
+                    convertedDepth = depthData
                 }
+                
+                if !self.videoDepthConverter.isPrepared {
+                    var depthFormatDescription: CMFormatDescription?
+                    CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                                 imageBuffer: convertedDepth.depthDataMap,
+                                                                 formatDescriptionOut: &depthFormatDescription)
+                    if let unwrappedDepthFormatDescription = depthFormatDescription {
+                        self.videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+                    }
+                }
+                
+                guard let depthPixelBuffer = self.videoDepthConverter.render(pixelBuffer: convertedDepth.depthDataMap) else {
+                    print("Unable to process depth")
+                    return
+                }
+                self.writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
             }
-            
-            guard let depthPixelBuffer = videoDepthConverter.render(pixelBuffer: convertedDepth.depthDataMap) else {
-                print("Unable to process depth")
-                return
-            }
-            
-            writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
         }
-        
     }
     
     func processVideo(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
         
-        let output = videoDataOutput
         if recordingState != .idle {
-            writeOutputToFile(output, sampleBuffer: sampleBuffer)
+            recordingQueue.async {
+                self.writeOutputToFile(self.videoDataOutput, sampleBuffer: sampleBuffer)
+            }
         }
-        
-        //autoreleasepool {
-        guard let visionProcessor = self.faceDetectionProcessor else {
-            print("Vision tracking processor not found.")
-            return
-        }
-        
         
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             print("Failed to obtain a CVPixelBuffer for the current output frame.")
             return
         }
-        
+        sampleBuffer.propagateAttachments(to: pixelBuffer)
+
         /*
         if !visionProcessor.isPrepared {
          guard let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) else {
@@ -228,85 +229,95 @@ class DataOutputProcessor: NSObject {
             return
         }
         */
-        
-        //visionTrackingQueue.async {
-        visionProcessor.performVisionRequests(on: pixelBuffer)
-        //}
-        //}
-        
-        // Change this to only update every other frame if necessary
-        if cameraViewController!.renderingEnabled {
-            cameraViewController!.previewView.pixelBuffer = pixelBuffer
+        if recordingState == .idle {
+            if let visionProcessor = self.faceDetectionProcessor {
+                visionProcessor.performVisionRequests(on: pixelBuffer)
+            } else {
+                print("Vision face detection processor not found.")
+            }
         }
+
+        if let cameraViewController = cameraViewController {
+            if cameraViewController.renderingEnabled {
+                cameraViewController.previewView.pixelBuffer = pixelBuffer
+            }
+        }
+
     }
     
     func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
         
-        let output = audioDataOutput
         if recordingState != .idle {
-            writeOutputToFile(output, sampleBuffer: sampleBuffer)
+            recordingQueue.async {
+                self.writeOutputToFile(self.audioDataOutput, sampleBuffer: sampleBuffer)
+            }
         }
-        
     }
     
     // MARK: - Data Recording
     
     func startRecording() {
-        // Create folder for all data files
-        guard let saveFolder = createFolder() else {
-            print("Failed to create save folder")
-            return
-        }
-        guard let audioURL = createFileURL(in: saveFolder, nameLabel: OutputType.audio.rawValue, fileType: audioFileSettings.fileExtension) else {
-            print("Failed to create audio file")
-            return
-        }
-        guard let videoURL = createFileURL(in: saveFolder, nameLabel: OutputType.video.rawValue, fileType: videoFileSettings.fileExtension) else {
-            print("Failed to create video file")
-            return
-        }
-        guard let depthMapURL = createFileURL(in: saveFolder, nameLabel: OutputType.depth.rawValue, fileType: depthMapFileSettings.fileExtension) else {
-            print("Failed to create depth map file")
-            return
-        }
-        guard let landmarksURL = createFileURL(in: saveFolder, nameLabel: OutputType.landmarks.rawValue, fileType: "csv") else {
-            print("Failed to create landmarks file")
-            return
-        }
-        guard let videoConfiguration = videoFileSettings.configuration,
-              let audioConfiguration = audioFileSettings.configuration,
-              let depthMapConfiguration = depthMapFileSettings.configuration else {
-            print("AV file configurations not found")
-            return
-        }
-        videoWriterSubject = FileWriterSubject()
-        audioWriterSubject = FileWriterSubject()
-        depthWriterSubject = FileWriterSubject()
+        self.recordingState = .start
         
-        let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL, OutputType.landmarks: landmarksURL]
-        savedRecordingsDataSource.saveRecording(saveFolder, outputFiles: fileDictionary)
+        // Initialize passthrough subjects to retrieve status from file writers
+        self.videoWriterSubject = FileWriterSubject()
+        self.audioWriterSubject = FileWriterSubject()
+        self.depthWriterSubject = FileWriterSubject()
         
-        do {
-            videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: videoWriterSubject!)
-        } catch {
-            print("Error creating video file writer: \(error)")
-        }
-        do {
-            audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration, subject: audioWriterSubject!)
-        } catch {
-            print("Error creating audio file writer: \(error)")
-        }
-        do {
-            depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration, subject: depthWriterSubject!)
-        } catch {
-            print("Error creating depth map file writer: \(error)")
-        }
-        guard (faceLandmarksFileWriter?.startDataCollection(path: landmarksURL)) != nil else {
-            print("No face landmarks file writer found, failed to access startDataCollection().")
-            return
+        recordingQueue.async {
+            // Create folder for all data files
+            guard let saveFolder = self.createFolder() else {
+                print("Failed to create save folder")
+                return
+            }
+            guard let audioURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.audio.rawValue, fileType: self.audioFileSettings.fileExtension) else {
+                print("Failed to create audio file")
+                return
+            }
+            guard let videoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.video.rawValue, fileType: self.videoFileSettings.fileExtension) else {
+                print("Failed to create video file")
+                return
+            }
+            guard let depthMapURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.depth.rawValue, fileType: self.depthMapFileSettings.fileExtension) else {
+                print("Failed to create depth map file")
+                return
+            }
+            guard let landmarksURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks.rawValue, fileType: "csv") else {
+                print("Failed to create landmarks file")
+                return
+            }
+            guard let videoConfiguration = self.videoFileSettings.configuration,
+                  let audioConfiguration = self.audioFileSettings.configuration,
+                  let depthMapConfiguration = self.depthMapFileSettings.configuration else {
+                print("AV file configurations not found")
+                return
+            }
+
+            let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL, OutputType.landmarks: landmarksURL]
+            self.savedRecordingsDataSource.saveRecording(saveFolder, outputFiles: fileDictionary)
+            
+            do {
+                self.videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: self.videoWriterSubject!)
+            } catch {
+                print("Error creating video file writer: \(error)")
+            }
+            do {
+                self.audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration, subject: self.audioWriterSubject!)
+            } catch {
+                print("Error creating audio file writer: \(error)")
+            }
+            do {
+                self.depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration, subject: self.depthWriterSubject!)
+            } catch {
+                print("Error creating depth map file writer: \(error)")
+            }
+            guard (self.faceLandmarksProcessor?.faceLandmarksFileWriter.prepare(saveURL: landmarksURL)) != nil else {
+                print("No face landmarks processor found. Failed to prepare landmarks file writer.")
+                return
+            }
         }
         
-        fileWritingDone = videoWriterSubject!.combineLatest(depthWriterSubject!, audioWriterSubject!)
+        self.fileWritingDone = self.videoWriterSubject!.combineLatest(self.depthWriterSubject!, self.audioWriterSubject!)
         .sink(receiveCompletion: { [weak self] completion in
             self?.handleRecordingFinish(completion: completion)
         }, receiveValue: { [weak self] state in
@@ -314,13 +325,16 @@ class DataOutputProcessor: NSObject {
                 self?.recordingState = .recording
             }
         })
-        recordingState = .start
+        
     }
     
     func stopRecording() {
         videoFileWriter?.endRecording()
         audioFileWriter?.endRecording()
         depthMapFileWriter?.endRecording()
+        videoFileWriter = nil
+        audioFileWriter = nil
+        depthMapFileWriter = nil
         recordingState = .finish
     }
     
@@ -339,19 +353,6 @@ class DataOutputProcessor: NSObject {
             break
         }
         recordingState = .idle
-    }
-
-    private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
-        guard let connection = output.connection(with: .video) else {
-                print("Could not find the camera video connection")
-                return nil
-        }
-        let videoOrientation: AVCaptureVideoOrientation = .portrait
-        
-        // Compute transforms from the front camera's video orientation to the device's orientation
-        let cameraTransform = connection.videoOrientationTransform(relativeTo: videoOrientation)
-
-        return cameraTransform
     }
     
     // MARK: - File Writing
@@ -438,7 +439,6 @@ class DataOutputProcessor: NSObject {
             if audioWriter.writeState == .inactive {
                 audioWriter.start(at: presentationTime)
             }
-            //fallthrough
         case .recording:
             // Alternatively we could check the connection instead, but since there's just one connection to each output this is equivalent
             if output === videoDataOutput {
@@ -455,15 +455,15 @@ class DataOutputProcessor: NSObject {
     // MARK: - Face Landmarks Post-Processing
     
     func startTracking() {
-        // Load RGB and depth map video files from saved URLs
-        guard let (videoAsset, depthAsset) = loadAssets() else {
-            return
-        }
-        
-        // Initialize Vision tracker processor
-        visionProcessor = VisionTrackerProcessor(videoAsset: videoAsset, depthAsset: depthAsset, cameraIntrinsicData: processorSettings?.cameraCalibrationData)
-        visionProcessor?.delegate = self
         visionTrackingQueue.async {
+            // Load RGB and depth map video files from saved URLs
+            guard let (videoAsset, depthAsset) = self.loadAssets() else {
+                return
+            }
+            
+            // Initialize Vision tracker processor
+            self.visionProcessor = VisionTrackerProcessor(videoAsset: videoAsset, depthAsset: depthAsset, processorSettings: self.processorSettings)
+            self.visionProcessor?.delegate = self.faceLandmarksProcessor
             do {
                 try self.visionProcessor?.performTracking()
             } catch {
@@ -598,36 +598,7 @@ extension DataOutputProcessor: VisionFaceDetectionProcessorDelegate {
     }
 }
 
-// MARK: - VisionTrackerProcessorDelegate Methods
 
-extension DataOutputProcessor: VisionTrackerProcessorDelegate {
-    
-    func recordLandmarks(of faceObservation: VNFaceObservation, with depthMap: CVPixelBuffer?, frame: Int) {
-        // Write face observation results to file if collecting data.
-        // Perform data collection in background queue so that it does not hold up the UI.
-        
-        guard let landmarksProcessor = self.faceProcessor,
-              let landmarksFileWriter = self.faceLandmarksFileWriter else {
-            print("No face landmarks processor and/or file writer found, failed to write to file.")
-            return
-        }
-        
-        let (boundingBox, landmarks) = landmarksProcessor.processFace(faceObservation, with: self.depthData, settings: sessionManager.processorSettings)
-        landmarksFileWriter.writeToCSV(boundingBox: boundingBox, landmarks: landmarks)
-        
-        // Display the frame counter on the UI
-        cameraViewController?.displayFrameCounter(frame)
-    }
-    
-    func didFinishTracking() {
-        faceLandmarksFileWriter?.reset()
-        DispatchQueue.main.async {
-            self.cameraViewController?.trackingState = .stopped
-            self.cameraViewController?.processingMode = .record
-        }
-    }
-    
-}
 
 /*
 // MARK: - AVCaptureVideoDataOutputSampleBufferDelegate

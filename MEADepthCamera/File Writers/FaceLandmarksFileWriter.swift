@@ -12,7 +12,7 @@ class FaceLandmarksFileWriter: FileWriter {
     
     private var numLandmarks: Int
     
-    private var savePath: URL?
+    private var saveURL: URL?
     private var startTime: Date?
     private var frameCount: Int = 0
     
@@ -20,17 +20,22 @@ class FaceLandmarksFileWriter: FileWriter {
         self.numLandmarks = numLandmarks
     }
     
-    func startDataCollection(path: URL) {
+    func prepare(saveURL: URL) {
         // Create and write column labels
-        createLabels(fileURL: path)
-        self.savePath = path
+        createLabels(fileURL: saveURL)
+        self.saveURL = saveURL
         self.startTime = Date()
         self.frameCount = 0
     }
     
-    private func createInfoRow() {
-        
+    func reset() {
+        saveURL = nil
+        startTime = nil
     }
+    
+//    private func createInfoRow() {
+//
+//    }
     
     private func createLabels(fileURL: URL) {
         // Create string with appropriate column labels
@@ -48,7 +53,7 @@ class FaceLandmarksFileWriter: FileWriter {
     }
     
     func writeToCSV(boundingBox: CGRect, landmarks: [vector_float3]) {
-        guard let path = savePath, let start = startTime else {
+        guard let path = saveURL, let start = startTime else {
             print("No save path found")
             return
         }
@@ -90,8 +95,4 @@ class FaceLandmarksFileWriter: FileWriter {
         frameCount += 1
     }
     
-    func reset() {
-        savePath = nil
-        startTime = nil
-    }
 }

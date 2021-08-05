@@ -10,7 +10,7 @@ import Metal
 
 class PointCloudProcessor {
     
-    var numLandmarks: Int
+    private var processorSettings: ProcessorSettings
     
     var description: String = "Point Cloud Processor"
     
@@ -35,8 +35,8 @@ class PointCloudProcessor {
     var inputBufferSize: Int
     var outputBufferSize: Int
     
-    required init(numLandmarks: Int) {
-        self.numLandmarks = numLandmarks
+    init(settings: ProcessorSettings) {
+        self.processorSettings = settings
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
         let kernelFunction = defaultLibrary.makeFunction(name: "pointCloudKernel")
         do {
@@ -44,8 +44,8 @@ class PointCloudProcessor {
         } catch {
             fatalError("Unable to create depth converter pipeline state. (\(error))")
         }
-        inputBufferSize = MemoryLayout<vector_float2>.stride * numLandmarks
-        outputBufferSize = MemoryLayout<vector_float3>.stride * numLandmarks
+        inputBufferSize = MemoryLayout<vector_float2>.stride * processorSettings.numLandmarks
+        outputBufferSize = MemoryLayout<vector_float3>.stride * processorSettings.numLandmarks
     }
     /*
     static private func allocateOutputBuffers() {
@@ -91,13 +91,13 @@ class PointCloudProcessor {
     }
     
     // MARK: Point Cloud Rendering
-    func render(landmarks: [vector_float2], depthData: AVDepthData) {
+    func render(landmarks: [vector_float2], depthFrame: CVPixelBuffer) {
         if !isPrepared {
             assertionFailure("Invalid state: Not prepared")
             return
         }
         
-        let depthFrame: CVPixelBuffer = depthData.depthDataMap
+        //let depthFrame: CVPixelBuffer = depthData.depthDataMap
         
         guard let inputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: depthFrame, textureFormat: inputTextureFormat) else {
             print("Depth data input buffer not found")
@@ -105,8 +105,8 @@ class PointCloudProcessor {
         }
         
         // Get camera instrinsics
-        guard var intrinsics: float3x3 = depthData.cameraCalibrationData?.intrinsicMatrix,
-              let referenceDimensions: CGSize = depthData.cameraCalibrationData?.intrinsicMatrixReferenceDimensions else {
+        guard var intrinsics: float3x3 = processorSettings.cameraCalibrationData?.intrinsicMatrix,
+              let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions else {
             print("Could not find camera calibration data")
             return
         }
@@ -136,10 +136,10 @@ class PointCloudProcessor {
         commandEncoder.setBuffer(pointCloudBuffer, offset: 0, index: Int(BufferIndexPointCloudOutput.rawValue))
         
         // Set up the thread groups.
-        let gridSize: MTLSize = MTLSizeMake(numLandmarks, 1, 1)
+        let gridSize: MTLSize = MTLSizeMake(processorSettings.numLandmarks, 1, 1)
         var threadgroupSize = computePipelineState!.maxTotalThreadsPerThreadgroup
-        if threadgroupSize > numLandmarks {
-            threadgroupSize = numLandmarks
+        if threadgroupSize > processorSettings.numLandmarks {
+            threadgroupSize = processorSettings.numLandmarks
         }
         let threadsPerThreadgroup: MTLSize = MTLSizeMake(threadgroupSize, 1, 1)
         /*

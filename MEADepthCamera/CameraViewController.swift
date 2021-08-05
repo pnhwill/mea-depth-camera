@@ -27,24 +27,17 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var frameCounterLabel: UILabel!
     @IBOutlet private weak var startStopButton: UIButton!
     private var spinner: UIActivityIndicatorView!
-    var processingMode: ProcessingMode = .record {
-        didSet {
-            self.handleProcessingModeChange()
-        }
-    }
-    
-    // Capture data output delegate
-    private var dataOutputProcessor: DataOutputProcessor?
-    
+
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
     
     private var isSessionRunning = false
     
+    // Capture data output delegate
+    private var dataOutputProcessor: DataOutputProcessor?
+    
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
-    
-    var renderingEnabled = true
     
     // Layer UI for drawing Vision results
     var previewLayer: CALayer?
@@ -57,11 +50,18 @@ class CameraViewController: UIViewController {
         }
     }
     
+    // App state
+    var processingMode: ProcessingMode = .record {
+        didSet {
+            self.handleProcessingModeChange()
+        }
+    }
     var trackingState: TrackingState = .stopped {
         didSet {
             self.handleTrackingStateChange()
         }
     }
+    var renderingEnabled = true
     
     // Face guidelines alignment
     var isAligned: Bool = false {
@@ -70,12 +70,8 @@ class CameraViewController: UIViewController {
         }
     }
     
-    // Dispatch queues
-    var sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
-    var dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-//    var videoOutputQueue = DispatchQueue(label: "video data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-//    var audioOutputQueue = DispatchQueue(label: "audio data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-//    var depthOutputQueue = DispatchQueue(label: "depth data queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    // Session queue
+    let sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -87,6 +83,10 @@ class CameraViewController: UIViewController {
         
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
+        
+        sessionQueue.async {
+            self.sessionManager = CaptureSessionManager(cameraViewController: self)
+        }
         
         /*
          Check the video authorization status. Video access is required and audio
@@ -125,14 +125,13 @@ class CameraViewController: UIViewController {
          that the main queue isn't blocked, which keeps the UI responsive.
          */
         sessionQueue.async {
-            self.sessionManager = CaptureSessionManager(cameraViewController: self)
             self.sessionManager.configureSession()
             self.dataOutputProcessor = self.sessionManager.dataOutputProcessor
         }
         // Configure the progress spinner
         DispatchQueue.main.async {
             self.spinner = UIActivityIndicatorView(style: .large)
-            self.spinner.color = UIColor.yellow
+            self.spinner.color = UIColor.systemBlue
             self.view.addSubview(self.spinner)
         }
     }
@@ -156,9 +155,6 @@ class CameraViewController: UIViewController {
             case .success:
                 
                 // Only setup observers and start the session running if setup succeeded
-                DispatchQueue.main.async {
-                    self.designatePreviewLayer()
-                }
                 
                 // Set up preview Metal View orientation
                 if let unwrappedVideoDataOutputConnection = self.sessionManager.videoDataOutput.connection(with: .video) {
@@ -176,7 +172,7 @@ class CameraViewController: UIViewController {
                 
                 self.addObservers()
                 
-                self.dataOutputQueue.async {
+                self.sessionManager.dataOutputQueue.async {
                     self.renderingEnabled = true
                 }
                 
@@ -216,7 +212,7 @@ class CameraViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         //dataOutputProcessor?.visionProcessor?.cancelTracking()
-        self.dataOutputQueue.async {
+        sessionManager.dataOutputQueue.async {
             self.renderingEnabled = false
         }
         sessionQueue.async {
@@ -237,10 +233,9 @@ class CameraViewController: UIViewController {
     @objc
     func didEnterBackground(notification: NSNotification) {
         // Free up resources.
-        dataOutputQueue.async {
+        sessionManager.dataOutputQueue.async {
             self.renderingEnabled = false
-            //self.dataOutputProcessor?.visionProcessor?.reset()
-            //self.dataOutputProcessor.videoDepthConverter.reset()
+            self.dataOutputProcessor?.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
             self.previewView.flushTextureCache()
         }
@@ -248,7 +243,7 @@ class CameraViewController: UIViewController {
     
     @objc
     func willEnterForeground(notification: NSNotification) {
-        dataOutputQueue.async {
+        sessionManager.dataOutputQueue.async {
             self.renderingEnabled = true
         }
     }
@@ -263,17 +258,7 @@ class CameraViewController: UIViewController {
     
     func showThermalState(state: ProcessInfo.ThermalState) {
         DispatchQueue.main.async {
-            var thermalStateString = "UNKNOWN"
-            if state == .nominal {
-                thermalStateString = "NOMINAL"
-            } else if state == .fair {
-                thermalStateString = "FAIR"
-            } else if state == .serious {
-                thermalStateString = "SERIOUS"
-            } else if state == .critical {
-                thermalStateString = "CRITICAL"
-            }
-            let message = NSLocalizedString("Thermal state: \(thermalStateString)", comment: "Alert message when thermal state has changed")
+            let message = NSLocalizedString("Thermal state: \(state.thermalStateString)", comment: "Alert message when thermal state has changed")
             let actions = [UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil)]
             self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
         }
@@ -481,23 +466,9 @@ class CameraViewController: UIViewController {
     }
     
     private func displayPressureState(systemPressureState: AVCaptureDevice.SystemPressureState) {
-        let pressureLevel = systemPressureState.level
         //let pressureFactors = systemPressureState.factors
-        var pressureLevelString = "UNKNOWN"
-        if pressureLevel == .nominal {
-            pressureLevelString = "NOMINAL"
-        } else if pressureLevel == .fair {
-            pressureLevelString = "FAIR"
-        } else if pressureLevel == .serious {
-            pressureLevelString = "SERIOUS"
-        } else if pressureLevel == .critical {
-            pressureLevelString = "CRITICAL"
-        } else if pressureLevel == .shutdown {
-            print("Session stopped running due to shutdown system pressure level.")
-            pressureLevelString = "SHUTDOWN"
-        }
-        print("System pressure state is now \(pressureLevelString)")
-        let message = NSLocalizedString("System pressure level: \(pressureLevelString)", comment: "Alert message when system pressure level has changed")
+        print("System pressure state is now \(systemPressureState.pressureLevelString)")
+        let message = NSLocalizedString("System pressure level: \(systemPressureState.pressureLevelString)", comment: "Alert message when system pressure level has changed")
         let actions = [UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil)]
         self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
     }
@@ -538,10 +509,14 @@ class CameraViewController: UIViewController {
     // MARK: - Toggle Recording
     
     @IBAction private func toggleRecording(_ sender: UIButton) {
+        guard processingMode == .record else {
+            return
+        }
+        
         // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
-        dataOutputQueue.async {
+        sessionManager.dataOutputQueue.async {
             defer {
                 DispatchQueue.main.async {
                     // Enable the Record button to let the user stop or start another recording
@@ -579,55 +554,21 @@ class CameraViewController: UIViewController {
         }
     }
     
-    private func updateRecordButtonWithRecordingState(_ recordingState: RecordingState) {
-        var isRecording: Bool {
-            switch recordingState {
-            case .idle, .finish:
-                return false
-            case .recording, .start:
-                return true
-            }
+    func updateRecordButtonWithRecordingState(_ recordingState: RecordingState) {
+        var recordButtonImage: UIImage?
+        switch recordingState {
+        case .idle, .finish:
+            recordButtonImage = UIImage(systemName: "record.circle.fill")
+        case .recording, .start:
+            recordButtonImage = UIImage(systemName: "stop.circle")
         }
-        //let color = isRecording ? UIColor.red : UIColor.yellow
-        //let title = isRecording ? "Stop" : "Record"
-        //recordButton.tintColor = color
-        //recordButton.setTitleColor(color, for: .normal)
-        //recordButton.setTitle(title, for: .normal)
-        let image = isRecording ? UIImage(systemName: "stop.circle") : UIImage(systemName: "record.circle.fill")
-        recordButton.setBackgroundImage(image, for: [])
+        recordButton.setBackgroundImage(recordButtonImage, for: [])
     }
     
     // MARK: - Face Detection Preview
     
-    private func designatePreviewLayer() {
-        let videoPreviewLayer = previewView.layer
-        self.previewLayer = videoPreviewLayer
-        
-        videoPreviewLayer.name = "CameraPreview"
-        videoPreviewLayer.backgroundColor = UIColor.black.cgColor
-        videoPreviewLayer.contentsGravity = .resizeAspect
-        
-        videoPreviewLayer.masksToBounds = true
-    }
-    
-    /*
-    func displayMetrics(confidence: VNConfidence?) {
-        guard renderingEnabled else {
-            return
-        }
-        // Update UI labels on the main queue
-        DispatchQueue.main.async {
-            if let confidence = confidence {
-                self.confidenceLabel.isHidden = false
-                let confidenceText = String(format: "%.3f", confidence)
-                self.confidenceLabel.text = "Face Landmarks Confidence: " + confidenceText
-            }
-        }
-    }
-    */
-    
     func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        guard let rootView = previewView, renderingEnabled else {
+        guard let rootView = previewView, renderingEnabled, let settings = dataOutputProcessor?.processorSettings else {
             //print("Preview view not found/rendering disabled")
             return
         }
@@ -639,7 +580,7 @@ class CameraViewController: UIViewController {
                 if let existingView = reusableViews.popLast() {
                     existingView.faceObservation = observation
                 } else {
-                    let newView = FaceObservationOverlayView(faceObservation: observation, settings: self.sessionManager.processorSettings)
+                    let newView = FaceObservationOverlayView(faceObservation: observation, settings: settings)
                     rootView.addSubview(newView)
                 }
             }
@@ -653,6 +594,7 @@ class CameraViewController: UIViewController {
     // MARK: - Face Alignment Indicator
     
     func updateIndicator() {
+        guard renderingEnabled else { return }
         DispatchQueue.main.async {
             self.indicatorImage.image = self.isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
             self.indicatorImage.tintColor = self.isAligned ? UIColor.systemGreen : UIColor.systemRed
@@ -679,11 +621,27 @@ class CameraViewController: UIViewController {
         case .track:
             // Switch from live recording mode to post-processing mode
             self.startStopButton.isHidden = false
-            self.renderingEnabled = false
+            sessionManager.dataOutputQueue.async {
+                self.renderingEnabled = false
+            }
+            sessionQueue.async {
+                if self.sessionManager.setupResult == .success {
+                    self.sessionManager.session.stopRunning()
+                    self.isSessionRunning = self.sessionManager.session.isRunning
+                }
+            }
         case .record:
             // Switch back to live recording mode
             self.startStopButton.isHidden = true
-            self.renderingEnabled = true
+            sessionManager.dataOutputQueue.async {
+                self.renderingEnabled = true
+            }
+            sessionQueue.async {
+                if self.sessionManager.setupResult == .success {
+                    self.sessionManager.session.startRunning()
+                    self.isSessionRunning = self.sessionManager.session.isRunning
+                }
+            }
         }
     }
     
@@ -744,13 +702,5 @@ class CameraViewController: UIViewController {
         
         self.present(alertController, animated: true, completion: nil)
     }
-    
-//    func presentErrorAlert(withTitle title: String = "Unexpected Failure", message: String) {
-//        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
-//        self.present(alertController, animated: true)
-//    }
-//    func presentError(_ error: NSError) {
-//        self.presentErrorAlert(withTitle: "Failed with error \(error.code)", message: error.localizedDescription)
-//    }
     
 }

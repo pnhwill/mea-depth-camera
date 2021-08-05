@@ -143,11 +143,8 @@ class FaceObservationOverlayView: UIView {
         
         CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
         
-        // Check if video resolution is in portrait and rotate 90 degrees if not
-        let isPortrait = captureDeviceResolution.width <= captureDeviceResolution.height
-        let portraitResolution = isPortrait ? captureDeviceResolution : captureDeviceResolution.applying(CGAffineTransform(rotationAngle: radiansForDegrees(90)))
         // Scale the video resolution to fit within root layer bounds while maintaining the aspect ratio
-        let scaledAspectRect = AVMakeRect(aspectRatio: portraitResolution, insideRect: rootLayer.bounds)
+        let scaledAspectRect = AVMakeRect(aspectRatio: captureDeviceResolution, insideRect: rootLayer.bounds)
         // Get standardized rect with origin at 0
         let videoPreviewRect = VNImageRectForNormalizedRect(CGRect(x: 0, y: 0, width: 1, height: 1), Int(scaledAspectRect.width), Int(scaledAspectRect.height))
         
