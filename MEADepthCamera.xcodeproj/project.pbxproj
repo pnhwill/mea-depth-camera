@@ -41,6 +41,8 @@
 		B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5ABE86026AA076F003D2AFD /* LICENSE.txt */; };
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
 		B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */; };
+		B5BE267C26BCD452008EABAA /* GrayscaleToDepthConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */; };
+		B5BE267E26BCDB10008EABAA /* GrayscaleToDepth.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */; };
 		B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3F926B2183C00CB1241 /* PassThrough.metal */; };
 		B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
@@ -109,6 +111,8 @@
 		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
 		B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = minMaxFromBuffer.m; sourceTree = "<group>"; };
 		B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = minMaxFromBuffer.h; sourceTree = "<group>"; };
+		B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleToDepthConverter.swift; sourceTree = "<group>"; };
+		B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GrayscaleToDepth.metal; sourceTree = "<group>"; };
 		B5D4E3F926B2183C00CB1241 /* PassThrough.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PassThrough.metal; sourceTree = "<group>"; };
 		B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewMetalView.swift; sourceTree = "<group>"; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
@@ -250,6 +254,7 @@
 			children = (
 				B518049126ACBB0F0036F104 /* ShaderTypes.h */,
 				B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */,
+				B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */,
 				B56F2EA626AB654B00998C27 /* PointCloud.metal */,
 				B5D4E3F926B2183C00CB1241 /* PassThrough.metal */,
 			);
@@ -283,6 +288,7 @@
 			children = (
 				B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */,
 				B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */,
+				B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */,
 				B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */,
 				B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */,
 			);
@@ -434,10 +440,12 @@
 				B50787D626AF73D60077ACCB /* FaceLandmarksProcessor.swift in Sources */,
 				B575413F26B8E077004ED4E4 /* VisionTrackerProcessor.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
+				B5BE267C26BCD452008EABAA /* GrayscaleToDepthConverter.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
+				B5BE267E26BCDB10008EABAA /* GrayscaleToDepth.metal in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,

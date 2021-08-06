@@ -607,7 +607,7 @@ class CameraViewController: UIViewController {
         switch trackingState {
         case .tracking:
             // Stop tracking
-            self.dataOutputProcessor?.visionProcessor?.cancelTracking()
+            self.dataOutputProcessor?.visionTrackerProcessor?.cancelTracking()
             self.trackingState = .stopped
         case .stopped:
             // Initialize processor and start tracking

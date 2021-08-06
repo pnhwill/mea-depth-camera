@@ -5,8 +5,6 @@
 //  Created by Will on 8/2/21.
 //
 /*
- See LICENSE folder for this sample’s licensing information.
- 
  Abstract:
  Contains the face tracker post-processing logic using Vision.
  */
@@ -40,15 +38,19 @@ class VisionTrackerProcessor {
     
     private var cancelRequested = false
     
+    // Depth conversion
+    let videoGrayscaleConverter = GrayscaleToDepthConverter()
+    
     init(videoAsset: AVAsset, depthAsset: AVAsset, processorSettings: ProcessorSettings) {
         self.videoAsset = videoAsset
         self.depthAsset = depthAsset
         self.processorSettings = processorSettings
     }
     
+    // MARK: Read Video and Perform Tracking
     func performTracking() throws {
-        guard let videoReader = VideoReader(videoAsset: videoAsset),
-              let depthReader = VideoReader(videoAsset: depthAsset) else {
+        guard let videoReader = VideoReader(videoAsset: videoAsset, videoDataType: .video),
+              let depthReader = VideoReader(videoAsset: depthAsset, videoDataType: .depth) else {
             throw VisionTrackerProcessorError.readerInitializationFailed
         }
         self.videoReader = videoReader
@@ -65,6 +67,21 @@ class VisionTrackerProcessor {
         var frames = 1
         
         var nextDepthFrame: CMSampleBuffer? = depthReader.nextFrame()
+        var nextDepthImage: CVPixelBuffer?
+        if let depthFrame = nextDepthFrame {
+            nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
+        }
+        
+        // Prepare the depth to grayscale converter and depth map file configuration
+        if !self.videoGrayscaleConverter.isPrepared, let depthImage = nextDepthImage {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: depthImage,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                self.videoGrayscaleConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+            }
+        }
         
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?) throws {
             try performVisionRequests(on: video, completion: { faceObservation in
@@ -85,7 +102,17 @@ class VisionTrackerProcessor {
             }
             
             // We may run out of depth frames before video frames, but we don't want to break the loop
-            if let depthFrame = nextDepthFrame, let depthImage = CMSampleBufferGetImageBuffer(depthFrame) {
+            if let depthFrame = nextDepthFrame, var depthImage = nextDepthImage {
+                
+                // Convert the depth image from grayscale RGB to depth float, if we haven't already
+                if CVPixelBufferGetPixelFormatType(depthImage) != kCVPixelFormatType_DepthFloat32 {
+                    if let convertedDepthImage = videoGrayscaleConverter.render(pixelBuffer: depthImage) {
+                        depthImage = convertedDepthImage
+                    } else {
+                        print("Failed to convert from grayscale to depth")
+                    }
+                }
+                
                 let videoTimeStamp = videoFrame.presentationTimeStamp
                 let depthTimeStamp = depthFrame.presentationTimeStamp
                 // If there is a dropped frame, then the videos will become misaligned and it will never record the depth data, so we must compare the timestamps
@@ -115,11 +142,15 @@ class VisionTrackerProcessor {
             
             // Get the next depth frame from the reader
             nextDepthFrame = depthReader.nextFrame()
+            if let depthFrame = nextDepthFrame {
+                nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
+            }
         }
         
         delegate?.didFinishTracking()
-        
     }
+    
+    // MARK: Vision Requests
     
     private func prepareVisionRequest() {
         //self.trackingRequests = []

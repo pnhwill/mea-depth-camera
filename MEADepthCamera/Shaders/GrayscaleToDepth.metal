@@ -1,14 +1,12 @@
 //
-//  DepthToGrayscale.metal
+//  GrayscaleToDepth.metal
 //  MEADepthCamera
 //
-//  Created by Will on 7/22/21.
+//  Created by Will on 8/5/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
-Metal compute shader that translates depth values to grayscale RGB values.
+Metal compute shader that translates grayscale RGB values to depth values.
 */
 
 #include <metal_stdlib>
@@ -18,7 +16,7 @@ using namespace metal;
 #import "ShaderTypes.h"
 
 // Compute kernel
-kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [[ texture(TextureIndexInput) ]],
+kernel void grayscaleToDepth(texture2d<float, access::read>  inputTexture      [[ texture(TextureIndexInput) ]],
                              texture2d<float, access::write> outputTexture     [[ texture(TextureIndexOutput) ]],
                              constant ConverterParameters& converterParameters [[ buffer(BufferIndexConverterParameters) ]],
                              uint2 gid [[ thread_position_in_grid ]])
@@ -28,14 +26,13 @@ kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [
         return;
     }
     
-    float depth = inputTexture.read(gid).x;
+    float4 grayscale = inputTexture.read(gid).x;
     
     // Normalize the value between 0 and 1.
     //depth = (depth - converterParameters.offset) / (converterParameters.range);
-    // NOTE: with normalization disabled, the pixel conversion when it is written to the texture clamps the values between 0 and 1 and then scales to [0,255].
-    // i.e. all depth data beyond 1 meter is discarded during this operation
     
-    float4 outputColor = float4(float3(depth), 1.0);
+    // The first three components (red, green, and blue) are all the same so we can choose any of them as our output depth
+    float outputDepth = grayscale.r;
     
-    outputTexture.write(outputColor, gid);
+    outputTexture.write(outputDepth, gid);
 }

@@ -36,10 +36,8 @@ class DataOutputProcessor: NSObject {
     
     // Real time Vision requests
     private(set) var faceDetectionProcessor: VisionFaceDetectionProcessor?
-
     
     // AV file writing
-    
     private var videoFileWriter: VideoFileWriter<FileWriterSubject>?
     private var audioFileWriter: AudioFileWriter<FileWriterSubject>?
     private var depthMapFileWriter: DepthMapFileWriter<FileWriterSubject>?
@@ -71,7 +69,7 @@ class DataOutputProcessor: NSObject {
     var fileWritingDone: AnyCancellable?
     
     // Face landmarks post-processing
-    var visionProcessor: VisionTrackerProcessor?
+    var visionTrackerProcessor: VisionTrackerProcessor?
     private var faceLandmarksProcessor: FaceLandmarksProcessor?
     private let savedRecordingsDataSource = SavedRecordingsDataSource()
     var totalFrames: Int?
@@ -98,7 +96,7 @@ class DataOutputProcessor: NSObject {
         self.faceDetectionProcessor?.delegate = self
         
         // Get source media formats
-        guard let videoFormat = sessionManager.videoFormatDescription, let depthFormat = sessionManager.depthDataFormatDescription else {
+        guard let videoFormat = sessionManager.videoFormatDescription else {
             print("Failed to retrieve source media format descriptions")
             return
         }
@@ -125,14 +123,7 @@ class DataOutputProcessor: NSObject {
         let videoSettingsForDepthMap = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapFileSettings.fileType)
         depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType,
                                                                        videoSettings: videoSettingsForDepthMap,
-                                                                       transform: videoTransform,
-                                                                       depthDataFormat: depthFormat)
-        // Initialize face landmarks processor
-        if let cameraViewController = cameraViewController {
-            faceLandmarksProcessor = FaceLandmarksProcessor(cameraViewController: cameraViewController, settings: processorSettings)
-        } else {
-            print("Failed to initialize face landmarks processor: camera view controller not found")
-        }
+                                                                       transform: videoTransform)
     }
     
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
@@ -155,39 +146,61 @@ class DataOutputProcessor: NSObject {
     // MARK: - Data Processing Methods
     func processDepth(depthData: AVDepthData, timestamp: CMTime) {
         
-        // Upon receiving the first depth frame, set the camera calibration data in the processor settings
+        // We need to do additional setup upon receiving the first depth frame
+        
+        // Set the camera calibration data in the processor settings
         if processorSettings.cameraCalibrationData == nil {
             if let cameraCalibrationData = depthData.cameraCalibrationData {
                 processorSettings.cameraCalibrationData = cameraCalibrationData
             } else {
                 print("Failed to retrieve camera calibration data")
             }
+            // Initialize face landmarks processor once we have the processor settings
+            if let cameraViewController = cameraViewController {
+                faceLandmarksProcessor = FaceLandmarksProcessor(cameraViewController: cameraViewController, settings: processorSettings)
+            } else {
+                print("Failed to initialize face landmarks processor: camera view controller not found")
+            }
+        }
+        
+        // Ensure depth data is of the correct type
+        let depthDataType = kCVPixelFormatType_DepthFloat32
+        var convertedDepth: AVDepthData
+        if depthData.depthDataType != depthDataType {
+            convertedDepth = depthData.converting(toDepthDataType: depthDataType)
+        } else {
+            convertedDepth = depthData
+        }
+        
+        // Prepare the depth to grayscale converter and depth map file configuration
+        if !self.videoDepthConverter.isPrepared {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: convertedDepth.depthDataMap,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                self.videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+                
+                // Since the depth map frames are converted from DepthFloat32 to 32BGRA pixel format by the converter,
+                //  we need to set the source video format and source pixel buffer attributes in our file configuration to match.
+                // The output format description is set inside the prepare() method call, so we can safely do this as soon as it returns.
+                if var depthMapFileConfiguration = self.depthMapFileSettings.configuration as? DepthMapFileConfiguration,
+                   let grayscaleFormat = self.videoDepthConverter.outputFormatDescription {
+                    depthMapFileConfiguration.sourceVideoFormat = grayscaleFormat
+                    depthMapFileConfiguration.sourcePixelBufferAttributes = DepthToGrayscaleConverter.createOutputPixelBufferAttributes(from: unwrappedDepthFormatDescription)
+                    let inputDimensions = CMVideoFormatDescriptionGetDimensions(unwrappedDepthFormatDescription)
+                    depthMapFileConfiguration.videoSettings?["AVVideoWidthKey"] = Int(inputDimensions.width)
+                    depthMapFileConfiguration.videoSettings?["AVVideoHeightKey"] = Int(inputDimensions.height)
+                    self.depthMapFileSettings.configuration = depthMapFileConfiguration
+                } else {
+                    print("Failed to set depth map source format in file configuration")
+                }
+            }
         }
         
         if recordingState != .idle {
-            
             recordingQueue.async {
-                // Ensure depth data is of the correct type
-                let depthDataType = kCVPixelFormatType_DepthFloat32
-                //let depthDataType = kCVPixelFormatType_DisparityFloat32
-                var convertedDepth: AVDepthData
-                
-                if depthData.depthDataType != depthDataType {
-                    convertedDepth = depthData.converting(toDepthDataType: depthDataType)
-                } else {
-                    convertedDepth = depthData
-                }
-                
-                if !self.videoDepthConverter.isPrepared {
-                    var depthFormatDescription: CMFormatDescription?
-                    CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                                 imageBuffer: convertedDepth.depthDataMap,
-                                                                 formatDescriptionOut: &depthFormatDescription)
-                    if let unwrappedDepthFormatDescription = depthFormatDescription {
-                        self.videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
-                    }
-                }
-                
+                // Convert the depth map to a video format accepted by the AVAssetWriter, then write to file
                 guard let depthPixelBuffer = self.videoDepthConverter.render(pixelBuffer: convertedDepth.depthDataMap) else {
                     print("Unable to process depth")
                     return
@@ -325,7 +338,6 @@ class DataOutputProcessor: NSObject {
                 self?.recordingState = .recording
             }
         })
-        
     }
     
     func stopRecording() {
@@ -462,10 +474,10 @@ class DataOutputProcessor: NSObject {
             }
             
             // Initialize Vision tracker processor
-            self.visionProcessor = VisionTrackerProcessor(videoAsset: videoAsset, depthAsset: depthAsset, processorSettings: self.processorSettings)
-            self.visionProcessor?.delegate = self.faceLandmarksProcessor
+            self.visionTrackerProcessor = VisionTrackerProcessor(videoAsset: videoAsset, depthAsset: depthAsset, processorSettings: self.processorSettings)
+            self.visionTrackerProcessor?.delegate = self.faceLandmarksProcessor
             do {
-                try self.visionProcessor?.performTracking()
+                try self.visionTrackerProcessor?.performTracking()
             } catch {
                 self.cameraViewController?.handleTrackerError(error)
             }

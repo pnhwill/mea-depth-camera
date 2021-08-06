@@ -131,7 +131,7 @@ class PointCloudProcessor {
         commandEncoder.label = description
         commandEncoder.setComputePipelineState(computePipelineState!)
         commandEncoder.setBytes(landmarks, length: inputBufferSize, index: Int(BufferIndexLandmarksInput.rawValue))
-        commandEncoder.setTexture(inputTexture, index: Int(TextureIndexDepthInput.rawValue))
+        commandEncoder.setTexture(inputTexture, index: Int(TextureIndexInput.rawValue))
         commandEncoder.setBytes(&intrinsics, length: MemoryLayout<float3x3>.size, index: Int(BufferIndexCameraIntrinsicsInput.rawValue))
         commandEncoder.setBuffer(pointCloudBuffer, offset: 0, index: Int(BufferIndexPointCloudOutput.rawValue))
         

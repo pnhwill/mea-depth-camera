@@ -51,16 +51,26 @@ class VideoReader {
         return CGImagePropertyOrientation(rawValue: orientation)!
     }
     
+    private var videoDataType: OutputType
+    private var outputSettings: [String: Any] {
+        switch videoDataType {
+        case .depth:
+            return [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+        default:
+            return [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange]
+        }
+    }
+    
     private var videoAsset: AVAsset!
     private var videoTrack: AVAssetTrack!
     private var assetReader: AVAssetReader!
     private var videoAssetReaderOutput: AVAssetReaderTrackOutput!
 
-    init?(videoAsset: AVAsset) {
+    init?(videoAsset: AVAsset, videoDataType: OutputType) {
         self.videoAsset = videoAsset
         let array = self.videoAsset.tracks(withMediaType: AVMediaType.video)
         self.videoTrack = array[0]
-
+        self.videoDataType = videoDataType
         guard self.restartReading() else {
             return nil
         }
@@ -74,7 +84,7 @@ class VideoReader {
             return false
         }
         
-        self.videoAssetReaderOutput = AVAssetReaderTrackOutput(track: self.videoTrack, outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange])
+        self.videoAssetReaderOutput = AVAssetReaderTrackOutput(track: self.videoTrack, outputSettings: self.outputSettings)
         guard self.videoAssetReaderOutput != nil else {
             return false
         }

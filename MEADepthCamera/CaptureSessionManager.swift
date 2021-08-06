@@ -42,6 +42,7 @@ class CaptureSessionManager: NSObject {
     let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     let discardLateFrames: Bool = false
+    let depthDataFiltering: Bool = false
     
     enum SessionSetupResult {
         case success
@@ -211,7 +212,7 @@ class CaptureSessionManager: NSObject {
         // Add a depth data output
         if session.canAddOutput(depthDataOutput) {
             session.addOutput(depthDataOutput)
-            depthDataOutput.isFilteringEnabled = false
+            depthDataOutput.isFilteringEnabled = depthDataFiltering
             if let connection = depthDataOutput.connection(with: .depthData) {
                 connection.isEnabled = true
             } else {
@@ -267,6 +268,9 @@ class CaptureSessionManager: NSObject {
                 videoDevice.activeVideoMinFrameDuration = duration
                 videoDevice.activeVideoMaxFrameDuration = duration
                 
+                // Set device to monitor subject area change so we can re-focus
+                videoDevice.isSubjectAreaChangeMonitoringEnabled = true
+                
                 videoDevice.unlockForConfiguration()
             } catch {
                 print("Failed to set video device format")
@@ -278,7 +282,7 @@ class CaptureSessionManager: NSObject {
             return false
         }
         
-        // Search for highest resolution with floating-point depth values
+        // Search for depth data formats with floating-point depth values
         let depthFormats = videoDevice.activeFormat.supportedDepthDataFormats
         
         let depth32formats = depthFormats.filter({
@@ -289,10 +293,10 @@ class CaptureSessionManager: NSObject {
             return false
         }
         
+        // Select format with highest resolution
         let selectedFormat = depth32formats.max(by: { first, second in
                                                     CMVideoFormatDescriptionGetDimensions(first.formatDescription).width <
                                                         CMVideoFormatDescriptionGetDimensions(second.formatDescription).width })
-        
         
         if let selectedFormatDescription = selectedFormat?.formatDescription {
             depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
@@ -301,6 +305,7 @@ class CaptureSessionManager: NSObject {
             print("Failed to obtain depth data resolution")
         }
         
+        // Set the depth data format
         do {
             try videoDevice.lockForConfiguration()
             videoDevice.activeDepthDataFormat = selectedFormat

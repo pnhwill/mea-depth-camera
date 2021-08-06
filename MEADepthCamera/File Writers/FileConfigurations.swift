@@ -105,20 +105,15 @@ struct DepthMapFileConfiguration: FileConfiguration {
     
     // Specify preserve 30fps
     
-    let sourceVideoFormat: CMVideoFormatDescription
+    var sourceVideoFormat: CMVideoFormatDescription?
     
-    var pixelBufferAttributes: [String: Any]?
+    var sourcePixelBufferAttributes: [String: Any]?
     
     let videoTransform: CGAffineTransform
     
-    init(fileType: AVFileType, videoSettings: [String: Any]?, transform: CGAffineTransform, depthDataFormat: CMFormatDescription) {
+    init(fileType: AVFileType, videoSettings: [String: Any]?, transform: CGAffineTransform) {
         self.outputFileType = fileType
         self.videoSettings = videoSettings
-        self.videoSettings?["AVVideoHeightKey"] = 480
-        self.videoSettings?["AVVideoWidthKey"] = 640
-        //print(self.videoSettings)
-        self.pixelBufferAttributes = nil
         self.videoTransform = transform
-        self.sourceVideoFormat = depthDataFormat
     }
 }

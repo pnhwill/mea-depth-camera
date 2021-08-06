@@ -346,10 +346,10 @@ class PreviewMetalView: MTKView {
         
         commandEncoder.label = "Preview display"
         commandEncoder.setRenderPipelineState(renderPipelineState!)
-        commandEncoder.setVertexBuffer(vertexCoordBuffer, offset: 0, index: 0)
-        commandEncoder.setVertexBuffer(textCoordBuffer, offset: 0, index: 1)
-        commandEncoder.setFragmentTexture(texture, index: 0)
-        commandEncoder.setFragmentSamplerState(sampler, index: 0)
+        commandEncoder.setVertexBuffer(vertexCoordBuffer, offset: 0, index: Int(VertexIndexPosition.rawValue))
+        commandEncoder.setVertexBuffer(textCoordBuffer, offset: 0, index: Int(VertexIndexTextureCoordinates.rawValue))
+        commandEncoder.setFragmentTexture(texture, index: Int(TextureIndexInput.rawValue))
+        commandEncoder.setFragmentSamplerState(sampler, index: Int(FragmentIndexSampler.rawValue))
         commandEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         commandEncoder.endEncoding()
         

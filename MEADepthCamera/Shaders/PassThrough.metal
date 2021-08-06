@@ -14,6 +14,9 @@ Abstract:
 #include <metal_stdlib>
 using namespace metal;
 
+// Include header shared between this Metal shader code and Swift code executing Metal API commands
+#import "ShaderTypes.h"
+
 // Vertex input/output structure for passing results from vertex shader to fragment shader
 struct VertexIO
 {
@@ -22,8 +25,8 @@ struct VertexIO
 };
 
 // Vertex shader for a textured quad
-vertex VertexIO vertexPassThrough(const device packed_float4 *pPosition  [[ buffer(0) ]],
-                                  const device packed_float2 *pTexCoords [[ buffer(1) ]],
+vertex VertexIO vertexPassThrough(const device packed_float4 *pPosition  [[ buffer(VertexIndexPosition) ]],
+                                  const device packed_float2 *pTexCoords [[ buffer(VertexIndexTextureCoordinates) ]],
                                   uint                        vid        [[ vertex_id ]])
 {
     VertexIO outVertex;
@@ -35,9 +38,9 @@ vertex VertexIO vertexPassThrough(const device packed_float4 *pPosition  [[ buff
 }
 
 // Fragment shader for a textured quad
-fragment half4 fragmentPassThrough(VertexIO        inputFragment [[ stage_in ]],
-                                   texture2d<half> inputTexture  [[ texture(0) ]],
-                                   sampler         samplr        [[ sampler(0) ]])
+fragment half4 fragmentPassThrough(VertexIO        inputFragment  [[ stage_in ]],
+                                   texture2d<half> inputTexture   [[ texture(TextureIndexInput) ]],
+                                   sampler         textureSampler [[ sampler(FragmentIndexSampler) ]])
 {
-    return inputTexture.sample(samplr, inputFragment.textureCoord);
+    return inputTexture.sample(textureSampler, inputFragment.textureCoord);
 }

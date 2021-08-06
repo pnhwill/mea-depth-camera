@@ -23,7 +23,7 @@ class DepthMapFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Wr
     
     required init(outputURL: URL, configuration: DepthMapFileConfiguration, subject: S) throws {
         videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings, sourceFormatHint: configuration.sourceVideoFormat)
-        pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: configuration.pixelBufferAttributes)
+        pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: configuration.sourcePixelBufferAttributes)
         
         try super.init(name: "DepthMapFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)
         

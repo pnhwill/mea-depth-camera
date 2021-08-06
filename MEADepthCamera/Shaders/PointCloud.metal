@@ -14,12 +14,12 @@ Metal compute shader used for point-cloud calculations
 #include <metal_stdlib>
 using namespace metal;
 
-// Include header shared between this Metal shader code and C code executing Metal API commands
+// Include header shared between this Metal shader code and Swift code executing Metal API commands
 #import "ShaderTypes.h"
 
 // Compute kernel
 kernel void pointCloudKernel(constant float2* landmarks                    [[ buffer(BufferIndexLandmarksInput) ]],
-                             texture2d<float, access::sample> depthTexture [[ texture(TextureIndexDepthInput) ]],
+                             texture2d<float, access::sample> depthTexture [[ texture(TextureIndexInput) ]],
                              constant float3x3& cameraIntrinsics           [[ buffer(BufferIndexCameraIntrinsicsInput) ]],
                              device float3* outBuffer                      [[ buffer(BufferIndexPointCloudOutput) ]],
                              uint index [[ thread_position_in_grid ]])

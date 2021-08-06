@@ -1,27 +1,27 @@
 //
-//  DepthToGrayscaleConverter.swift
+//  GrayscaleToDepthConverter.swift
 //  MEADepthCamera
 //
-//  Created by Will on 7/22/21.
+//  Created by Will on 8/5/21.
 //
 /*
 Abstract:
-The depth-to-grayscale converter for writing depth values to a video file.
+The grayscale-to-depth converter for reading depth values from a video file.
 */
 
 import CoreMedia
 import CoreVideo
 import Metal
 
-class DepthToGrayscaleConverter: FilterRenderer {
+class GrayscaleToDepthConverter: FilterRenderer {
     
-    var description: String = "Depth to Grayscale Converter"
+    var description: String = "Grayscale to Depth Converter"
     
-    var isPrepared = false
-    
-    private(set) var inputFormatDescription: CMFormatDescription?
+    var isPrepared: Bool = false
     
     private(set) var outputFormatDescription: CMFormatDescription?
+    
+    private(set) var inputFormatDescription: CMFormatDescription?
     
     private var inputTextureFormat: MTLPixelFormat = .invalid
     
@@ -45,7 +45,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
     
     required init() {
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
-        let kernelFunction = defaultLibrary.makeFunction(name: "depthToGrayscale")
+        let kernelFunction = defaultLibrary.makeFunction(name: "grayscaleToDepth")
         do {
             computePipelineState = try metalDevice.makeComputePipelineState(function: kernelFunction!)
         } catch {
@@ -54,7 +54,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
     }
     
     static private func allocateOutputBuffers(with formatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) -> CVPixelBufferPool? {
-        let outputPixelBufferAttributes = DepthToGrayscaleConverter.createOutputPixelBufferAttributes(from: formatDescription)
+        let outputPixelBufferAttributes = GrayscaleToDepthConverter.createOutputPixelBufferAttributes(from: formatDescription)
         
         let poolAttributes = [kCVPixelBufferPoolMinimumBufferCountKey as String: outputRetainedBufferCountHint]
         var cvPixelBufferPool: CVPixelBufferPool?
@@ -74,7 +74,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
         // Type method to create pixel buffer attributes dictionary for the output pixel buffer from a given format description for the input pixel buffer
         let inputDimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
         let outputPixelBufferAttributes: [String: Any] = [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_DepthFloat32,
             kCVPixelBufferWidthKey as String: Int(inputDimensions.width),
             kCVPixelBufferHeightKey as String: Int(inputDimensions.height),
             kCVPixelBufferIOSurfacePropertiesKey as String: [:]
@@ -85,7 +85,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
     func prepare(with formatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) {
         reset()
         
-        outputPixelBufferPool = DepthToGrayscaleConverter.allocateOutputBuffers(with: formatDescription,
+        outputPixelBufferPool = GrayscaleToDepthConverter.allocateOutputBuffers(with: formatDescription,
                                                                                 outputRetainedBufferCountHint: outputRetainedBufferCountHint)
         if outputPixelBufferPool == nil {
             return
@@ -105,12 +105,8 @@ class DepthToGrayscaleConverter: FilterRenderer {
         outputFormatDescription = pixelBufferFormatDescription
         
         let inputMediaSubType = CMFormatDescriptionGetMediaSubType(formatDescription)
-        if inputMediaSubType == kCVPixelFormatType_DepthFloat16 ||
-            inputMediaSubType == kCVPixelFormatType_DisparityFloat16 {
-            inputTextureFormat = .r16Float
-        } else if inputMediaSubType == kCVPixelFormatType_DepthFloat32 ||
-            inputMediaSubType == kCVPixelFormatType_DisparityFloat32 {
-            inputTextureFormat = .r32Float
+        if inputMediaSubType == kCVPixelFormatType_32BGRA {
+            inputTextureFormat = .bgra8Unorm
         } else {
             assertionFailure("Input format not supported")
         }
@@ -147,11 +143,11 @@ class DepthToGrayscaleConverter: FilterRenderer {
             return nil
         }
         
-        guard let outputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: outputPixelBuffer, textureFormat: .bgra8Unorm),
+        guard let outputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: outputPixelBuffer, textureFormat: .r32Float),
             let inputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: pixelBuffer, textureFormat: inputTextureFormat) else {
                 return nil
         }
-        
+        /*
         var min: Float = 0.0
         var max: Float = 0.0
         minMaxFromPixelBuffer(pixelBuffer, &min, &max, inputTextureFormat)
@@ -161,9 +157,8 @@ class DepthToGrayscaleConverter: FilterRenderer {
         if max > highest {
             highest = max
         }
-        
-        converterParameters = ConverterParameters(offset: lowest, range: highest - lowest)
-        
+         converterParameters = ConverterParameters(offset: lowest, range: highest - lowest)
+        */
         // Set up command queue, buffer, and encoder
         guard let commandQueue = commandQueue,
             let commandBuffer = commandQueue.makeCommandBuffer(),
@@ -173,7 +168,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
                 return nil
         }
         
-        commandEncoder.label = "Depth to Grayscale"
+        commandEncoder.label = "Grayscale to Depth"
         commandEncoder.setComputePipelineState(computePipelineState!)
         commandEncoder.setTexture(inputTexture, index: Int(TextureIndexInput.rawValue))
         commandEncoder.setTexture(outputTexture, index: Int(TextureIndexOutput.rawValue))
@@ -193,9 +188,6 @@ class DepthToGrayscaleConverter: FilterRenderer {
         
         commandBuffer.commit()
         
-//        let (minOut, maxOut) = minMax(for: outputPixelBuffer)
-//        print("min \(minOut) max \(maxOut)")
-        
         return outputPixelBuffer
     }
     
@@ -207,7 +199,7 @@ class DepthToGrayscaleConverter: FilterRenderer {
         var cvTextureOut: CVMetalTexture?
         CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, nil, textureFormat, width, height, 0, &cvTextureOut)
         guard let cvTexture = cvTextureOut, let texture = CVMetalTextureGetTexture(cvTexture) else {
-            print("Depth converter failed to create preview texture")
+            print("Grayscale converter failed to create preview texture")
             
             CVMetalTextureCacheFlush(textureCache, 0)
             
@@ -216,31 +208,4 @@ class DepthToGrayscaleConverter: FilterRenderer {
         
         return texture
     }
-    
-    func minMax(for buffer: CVPixelBuffer) -> (UInt8, UInt8) {
-        
-        let width = CVPixelBufferGetWidth(buffer)
-        let height = CVPixelBufferGetHeight(buffer)
-        var min: UInt8 = 255
-        var max: UInt8 = 0
-        
-        CVPixelBufferLockBaseAddress(buffer, .readOnly)
-        let baseAddress = CVPixelBufferGetBaseAddress(buffer)!
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
-        
-        for y in stride(from: 0, to: height, by: 1) {
-          for x in stride(from: 0, to: width, by: 1) {
-            
-            let rowData = baseAddress + y * bytesPerRow
-            let pixel = rowData.assumingMemoryBound(to: UInt8.self)[x*4]
-            
-            min = pixel < min ? pixel : min
-            max = pixel > max ? pixel : max
-          }
-        }
-        
-        CVPixelBufferUnlockBaseAddress(buffer, .readOnly)
-        return (min, max)
-    }
-    
 }
