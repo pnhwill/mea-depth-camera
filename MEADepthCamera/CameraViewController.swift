@@ -34,7 +34,9 @@ class CameraViewController: UIViewController {
     private var isSessionRunning = false
     
     // Capture data output delegate
-    private var dataOutputProcessor: DataOutputProcessor?
+    private var dataOutputPipeline: CaptureOutputPipeline?
+    
+    var faceLandmarksPipeline: FaceLandmarksPipeline?
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
@@ -126,7 +128,7 @@ class CameraViewController: UIViewController {
          */
         sessionQueue.async {
             self.sessionManager.configureSession()
-            self.dataOutputProcessor = self.sessionManager.dataOutputProcessor
+            self.dataOutputPipeline = self.sessionManager.dataOutputPipeline
         }
         // Configure the progress spinner
         DispatchQueue.main.async {
@@ -168,7 +170,7 @@ class CameraViewController: UIViewController {
                     }
                 }
                 
-                self.dataOutputProcessor?.configureProcessors()
+                self.dataOutputPipeline?.configureProcessors()
                 
                 self.addObservers()
                 
@@ -235,7 +237,7 @@ class CameraViewController: UIViewController {
         // Free up resources.
         sessionManager.dataOutputQueue.async {
             self.renderingEnabled = false
-            self.dataOutputProcessor?.videoDepthConverter.reset()
+            self.dataOutputPipeline?.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
             self.previewView.flushTextureCache()
         }
@@ -280,7 +282,7 @@ class CameraViewController: UIViewController {
             guard let isSessionRunning = change.newValue else { return }
             
             DispatchQueue.main.async {
-                self.recordButton.isEnabled = isSessionRunning && self.dataOutputProcessor != nil
+                self.recordButton.isEnabled = isSessionRunning && self.dataOutputPipeline != nil
             }
         }
         keyValueObservations.append(sessionRunningObservation)
@@ -521,13 +523,13 @@ class CameraViewController: UIViewController {
                 DispatchQueue.main.async {
                     // Enable the Record button to let the user stop or start another recording
                     self.recordButton.isEnabled = true
-                    if let dataProcessor = self.dataOutputProcessor {
+                    if let dataProcessor = self.dataOutputPipeline {
                         self.updateRecordButtonWithRecordingState(dataProcessor.recordingState)
                     }
                 }
             }
             
-            switch self.dataOutputProcessor?.recordingState {
+            switch self.dataOutputPipeline?.recordingState {
             case .idle:
                 // Only let recording start if the face is aligned
                 guard self.isAligned else {
@@ -538,10 +540,10 @@ class CameraViewController: UIViewController {
                 if UIDevice.current.isMultitaskingSupported {
                     self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
                 }
-                self.dataOutputProcessor?.startRecording()
+                self.dataOutputPipeline?.startRecording()
                 
             case .recording:
-                self.dataOutputProcessor?.stopRecording()
+                self.dataOutputPipeline?.stopRecording()
                 if let currentBackgroundRecordingID = self.backgroundRecordingID {
                     self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
                     if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
@@ -568,7 +570,7 @@ class CameraViewController: UIViewController {
     // MARK: - Face Detection Preview
     
     func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        guard let rootView = previewView, renderingEnabled, let settings = dataOutputProcessor?.processorSettings else {
+        guard let rootView = previewView, renderingEnabled, let settings = dataOutputPipeline?.processorSettings else {
             //print("Preview view not found/rendering disabled")
             return
         }
@@ -607,12 +609,12 @@ class CameraViewController: UIViewController {
         switch trackingState {
         case .tracking:
             // Stop tracking
-            self.dataOutputProcessor?.visionTrackerProcessor?.cancelTracking()
+            self.faceLandmarksPipeline?.cancelTracking()
             self.trackingState = .stopped
         case .stopped:
             // Initialize processor and start tracking
             self.trackingState = .tracking
-            self.dataOutputProcessor?.startTracking()
+            self.faceLandmarksPipeline?.startTracking()
         }
     }
     
@@ -668,7 +670,7 @@ class CameraViewController: UIViewController {
     }
     
     func displayFrameCounter(_ frame: Int) {
-        let totalFrames = dataOutputProcessor?.totalFrames
+        let totalFrames = faceLandmarksPipeline?.totalFrames
         let totalFramesString = totalFrames != nil ? String(totalFrames!) : "?"
         DispatchQueue.main.async {
             self.frameCounterLabel.text = "Frame: \(frame)/\(totalFramesString)"

@@ -1,12 +1,10 @@
 //
-//  VisionFaceDetectionProcessor.swift
+//  LiveFaceDetectionProcessor.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/22/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 Detect faces from the selfie cam feed in real time.
 */
@@ -14,16 +12,16 @@ Detect faces from the selfie cam feed in real time.
 import AVFoundation
 import Vision
 
-protocol VisionFaceDetectionProcessorDelegate: AnyObject {
+protocol LiveFaceDetectionProcessorDelegate: AnyObject {
     func displayFrame(_ faceObservations: [VNFaceObservation])
     func checkAlignment(of faceObservation: VNFaceObservation)
 }
 
-class VisionFaceDetectionProcessor {
+class LiveFaceDetectionProcessor: VisionProcessor {
     
-    let description: String = "VisionFaceDetectionProcessor"
+    let description: String = "LiveFaceDetectionProcessor"
     
-    weak var delegate: VisionFaceDetectionProcessorDelegate?
+    weak var delegate: LiveFaceDetectionProcessorDelegate?
     
     // MARK: Performing Vision Requests
     

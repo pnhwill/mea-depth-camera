@@ -15,9 +15,10 @@ class SavedRecordingsDataSource {
     
     let baseURL: URL
     var savedRecordings = [SavedRecording]()
+    let fileManager = FileManager.default
     
     init() {
-        guard let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("Unable to locate Documents directory.")
         }
         self.baseURL = docsURL
@@ -37,19 +38,17 @@ class SavedRecordingsDataSource {
     }
     
     func removeSavedRecording(at index: Int) throws {
-        let fileMgr = FileManager.default
         let savedRecording = savedRecordings[index]
-        try fileMgr.removeItem(at: savedRecording.folderURL)
+        try fileManager.removeItem(at: savedRecording.folderURL)
         savedRecordings.remove(at: index)
     }
     
     func removeAllSavedRecordings() {
-        let fileMgr = FileManager.default
-        guard let folders = try? fileMgr.contentsOfDirectory(at: baseURL, includingPropertiesForKeys: nil) else {
+        guard let folders = try? fileManager.contentsOfDirectory(at: baseURL, includingPropertiesForKeys: nil) else {
             return
         }
         for folder in folders {
-            try? fileMgr.removeItem(at: folder)
+            try? fileManager.removeItem(at: folder)
         }
         savedRecordings.removeAll()
     }

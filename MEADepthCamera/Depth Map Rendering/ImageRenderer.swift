@@ -1,19 +1,17 @@
 //
-//  FilterRenderer.swift
+//  ImageRenderer.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/22/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
-Filter renderer protocol.
+Image renderer protocol.
 */
 
 import CoreMedia
 
-protocol FilterRenderer: AnyObject {
+protocol ImageRenderer: AnyObject {
     
     var description: String { get }
     

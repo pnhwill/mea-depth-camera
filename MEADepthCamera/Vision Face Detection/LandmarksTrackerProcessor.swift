@@ -1,5 +1,5 @@
 //
-//  VisionTrackerProcessor.swift
+//  LandmarksTrackerProcessor.swift
 //  MEADepthCamera
 //
 //  Created by Will on 8/2/21.
@@ -12,21 +12,9 @@
 import AVFoundation
 import Vision
 
-protocol VisionTrackerProcessorDelegate: AnyObject {
-    func recordLandmarks(of faceObservation: VNFaceObservation, with depthMap: CVPixelBuffer?, frame: Int)
-    func didFinishTracking()
-}
-
-class VisionTrackerProcessor {
+class LandmarksTrackerProcessor: VisionProcessor {
     
-    let description: String = "VisionTrackerProcessor"
-    
-    weak var delegate: VisionTrackerProcessorDelegate?
-    
-    private var videoAsset: AVAsset
-    private var videoReader: VideoReader?
-    private var depthAsset: AVAsset
-    private var depthReader: VideoReader?
+    let description: String = "LandmarksTrackerProcessor"
     
     // Vision requests
     private var trackingLevel = VNRequestTrackingLevel.accurate
@@ -36,123 +24,13 @@ class VisionTrackerProcessor {
     
     private let processorSettings: ProcessorSettings
     
-    private var cancelRequested = false
-    
-    // Depth conversion
-    let videoGrayscaleConverter = GrayscaleToDepthConverter()
-    
-    init(videoAsset: AVAsset, depthAsset: AVAsset, processorSettings: ProcessorSettings) {
-        self.videoAsset = videoAsset
-        self.depthAsset = depthAsset
+    init(processorSettings: ProcessorSettings) {
         self.processorSettings = processorSettings
-    }
-    
-    // MARK: Read Video and Perform Tracking
-    func performTracking() throws {
-        guard let videoReader = VideoReader(videoAsset: videoAsset, videoDataType: .video),
-              let depthReader = VideoReader(videoAsset: depthAsset, videoDataType: .depth) else {
-            throw VisionTrackerProcessorError.readerInitializationFailed
-        }
-        self.videoReader = videoReader
-        self.depthReader = depthReader
-        
-        guard videoReader.nextFrame() != nil else {
-            throw VisionTrackerProcessorError.firstFrameReadFailed
-        }
-        
-        cancelRequested = false
-        
-        self.prepareVisionRequest()
-        
-        var frames = 1
-        
-        var nextDepthFrame: CMSampleBuffer? = depthReader.nextFrame()
-        var nextDepthImage: CVPixelBuffer?
-        if let depthFrame = nextDepthFrame {
-            nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
-        }
-        
-        // Prepare the depth to grayscale converter and depth map file configuration
-        if !self.videoGrayscaleConverter.isPrepared, let depthImage = nextDepthImage {
-            var depthFormatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                         imageBuffer: depthImage,
-                                                         formatDescriptionOut: &depthFormatDescription)
-            if let unwrappedDepthFormatDescription = depthFormatDescription {
-                self.videoGrayscaleConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
-            }
-        }
-        
-        func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?) throws {
-            try performVisionRequests(on: video, completion: { faceObservation in
-                self.delegate?.recordLandmarks(of: faceObservation, with: depth, frame: frames)
-            })
-        }
-        
-        while true {
-            guard cancelRequested == false, let videoFrame = videoReader.nextFrame() else {
-                break
-            }
-            
-            frames += 1
-            
-            guard let videoImage = CMSampleBufferGetImageBuffer(videoFrame) else {
-                print("\(description): No image found in video sample")
-                break
-            }
-            
-            // We may run out of depth frames before video frames, but we don't want to break the loop
-            if let depthFrame = nextDepthFrame, var depthImage = nextDepthImage {
-                
-                // Convert the depth image from grayscale RGB to depth float, if we haven't already
-                if CVPixelBufferGetPixelFormatType(depthImage) != kCVPixelFormatType_DepthFloat32 {
-                    if let convertedDepthImage = videoGrayscaleConverter.render(pixelBuffer: depthImage) {
-                        depthImage = convertedDepthImage
-                    } else {
-                        print("Failed to convert from grayscale to depth")
-                    }
-                }
-                
-                let videoTimeStamp = videoFrame.presentationTimeStamp
-                let depthTimeStamp = depthFrame.presentationTimeStamp
-                // If there is a dropped frame, then the videos will become misaligned and it will never record the depth data, so we must compare the timestamps
-                // This doesn't exactly work if many frames are dropped early, so we need another way to check (frame index?)
-                switch (CMTimeGetSeconds(videoTimeStamp), CMTimeGetSeconds(depthTimeStamp)) {
-                case let (videoTime, depthTime) where videoTime < depthTime:
-                    // Video frame is before depth frame, so don't send the depth data to record
-                    try trackAndRecord(video: videoImage, depth: nil)
-                    // Start at beginning of next loop iteration without getting a new depth frame from the reader
-                    print("<")
-                    continue
-                case let (videoTime, depthTime) where videoTime == depthTime:
-                    // Frames match, so send the depth data to be recorded
-                    try trackAndRecord(video: videoImage, depth: depthImage)
-                    print("=")
-                //case let (videoTime, depthTime) where videoTime > depthTime:
-                default:
-                    // Video frame is after depth frame, so don't send the depth data
-                    print(">")
-                    try trackAndRecord(video: videoImage, depth: nil)
-                }
-            } else {
-                // No more depth data
-                print("\(description): No depth data found")
-                try trackAndRecord(video: videoImage, depth: nil)
-            }
-            
-            // Get the next depth frame from the reader
-            nextDepthFrame = depthReader.nextFrame()
-            if let depthFrame = nextDepthFrame {
-                nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
-            }
-        }
-        
-        delegate?.didFinishTracking()
     }
     
     // MARK: Vision Requests
     
-    private func prepareVisionRequest() {
+    func prepareVisionRequest() {
         //self.trackingRequests = []
         var requests = [VNTrackObjectRequest]()
         
@@ -183,11 +61,9 @@ class VisionTrackerProcessor {
         self.sequenceRequestHandler = VNSequenceRequestHandler()
     }
     
-    private func performVisionRequests(on pixelBuffer: CVPixelBuffer, completion: @escaping (VNFaceObservation) -> Void) throws {
+    func performVisionRequests(on pixelBuffer: CVPixelBuffer, completion: @escaping (VNFaceObservation) -> Void) throws {
         
         var requestHandlerOptions: [VNImageOption: AnyObject] = [:]
-        
-
         
         if let cameraIntrinsics = processorSettings.cameraCalibrationData?.intrinsicMatrix {
             requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsics as AnyObject
@@ -305,12 +181,6 @@ class VisionTrackerProcessor {
                 print("\(description): Failed to perform FaceRectanglesRequest: \(error.localizedDescription)")
                 throw VisionTrackerProcessorError.faceTrackingFailed
             }
-            
         }
     }
-    
-    func cancelTracking() {
-        cancelRequested = true
-    }
-    
 }

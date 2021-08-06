@@ -1,5 +1,5 @@
 //
-//  CaptureDataOutputProcessor.swift
+//  CaptureOutputPipeline.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/29/21.
@@ -9,7 +9,7 @@ import AVFoundation
 import Combine
 import Vision
 
-class DataOutputProcessor: NSObject {
+class CaptureOutputPipeline: NSObject, DataPipeline {
     
     // Capture session manager (parent)
     private weak var sessionManager: CaptureSessionManager!
@@ -35,7 +35,7 @@ class DataOutputProcessor: NSObject {
     let videoDepthConverter = DepthToGrayscaleConverter()
     
     // Real time Vision requests
-    private(set) var faceDetectionProcessor: VisionFaceDetectionProcessor?
+    private(set) var faceDetectionProcessor: LiveFaceDetectionProcessor?
     
     // AV file writing
     private var videoFileWriter: VideoFileWriter<FileWriterSubject>?
@@ -64,16 +64,13 @@ class DataOutputProcessor: NSObject {
     var videoWriterSubject: FileWriterSubject?
     var audioWriterSubject: FileWriterSubject?
     var depthWriterSubject: FileWriterSubject?
-    //var landmarksWriterSubject: FileWriterSubject?
     
     var fileWritingDone: AnyCancellable?
     
     // Face landmarks post-processing
-    var visionTrackerProcessor: VisionTrackerProcessor?
-    private var faceLandmarksProcessor: FaceLandmarksProcessor?
-    private let savedRecordingsDataSource = SavedRecordingsDataSource()
-    var totalFrames: Int?
-    let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
+    private var faceLandmarksPipeline: FaceLandmarksPipeline?
+    private let savedRecordingsDataSource = SavedRecordingsDataSource()    
     
     let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
@@ -92,7 +89,7 @@ class DataOutputProcessor: NSObject {
     
     // MARK: - Data Pipeline Setup
     func configureProcessors() {
-        self.faceDetectionProcessor = VisionFaceDetectionProcessor()
+        self.faceDetectionProcessor = LiveFaceDetectionProcessor()
         self.faceDetectionProcessor?.delegate = self
         
         // Get source media formats
@@ -157,7 +154,7 @@ class DataOutputProcessor: NSObject {
             }
             // Initialize face landmarks processor once we have the processor settings
             if let cameraViewController = cameraViewController {
-                faceLandmarksProcessor = FaceLandmarksProcessor(cameraViewController: cameraViewController, settings: processorSettings)
+                faceLandmarksPipeline = FaceLandmarksPipeline(cameraViewController: cameraViewController, processorSettings: processorSettings, savedRecordingsDataSource: savedRecordingsDataSource)
             } else {
                 print("Failed to initialize face landmarks processor: camera view controller not found")
             }
@@ -224,24 +221,6 @@ class DataOutputProcessor: NSObject {
         }
         sampleBuffer.propagateAttachments(to: pixelBuffer)
 
-        /*
-        if !visionProcessor.isPrepared {
-         guard let formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer) else {
-            return
-         }
-            /*
-             outputRetainedBufferCountHint is the number of pixel buffers the renderer retains.
-             This value informs the renderer how to size its buffer pool and how many pixel buffers to preallocate.
-             Allow 3 frames of latency to cover the dispatch_async call.
-             */
-            visionProcessor.prepare(with: formatDescription, outputRetainedBufferCountHint: 3)
-        }
-        
-        guard let pixelBufferCopy = visionProcessor.copyPixelBuffer(inputBuffer: pixelBuffer) else {
-            print("Failed to copy pixel buffer.")
-            return
-        }
-        */
         if recordingState == .idle {
             if let visionProcessor = self.faceDetectionProcessor {
                 visionProcessor.performVisionRequests(on: pixelBuffer)
@@ -250,12 +229,9 @@ class DataOutputProcessor: NSObject {
             }
         }
 
-        if let cameraViewController = cameraViewController {
-            if cameraViewController.renderingEnabled {
-                cameraViewController.previewView.pixelBuffer = pixelBuffer
-            }
+        if let cameraViewController = cameraViewController, cameraViewController.renderingEnabled {
+            cameraViewController.previewView.pixelBuffer = pixelBuffer
         }
-
     }
     
     func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
@@ -299,6 +275,7 @@ class DataOutputProcessor: NSObject {
                 print("Failed to create landmarks file")
                 return
             }
+
             guard let videoConfiguration = self.videoFileSettings.configuration,
                   let audioConfiguration = self.audioFileSettings.configuration,
                   let depthMapConfiguration = self.depthMapFileSettings.configuration else {
@@ -324,10 +301,7 @@ class DataOutputProcessor: NSObject {
             } catch {
                 print("Error creating depth map file writer: \(error)")
             }
-            guard (self.faceLandmarksProcessor?.faceLandmarksFileWriter.prepare(saveURL: landmarksURL)) != nil else {
-                print("No face landmarks processor found. Failed to prepare landmarks file writer.")
-                return
-            }
+
         }
         
         self.fileWritingDone = self.videoWriterSubject!.combineLatest(self.depthWriterSubject!, self.audioWriterSubject!)
@@ -368,45 +342,6 @@ class DataOutputProcessor: NSObject {
     }
     
     // MARK: - File Writing
-    
-    private func createFolder() -> URL? {
-        // Get or create documents directory
-        var docURL: URL?
-        do {
-            docURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        } catch {
-            print("Error getting documents directory: \(error)")
-            return nil
-        }
-        // Get current datetime and format the folder name
-        let date = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
-        let timeStamp = formatter.string(from: date)
-        // Create URL for folder inside documents path
-        guard let dataURL = docURL?.appendingPathComponent(timeStamp, isDirectory: true) else {
-            print("Failed to append folder name to documents URL")
-            return nil
-        }
-        // Create folder at desired path if it does not already exist
-        if !FileManager.default.fileExists(atPath: dataURL.path) {
-            do {
-                try FileManager.default.createDirectory(at: dataURL, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                print("Error creating folder in documents directory: \(error.localizedDescription)")
-            }
-        }
-        return dataURL
-    }
-    
-    private func createFileURL(in folderURL: URL, nameLabel: String, fileType: String) -> URL? {
-        let folderName = folderURL.lastPathComponent
-        let fileName = folderName + "_" + nameLabel
-        
-        let fileURL = folderURL.appendingPathComponent(fileName).appendingPathExtension(fileType)
-        
-        return fileURL
-    }
     /*
     private func writeOutputToFile<T>(_ output: AVCaptureOutput, data: T) {
     }
@@ -445,10 +380,10 @@ class DataOutputProcessor: NSObject {
         switch recordingState {
         case .start:
             // If these file writers are inactive, start them and change their state to active
-            if videoWriter.writeState == .inactive {
+            if output === videoDataOutput, videoWriter.writeState == .inactive {
                 videoWriter.start(at: presentationTime)
             }
-            if audioWriter.writeState == .inactive {
+            if output === audioDataOutput, audioWriter.writeState == .inactive {
                 audioWriter.start(at: presentationTime)
             }
         case .recording:
@@ -464,57 +399,11 @@ class DataOutputProcessor: NSObject {
         }
     }
     
-    // MARK: - Face Landmarks Post-Processing
-    
-    func startTracking() {
-        visionTrackingQueue.async {
-            // Load RGB and depth map video files from saved URLs
-            guard let (videoAsset, depthAsset) = self.loadAssets() else {
-                return
-            }
-            
-            // Initialize Vision tracker processor
-            self.visionTrackerProcessor = VisionTrackerProcessor(videoAsset: videoAsset, depthAsset: depthAsset, processorSettings: self.processorSettings)
-            self.visionTrackerProcessor?.delegate = self.faceLandmarksProcessor
-            do {
-                try self.visionTrackerProcessor?.performTracking()
-            } catch {
-                self.cameraViewController?.handleTrackerError(error)
-            }
-        }
-    }
-    
-    private func loadAssets() -> (AVAsset, AVAsset)? {
-        guard let lastSavedRecording = savedRecordingsDataSource.savedRecordings.last else {
-            print("Last saved recording not found")
-            return nil
-        }
-        let folderURL = lastSavedRecording.folderURL
-        guard let videoFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.video }),
-              let depthFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.depth }) else {
-            print("Failed to access saved video and/or depth file")
-            return nil
-        }
-        let videoURL = folderURL.appendingPathComponent(videoFile.lastPathComponent)
-        let depthURL = folderURL.appendingPathComponent(depthFile.lastPathComponent)
-        if FileManager.default.fileExists(atPath: videoURL.path) {
-            totalFrames = Int(getNumberOfFrames(videoURL))
-            print(totalFrames!)
-        } else {
-            print("File does not exist at specified URL")
-            return nil
-        }
-        let videoAsset = AVAsset(url: videoURL)
-        let depthAsset = AVAsset(url: depthURL)
-        return (videoAsset, depthAsset)
-    }
-    
-    
 }
 
 // MARK: - AVCaptureDataOutputSynchronizerDelegate
 
-extension DataOutputProcessor: AVCaptureDataOutputSynchronizerDelegate {
+extension CaptureOutputPipeline: AVCaptureDataOutputSynchronizerDelegate {
     
     func dataOutputSynchronizer(_ synchronizer: AVCaptureDataOutputSynchronizer, didOutput synchronizedDataCollection: AVCaptureSynchronizedDataCollection) {
         
@@ -559,7 +448,7 @@ extension DataOutputProcessor: AVCaptureDataOutputSynchronizerDelegate {
 
 // MARK: - VisionFaceDetectionProcessorDelegate Methods
 
-extension DataOutputProcessor: VisionFaceDetectionProcessorDelegate {
+extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
     
     func displayFrame(_ faceObservations: [VNFaceObservation]) {
         cameraViewController?.displayFaceObservations(faceObservations)

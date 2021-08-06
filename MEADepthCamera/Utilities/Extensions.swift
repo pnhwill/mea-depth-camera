@@ -184,7 +184,7 @@ extension PreviewMetalView.Rotation {
 }
 
 // MARK: VisionFaceDetectionProcessor
-extension VisionFaceDetectionProcessor {
+extension LiveFaceDetectionProcessor {
     // Helper Methods for Handling Device Orientation & EXIF
     func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
         

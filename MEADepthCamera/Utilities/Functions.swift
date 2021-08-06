@@ -10,7 +10,7 @@ import CoreMedia
 func radiansForDegrees(_ degrees: CGFloat) -> CGFloat {
     return CGFloat(Double(degrees) * Double.pi / 180.0)
 }
-
+/*
 func allocateOutputBufferPool(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) ->(
     outputBufferPool: CVPixelBufferPool?,
     outputColorSpace: CGColorSpace?,
@@ -97,3 +97,4 @@ private func preallocateBuffers(pool: CVPixelBufferPool, allocationThreshold: In
     }
     pixelBuffers.removeAll()
 }
+*/

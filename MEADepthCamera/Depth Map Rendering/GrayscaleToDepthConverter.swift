@@ -13,9 +13,9 @@ import CoreMedia
 import CoreVideo
 import Metal
 
-class GrayscaleToDepthConverter: FilterRenderer {
+class GrayscaleToDepthConverter: ImageRenderer {
     
-    var description: String = "Grayscale to Depth Converter"
+    let description: String = "Grayscale to Depth Converter"
     
     var isPrepared: Bool = false
     

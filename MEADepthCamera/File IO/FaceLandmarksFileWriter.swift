@@ -13,24 +13,21 @@ class FaceLandmarksFileWriter: FileWriter {
     private var numLandmarks: Int
     
     private var saveURL: URL?
-    private var startTime: Date?
-    private var frameCount: Int = 0
     
     init(numLandmarks: Int) {
         self.numLandmarks = numLandmarks
     }
     
+    // MARK: Setup
+    
     func prepare(saveURL: URL) {
         // Create and write column labels
         createLabels(fileURL: saveURL)
         self.saveURL = saveURL
-        self.startTime = Date()
-        self.frameCount = 0
     }
     
     func reset() {
         saveURL = nil
-        startTime = nil
     }
     
 //    private func createInfoRow() {
@@ -52,18 +49,16 @@ class FaceLandmarksFileWriter: FileWriter {
         }
     }
     
-    func writeToCSV(boundingBox: CGRect, landmarks: [vector_float3]) {
-        guard let path = saveURL, let start = startTime else {
+    // MARK: Write Row Data
+    
+    func writeToCSV(frame: Int, timeStamp: Float64, boundingBox: CGRect, landmarks: [vector_float3]) {
+        guard let path = saveURL else {
             print("No save path found")
             return
         }
         
-        // Get timestamp and frame to record
-        let date = Date()
-        let timeStamp = date.timeIntervalSince(start)
-        
         // Create string to hold the row's data
-        var data = "\(frameCount),\(timeStamp),"
+        var data = "\(frame),\(timeStamp),"
         
         // Add face bounding box in RGB image coordinates to string
         data.append("\(boundingBox.origin.x),\(boundingBox.origin.y),\(boundingBox.size.width),\(boundingBox.size.height),")
@@ -91,8 +86,6 @@ class FaceLandmarksFileWriter: FileWriter {
         } else {
             print("Failed to write data to file.")
         }
-        // Update the frame count
-        frameCount += 1
     }
     
 }

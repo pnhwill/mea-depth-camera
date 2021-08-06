@@ -13,7 +13,7 @@ class CaptureSessionManager: NSObject {
     private weak var cameraViewController: CameraViewController!
     
     // Data output processor
-    private(set) var dataOutputProcessor: DataOutputProcessor?
+    private(set) var dataOutputPipeline: CaptureOutputPipeline?
     
     // AVCapture session
     private(set) var session = AVCaptureSession()
@@ -96,7 +96,7 @@ class CaptureSessionManager: NSObject {
         
         if let videoDimensions = videoDimensions, let depthDimensions = depthDimensions, let videoOrientation = videoOrientation {
             // Initialize the data output processor
-            self.dataOutputProcessor = DataOutputProcessor(sessionManager: self,
+            self.dataOutputPipeline = CaptureOutputPipeline(sessionManager: self,
                                                            cameraViewController: cameraViewController,
                                                            videoDimensions: videoDimensions,
                                                            depthDimensions: depthDimensions,
@@ -110,7 +110,7 @@ class CaptureSessionManager: NSObject {
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
         // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
         outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
-        outputSynchronizer?.setDelegate(dataOutputProcessor, queue: dataOutputQueue)
+        outputSynchronizer?.setDelegate(dataOutputPipeline, queue: dataOutputQueue)
     }
     
     // MARK: - Capture Device Configuration

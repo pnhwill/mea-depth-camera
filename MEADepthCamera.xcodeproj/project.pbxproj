@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B50787D626AF73D60077ACCB /* FaceLandmarksProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50787D526AF73D60077ACCB /* FaceLandmarksProcessor.swift */; };
+		B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
-		B53CD4B326B38EF3003BBFD9 /* DataOutputProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */; };
+		B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* CaptureOutputPipeline.swift */; };
 		B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */; };
 		B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */; };
 		B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA626AB654B00998C27 /* PointCloud.metal */; };
-		B575413F26B8E077004ED4E4 /* VisionTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575413E26B8E077004ED4E4 /* VisionTrackerProcessor.swift */; };
+		B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */; };
 		B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414026B8E08D004ED4E4 /* VideoReader.swift */; };
 		B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */; };
 		B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */ = {isa = PBXBuildFile; fileRef = B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */; };
@@ -31,18 +31,20 @@
 		B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B587706126B4AEAC00E26C7D /* CommonTypes.swift */; };
 		B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */; };
 		B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */; };
-		B5886DFD26AA61E100EB344C /* VisionFaceDetectionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DFC26AA61E100EB344C /* VisionFaceDetectionProcessor.swift */; };
+		B5886DFD26AA61E100EB344C /* LiveFaceDetectionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DFC26AA61E100EB344C /* LiveFaceDetectionProcessor.swift */; };
 		B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0026AA7F8500EB344C /* Extensions.swift */; };
 		B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0226AB249A00EB344C /* FileConfigurations.swift */; };
 		B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0426AB2CEE00EB344C /* FileWriter.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
-		B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */; };
+		B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */; };
 		B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5ABE86026AA076F003D2AFD /* LICENSE.txt */; };
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
 		B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */; };
 		B5BE267C26BCD452008EABAA /* GrayscaleToDepthConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */; };
 		B5BE267E26BCDB10008EABAA /* GrayscaleToDepth.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */; };
+		B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */; };
+		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
 		B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3F926B2183C00CB1241 /* PassThrough.metal */; };
 		B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
@@ -66,16 +68,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B50787D526AF73D60077ACCB /* FaceLandmarksProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksProcessor.swift; sourceTree = "<group>"; };
+		B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksPipeline.swift; sourceTree = "<group>"; };
 		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
 		B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensDistortionPointForPoint.h; sourceTree = "<group>"; };
-		B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataOutputProcessor.swift; sourceTree = "<group>"; };
+		B53CD4B226B38EF3003BBFD9 /* CaptureOutputPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureOutputPipeline.swift; sourceTree = "<group>"; };
 		B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enumerations.swift; sourceTree = "<group>"; };
 		B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSessionManager.swift; sourceTree = "<group>"; };
 		B56F2EA626AB654B00998C27 /* PointCloud.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PointCloud.metal; sourceTree = "<group>"; };
-		B575413E26B8E077004ED4E4 /* VisionTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionTrackerProcessor.swift; sourceTree = "<group>"; };
+		B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarksTrackerProcessor.swift; sourceTree = "<group>"; };
 		B575414026B8E08D004ED4E4 /* VideoReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoReader.swift; sourceTree = "<group>"; };
 		B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRecordingsDataSource.swift; sourceTree = "<group>"; };
 		B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = getNumberOfFrames.m; sourceTree = "<group>"; };
@@ -99,13 +101,13 @@
 		B587706126B4AEAC00E26C7D /* CommonTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTypes.swift; sourceTree = "<group>"; };
 		B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DepthToGrayscale.metal; sourceTree = "<group>"; };
 		B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservationOverlayView.swift; sourceTree = "<group>"; };
-		B5886DFC26AA61E100EB344C /* VisionFaceDetectionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionFaceDetectionProcessor.swift; sourceTree = "<group>"; };
+		B5886DFC26AA61E100EB344C /* LiveFaceDetectionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveFaceDetectionProcessor.swift; sourceTree = "<group>"; };
 		B5886E0026AA7F8500EB344C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		B5886E0226AB249A00EB344C /* FileConfigurations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileConfigurations.swift; sourceTree = "<group>"; };
 		B5886E0426AB2CEE00EB344C /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
-		B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterRenderer.swift; sourceTree = "<group>"; };
+		B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderer.swift; sourceTree = "<group>"; };
 		B5ABE86026AA076F003D2AFD /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthToGrayscaleConverter.swift; sourceTree = "<group>"; };
 		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -113,6 +115,8 @@
 		B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = minMaxFromBuffer.h; sourceTree = "<group>"; };
 		B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleToDepthConverter.swift; sourceTree = "<group>"; };
 		B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GrayscaleToDepth.metal; sourceTree = "<group>"; };
+		B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPipeline.swift; sourceTree = "<group>"; };
+		B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		B5D4E3F926B2183C00CB1241 /* PassThrough.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PassThrough.metal; sourceTree = "<group>"; };
 		B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewMetalView.swift; sourceTree = "<group>"; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
@@ -143,14 +147,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B50787D726AF74330077ACCB /* Real Time Face Detection */ = {
-			isa = PBXGroup;
-			children = (
-				B5886DFC26AA61E100EB344C /* VisionFaceDetectionProcessor.swift */,
-			);
-			path = "Real Time Face Detection";
-			sourceTree = "<group>";
-		};
 		B56F2EAA26AB7EC300998C27 /* Point Cloud */ = {
 			isa = PBXGroup;
 			children = (
@@ -161,17 +157,14 @@
 			path = "Point Cloud";
 			sourceTree = "<group>";
 		};
-		B575413D26B8DB36004ED4E4 /* Face Landmarks Tracking */ = {
+		B575413D26B8DB36004ED4E4 /* Vision Face Detection */ = {
 			isa = PBXGroup;
 			children = (
-				B575413E26B8E077004ED4E4 /* VisionTrackerProcessor.swift */,
-				B50787D526AF73D60077ACCB /* FaceLandmarksProcessor.swift */,
-				B575414026B8E08D004ED4E4 /* VideoReader.swift */,
-				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
-				B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */,
-				B575414626BA10DA004ED4E4 /* getNumberOfFrames.h */,
+				B5886DFC26AA61E100EB344C /* LiveFaceDetectionProcessor.swift */,
+				B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */,
+				B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */,
 			);
-			path = "Face Landmarks Tracking";
+			path = "Vision Face Detection";
 			sourceTree = "<group>";
 		};
 		B5796575269DED5F0070C294 = {
@@ -202,12 +195,11 @@
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
 				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
-				B53CD4B226B38EF3003BBFD9 /* DataOutputProcessor.swift */,
+				B5C732AD26BDCC72002B01C2 /* Data Pipelines */,
 				B5886DFB26AA5FB900EB344C /* Views */,
-				B50787D726AF74330077ACCB /* Real Time Face Detection */,
-				B575413D26B8DB36004ED4E4 /* Face Landmarks Tracking */,
+				B575413D26B8DB36004ED4E4 /* Vision Face Detection */,
 				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
-				B5ABE85926A9CC9B003D2AFD /* File Writers */,
+				B5ABE85926A9CC9B003D2AFD /* File IO */,
 				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
 				B587705E26B4AD8900E26C7D /* Utilities */,
 				B5886DF626AA168B00EB344C /* Shaders */,
@@ -270,7 +262,7 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		B5ABE85926A9CC9B003D2AFD /* File Writers */ = {
+		B5ABE85926A9CC9B003D2AFD /* File IO */ = {
 			isa = PBXGroup;
 			children = (
 				B5886E0426AB2CEE00EB344C /* FileWriter.swift */,
@@ -279,14 +271,16 @@
 				B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */,
 				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
 				B5886E0226AB249A00EB344C /* FileConfigurations.swift */,
+				B575414026B8E08D004ED4E4 /* VideoReader.swift */,
+				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
 			);
-			path = "File Writers";
+			path = "File IO";
 			sourceTree = "<group>";
 		};
 		B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */ = {
 			isa = PBXGroup;
 			children = (
-				B5ABE85B26AA04B8003D2AFD /* FilterRenderer.swift */,
+				B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */,
 				B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */,
 				B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */,
 				B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */,
@@ -301,6 +295,18 @@
 				B5ABE86026AA076F003D2AFD /* LICENSE.txt */,
 			);
 			path = LICENSE;
+			sourceTree = "<group>";
+		};
+		B5C732AD26BDCC72002B01C2 /* Data Pipelines */ = {
+			isa = PBXGroup;
+			children = (
+				B53CD4B226B38EF3003BBFD9 /* CaptureOutputPipeline.swift */,
+				B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */,
+				B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */,
+				B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */,
+				B575414626BA10DA004ED4E4 /* getNumberOfFrames.h */,
+			);
+			path = "Data Pipelines";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -437,11 +443,12 @@
 			files = (
 				B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */,
 				B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */,
-				B50787D626AF73D60077ACCB /* FaceLandmarksProcessor.swift in Sources */,
-				B575413F26B8E077004ED4E4 /* VisionTrackerProcessor.swift in Sources */,
+				B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */,
+				B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
 				B5BE267C26BCD452008EABAA /* GrayscaleToDepthConverter.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
+				B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
@@ -452,13 +459,14 @@
 				B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */,
 				B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */,
 				B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */,
+				B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
-				B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */,
+				B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */,
 				B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */,
 				B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */,
-				B53CD4B326B38EF3003BBFD9 /* DataOutputProcessor.swift in Sources */,
+				B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
 				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
 				B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */,
@@ -466,7 +474,7 @@
 				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,
 				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,
 				B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */,
-				B5886DFD26AA61E100EB344C /* VisionFaceDetectionProcessor.swift in Sources */,
+				B5886DFD26AA61E100EB344C /* LiveFaceDetectionProcessor.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
