@@ -19,10 +19,9 @@ Header containing types and enum constants shared between Metal shaders and Swif
 // Buffer index values shared between the Metal shader and Swift code ensure the shader buffer
 // inputs match the Metal API buffer set calls.
 typedef enum BufferIndex {
-    BufferIndexConverterParameters   = 0,
-    BufferIndexLandmarksInput        = 1,
-    BufferIndexCameraIntrinsicsInput = 2,
-    BufferIndexPointCloudOutput      = 3,
+    BufferIndexLandmarksInput        = 0,
+    BufferIndexCameraIntrinsicsInput = 1,
+    BufferIndexPointCloudOutput      = 2,
 } BufferIndex;
 
 // Texture index values shared between the Metal shader and Swift code ensure the shader buffer
@@ -41,11 +40,6 @@ typedef enum FragmentIndex {
     FragmentIndexSampler = 0,
 } FragmentIndex;
 
-// This structure defines the depth map converter parameters.
-typedef struct {
-    float offset;
-    float range;
-} ConverterParameters;
 /*
 // This structure defines the layout of each vertex in the array of vertices set as an
 // input to our Metal vertex shader. Since this header is shared between the Metal shader

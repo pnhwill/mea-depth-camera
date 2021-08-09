@@ -8,6 +8,15 @@
 import AVFoundation
 import UIKit
 
+// MARK: CGPoint
+extension CGPoint {
+    // Method to clamp a CGPoint within a certain bounds
+    mutating func clamp(bounds: CGSize) {
+        self.x = min(bounds.width, max(self.x, 0.0))
+        self.y = min(bounds.height, max(self.y, 0.0))
+    }
+}
+
 // MARK: CGSize
 extension CGSize {
     func rounded() -> CGSize {

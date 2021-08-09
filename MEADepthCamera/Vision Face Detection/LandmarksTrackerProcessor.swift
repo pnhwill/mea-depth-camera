@@ -61,7 +61,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
         self.sequenceRequestHandler = VNSequenceRequestHandler()
     }
     
-    func performVisionRequests(on pixelBuffer: CVPixelBuffer, completion: @escaping (VNFaceObservation) -> Void) throws {
+    func performVisionRequests(on pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation, completion: @escaping (VNFaceObservation) -> Void) throws {
         
         var requestHandlerOptions: [VNImageOption: AnyObject] = [:]
         
@@ -71,12 +71,10 @@ class LandmarksTrackerProcessor: VisionProcessor {
             print("\(description): Camera intrinsic data not found.")
         }
         
-        let exifOrientation = CGImagePropertyOrientation.leftMirrored
-        
         guard let requests = self.trackingRequests, !requests.isEmpty else {
             // No tracking object detected, so perform initial detection
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer,
-                                                            orientation: exifOrientation,
+                                                            orientation: orientation,
                                                             options: requestHandlerOptions)
             
             do {
@@ -95,7 +93,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
         do {
             try self.sequenceRequestHandler.perform(requests,
                                                     on: pixelBuffer,
-                                                    orientation: exifOrientation)
+                                                    orientation: orientation)
         } catch let error as NSError {
             NSLog("Failed to perform SequenceRequest: %@", error)
             print("\(description): Failed to perform SequenceRequest: \(error.localizedDescription)")
@@ -171,7 +169,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
             faceLandmarkRequests.append(faceLandmarksRequest)
             
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer,
-                                                            orientation: exifOrientation,
+                                                            orientation: orientation,
                                                             options: requestHandlerOptions)
             
             do {

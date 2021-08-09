@@ -20,11 +20,21 @@ struct ProcessorSettings {
     
     init(videoDimensions: CMVideoDimensions, depthDimensions: CMVideoDimensions, videoOrientation: AVCaptureVideoOrientation) {
         self.videoOrientation = videoOrientation
+        self.videoResolution = CGSize(width: Int(videoDimensions.width), height: Int(videoDimensions.height))
+        self.depthResolution = CGSize(width: Int(depthDimensions.width), height: Int(depthDimensions.height))
+    }
+    
+    func getTransform() -> CGAffineTransform {
         // The TrueDepth camera is in the front position
         let angleOffset = CGFloat(videoOrientation.angleOffsetFromPortraitOrientation(at: .front))
         let transform = CGAffineTransform(rotationAngle: angleOffset)
-        self.videoResolution = CGRect(x: 0, y: 0, width: CGFloat(videoDimensions.width), height: CGFloat(videoDimensions.height)).applying(transform).standardized.size.rounded()
-        self.depthResolution = CGRect(x: 0, y: 0, width: CGFloat(depthDimensions.width), height: CGFloat(depthDimensions.height)).applying(transform).standardized.size.rounded()
+        return transform
+    }
+    
+    func getPortraitResolutions() -> (CGSize, CGSize) {
+        let portraitVideoResolution = CGRect(x: 0, y: 0, width: CGFloat(videoResolution.width), height: CGFloat(videoResolution.height)).applying(getTransform()).standardized.size.rounded()
+        let portraitDepthResolution = CGRect(x: 0, y: 0, width: CGFloat(depthResolution.width), height: CGFloat(depthResolution.height)).applying(getTransform()).standardized.size.rounded()
+        return (portraitVideoResolution, portraitDepthResolution)
     }
 }
 

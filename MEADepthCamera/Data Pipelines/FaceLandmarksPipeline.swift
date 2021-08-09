@@ -24,9 +24,6 @@ class FaceLandmarksPipeline: DataPipeline {
     
     private let savedRecordingsDataSource: SavedRecordingsDataSource
     
-    // Depth conversion
-    let videoGrayscaleConverter = GrayscaleToDepthConverter()
-    
     let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     var totalFrames: Int?
@@ -124,20 +121,9 @@ class FaceLandmarksPipeline: DataPipeline {
         if let depthFrame = nextDepthFrame {
             nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
         }
-        
-        // Prepare the depth to grayscale converter and depth map file configuration
-        if !self.videoGrayscaleConverter.isPrepared, let depthImage = nextDepthImage {
-            var depthFormatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                         imageBuffer: depthImage,
-                                                         formatDescriptionOut: &depthFormatDescription)
-            if let unwrappedDepthFormatDescription = depthFormatDescription {
-                self.videoGrayscaleConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
-            }
-        }
-        
+
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
-            try visionTrackerProcessor?.performVisionRequests(on: video, completion: { faceObservation in
+            try visionTrackerProcessor?.performVisionRequests(on: video, orientation: videoReader.orientation, completion: { faceObservation in
                 self.recordLandmarks(of: faceObservation, with: depth, frame: frame, timeStamp: timeStamp)
             })
         }
@@ -157,16 +143,7 @@ class FaceLandmarksPipeline: DataPipeline {
             }
             
             // We may run out of depth frames before video frames, but we don't want to break the loop
-            if let depthFrame = nextDepthFrame, var depthImage = nextDepthImage {
-                
-                // Convert the depth image from grayscale RGB to depth float, if we haven't already
-                if CVPixelBufferGetPixelFormatType(depthImage) != kCVPixelFormatType_DepthFloat32 {
-                    if let convertedDepthImage = videoGrayscaleConverter.render(pixelBuffer: depthImage) {
-                        depthImage = convertedDepthImage
-                    } else {
-                        print("Failed to convert from grayscale to depth")
-                    }
-                }
+            if let depthFrame = nextDepthFrame, let depthImage = nextDepthImage {
                 
                 let depthTime = CMTimeGetSeconds(depthFrame.presentationTimeStamp)
                 // If there is a dropped frame, then the videos will become misaligned and it will never record the depth data, so we must compare the timestamps
@@ -227,31 +204,34 @@ class FaceLandmarksPipeline: DataPipeline {
             
             if let landmarks = faceObservation.landmarks?.allPoints {
 
-                if let depthDataMap = depthDataMap {
+                if let depthDataMap = depthDataMap, let correctedDepthMap = rectifyDepthDataMap(depthDataMap: depthDataMap) {
                     
                     let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
-                    let landmarkVectors = landmarkPoints.map { simd_float2(Float($0.x), Float($0.y)) }
+                    
+                    let correctedLandmarks = landmarkPoints.map { rectifyLandmark(landmark: $0) }
+                    
+                    let landmarkVectors = correctedLandmarks.map { simd_float2(Float($0!.x), Float($0!.y)) }
                     
                     if !pointCloudProcessor.isPrepared {
                         var depthFormatDescription: CMFormatDescription?
                         CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                                     imageBuffer: depthDataMap,
+                                                                     imageBuffer: correctedDepthMap,
                                                                      formatDescriptionOut: &depthFormatDescription)
                         if let unwrappedDepthFormatDescription = depthFormatDescription {
                             pointCloudProcessor.prepare(with: unwrappedDepthFormatDescription)
                         }
                     }
-                    pointCloudProcessor.render(landmarks: landmarkVectors, depthFrame: depthDataMap)
+                    guard let landmarkPointCloud = pointCloudProcessor.render(landmarks: landmarkVectors, depthFrame: correctedDepthMap) else {
+                        // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given
+                        print("Metal point cloud processor failed to output landmark position. Returning landmarks in RGB image coordinates.")
+                        let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
+                        landmarks3D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
+                        return (boundingBox, landmarks3D)
+                    }
                     
                     for (index, _) in landmarks.normalizedPoints.enumerated() {
-                        guard let landmarkPoint = pointCloudProcessor.getOutput(index: index) else {
-                            // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given
-                            print("Metal point cloud processor failed to output landmark position. Returning landmarks in RGB image coordinates.")
-                            let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                            landmarks3D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
-                            return (boundingBox, landmarks3D)
-                        }
-                        landmarks3D[index] = landmarkPoint
+
+                        landmarks3D[index] = landmarkPointCloud[index]
                     }
                 } else {
                     //print("No depth data found. Returning 2D landmarks in RGB image coordinates.")
@@ -265,6 +245,97 @@ class FaceLandmarksPipeline: DataPipeline {
             print("No face observation found. Inserting zeros for all values.")
         }
         return (boundingBox, landmarks3D)
+    }
+    
+    private func rectifyLandmark(landmark: CGPoint) -> CGPoint? {
+        // Get camera instrinsics
+        guard let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions,
+              let opticalCenter: CGPoint = processorSettings.cameraCalibrationData?.lensDistortionCenter,
+              let lookupTable = processorSettings.cameraCalibrationData?.inverseLensDistortionLookupTable else {
+            print("Could not find camera calibration data")
+            return nil
+        }
+        let ratio: Float = Float(referenceDimensions.width) / Float(processorSettings.depthResolution.width)
+        let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
+        
+        let outputPoint = lensDistortionPointForPoint(landmark, lookupTable, scaledOpticalCenter, processorSettings.depthResolution)
+        
+        return outputPoint
+    }
+    
+    private func rectifyDepthDataMap(depthDataMap: CVPixelBuffer) -> CVPixelBuffer? {
+        // Method to rectify the depth data map from lens-distorted to rectilinear coordinate space
+        
+        // Get camera instrinsics
+        guard let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions,
+              let opticalCenter: CGPoint = processorSettings.cameraCalibrationData?.lensDistortionCenter,
+              let lookupTable = processorSettings.cameraCalibrationData?.inverseLensDistortionLookupTable else {
+            print("Could not find camera calibration data")
+            return nil
+        }
+        let ratio: Float = Float(referenceDimensions.width) / Float(CVPixelBufferGetWidth(depthDataMap))
+        let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
+        
+        // Get depth stream resolutions and pixel format
+        let depthDataType = CVPixelBufferGetPixelFormatType(depthDataMap)
+        let depthMapWidth = CVPixelBufferGetWidth(depthDataMap)
+        let depthMapHeight = CVPixelBufferGetHeight(depthDataMap)
+        let depthMapSize = CGSize(width: depthMapWidth, height: depthMapHeight)
+        
+        let outputPixelBufferAttributes: [String: Any] = [
+//            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+//            kCVPixelBufferWidthKey as String: Int(inputDimensions.width),
+//            kCVPixelBufferHeightKey as String: Int(inputDimensions.height),
+            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
+        ]
+        
+        var outputBuffer: CVPixelBuffer?
+        let result = CVPixelBufferCreate(nil, depthMapWidth, depthMapHeight, depthDataType, outputPixelBufferAttributes as CFDictionary, &outputBuffer)
+        //print(result)
+        
+        if result == kCVReturnSuccess && outputBuffer != nil {
+            CVPixelBufferLockBaseAddress(depthDataMap, .readOnly)
+            CVPixelBufferLockBaseAddress(outputBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+            
+            let inputBytesPerRow = CVPixelBufferGetBytesPerRow(depthDataMap)
+            guard let inputBaseAddress = CVPixelBufferGetBaseAddress(depthDataMap) else {
+                print("input pointer failed")
+                return nil
+            }
+            let outputBytesPerRow = CVPixelBufferGetBytesPerRow(outputBuffer!)
+            guard let outputBaseAddress = CVPixelBufferGetBaseAddress(outputBuffer!) else {
+                print("output pointer failed")
+                return nil
+            }
+            
+            // Loop over all output pixels
+            for y in 0..<depthMapHeight {
+                // Create pointer to output buffer
+                let outputRowData = outputBaseAddress + y * outputBytesPerRow
+                let outputData = UnsafeMutableBufferPointer(start: outputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
+                
+                for x in 0..<depthMapWidth {
+                    // For each output pixel, do inverse distortion transformation and clamp the points within the bounds of the buffer
+                    let distortedPoint = CGPoint(x: x, y: y)
+                    var correctedPoint = lensDistortionPointForPoint(distortedPoint, lookupTable, scaledOpticalCenter, depthMapSize)
+                    correctedPoint.clamp(bounds: depthMapSize)
+                    
+                    // Create pointer to input buffer
+                    let inputRowData = inputBaseAddress + Int(correctedPoint.y) * inputBytesPerRow
+                    let inputData = UnsafeBufferPointer(start: inputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
+                    
+                    // Sample pixel value from input buffer and pull into output buffer
+                    let pixelValue = inputData[Int(correctedPoint.x)]
+                    outputData[x] = pixelValue
+                }
+            }
+            CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
+            CVPixelBufferUnlockBaseAddress(outputBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+        } else {
+            print("Failed to create output pixel buffer.")
+            return nil
+        }
+        return outputBuffer
     }
     
     func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {

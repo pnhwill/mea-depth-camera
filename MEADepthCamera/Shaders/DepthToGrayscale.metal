@@ -5,8 +5,6 @@
 //  Created by Will on 7/22/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 Metal compute shader that translates depth values to grayscale RGB values.
 */
@@ -18,9 +16,8 @@ using namespace metal;
 #import "ShaderTypes.h"
 
 // Compute kernel
-kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [[ texture(TextureIndexInput) ]],
-                             texture2d<float, access::write> outputTexture     [[ texture(TextureIndexOutput) ]],
-                             constant ConverterParameters& converterParameters [[ buffer(BufferIndexConverterParameters) ]],
+kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture  [[ texture(TextureIndexInput) ]],
+                             texture2d<float, access::write> outputTexture [[ texture(TextureIndexOutput) ]],
                              uint2 gid [[ thread_position_in_grid ]])
 {
     // Don't read or write outside of the texture.
@@ -30,9 +27,7 @@ kernel void depthToGrayscale(texture2d<float, access::read>  inputTexture      [
     
     float depth = inputTexture.read(gid).x;
     
-    // Normalize the value between 0 and 1.
-    //depth = (depth - converterParameters.offset) / (converterParameters.range);
-    // NOTE: with normalization disabled, the pixel conversion when it is written to the texture clamps the values between 0 and 1 and then scales to [0,255].
+    // Without normalization, the pixel conversion to the texture clamps the values between 0 and 1 and then scales to [0,255] when it is written
     // i.e. all depth data beyond 1 meter is discarded during this operation
     
     float4 outputColor = float4(float3(depth), 1.0);

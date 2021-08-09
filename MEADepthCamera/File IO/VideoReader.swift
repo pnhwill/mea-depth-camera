@@ -5,8 +5,6 @@
 //  Created by Will on 8/2/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 Contains the video reader implementation using AVCapture.
 */

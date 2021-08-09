@@ -5,8 +5,6 @@
 //  Created by Will on 7/23/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 Metal compute shader used for point-cloud calculations
 */
@@ -16,6 +14,8 @@ using namespace metal;
 
 // Include header shared between this Metal shader code and Swift code executing Metal API commands
 #import "ShaderTypes.h"
+
+constexpr sampler textureSampler (coord::pixel, mag_filter::linear, min_filter::linear);
 
 // Compute kernel
 kernel void pointCloudKernel(constant float2* landmarks                    [[ buffer(BufferIndexLandmarksInput) ]],
@@ -29,17 +29,22 @@ kernel void pointCloudKernel(constant float2* landmarks                    [[ bu
     // is 100 pixels from the origin).
     float2 pixelSpacePosition = landmarks[index].xy;
     
-    // depthDataType is kCVPixelFormatType_DepthFloat32
-    constexpr sampler textureSampler (coord::pixel, mag_filter::linear, min_filter::linear);
+    // Don't sample outside of the texture.
+    if ((pixelSpacePosition.x >= depthTexture.get_width()) || (pixelSpacePosition.y >= depthTexture.get_height())) {
+        return;
+    }
     
-    // The depth value units are meters. We can scale all the coordinates by simply scaling the depth here
-    float depth = depthTexture.sample(textureSampler, pixelSpacePosition).x;// * 1000.0f;
+    // Depth data pixel format is kCVPixelFormatType_32BGRA
+    
+    // The first three components (red, green, and blue) are all the same so we can choose any of them as our output depth
+    float depth = depthTexture.sample(textureSampler, pixelSpacePosition).r;// * 1000.0f;
     
     // Calculate the absolute physical location of the landmark
-    float xrw = (pixelSpacePosition.x - cameraIntrinsics[2][0]) * depth / cameraIntrinsics[0][0];
-    float yrw = (pixelSpacePosition.y - cameraIntrinsics[2][1]) * depth / cameraIntrinsics[1][1];
+    // The depth value units are meters. We can scale all the coordinates just by scaling the depth first
+    float x = (pixelSpacePosition.x - cameraIntrinsics[2][0]) * depth / cameraIntrinsics[0][0];
+    float y = (pixelSpacePosition.y - cameraIntrinsics[2][1]) * depth / cameraIntrinsics[1][1];
     
     // Assign the spatial coordinates to a 3d vector and write to the output buffer
-    float3 xyz = float3(xrw, yrw, depth);
+    float3 xyz = float3(x, y, depth);
     outBuffer[index] = xyz;
 }

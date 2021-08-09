@@ -68,11 +68,10 @@ class FaceObservationOverlayView: UIView {
     // MARK: Drawing Vision Observations
     
     fileprivate func setupVisionDrawingLayers() {
-        guard let captureDeviceResolution = processorSettings?.videoResolution else {
+        guard let (captureDeviceResolution, _) = processorSettings?.getPortraitResolutions() else {
             print("No video resolution found")
             return
         }
-        
         let captureDeviceBounds = CGRect(x: 0,
                                          y: 0,
                                          width: captureDeviceResolution.width,
@@ -136,11 +135,11 @@ class FaceObservationOverlayView: UIView {
             return
         }
         
-        guard let captureDeviceResolution = processorSettings?.videoResolution else {
+        guard let (captureDeviceResolution, _) = processorSettings?.getPortraitResolutions() else {
             print("No video resolution found")
             return
         }
-        
+
         CATransaction.setValue(NSNumber(value: true), forKey: kCATransactionDisableActions)
         
         // Scale the video resolution to fit within root layer bounds while maintaining the aspect ratio
@@ -200,7 +199,7 @@ class FaceObservationOverlayView: UIView {
     }
     
     fileprivate func addIndicators(to faceRectanglePath: CGMutablePath, faceLandmarksPath: CGMutablePath, for faceObservation: VNFaceObservation) {
-        guard let displaySize = processorSettings?.videoResolution else {
+        guard let (displaySize, _) = processorSettings?.getPortraitResolutions() else {
             print("No video resolution found")
             return
         }

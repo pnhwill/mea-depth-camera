@@ -37,12 +37,6 @@ class DepthToGrayscaleConverter: ImageRenderer {
     
     private var textureCache: CVMetalTextureCache!
     
-    private var lowest: Float = 0.0
-    
-    private var highest: Float = 0.0
-    
-    var converterParameters: ConverterParameters = ConverterParameters(offset: -4.0, range: 8.0)
-    
     required init() {
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
         let kernelFunction = defaultLibrary.makeFunction(name: "depthToGrayscale")
@@ -152,18 +146,6 @@ class DepthToGrayscaleConverter: ImageRenderer {
                 return nil
         }
         
-        var min: Float = 0.0
-        var max: Float = 0.0
-        minMaxFromPixelBuffer(pixelBuffer, &min, &max, inputTextureFormat)
-        if min < lowest {
-            lowest = min
-        }
-        if max > highest {
-            highest = max
-        }
-        
-        converterParameters = ConverterParameters(offset: lowest, range: highest - lowest)
-        
         // Set up command queue, buffer, and encoder
         guard let commandQueue = commandQueue,
             let commandBuffer = commandQueue.makeCommandBuffer(),
@@ -177,8 +159,6 @@ class DepthToGrayscaleConverter: ImageRenderer {
         commandEncoder.setComputePipelineState(computePipelineState!)
         commandEncoder.setTexture(inputTexture, index: Int(TextureIndexInput.rawValue))
         commandEncoder.setTexture(outputTexture, index: Int(TextureIndexOutput.rawValue))
-        // use 'withUnsafeMutableBytes' to get rid of the warning below
-        commandEncoder.setBytes( UnsafeMutableRawPointer(&converterParameters), length: MemoryLayout<ConverterParameters>.size, index: Int(BufferIndexConverterParameters.rawValue))
         
         // Set up the thread groups.
         let width = computePipelineState!.threadExecutionWidth
@@ -192,9 +172,6 @@ class DepthToGrayscaleConverter: ImageRenderer {
         commandEncoder.endEncoding()
         
         commandBuffer.commit()
-        
-//        let (minOut, maxOut) = minMax(for: outputPixelBuffer)
-//        print("min \(minOut) max \(maxOut)")
         
         return outputPixelBuffer
     }
@@ -216,31 +193,4 @@ class DepthToGrayscaleConverter: ImageRenderer {
         
         return texture
     }
-    
-    func minMax(for buffer: CVPixelBuffer) -> (UInt8, UInt8) {
-        
-        let width = CVPixelBufferGetWidth(buffer)
-        let height = CVPixelBufferGetHeight(buffer)
-        var min: UInt8 = 255
-        var max: UInt8 = 0
-        
-        CVPixelBufferLockBaseAddress(buffer, .readOnly)
-        let baseAddress = CVPixelBufferGetBaseAddress(buffer)!
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
-        
-        for y in stride(from: 0, to: height, by: 1) {
-          for x in stride(from: 0, to: width, by: 1) {
-            
-            let rowData = baseAddress + y * bytesPerRow
-            let pixel = rowData.assumingMemoryBound(to: UInt8.self)[x*4]
-            
-            min = pixel < min ? pixel : min
-            max = pixel > max ? pixel : max
-          }
-        }
-        
-        CVPixelBufferUnlockBaseAddress(buffer, .readOnly)
-        return (min, max)
-    }
-    
 }

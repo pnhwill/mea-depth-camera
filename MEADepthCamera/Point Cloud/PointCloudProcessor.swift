@@ -10,11 +10,11 @@ import Metal
 
 class PointCloudProcessor {
     
-    private var processorSettings: ProcessorSettings
-    
-    var description: String = "Point Cloud Processor"
+    let description: String = "Point Cloud Processor"
     
     var isPrepared = false
+    
+    private var processorSettings: ProcessorSettings
     
     private(set) var inputFormatDescription: CMFormatDescription?
     
@@ -32,20 +32,20 @@ class PointCloudProcessor {
     
     private var textureCache: CVMetalTextureCache!
     
-    var inputBufferSize: Int
-    var outputBufferSize: Int
+    private var inputBufferSize: Int
+    private var outputBufferSize: Int
     
     init(settings: ProcessorSettings) {
         self.processorSettings = settings
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
         let kernelFunction = defaultLibrary.makeFunction(name: "pointCloudKernel")
+        inputBufferSize = MemoryLayout<vector_float2>.stride * processorSettings.numLandmarks
+        outputBufferSize = MemoryLayout<vector_float3>.stride * processorSettings.numLandmarks
         do {
             computePipelineState = try metalDevice.makeComputePipelineState(function: kernelFunction!)
         } catch {
-            fatalError("Unable to create depth converter pipeline state. (\(error))")
+            fatalError("Unable to create \(description) pipeline state. (\(error))")
         }
-        inputBufferSize = MemoryLayout<vector_float2>.stride * processorSettings.numLandmarks
-        outputBufferSize = MemoryLayout<vector_float3>.stride * processorSettings.numLandmarks
     }
     /*
     static private func allocateOutputBuffers() {
@@ -57,24 +57,20 @@ class PointCloudProcessor {
         inputFormatDescription = formatDescription
         
         let inputMediaSubType = CMFormatDescriptionGetMediaSubType(formatDescription)
-        if inputMediaSubType == kCVPixelFormatType_DepthFloat16 ||
-            inputMediaSubType == kCVPixelFormatType_DisparityFloat16 {
-            inputTextureFormat = .r16Float
-        } else if inputMediaSubType == kCVPixelFormatType_DepthFloat32 ||
-            inputMediaSubType == kCVPixelFormatType_DisparityFloat32 {
-            inputTextureFormat = .r32Float
+        if inputMediaSubType == kCVPixelFormatType_32BGRA {
+            inputTextureFormat = .bgra8Unorm
         } else {
             assertionFailure("Input format not supported")
         }
         
         var metalTextureCache: CVMetalTextureCache?
         if CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, metalDevice, nil, &metalTextureCache) != kCVReturnSuccess {
-            assertionFailure("Unable to allocate depth converter texture cache")
+            assertionFailure("Unable to allocate \(description) texture cache")
         } else {
             textureCache = metalTextureCache
         }
         
-        // Set up input and output buffers
+        // Create a new buffer with enough capacity to store one instance of the dynamic buffer data
         guard let outputBuffer = metalDevice.makeBuffer(length: outputBufferSize, options: [.storageModeShared]) else {
             print("Allocation failure: Could not make landmarks buffers (\(self.description))")
             return
@@ -91,24 +87,23 @@ class PointCloudProcessor {
     }
     
     // MARK: Point Cloud Rendering
-    func render(landmarks: [vector_float2], depthFrame: CVPixelBuffer) {
+    
+    func render(landmarks: [vector_float2], depthFrame: CVPixelBuffer) -> [vector_float3]? {
         if !isPrepared {
             assertionFailure("Invalid state: Not prepared")
-            return
+            return nil
         }
-        
-        //let depthFrame: CVPixelBuffer = depthData.depthDataMap
         
         guard let inputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: depthFrame, textureFormat: inputTextureFormat) else {
             print("Depth data input buffer not found")
-            return
+            return nil
         }
         
         // Get camera instrinsics
         guard var intrinsics: float3x3 = processorSettings.cameraCalibrationData?.intrinsicMatrix,
               let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions else {
             print("Could not find camera calibration data")
-            return
+            return nil
         }
         
         // Bring focal and principal points into the same coordinate system as the depth map
@@ -117,14 +112,14 @@ class PointCloudProcessor {
         intrinsics[1][1] /= ratio
         intrinsics[2][0] /= ratio
         intrinsics[2][1] /= ratio
-
+        
         // Set up command queue, buffer, and encoder
         guard let commandQueue = commandQueue,
             let commandBuffer = commandQueue.makeCommandBuffer(),
             let commandEncoder = commandBuffer.makeComputeCommandEncoder() else {
                 print("Failed to create Metal command queue")
                 CVMetalTextureCacheFlush(textureCache!, 0)
-                return
+                return nil
         }
         
         // Set arguments to shader
@@ -156,16 +151,11 @@ class PointCloudProcessor {
         
         commandBuffer.commit()
 
-        //let outputArray = outputBuffer.contents()//.assumingMemoryBound(to: [vector_float3].self).pointee
-    }
-    
-    func getOutput(index: Int) -> vector_float3? {
-        guard let output: UnsafeMutableRawPointer = pointCloudBuffer?.contents() else {
-            print("Output buffer not found")
-            return nil
-        }
+        let outputPointer = pointCloudBuffer?.contents().assumingMemoryBound(to: vector_float3.self)
+        let outputDataBufferPointer = UnsafeBufferPointer<vector_float3>(start: outputPointer, count: processorSettings.numLandmarks)
+        let outputArray = Array<vector_float3>(outputDataBufferPointer)
         
-        return output.load(fromByteOffset: MemoryLayout<vector_float3>.stride, as: vector_float3.self)
+        return outputArray
     }
     
     func makeTextureFromCVPixelBuffer(pixelBuffer: CVPixelBuffer, textureFormat: MTLPixelFormat) -> MTLTexture? {
@@ -176,7 +166,7 @@ class PointCloudProcessor {
         var cvTextureOut: CVMetalTexture?
         CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, nil, textureFormat, width, height, 0, &cvTextureOut)
         guard let cvTexture = cvTextureOut, let texture = CVMetalTextureGetTexture(cvTexture) else {
-            print("Depth converter failed to create preview texture")
+            print("\(description) failed to create preview texture")
             
             CVMetalTextureCacheFlush(textureCache, 0)
             
@@ -185,6 +175,7 @@ class PointCloudProcessor {
         
         return texture
     }
+    
     
 }
 

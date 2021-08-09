@@ -40,9 +40,6 @@
 		B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */; };
 		B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5ABE86026AA076F003D2AFD /* LICENSE.txt */; };
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
-		B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */; };
-		B5BE267C26BCD452008EABAA /* GrayscaleToDepthConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */; };
-		B5BE267E26BCDB10008EABAA /* GrayscaleToDepth.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */; };
 		B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */; };
 		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
 		B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3F926B2183C00CB1241 /* PassThrough.metal */; };
@@ -111,10 +108,6 @@
 		B5ABE86026AA076F003D2AFD /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthToGrayscaleConverter.swift; sourceTree = "<group>"; };
 		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
-		B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = minMaxFromBuffer.m; sourceTree = "<group>"; };
-		B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = minMaxFromBuffer.h; sourceTree = "<group>"; };
-		B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrayscaleToDepthConverter.swift; sourceTree = "<group>"; };
-		B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = GrayscaleToDepth.metal; sourceTree = "<group>"; };
 		B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPipeline.swift; sourceTree = "<group>"; };
 		B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		B5D4E3F926B2183C00CB1241 /* PassThrough.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PassThrough.metal; sourceTree = "<group>"; };
@@ -246,7 +239,6 @@
 			children = (
 				B518049126ACBB0F0036F104 /* ShaderTypes.h */,
 				B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */,
-				B5BE267D26BCDB10008EABAA /* GrayscaleToDepth.metal */,
 				B56F2EA626AB654B00998C27 /* PointCloud.metal */,
 				B5D4E3F926B2183C00CB1241 /* PassThrough.metal */,
 			);
@@ -282,9 +274,6 @@
 			children = (
 				B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */,
 				B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */,
-				B5BE267B26BCD452008EABAA /* GrayscaleToDepthConverter.swift */,
-				B5ABE86626AA09D0003D2AFD /* minMaxFromBuffer.m */,
-				B5ABE86826AA09FA003D2AFD /* minMaxFromBuffer.h */,
 			);
 			path = "Depth Map Rendering";
 			sourceTree = "<group>";
@@ -446,13 +435,11 @@
 				B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */,
 				B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
-				B5BE267C26BCD452008EABAA /* GrayscaleToDepthConverter.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
 				B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
-				B5BE267E26BCDB10008EABAA /* GrayscaleToDepth.metal in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
@@ -465,7 +452,6 @@
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
 				B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */,
 				B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */,
-				B5ABE86726AA09D0003D2AFD /* minMaxFromBuffer.m in Sources */,
 				B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
 				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
