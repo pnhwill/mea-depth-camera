@@ -20,9 +20,13 @@ class FaceLandmarksPipeline: DataPipeline {
     // Point cloud Metal renderer with compute kernel
     private var pointCloudProcessor: PointCloudProcessor
     
-    private(set) var faceLandmarksFileWriter: FaceLandmarksFileWriter
+    private(set) var faceLandmarks2DFileWriter: FaceLandmarksFileWriter
+    private(set) var faceLandmarks3DFileWriter: FaceLandmarksFileWriter
+    private(set) var infoFileWriter: InfoFileWriter
     
     private let savedRecordingsDataSource: SavedRecordingsDataSource
+    
+    var depthMapPixelBufferPool: CVPixelBufferPool?
     
     let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
@@ -39,7 +43,9 @@ class FaceLandmarksPipeline: DataPipeline {
         self.cameraViewController = cameraViewController
         self.processorSettings = processorSettings
         self.pointCloudProcessor = PointCloudProcessor(settings: processorSettings)
-        self.faceLandmarksFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
+        self.faceLandmarks2DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
+        self.faceLandmarks3DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
+        self.infoFileWriter = InfoFileWriter(processorSettings: processorSettings)
         self.savedRecordingsDataSource = savedRecordingsDataSource
         self.cameraViewController?.faceLandmarksPipeline = self
     }
@@ -48,14 +54,42 @@ class FaceLandmarksPipeline: DataPipeline {
     
     func startTracking() {
         visionTrackingQueue.async {
+            guard var lastSavedRecording = self.savedRecordingsDataSource.savedRecordings.last else {
+                print("Last saved recording not found")
+                return
+            }
             // Load RGB and depth map video files from saved URLs
-            guard let (landmarksURL, videoAsset, depthAsset) = self.loadAssets() else {
+            guard let (videoAsset, depthAsset) = self.loadAssets(from: lastSavedRecording) else {
                 return
             }
             self.videoAsset = videoAsset
             self.depthAsset = depthAsset
-
-            self.faceLandmarksFileWriter.prepare(saveURL: landmarksURL)
+            
+            // Create the landmarks csv files and save in recordings data source
+            let saveFolder = lastSavedRecording.folderURL
+            guard let landmarks2DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks2D.rawValue, fileType: "csv") else {
+                print("Failed to create landmarks2D file")
+                return
+            }
+            guard let landmarks3DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks3D.rawValue, fileType: "csv") else {
+                print("Failed to create landmarks2D file")
+                return
+            }
+            guard let infoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.info.rawValue, fileType: "csv") else {
+                print("Failed to create landmarks2D file")
+                return
+            }
+            self.savedRecordingsDataSource.addFilesToSavedRecording(&lastSavedRecording, newFiles: [OutputType.landmarks2D: landmarks2DURL,
+                                                                                                    OutputType.landmarks3D: landmarks3DURL,
+                                                                                                    OutputType.info: infoURL])
+            
+            // Prepare the landmarks file writers
+            self.faceLandmarks2DFileWriter.prepare(saveURL: landmarks2DURL)
+            self.faceLandmarks3DFileWriter.prepare(saveURL: landmarks3DURL)
+            self.infoFileWriter.prepare(saveURL: infoURL)
+            if let totalFrames = self.totalFrames {
+                self.infoFileWriter.createInfoRow(startTime: saveFolder.lastPathComponent, totalFrames: totalFrames)
+            }
             
             // Initialize Vision tracker processor
             self.visionTrackerProcessor = LandmarksTrackerProcessor(processorSettings: self.processorSettings)
@@ -67,21 +101,16 @@ class FaceLandmarksPipeline: DataPipeline {
         }
     }
     
-    private func loadAssets() -> (URL, AVAsset, AVAsset)? {
-        guard let lastSavedRecording = savedRecordingsDataSource.savedRecordings.last else {
-            print("Last saved recording not found")
-            return nil
-        }
-        let folderURL = lastSavedRecording.folderURL
-        guard let videoFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.video }),
-              let depthFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.depth }),
-              let landmarksFile = lastSavedRecording.savedFiles.first(where: { $0.outputType == OutputType.landmarks }) else {
+    private func loadAssets(from savedRecording: SavedRecording) -> (AVAsset, AVAsset)? {
+
+        let folderURL = savedRecording.folderURL
+        guard let videoFile = savedRecording.savedFiles.first(where: { $0.outputType == OutputType.video }),
+              let depthFile = savedRecording.savedFiles.first(where: { $0.outputType == OutputType.depth }) else {
             print("Failed to access saved files")
             return nil
         }
         let videoURL = folderURL.appendingPathComponent(videoFile.lastPathComponent)
         let depthURL = folderURL.appendingPathComponent(depthFile.lastPathComponent)
-        let landmarksURL = folderURL.appendingPathComponent(landmarksFile.lastPathComponent)
         if FileManager.default.fileExists(atPath: videoURL.path) {
             totalFrames = Int(getNumberOfFrames(videoURL))
             print(totalFrames!)
@@ -91,7 +120,7 @@ class FaceLandmarksPipeline: DataPipeline {
         }
         let videoAsset = AVAsset(url: videoURL)
         let depthAsset = AVAsset(url: depthURL)
-        return (landmarksURL, videoAsset, depthAsset)
+        return (videoAsset, depthAsset)
     }
     
     // MARK: Read Video and Perform Tracking
@@ -114,12 +143,26 @@ class FaceLandmarksPipeline: DataPipeline {
             throw VisionTrackerProcessorError.faceTrackingFailed
         }
         
-        var frames = 1
+        var frames = 0
         
         var nextDepthFrame: CMSampleBuffer? = depthReader.nextFrame()
         var nextDepthImage: CVPixelBuffer?
         if let depthFrame = nextDepthFrame {
             nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
+        }
+        
+        // Create pixel buffer pool for depth map rectification
+        if depthMapPixelBufferPool == nil, let depthImage = nextDepthImage {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: depthImage,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                (depthMapPixelBufferPool, _, _) = allocateOutputBufferPool(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
+            }
+        }
+        if depthMapPixelBufferPool == nil {
+            throw VisionTrackerProcessorError.readerInitializationFailed
         }
 
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
@@ -176,6 +219,7 @@ class FaceLandmarksPipeline: DataPipeline {
             if let depthFrame = nextDepthFrame {
                 nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
             }
+            
         }
         
         didFinishTracking()
@@ -185,10 +229,9 @@ class FaceLandmarksPipeline: DataPipeline {
         cancelRequested = true
     }
     
-    
     // MARK: - Methods to get depth data for landmarks
     
-    func processFace(_ faceObservation: VNFaceObservation?, with depthDataMap: CVPixelBuffer?) -> (CGRect, [vector_float3]) {
+    func processFace(_ faceObservation: VNFaceObservation?, with depthDataMap: CVPixelBuffer?) -> (CGRect, [vector_float3], [vector_float3]?) {
         // This method combines a face observation and depth data to produce a bounding box and face landmarks in 3D space.
         // If no depth is provided, it returns the 2D landmarks in image coordinates.
         // If no landmarks are provided, it returns just the bounding box.
@@ -196,6 +239,7 @@ class FaceLandmarksPipeline: DataPipeline {
         
         // In case the face is lost in the middle of collecting data, this prevents empty or nil-valued cells in the file so it can still be parsed later
         var boundingBox = CGRect.zero
+        var landmarks2D = Array(repeating: simd_make_float3(0.0, 0.0, 0.0), count: processorSettings.numLandmarks)
         var landmarks3D = Array(repeating: simd_make_float3(0.0, 0.0, 0.0), count: processorSettings.numLandmarks)
         
         if let faceObservation = faceObservation {
@@ -210,7 +254,8 @@ class FaceLandmarksPipeline: DataPipeline {
                     
                     let correctedLandmarks = landmarkPoints.map { rectifyLandmark(landmark: $0) }
                     
-                    let landmarkVectors = correctedLandmarks.map { simd_float2(Float($0!.x), Float($0!.y)) }
+                    let landmarkVectors = landmarkPoints.map { simd_float2(Float($0.x), Float($0.y)) }
+                    let correctedLandmarkVectors = correctedLandmarks.map { simd_float2(Float($0!.x), Float($0!.y)) }
                     
                     if !pointCloudProcessor.isPrepared {
                         var depthFormatDescription: CMFormatDescription?
@@ -221,30 +266,33 @@ class FaceLandmarksPipeline: DataPipeline {
                             pointCloudProcessor.prepare(with: unwrappedDepthFormatDescription)
                         }
                     }
-                    guard let landmarkPointCloud = pointCloudProcessor.render(landmarks: landmarkVectors, depthFrame: correctedDepthMap) else {
+                    guard let landmarkPointCloud = pointCloudProcessor.render(landmarks: correctedLandmarkVectors, depthFrame: correctedDepthMap) else {
                         // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given
                         print("Metal point cloud processor failed to output landmark position. Returning landmarks in RGB image coordinates.")
                         let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                        landmarks3D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
-                        return (boundingBox, landmarks3D)
+                        landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
+                        return (boundingBox, landmarks2D, nil)
                     }
                     
                     for (index, _) in landmarks.normalizedPoints.enumerated() {
-
+                        landmarks2D[index] = simd_make_float3(landmarkVectors[index], landmarkPointCloud[index].z)
                         landmarks3D[index] = landmarkPointCloud[index]
                     }
                 } else {
                     //print("No depth data found. Returning 2D landmarks in RGB image coordinates.")
                     let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                    landmarks3D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
+                    landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
+                    return (boundingBox, landmarks2D, nil)
                 }
             } else {
                 print("Invalid face detection request: no face landmarks. Returning bounding box only.")
+                return (boundingBox, landmarks2D, nil)
             }
         } else {
             print("No face observation found. Inserting zeros for all values.")
+            return (boundingBox, landmarks2D, nil)
         }
-        return (boundingBox, landmarks3D)
+        return (boundingBox, landmarks2D, landmarks3D)
     }
     
     private func rectifyLandmark(landmark: CGPoint) -> CGPoint? {
@@ -277,64 +325,55 @@ class FaceLandmarksPipeline: DataPipeline {
         let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
         
         // Get depth stream resolutions and pixel format
-        let depthDataType = CVPixelBufferGetPixelFormatType(depthDataMap)
         let depthMapWidth = CVPixelBufferGetWidth(depthDataMap)
         let depthMapHeight = CVPixelBufferGetHeight(depthDataMap)
         let depthMapSize = CGSize(width: depthMapWidth, height: depthMapHeight)
         
-        let outputPixelBufferAttributes: [String: Any] = [
-//            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-//            kCVPixelBufferWidthKey as String: Int(inputDimensions.width),
-//            kCVPixelBufferHeightKey as String: Int(inputDimensions.height),
-            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
-        ]
-        
-        var outputBuffer: CVPixelBuffer?
-        let result = CVPixelBufferCreate(nil, depthMapWidth, depthMapHeight, depthDataType, outputPixelBufferAttributes as CFDictionary, &outputBuffer)
-        //print(result)
-        
-        if result == kCVReturnSuccess && outputBuffer != nil {
-            CVPixelBufferLockBaseAddress(depthDataMap, .readOnly)
-            CVPixelBufferLockBaseAddress(outputBuffer!, CVPixelBufferLockFlags(rawValue: 0))
-            
-            let inputBytesPerRow = CVPixelBufferGetBytesPerRow(depthDataMap)
-            guard let inputBaseAddress = CVPixelBufferGetBaseAddress(depthDataMap) else {
-                print("input pointer failed")
-                return nil
-            }
-            let outputBytesPerRow = CVPixelBufferGetBytesPerRow(outputBuffer!)
-            guard let outputBaseAddress = CVPixelBufferGetBaseAddress(outputBuffer!) else {
-                print("output pointer failed")
-                return nil
-            }
-            
-            // Loop over all output pixels
-            for y in 0..<depthMapHeight {
-                // Create pointer to output buffer
-                let outputRowData = outputBaseAddress + y * outputBytesPerRow
-                let outputData = UnsafeMutableBufferPointer(start: outputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
-                
-                for x in 0..<depthMapWidth {
-                    // For each output pixel, do inverse distortion transformation and clamp the points within the bounds of the buffer
-                    let distortedPoint = CGPoint(x: x, y: y)
-                    var correctedPoint = lensDistortionPointForPoint(distortedPoint, lookupTable, scaledOpticalCenter, depthMapSize)
-                    correctedPoint.clamp(bounds: depthMapSize)
-                    
-                    // Create pointer to input buffer
-                    let inputRowData = inputBaseAddress + Int(correctedPoint.y) * inputBytesPerRow
-                    let inputData = UnsafeBufferPointer(start: inputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
-                    
-                    // Sample pixel value from input buffer and pull into output buffer
-                    let pixelValue = inputData[Int(correctedPoint.x)]
-                    outputData[x] = pixelValue
-                }
-            }
-            CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
-            CVPixelBufferUnlockBaseAddress(outputBuffer!, CVPixelBufferLockFlags(rawValue: 0))
-        } else {
-            print("Failed to create output pixel buffer.")
+        var newPixelBuffer: CVPixelBuffer?
+        CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, depthMapPixelBufferPool!, &newPixelBuffer)
+        guard let outputBuffer = newPixelBuffer else {
+            print("Allocation failure: Could not get pixel buffer from pool)")
             return nil
         }
+        
+        CVPixelBufferLockBaseAddress(depthDataMap, .readOnly)
+        CVPixelBufferLockBaseAddress(outputBuffer, CVPixelBufferLockFlags(rawValue: 0))
+        
+        let inputBytesPerRow = CVPixelBufferGetBytesPerRow(depthDataMap)
+        guard let inputBaseAddress = CVPixelBufferGetBaseAddress(depthDataMap) else {
+            print("input pointer failed")
+            return nil
+        }
+        let outputBytesPerRow = CVPixelBufferGetBytesPerRow(outputBuffer)
+        guard let outputBaseAddress = CVPixelBufferGetBaseAddress(outputBuffer) else {
+            print("output pointer failed")
+            return nil
+        }
+        
+        // Loop over all output pixels
+        for y in 0..<depthMapHeight {
+            // Create pointer to output buffer
+            let outputRowData = outputBaseAddress + y * outputBytesPerRow
+            let outputData = UnsafeMutableBufferPointer(start: outputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
+            
+            for x in 0..<depthMapWidth {
+                // For each output pixel, do inverse distortion transformation and clamp the points within the bounds of the buffer
+                let distortedPoint = CGPoint(x: x, y: y)
+                var correctedPoint = lensDistortionPointForPoint(distortedPoint, lookupTable, scaledOpticalCenter, depthMapSize)
+                correctedPoint.clamp(bounds: depthMapSize)
+                
+                // Create pointer to input buffer
+                let inputRowData = inputBaseAddress + Int(correctedPoint.y) * inputBytesPerRow
+                let inputData = UnsafeBufferPointer(start: inputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
+                
+                // Sample pixel value from input buffer and pull into output buffer
+                let pixelValue = inputData[Int(correctedPoint.x)]
+                outputData[x] = pixelValue
+            }
+        }
+        CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
+        CVPixelBufferUnlockBaseAddress(outputBuffer, CVPixelBufferLockFlags(rawValue: 0))
+
         return outputBuffer
     }
     
@@ -342,15 +381,20 @@ class FaceLandmarksPipeline: DataPipeline {
         // Write face observation results to file if collecting data.
         // Perform data collection in background queue so that it does not hold up the UI.
         
-        let (boundingBox, landmarks) = processFace(faceObservation, with: depthDataMap)
-        faceLandmarksFileWriter.writeToCSV(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks)
+        let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)
+        faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
+        if let landmarks3D = landmarks3D {
+            faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
+        }
         
         // Display the frame counter on the UI
         cameraViewController?.displayFrameCounter(frame)
     }
     
     func didFinishTracking() {
-        faceLandmarksFileWriter.reset()
+        faceLandmarks2DFileWriter.reset()
+        faceLandmarks3DFileWriter.reset()
+        depthMapPixelBufferPool = nil
         DispatchQueue.main.async {
             self.cameraViewController?.trackingState = .stopped
             self.cameraViewController?.processingMode = .record

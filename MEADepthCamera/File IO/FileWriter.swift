@@ -30,6 +30,10 @@ protocol FileWriter: AnyObject {
     */
 }
 
+protocol CSVFileWriter: FileWriter {
+    
+}
+
 // Abstract superclass for all video/audio/depth data file writers
 class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S.Failure == Error {
     

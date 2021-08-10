@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */; };
+		B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5235ECB26C207CB0042106C /* InfoFileWriter.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
 		B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* CaptureOutputPipeline.swift */; };
@@ -67,6 +68,7 @@
 /* Begin PBXFileReference section */
 		B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksPipeline.swift; sourceTree = "<group>"; };
 		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		B5235ECB26C207CB0042106C /* InfoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoFileWriter.swift; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
 		B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensDistortionPointForPoint.h; sourceTree = "<group>"; };
@@ -192,8 +194,8 @@
 				B5886DFB26AA5FB900EB344C /* Views */,
 				B575413D26B8DB36004ED4E4 /* Vision Face Detection */,
 				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
-				B5ABE85926A9CC9B003D2AFD /* File IO */,
 				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
+				B5ABE85926A9CC9B003D2AFD /* File IO */,
 				B587705E26B4AD8900E26C7D /* Utilities */,
 				B5886DF626AA168B00EB344C /* Shaders */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
@@ -262,6 +264,7 @@
 				B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */,
 				B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */,
 				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
+				B5235ECB26C207CB0042106C /* InfoFileWriter.swift */,
 				B5886E0226AB249A00EB344C /* FileConfigurations.swift */,
 				B575414026B8E08D004ED4E4 /* VideoReader.swift */,
 				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
@@ -441,6 +444,7 @@
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
+				B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
 				B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */,

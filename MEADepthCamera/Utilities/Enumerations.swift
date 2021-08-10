@@ -11,7 +11,10 @@ enum OutputType: String {
     case video
     case audio
     case depth
-    case landmarks
+    case landmarks2D
+    case landmarks3D
+    case info
+    case frameIndex
 }
 
 enum ProcessingMode {

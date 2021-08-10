@@ -271,10 +271,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
                 print("Failed to create depth map file")
                 return
             }
-            guard let landmarksURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks.rawValue, fileType: "csv") else {
-                print("Failed to create landmarks file")
-                return
-            }
 
             guard let videoConfiguration = self.videoFileSettings.configuration,
                   let audioConfiguration = self.audioFileSettings.configuration,
@@ -283,7 +279,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
                 return
             }
 
-            let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL, OutputType.landmarks: landmarksURL]
+            let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL]
             self.savedRecordingsDataSource.saveRecording(saveFolder, outputFiles: fileDictionary)
             
             do {

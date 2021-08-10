@@ -14,8 +14,8 @@ import Foundation
 class SavedRecordingsDataSource {
     
     let baseURL: URL
-    var savedRecordings = [SavedRecording]()
     let fileManager = FileManager.default
+    var savedRecordings = [SavedRecording]()
     
     init() {
         guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
@@ -35,6 +35,15 @@ class SavedRecordingsDataSource {
         }
         let newRecording = SavedRecording(name: folderName, folderURL: folderURL, savedFiles: savedFiles)
         savedRecordings.append(newRecording)
+    }
+    
+    func addFilesToSavedRecording(_ savedRecording: inout SavedRecording, newFiles: [OutputType: URL]) {
+        for file in newFiles {
+            let outputType = file.key
+            let fileName = file.value.lastPathComponent
+            let newFile = SavedFile(outputType: outputType, lastPathComponent: fileName)
+            savedRecording.savedFiles.append(newFile)
+        }
     }
     
     func removeSavedRecording(at index: Int) throws {

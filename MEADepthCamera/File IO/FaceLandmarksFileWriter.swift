@@ -8,7 +8,7 @@
 import AVFoundation
 import Vision
 
-class FaceLandmarksFileWriter: FileWriter {
+class FaceLandmarksFileWriter: CSVFileWriter {
     
     private var numLandmarks: Int
     
@@ -30,10 +30,6 @@ class FaceLandmarksFileWriter: FileWriter {
         saveURL = nil
     }
     
-//    private func createInfoRow() {
-//
-//    }
-    
     private func createLabels(fileURL: URL) {
         // Create string with appropriate column labels
         var columnLabels = "Frame,Timestamp(s),BBox_x,BBox_y,BBox_width,BBox_height,"
@@ -51,14 +47,16 @@ class FaceLandmarksFileWriter: FileWriter {
     
     // MARK: Write Row Data
     
-    func writeToCSV(frame: Int, timeStamp: Float64, boundingBox: CGRect, landmarks: [vector_float3]) {
+    func writeRowData(frame: Int, timeStamp: Float64, boundingBox: CGRect, landmarks: [vector_float3]) {
         guard let path = saveURL else {
             print("No save path found")
             return
         }
         
+        let formattedTimeStamp = String(format: "%.5f", timeStamp)
+        
         // Create string to hold the row's data
-        var data = "\(frame),\(timeStamp),"
+        var data = "\(frame),\(formattedTimeStamp),"
         
         // Add face bounding box in RGB image coordinates to string
         data.append("\(boundingBox.origin.x),\(boundingBox.origin.y),\(boundingBox.size.width),\(boundingBox.size.height),")

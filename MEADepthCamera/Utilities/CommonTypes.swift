@@ -46,5 +46,5 @@ struct SavedFile {
 struct SavedRecording {
     let name: String
     let folderURL: URL
-    let savedFiles: [SavedFile]
+    var savedFiles: [SavedFile]
 }
