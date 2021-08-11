@@ -82,7 +82,7 @@ class CameraViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        print("camera view did load")
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
         
@@ -140,7 +140,7 @@ class CameraViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        print("camera view will appear")
         let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
         let interfaceOrientation = mainWindowScene?.interfaceOrientation ?? .portrait
         //statusBarOrientation = interfaceOrientation
@@ -213,6 +213,7 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        print("camera view will disappear")
         //dataOutputProcessor?.visionProcessor?.cancelTracking()
         sessionManager.dataOutputQueue.async {
             self.renderingEnabled = false
@@ -234,6 +235,7 @@ class CameraViewController: UIViewController {
 
     @objc
     func didEnterBackground(notification: NSNotification) {
+        print("camera view did enter background")
         // Free up resources.
         sessionManager.dataOutputQueue.async {
             self.renderingEnabled = false
@@ -245,6 +247,7 @@ class CameraViewController: UIViewController {
     
     @objc
     func willEnterForeground(notification: NSNotification) {
+        print("camera view will enter foreground")
         sessionManager.dataOutputQueue.async {
             self.renderingEnabled = true
         }

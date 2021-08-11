@@ -46,5 +46,25 @@ struct SavedFile {
 struct SavedRecording {
     let name: String
     let folderURL: URL
+    let task: Task?
     var savedFiles: [SavedFile]
+}
+
+struct UseCase {
+    var id: String
+    var title: String
+    var date: Date
+    var subjectID: String
+    var recordings: [SavedRecording]
+    var notes: String? = nil
+}
+
+struct Task {
+    let name: String
+    let fileNameLabel: String?
+    let instructions: String?
+    let repTime: Int?
+    let repetitions: Int?
+    let recordVideo: Bool?
+    let recordAudio: Bool?
 }

@@ -33,7 +33,7 @@ class SavedRecordingsDataSource {
             let newFile = SavedFile(outputType: outputType, lastPathComponent: fileName)
             savedFiles.append(newFile)
         }
-        let newRecording = SavedRecording(name: folderName, folderURL: folderURL, savedFiles: savedFiles)
+        let newRecording = SavedRecording(name: folderName, folderURL: folderURL, task: nil, savedFiles: savedFiles)
         savedRecordings.append(newRecording)
     }
     
