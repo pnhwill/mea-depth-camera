@@ -8,12 +8,10 @@
 import AVFoundation
 
 class CaptureSessionManager: NSObject {
+    typealias SessionSetupCompletedAction = (AVCaptureDevice, AVCaptureVideoDataOutput, AVCaptureDepthDataOutput, AVCaptureAudioDataOutput) -> Void
     
     // Weak reference to parent
     private weak var cameraViewController: CameraViewController!
-    
-    // Data output processor
-    private(set) var dataOutputPipeline: CaptureOutputPipeline?
     
     // AVCapture session
     private(set) var session = AVCaptureSession()
@@ -31,16 +29,6 @@ class CaptureSessionManager: NSObject {
     private var depthDimensions: CMVideoDimensions?
     private var videoOrientation: AVCaptureVideoOrientation?
     
-    // Source media formats
-    private(set) var videoFormatDescription: CMVideoFormatDescription?
-    private(set) var depthDataFormatDescription: CMFormatDescription?
-    
-    // Synchronized data capture
-    private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
-    
-    // Data output synchronizer queue
-    let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    
     let discardLateFrames: Bool = false
     let depthDataFiltering: Bool = false
     
@@ -57,7 +45,7 @@ class CaptureSessionManager: NSObject {
     
     // MARK: - Session Configuration
     
-    func configureSession() {
+    func configureSession(completion: SessionSetupCompletedAction) {
         if setupResult != .success {
             return
         }
@@ -93,24 +81,8 @@ class CaptureSessionManager: NSObject {
             setupResult = .configurationFailed
             return
         }
-        
-        if let videoDimensions = videoDimensions, let depthDimensions = depthDimensions, let videoOrientation = videoOrientation {
-            // Initialize the data output processor
-            self.dataOutputPipeline = CaptureOutputPipeline(sessionManager: self,
-                                                           cameraViewController: cameraViewController,
-                                                           videoDimensions: videoDimensions,
-                                                           depthDimensions: depthDimensions,
-                                                           videoOrientation: videoOrientation)
-        } else {
-            print("Failed to retrieve video dimensions/orientation. Could not initialize data output processor")
-            setupResult = .configurationFailed
-            return
-        }
 
-        // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
-        // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
-        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
-        outputSynchronizer?.setDelegate(dataOutputPipeline, queue: dataOutputQueue)
+        completion(videoDevice, videoDataOutput, depthDataOutput, audioDataOutput)
     }
     
     // MARK: - Capture Device Configuration
@@ -191,7 +163,6 @@ class CaptureSessionManager: NSObject {
                     print("Camera intrinsic matrix delivery not supported")
                     return false
                 }
-                videoOrientation = connection.videoOrientation
             } else {
                 print("No AVCaptureConnection for video data output")
                 return false
@@ -314,8 +285,7 @@ class CaptureSessionManager: NSObject {
             print("Could not lock device for configuration: \(error)")
             return false
         }
-        videoFormatDescription = videoDevice.activeFormat.formatDescription
-        depthDataFormatDescription = videoDevice.activeDepthDataFormat?.formatDescription
+
         return true
     }
     

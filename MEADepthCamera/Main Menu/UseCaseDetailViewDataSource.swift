@@ -13,7 +13,7 @@ class UseCaseDetailViewDataSource: NSObject {
         case title
         case subjectID
         
-        func displayText(for useCase: UseCase?) -> String? {
+        func displayText(for useCase: SavedUseCase?) -> String? {
             switch self {
             case .title:
                 return useCase?.title
@@ -24,9 +24,9 @@ class UseCaseDetailViewDataSource: NSObject {
         
     }
     
-    private var useCase: UseCase
+    private var useCase: SavedUseCase
     
-    init(useCase: UseCase) {
+    init(useCase: SavedUseCase) {
         self.useCase = useCase
         super.init()
     }

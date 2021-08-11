@@ -22,6 +22,8 @@
 		B54215C826C366C900A4F984 /* UseCaseDetailEditDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54215C726C366C900A4F984 /* UseCaseDetailEditDataSource.swift */; };
 		B54215CA26C3670E00A4F984 /* MainMenuDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54215C926C3670E00A4F984 /* MainMenuDataSource.swift */; };
 		B54215CC26C36D6B00A4F984 /* MainMenuUseCaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54215CB26C36D6B00A4F984 /* MainMenuUseCaseView.swift */; };
+		B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */; };
+		B542161026C45F7300A4F984 /* PersistentContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B542160F26C45F7300A4F984 /* PersistentContainer.swift */; };
 		B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA626AB654B00998C27 /* PointCloud.metal */; };
 		B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */; };
 		B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414026B8E08D004ED4E4 /* VideoReader.swift */; };
@@ -91,6 +93,8 @@
 		B54215C726C366C900A4F984 /* UseCaseDetailEditDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseDetailEditDataSource.swift; sourceTree = "<group>"; };
 		B54215C926C3670E00A4F984 /* MainMenuDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuDataSource.swift; sourceTree = "<group>"; };
 		B54215CB26C36D6B00A4F984 /* MainMenuUseCaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuUseCaseView.swift; sourceTree = "<group>"; };
+		B54215CE26C45A3900A4F984 /* MEADepthCamera.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MEADepthCamera.xcdatamodel; sourceTree = "<group>"; };
+		B542160F26C45F7300A4F984 /* PersistentContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentContainer.swift; sourceTree = "<group>"; };
 		B56F2EA626AB654B00998C27 /* PointCloud.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PointCloud.metal; sourceTree = "<group>"; };
 		B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarksTrackerProcessor.swift; sourceTree = "<group>"; };
 		B575414026B8E08D004ED4E4 /* VideoReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoReader.swift; sourceTree = "<group>"; };
@@ -158,14 +162,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B50CD98D26C478B400192E7F /* Camera View Controller */ = {
+			isa = PBXGroup;
+			children = (
+				B5796585269DED5F0070C294 /* CameraViewController.swift */,
+				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
+			);
+			path = "Camera View Controller";
+			sourceTree = "<group>";
+		};
 		B54215BB26C31E9300A4F984 /* Main Menu */ = {
 			isa = PBXGroup;
 			children = (
 				B54215B926C316F600A4F984 /* MainMenuViewController.swift */,
-				B54215CB26C36D6B00A4F984 /* MainMenuUseCaseView.swift */,
+				B54215C926C3670E00A4F984 /* MainMenuDataSource.swift */,
 				B54215C126C3582C00A4F984 /* UseCaseDetailViewController.swift */,
 				B54215C726C366C900A4F984 /* UseCaseDetailEditDataSource.swift */,
-				B54215C926C3670E00A4F984 /* MainMenuDataSource.swift */,
 				B54215C326C3596F00A4F984 /* UseCaseDetailViewDataSource.swift */,
 				B54215BE26C34B2000A4F984 /* Use Case Views */,
 			);
@@ -175,10 +187,20 @@
 		B54215BE26C34B2000A4F984 /* Use Case Views */ = {
 			isa = PBXGroup;
 			children = (
+				B54215CB26C36D6B00A4F984 /* MainMenuUseCaseView.swift */,
 				B54215C526C35FAF00A4F984 /* EditTitleCell.swift */,
 				B54215BF26C34B5C00A4F984 /* EditSubjectIDCell.swift */,
 			);
 			path = "Use Case Views";
+			sourceTree = "<group>";
+		};
+		B542161126C46C1A00A4F984 /* Persistent Storage */ = {
+			isa = PBXGroup;
+			children = (
+				B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */,
+				B542160F26C45F7300A4F984 /* PersistentContainer.swift */,
+			);
+			path = "Persistent Storage";
 			sourceTree = "<group>";
 		};
 		B56F2EAA26AB7EC300998C27 /* Point Cloud */ = {
@@ -227,9 +249,9 @@
 			children = (
 				B5796581269DED5F0070C294 /* AppDelegate.swift */,
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
+				B542161126C46C1A00A4F984 /* Persistent Storage */,
 				B54215BB26C31E9300A4F984 /* Main Menu */,
-				B5796585269DED5F0070C294 /* CameraViewController.swift */,
-				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
+				B50CD98D26C478B400192E7F /* Camera View Controller */,
 				B5C732AD26BDCC72002B01C2 /* Data Pipelines */,
 				B5886DFB26AA5FB900EB344C /* Camera Preview Views */,
 				B575413D26B8DB36004ED4E4 /* Vision Face Detection */,
@@ -487,6 +509,7 @@
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
+				B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */,
 				B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
@@ -513,6 +536,7 @@
 				B54215CC26C36D6B00A4F984 /* MainMenuUseCaseView.swift in Sources */,
 				B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */,
 				B5886DFD26AA61E100EB344C /* LiveFaceDetectionProcessor.swift in Sources */,
+				B542161026C45F7300A4F984 /* PersistentContainer.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -851,6 +875,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				B54215CE26C45A3900A4F984 /* MEADepthCamera.xcdatamodel */,
+			);
+			currentVersion = B54215CE26C45A3900A4F984 /* MEADepthCamera.xcdatamodel */;
+			path = MEADepthCamera.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = B5796576269DED5F0070C294 /* Project object */;
 }

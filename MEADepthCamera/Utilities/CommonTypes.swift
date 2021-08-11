@@ -38,20 +38,20 @@ struct ProcessorSettings {
     }
 }
 
-struct SavedFile {
+struct SavedFile: Codable {
     let outputType: OutputType
     let lastPathComponent: String
 }
 
-struct SavedRecording {
+struct SavedRecording: Codable {
     let name: String
     let folderURL: URL
-    let task: Task?
+    let task: SavedTask?
     var savedFiles: [SavedFile]
 }
 
-struct UseCase {
-    var id: String
+struct SavedUseCase: Codable {
+    var id: UUID
     var title: String
     var date: Date
     var subjectID: String
@@ -59,7 +59,7 @@ struct UseCase {
     var notes: String? = nil
 }
 
-struct Task {
+struct SavedTask: Codable {
     let name: String
     let fileNameLabel: String?
     let instructions: String?

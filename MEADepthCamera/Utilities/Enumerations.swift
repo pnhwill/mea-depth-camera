@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-enum OutputType: String {
+enum OutputType: String, Codable {
     case video
     case audio
     case depth

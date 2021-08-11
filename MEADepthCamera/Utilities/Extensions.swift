@@ -8,6 +8,21 @@
 import AVFoundation
 import UIKit
 
+// MARK: UIViewController
+extension UIViewController {
+    func alert(title: String, message: String, actions: [UIAlertAction]) {
+        let alertController = UIAlertController(title: title,
+                                                message: message,
+                                                preferredStyle: .alert)
+        
+        actions.forEach {
+            alertController.addAction($0)
+        }
+        
+        self.present(alertController, animated: true, completion: nil)
+    }
+}
+
 // MARK: CGPoint
 extension CGPoint {
     // Method to clamp a CGPoint within a certain bounds

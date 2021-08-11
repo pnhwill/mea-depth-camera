@@ -11,10 +11,7 @@ import Vision
 
 class CaptureOutputPipeline: NSObject, DataPipeline {
     
-    // Capture session manager (parent)
-    private weak var sessionManager: CaptureSessionManager!
-    
-    // Weak reference to camera view controller
+    // Weak reference to camera view controller (parent)
     private weak var cameraViewController: CameraViewController?
     
     // Preview view
@@ -26,7 +23,13 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     //private unowned var metadataOutput: AVCaptureMetadataOutput
     private unowned var audioDataOutput: AVCaptureAudioDataOutput
     
-    private(set) var processorSettings: ProcessorSettings
+    private(set) var processorSettings: ProcessorSettings!
+    
+    // Synchronized data capture
+    private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
+    
+    // Data output synchronizer queue
+    let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // Recording
     var recordingState = RecordingState.idle
@@ -74,29 +77,41 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     
     let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
-    init(sessionManager: CaptureSessionManager,
-         cameraViewController: CameraViewController,
-         videoDimensions: CMVideoDimensions,
-         depthDimensions: CMVideoDimensions,
-         videoOrientation: AVCaptureVideoOrientation) {
-        self.sessionManager = sessionManager
+    // Use case
+    private let useCase: SavedUseCase
+    
+    init(cameraViewController: CameraViewController,
+         useCase: SavedUseCase,
+         videoDataOutput: AVCaptureVideoDataOutput,
+         depthDataOutput: AVCaptureDepthDataOutput,
+         audioDataOutput: AVCaptureAudioDataOutput) {
         self.cameraViewController = cameraViewController
-        self.videoDataOutput = sessionManager.videoDataOutput
-        self.depthDataOutput = sessionManager.depthDataOutput
-        self.audioDataOutput = sessionManager.audioDataOutput
-        self.processorSettings = ProcessorSettings(videoDimensions: videoDimensions, depthDimensions: depthDimensions, videoOrientation: videoOrientation)
+        self.useCase = useCase
+        self.videoDataOutput = videoDataOutput
+        self.depthDataOutput = depthDataOutput
+        self.audioDataOutput = audioDataOutput
     }
     
     // MARK: - Data Pipeline Setup
-    func configureProcessors() {
+    func configureProcessors(for videoDevice: AVCaptureDevice) {
+        
+        // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
+        // The first output in the dataOutputs array, in this case the AVCaptureVideoDataOutput, is the "master" output.
+        outputSynchronizer = AVCaptureDataOutputSynchronizer(dataOutputs: [videoDataOutput, depthDataOutput, audioDataOutput])
+        outputSynchronizer?.setDelegate(self, queue: dataOutputQueue)
+        
+        let videoFormatDescription = videoDevice.activeFormat.formatDescription
+        guard let depthDataFormatDescription = videoDevice.activeDepthDataFormat?.formatDescription else { return }
+        let videoDimensions = CMVideoFormatDescriptionGetDimensions(videoFormatDescription)
+        let depthDimensions = CMVideoFormatDescriptionGetDimensions(depthDataFormatDescription)
+        
+        guard let connection = videoDataOutput.connection(with: .video) else { return }
+        let videoOrientation = connection.videoOrientation
+        
+        self.processorSettings = ProcessorSettings(videoDimensions: videoDimensions, depthDimensions: depthDimensions, videoOrientation: videoOrientation)
+        
         self.faceDetectionProcessor = LiveFaceDetectionProcessor()
         self.faceDetectionProcessor?.delegate = self
-        
-        // Get source media formats
-        guard let videoFormat = sessionManager.videoFormatDescription else {
-            print("Failed to retrieve source media format descriptions")
-            return
-        }
         
         // Initialize video file writer configuration
         let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
@@ -109,7 +124,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
                                                                  videoSettings: videoSettingsForVideo,
                                                                  audioSettings: audioSettingsForVideo,
                                                                  transform: videoTransform,
-                                                                 videoFormat: videoFormat)
+                                                                 videoFormat: videoFormatDescription)
         
         // Initialize audio file writer configuration
         let audioSettingsForAudio = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioFileSettings.fileType)

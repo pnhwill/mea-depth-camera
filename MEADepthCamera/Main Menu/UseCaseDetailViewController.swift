@@ -8,16 +8,16 @@
 import UIKit
 
 class UseCaseDetailViewController: UITableViewController {
-    typealias UseCaseChangeAction = (UseCase) -> Void
+    typealias UseCaseChangeAction = (SavedUseCase) -> Void
     
-    private var useCase: UseCase?
-    private var tempUseCase: UseCase?
+    private var useCase: SavedUseCase?
+    private var tempUseCase: SavedUseCase?
     private var dataSource: UITableViewDataSource?
     private var useCaseEditAction: UseCaseChangeAction?
     private var useCaseAddAction: UseCaseChangeAction?
     private var isNew = false
     
-    func configure(with useCase: UseCase, isNew: Bool = false, addAction: UseCaseChangeAction? = nil, editAction: UseCaseChangeAction? = nil) {
+    func configure(with useCase: SavedUseCase, isNew: Bool = false, addAction: UseCaseChangeAction? = nil, editAction: UseCaseChangeAction? = nil) {
         self.useCase = useCase
         self.isNew = isNew
         self.useCaseAddAction = addAction
@@ -45,7 +45,7 @@ class UseCaseDetailViewController: UITableViewController {
     
     // MARK: Mode Transitions
     
-    fileprivate func transitionToViewMode(_ useCase: UseCase) {
+    fileprivate func transitionToViewMode(_ useCase: SavedUseCase) {
         if isNew {
             let addUseCase = tempUseCase ?? useCase
             dismiss(animated: true) {
@@ -66,7 +66,7 @@ class UseCaseDetailViewController: UITableViewController {
         editButtonItem.isEnabled = true
     }
     
-    fileprivate func transitionToEditMode(_ useCase: UseCase) {
+    fileprivate func transitionToEditMode(_ useCase: SavedUseCase) {
         dataSource = UseCaseDetailEditDataSource(useCase: useCase) { useCase in
             self.tempUseCase = useCase
             self.editButtonItem.isEnabled = true

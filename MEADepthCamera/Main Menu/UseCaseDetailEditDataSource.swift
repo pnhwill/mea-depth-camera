@@ -8,7 +8,7 @@
 import UIKit
 
 class UseCaseDetailEditDataSource: NSObject {
-    typealias UseCaseChangeAction = (UseCase) -> Void
+    typealias UseCaseChangeAction = (SavedUseCase) -> Void
     
     enum UseCaseSection: Int, CaseIterable {
         case title
@@ -40,10 +40,10 @@ class UseCaseDetailEditDataSource: NSObject {
         }
     }
     
-    var useCase: UseCase
+    var useCase: SavedUseCase
     private var useCaseChangeAction: UseCaseChangeAction?
     
-    init(useCase: UseCase, changeAction: @escaping UseCaseChangeAction) {
+    init(useCase: SavedUseCase, changeAction: @escaping UseCaseChangeAction) {
         self.useCase = useCase
         self.useCaseChangeAction = changeAction
     }

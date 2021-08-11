@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 class MainMenuViewController: UIViewController {
     
@@ -19,10 +20,21 @@ class MainMenuViewController: UIViewController {
     
     private var mainMenuDataSource: MainMenuDataSource?
     
+    // Core Data persistent container
+    private lazy var persistentContainer: PersistentContainer? = {
+        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        return appDelegate?.persistentContainer
+    }()
+    
     // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showCameraSegueIdentifier {
+        if segue.identifier == Self.showCameraSegueIdentifier, let destination = segue.destination as? CameraViewController {
+            destination.persistentContainer = persistentContainer
+            guard let useCase = mainMenuDataSource?.currentUseCase else {
+                fatalError("Couldn't find data source for use case.")
+            }
+            destination.useCase = useCase
         }
     }
     
@@ -30,6 +42,9 @@ class MainMenuViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        guard persistentContainer != nil else {
+            fatalError("This view needs a persistent container.")
+        }
         mainMenuDataSource = MainMenuDataSource(currentUseCaseChangedAction: { currentUseCase in
             DispatchQueue.main.async {
                 if let useCase = currentUseCase {
@@ -60,7 +75,7 @@ class MainMenuViewController: UIViewController {
     private func addUseCase() {
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-        let useCase = UseCase(id: UUID().uuidString, title: "New Use Case", date: Date(), subjectID: "", recordings: [])
+        let useCase = SavedUseCase(id: UUID(), title: "New Use Case", date: Date(), subjectID: "", recordings: [])
         detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
             self.mainMenuDataSource?.updateCurrentUseCase(useCase)
         })

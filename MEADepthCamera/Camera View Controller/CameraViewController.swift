@@ -52,6 +52,9 @@ class CameraViewController: UIViewController {
         }
     }
     
+    // Use case
+    var useCase: SavedUseCase!
+    
     // App state
     var processingMode: ProcessingMode = .record {
         didSet {
@@ -77,6 +80,9 @@ class CameraViewController: UIViewController {
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
+    
+    // Core Data
+    var persistentContainer: PersistentContainer?
     
     // MARK: - View Controller Life Cycle
     
@@ -127,8 +133,15 @@ class CameraViewController: UIViewController {
          that the main queue isn't blocked, which keeps the UI responsive.
          */
         sessionQueue.async {
-            self.sessionManager.configureSession()
-            self.dataOutputPipeline = self.sessionManager.dataOutputPipeline
+            self.sessionManager.configureSession { videoDevice, videoDataOutput, depthDataOutput, audioDataOutput in
+                // Initialize the data output processor
+                self.dataOutputPipeline = CaptureOutputPipeline(cameraViewController: self,
+                                                                useCase: self.useCase,
+                                                                videoDataOutput: videoDataOutput,
+                                                                depthDataOutput: depthDataOutput,
+                                                                audioDataOutput: audioDataOutput)
+                self.dataOutputPipeline?.configureProcessors(for: videoDevice)
+            }
         }
         // Configure the progress spinner
         DispatchQueue.main.async {
@@ -170,11 +183,9 @@ class CameraViewController: UIViewController {
                     }
                 }
                 
-                self.dataOutputPipeline?.configureProcessors()
-                
                 self.addObservers()
                 
-                self.sessionManager.dataOutputQueue.async {
+                self.dataOutputPipeline?.dataOutputQueue.async {
                     self.renderingEnabled = true
                 }
                 
@@ -215,7 +226,7 @@ class CameraViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         print("camera view will disappear")
         //dataOutputProcessor?.visionProcessor?.cancelTracking()
-        sessionManager.dataOutputQueue.async {
+        dataOutputPipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
         }
         sessionQueue.async {
@@ -237,7 +248,7 @@ class CameraViewController: UIViewController {
     func didEnterBackground(notification: NSNotification) {
         print("camera view did enter background")
         // Free up resources.
-        sessionManager.dataOutputQueue.async {
+        dataOutputPipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
             self.dataOutputPipeline?.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
@@ -248,7 +259,7 @@ class CameraViewController: UIViewController {
     @objc
     func willEnterForeground(notification: NSNotification) {
         print("camera view will enter foreground")
-        sessionManager.dataOutputQueue.async {
+        dataOutputPipeline?.dataOutputQueue.async {
             self.renderingEnabled = true
         }
     }
@@ -521,7 +532,7 @@ class CameraViewController: UIViewController {
         // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
-        sessionManager.dataOutputQueue.async {
+        dataOutputPipeline?.dataOutputQueue.async {
             defer {
                 DispatchQueue.main.async {
                     // Enable the Record button to let the user stop or start another recording
@@ -626,7 +637,7 @@ class CameraViewController: UIViewController {
         case .track:
             // Switch from live recording mode to post-processing mode
             self.startStopButton.isHidden = false
-            sessionManager.dataOutputQueue.async {
+            dataOutputPipeline?.dataOutputQueue.async {
                 self.renderingEnabled = false
             }
             sessionQueue.async {
@@ -638,7 +649,7 @@ class CameraViewController: UIViewController {
         case .record:
             // Switch back to live recording mode
             self.startStopButton.isHidden = true
-            sessionManager.dataOutputQueue.async {
+            dataOutputPipeline?.dataOutputQueue.async {
                 self.renderingEnabled = true
             }
             sessionQueue.async {
@@ -694,18 +705,6 @@ class CameraViewController: UIViewController {
             let actions = [UIAlertAction(title: "OK", style: .cancel, handler: nil)]
             self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
         }
-    }
-    
-    func alert(title: String, message: String, actions: [UIAlertAction]) {
-        let alertController = UIAlertController(title: title,
-                                                message: message,
-                                                preferredStyle: .alert)
-        
-        actions.forEach {
-            alertController.addAction($0)
-        }
-        
-        self.present(alertController, animated: true, completion: nil)
     }
     
 }
