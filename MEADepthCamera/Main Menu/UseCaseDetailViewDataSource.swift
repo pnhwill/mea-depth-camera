@@ -11,22 +11,51 @@ class UseCaseDetailViewDataSource: NSObject {
     
     enum UseCaseRow: Int, CaseIterable {
         case title
+        case date
         case subjectID
+        case numRecordings
+        case notes
         
-        func displayText(for useCase: SavedUseCase?) -> String? {
+        static let timeFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .none
+            formatter.timeStyle = .short
+            return formatter
+        }()
+        
+        static let dateFormatter: DateFormatter = {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .none
+            formatter.dateStyle = .long
+            return formatter
+        }()
+        
+        func displayText(for useCase: UseCase) -> String? {
             switch self {
             case .title:
-                return useCase?.title
+                return useCase.title
+            case .date:
+                guard let date = useCase.date else { return nil }
+                let timeText = Self.timeFormatter.string(from: date)
+                if Locale.current.calendar.isDateInToday(date) {
+                    return UseCase.todayDateFormatter.string(from: date)
+                }
+                return Self.dateFormatter.string(from: date) + " at " + timeText
             case .subjectID:
-                return useCase?.subjectID
+                guard let subjectID = useCase.subjectID else { return nil }
+                return "Subject ID: " + subjectID
+            case .numRecordings:
+                return String(useCase.recordingsCount) + " Recordings"
+            case .notes:
+                return useCase.notes
             }
         }
         
     }
     
-    private var useCase: SavedUseCase
+    private var useCase: UseCase
     
-    init(useCase: SavedUseCase) {
+    init(useCase: UseCase) {
         self.useCase = useCase
         super.init()
     }

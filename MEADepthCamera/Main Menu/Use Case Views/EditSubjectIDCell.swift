@@ -19,7 +19,7 @@ class EditSubjectIDCell: UITableViewCell {
         subjectIDTextField.delegate = self
     }
     
-    func configure(subjectID: String, changeAction: @escaping SubjectIDChangeAction) {
+    func configure(subjectID: String?, changeAction: @escaping SubjectIDChangeAction) {
         subjectIDTextField.text = subjectID
         self.subjectIDChangeAction = changeAction
     }

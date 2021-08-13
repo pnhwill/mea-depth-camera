@@ -78,10 +78,10 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // Use case
-    private let useCase: SavedUseCase
+    private let useCase: UseCase
     
     init(cameraViewController: CameraViewController,
-         useCase: SavedUseCase,
+         useCase: UseCase,
          videoDataOutput: AVCaptureVideoDataOutput,
          depthDataOutput: AVCaptureDepthDataOutput,
          audioDataOutput: AVCaptureAudioDataOutput) {

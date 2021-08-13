@@ -8,16 +8,17 @@
 import UIKit
 
 class UseCaseDetailViewController: UITableViewController {
-    typealias UseCaseChangeAction = (SavedUseCase) -> Void
+    typealias UseCaseChangeAction = (UseCase) -> Void
+    typealias UseCaseChanges = UseCaseDetailEditDataSource.UseCaseChanges
     
-    private var useCase: SavedUseCase?
-    private var tempUseCase: SavedUseCase?
+    private var useCase: UseCase?
+    private var useCaseChanges: UseCaseChanges?
     private var dataSource: UITableViewDataSource?
     private var useCaseEditAction: UseCaseChangeAction?
     private var useCaseAddAction: UseCaseChangeAction?
     private var isNew = false
     
-    func configure(with useCase: SavedUseCase, isNew: Bool = false, addAction: UseCaseChangeAction? = nil, editAction: UseCaseChangeAction? = nil) {
+    func configure(with useCase: UseCase, isNew: Bool = false, addAction: UseCaseChangeAction? = nil, editAction: UseCaseChangeAction? = nil) {
         self.useCase = useCase
         self.isNew = isNew
         self.useCaseAddAction = addAction
@@ -41,23 +42,25 @@ class UseCaseDetailViewController: UITableViewController {
            !navigationController.isToolbarHidden {
             navigationController.setToolbarHidden(true, animated: animated)
         }
+        self.isModalInPresentation = true
     }
     
     // MARK: Mode Transitions
     
-    fileprivate func transitionToViewMode(_ useCase: SavedUseCase) {
+    fileprivate func transitionToViewMode(_ useCase: UseCase) {
         if isNew {
-            let addUseCase = tempUseCase ?? useCase
+            //let addUseCase = tempUseCase ?? useCase
+            setUseCaseChanges()
             dismiss(animated: true) {
-                self.useCaseAddAction?(addUseCase)
+                self.useCaseAddAction?(useCase)
             }
             return
         }
-        if let tempUseCase = tempUseCase {
-            self.useCase = tempUseCase
-            self.tempUseCase = nil
-            useCaseEditAction?(tempUseCase)
-            dataSource = UseCaseDetailViewDataSource(useCase: tempUseCase)
+        if useCaseChanges != nil {
+            setUseCaseChanges()
+            self.useCaseChanges = nil
+            useCaseEditAction?(useCase)
+            dataSource = UseCaseDetailViewDataSource(useCase: useCase)
         } else {
             dataSource = UseCaseDetailViewDataSource(useCase: useCase)
         }
@@ -66,10 +69,14 @@ class UseCaseDetailViewController: UITableViewController {
         editButtonItem.isEnabled = true
     }
     
-    fileprivate func transitionToEditMode(_ useCase: SavedUseCase) {
-        dataSource = UseCaseDetailEditDataSource(useCase: useCase) { useCase in
-            self.tempUseCase = useCase
-            self.editButtonItem.isEnabled = true
+    fileprivate func transitionToEditMode(_ useCase: UseCase) {
+        editButtonItem.isEnabled = false
+        dataSource = UseCaseDetailEditDataSource(useCase: useCase) { useCaseChanges in
+            self.useCaseChanges = useCaseChanges
+            if let title = useCaseChanges.title, let subjectID = useCaseChanges.subjectID {
+                let isValidChanges = !title.isEmpty && !subjectID.isEmpty
+                self.editButtonItem.isEnabled = isValidChanges
+            }
         }
         navigationItem.title = isNew ? NSLocalizedString("Add Use Case", comment: "add use case nav title") : NSLocalizedString("Edit Use Case", comment: "edit use case nav title")
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTrigger))
@@ -96,11 +103,19 @@ class UseCaseDetailViewController: UITableViewController {
         if isNew {
             dismiss(animated: true, completion: nil)
         } else {
-            tempUseCase = nil
+            useCaseChanges = nil
             setEditing(false, animated: true)
         }
         
     }
+    
+    private func setUseCaseChanges() {
+        guard let useCaseChanges = useCaseChanges else { return }
+        useCase?.title = useCaseChanges.title
+        useCase?.subjectID = useCaseChanges.subjectID
+        useCase?.notes = useCaseChanges.notes
+    }
+    
 }
 
 extension UseCaseDetailViewController {

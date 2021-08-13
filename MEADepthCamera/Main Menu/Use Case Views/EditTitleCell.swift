@@ -19,7 +19,7 @@ class EditTitleCell: UITableViewCell {
         titleTextField.delegate = self
     }
     
-    func configure(title: String, changeAction: @escaping TitleChangeAction) {
+    func configure(title: String?, changeAction: @escaping TitleChangeAction) {
         titleTextField.text = title
         self.titleChangeAction = changeAction
     }

@@ -61,6 +61,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 fatalError("###\(#function): Failed to load persistent stores: \(error), \(error.userInfo)")
             }
         })
+        
+        container.viewContext.automaticallyMergesChangesFromParent = true
         return container
     }()
     

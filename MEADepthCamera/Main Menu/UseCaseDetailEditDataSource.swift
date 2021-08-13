@@ -8,11 +8,12 @@
 import UIKit
 
 class UseCaseDetailEditDataSource: NSObject {
-    typealias UseCaseChangeAction = (SavedUseCase) -> Void
+    typealias UseCaseChangeAction = (UseCaseChanges) -> Void
     
     enum UseCaseSection: Int, CaseIterable {
         case title
         case subjectID
+        case notes
         
         var displayText: String {
             switch self {
@@ -20,6 +21,8 @@ class UseCaseDetailEditDataSource: NSObject {
                 return "Title"
             case .subjectID:
                 return "Subject ID"
+            case .notes:
+                return "Notes"
             }
         }
         
@@ -36,15 +39,25 @@ class UseCaseDetailEditDataSource: NSObject {
                 return "EditTitleCell"
             case .subjectID:
                 return "EditSubjectIDCell"
+            case .notes:
+                return "EditNotesCell"
             }
         }
     }
     
-    var useCase: SavedUseCase
+    struct UseCaseChanges {
+        var title: String?
+        var subjectID: String?
+        var notes: String?
+    }
+    
+    private var useCase: UseCase
+    private var useCaseChanges: UseCaseChanges
     private var useCaseChangeAction: UseCaseChangeAction?
     
-    init(useCase: SavedUseCase, changeAction: @escaping UseCaseChangeAction) {
+    init(useCase: UseCase, changeAction: @escaping UseCaseChangeAction) {
         self.useCase = useCase
+        self.useCaseChanges = UseCaseChanges(title: useCase.title, subjectID: useCase.subjectID, notes: useCase.notes)
         self.useCaseChangeAction = changeAction
     }
     
@@ -59,15 +72,22 @@ class UseCaseDetailEditDataSource: NSObject {
         case .title:
             if let titleCell = cell as? EditTitleCell {
                 titleCell.configure(title: useCase.title) { title in
-                    self.useCase.title = title
-                    self.useCaseChangeAction?(self.useCase)
+                    self.useCaseChanges.title = title
+                    self.useCaseChangeAction?(self.useCaseChanges)
                 }
             }
         case .subjectID:
             if let subjectIDCell = cell as? EditSubjectIDCell {
                 subjectIDCell.configure(subjectID: useCase.subjectID) { subjectID in
-                    self.useCase.subjectID = subjectID
-                    self.useCaseChangeAction?(self.useCase)
+                    self.useCaseChanges.subjectID = subjectID
+                    self.useCaseChangeAction?(self.useCaseChanges)
+                }
+            }
+        case .notes:
+            if let notesCell = cell as? EditNotesCell {
+                notesCell.configure(notes: useCase.notes) { notes in
+                    self.useCaseChanges.notes = notes
+                    self.useCaseChangeAction?(self.useCaseChanges)
                 }
             }
         }

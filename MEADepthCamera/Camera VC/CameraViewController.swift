@@ -53,7 +53,7 @@ class CameraViewController: UIViewController {
     }
     
     // Use case
-    var useCase: SavedUseCase!
+    var useCase: UseCase!
     
     // App state
     var processingMode: ProcessingMode = .record {
