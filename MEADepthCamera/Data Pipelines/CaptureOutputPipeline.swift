@@ -73,7 +73,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     // Face landmarks post-processing
     
     private var faceLandmarksPipeline: FaceLandmarksPipeline?
-    private let savedRecordingsDataSource = SavedRecordingsDataSource()    
+    private let savedRecordingsDataSource = SavedRecordingsDataSource()
     
     let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
@@ -136,6 +136,11 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType,
                                                                        videoSettings: videoSettingsForDepthMap,
                                                                        transform: videoTransform)
+    }
+    
+    func configureSavedRecordingsDataSource(container: PersistentContainer) {
+        savedRecordingsDataSource.persistentContainer = container
+        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.savedRecordings.count)
     }
     
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
@@ -286,7 +291,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
                 print("Failed to create depth map file")
                 return
             }
-
+            
             guard let videoConfiguration = self.videoFileSettings.configuration,
                   let audioConfiguration = self.audioFileSettings.configuration,
                   let depthMapConfiguration = self.depthMapFileSettings.configuration else {
@@ -295,7 +300,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
             }
 
             let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL]
-            self.savedRecordingsDataSource.saveRecording(saveFolder, outputFiles: fileDictionary)
+            self.savedRecordingsDataSource.addRecording(saveFolder, outputFiles: fileDictionary)
             
             do {
                 self.videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: self.videoWriterSubject!)
@@ -315,6 +320,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
 
         }
         
+        // Set up subscriber do receive file writer statuses
         self.fileWritingDone = self.videoWriterSubject!.combineLatest(self.depthWriterSubject!, self.audioWriterSubject!)
         .sink(receiveCompletion: { [weak self] completion in
             self?.handleRecordingFinish(completion: completion)
@@ -333,6 +339,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         audioFileWriter = nil
         depthMapFileWriter = nil
         recordingState = .finish
+        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.savedRecordings.count)
     }
     
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {
@@ -509,24 +516,3 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
         cameraViewController?.isAligned = isAligned
     }
 }
-
-
-
-/*
-// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
-
-extension DataOutputProcessor: AVCaptureVideoDataOutputSampleBufferDelegate {
-    
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        if output == videoDataOutput{
-            let videoTimestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-            processVideo(sampleBuffer: sampleBuffer, timestamp: videoTimestamp)
-        }
-    }
-    
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        let droppedReason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String
-        print("Video frame dropped with reason: \(droppedReason ?? "unknown")")
-    }
-}
-*/

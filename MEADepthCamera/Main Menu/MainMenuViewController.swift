@@ -26,7 +26,7 @@ class MainMenuViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.showCameraSegueIdentifier, let destination = segue.destination as? CameraViewController {
-            //destination.persistentContainer = persistentContainer
+            destination.persistentContainer = mainMenuDataSource?.persistentContainer
             guard let useCase = mainMenuDataSource?.currentUseCase else {
                 fatalError("Couldn't find data source for use case.")
             }

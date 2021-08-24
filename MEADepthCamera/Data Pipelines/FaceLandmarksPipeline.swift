@@ -79,7 +79,7 @@ class FaceLandmarksPipeline: DataPipeline {
                 print("Failed to create landmarks2D file")
                 return
             }
-            self.savedRecordingsDataSource.addFilesToSavedRecording(&lastSavedRecording, newFiles: [OutputType.landmarks2D: landmarks2DURL,
+            self.savedRecordingsDataSource.addFiles(to: &lastSavedRecording, newFiles: [OutputType.landmarks2D: landmarks2DURL,
                                                                                                     OutputType.landmarks3D: landmarks3DURL,
                                                                                                     OutputType.info: infoURL])
             

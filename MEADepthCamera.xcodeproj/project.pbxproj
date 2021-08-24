@@ -64,6 +64,8 @@
 		B5DF4B8E26C496680045AE43 /* UseCaseListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */; };
 		B5DF4B9126C4ADA60045AE43 /* UseCase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
+		B5FB0A4926D44FBB00F65FA5 /* RecordingDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A4826D44FBB00F65FA5 /* RecordingDetailViewController.swift */; };
+		B5FB0A4B26D4548D00F65FA5 /* RecordingDetailDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A4A26D4548D00F65FA5 /* RecordingDetailDataSource.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,6 +153,8 @@
 		B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListCell.swift; sourceTree = "<group>"; };
 		B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UseCase+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
+		B5FB0A4826D44FBB00F65FA5 /* RecordingDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailViewController.swift; sourceTree = "<group>"; };
+		B5FB0A4A26D4548D00F65FA5 /* RecordingDetailDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailDataSource.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -276,7 +280,7 @@
 				B542161126C46C1A00A4F984 /* Persistent Storage */,
 				B54215BB26C31E9300A4F984 /* Main Menu */,
 				B50CD98D26C478B400192E7F /* Camera VC */,
-				B5DF4B8826C4928D0045AE43 /* Post-Processing VC */,
+				B5DF4B8826C4928D0045AE43 /* Recording VC */,
 				B5C732AD26BDCC72002B01C2 /* Data Pipelines */,
 				B5886DFB26AA5FB900EB344C /* Camera Preview Views */,
 				B575413D26B8DB36004ED4E4 /* Vision Face Detection */,
@@ -354,7 +358,6 @@
 				B5235ECB26C207CB0042106C /* InfoFileWriter.swift */,
 				B5886E0226AB249A00EB344C /* FileConfigurations.swift */,
 				B575414026B8E08D004ED4E4 /* VideoReader.swift */,
-				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
 			);
 			path = "File IO";
 			sourceTree = "<group>";
@@ -382,17 +385,20 @@
 				B53CD4B226B38EF3003BBFD9 /* CaptureOutputPipeline.swift */,
 				B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */,
 				B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */,
+				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
 				B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */,
 				B575414626BA10DA004ED4E4 /* getNumberOfFrames.h */,
 			);
 			path = "Data Pipelines";
 			sourceTree = "<group>";
 		};
-		B5DF4B8826C4928D0045AE43 /* Post-Processing VC */ = {
+		B5DF4B8826C4928D0045AE43 /* Recording VC */ = {
 			isa = PBXGroup;
 			children = (
+				B5FB0A4826D44FBB00F65FA5 /* RecordingDetailViewController.swift */,
+				B5FB0A4A26D4548D00F65FA5 /* RecordingDetailDataSource.swift */,
 			);
-			path = "Post-Processing VC";
+			path = "Recording VC";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -544,6 +550,7 @@
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */,
+				B5FB0A4926D44FBB00F65FA5 /* RecordingDetailViewController.swift in Sources */,
 				B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
@@ -553,6 +560,7 @@
 				B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B54215CA26C3670E00A4F984 /* MainMenuDataSource.swift in Sources */,
+				B5FB0A4B26D4548D00F65FA5 /* RecordingDetailDataSource.swift in Sources */,
 				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
 				B585A0A726C5CB3A00CA6546 /* EditNotesCell.swift in Sources */,

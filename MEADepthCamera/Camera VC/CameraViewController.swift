@@ -84,11 +84,41 @@ class CameraViewController: UIViewController {
     // Core Data
     var persistentContainer: PersistentContainer?
     
+    // Navigation/Storyboard
+    static let showRecordingSegueIdentifier = "ShowRecordingSegue"
+    static let mainStoryboardName = "Main"
+    
+    // MARK: - Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == Self.showRecordingSegueIdentifier, let destination = segue.destination as? RecordingDetailViewController {
+            destination.persistentContainer = persistentContainer
+        }
+    }
+    
+    // MARK: - Recordings Count
+    
+    func updateRecordingsCount(count: Int) {
+        var title: String {
+            switch count {
+            case 0:
+                return "No Recordings"
+            case 1:
+                return "One Recording"
+            default:
+                return "\(count) Recordings"
+            }
+        }
+        DispatchQueue.main.async { [weak self] in
+            self?.navigationItem.title = title
+        }
+    }
+    
     // MARK: - View Controller Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("camera view did load")
+        //print("camera view did load")
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
         
@@ -141,6 +171,11 @@ class CameraViewController: UIViewController {
                                                                 depthDataOutput: depthDataOutput,
                                                                 audioDataOutput: audioDataOutput)
                 self.dataOutputPipeline?.configureProcessors(for: videoDevice)
+                if let container = self.persistentContainer {
+                    self.dataOutputPipeline?.configureSavedRecordingsDataSource(container: container)
+                } else {
+                    self.sessionManager.setupResult = .configurationFailed
+                }
             }
         }
         // Configure the progress spinner
@@ -153,7 +188,7 @@ class CameraViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("camera view will appear")
+        //print("camera view will appear")
         let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
         let interfaceOrientation = mainWindowScene?.interfaceOrientation ?? .portrait
         //statusBarOrientation = interfaceOrientation
@@ -554,6 +589,11 @@ class CameraViewController: UIViewController {
                 if UIDevice.current.isMultitaskingSupported {
                     self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
                 }
+                // Hide the navigation bar back button and update title
+                DispatchQueue.main.async {
+                    self.navigationItem.title = "Recording in Progress"
+                    self.navigationItem.setHidesBackButton(true, animated: true)
+                }
                 self.dataOutputPipeline?.startRecording()
                 
             case .recording:
@@ -563,6 +603,10 @@ class CameraViewController: UIViewController {
                     if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
                         UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
                     }
+                }
+                // Unhide the navigation bar back button
+                DispatchQueue.main.async {
+                    self.navigationItem.setHidesBackButton(false, animated: true)
                 }
             default:
                 return

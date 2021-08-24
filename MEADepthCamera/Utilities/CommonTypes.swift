@@ -46,6 +46,7 @@ struct SavedFile: Codable {
 struct SavedRecording: Codable {
     let name: String
     let folderURL: URL
+    let duration: Double?
     let task: SavedTask?
     var savedFiles: [SavedFile]
 }
