@@ -51,6 +51,21 @@ class UseCaseDetailViewDataSource: NSObject {
             }
         }
         
+        var cellImage: UIImage? {
+            switch self {
+            case .title:
+                return nil
+            case .date:
+                return UIImage(systemName: "calendar.circle")
+            case .subjectID:
+                return UIImage(systemName: "person.fill.viewfinder")
+            case .numRecordings:
+                return UIImage(systemName: "tray.full")
+            case .notes:
+                return UIImage(systemName: "square.and.pencil")
+            }
+        }
+        
     }
     
     private var useCase: UseCase
@@ -60,6 +75,8 @@ class UseCaseDetailViewDataSource: NSObject {
         super.init()
     }
 }
+
+// MARK: UITableViewDataSource
 
 extension UseCaseDetailViewDataSource: UITableViewDataSource {
     static let useCaseDetailCellIdentifier = "UseCaseDetailCell"
@@ -72,11 +89,7 @@ extension UseCaseDetailViewDataSource: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: Self.useCaseDetailCellIdentifier, for: indexPath)
         let row = UseCaseRow(rawValue: indexPath.row)
         cell.textLabel?.text = row?.displayText(for: useCase)
-        //cell.imageView?.image = row?.cellImage
+        cell.imageView?.image = row?.cellImage
         return cell
     }
-    
-    
-    
-    
 }

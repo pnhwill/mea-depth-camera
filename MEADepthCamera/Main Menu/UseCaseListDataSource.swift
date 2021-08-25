@@ -30,10 +30,13 @@ class UseCaseListDataSource: NSObject {
         }
     }
     
-    var filter: Filter = .today
+    var filter: Filter = .all
     
     var filteredUseCases: [UseCase]? {
-        return fetchedResultsController.fetchedObjects?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
+        return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
+    }
+    var useCases: [UseCase]? {
+        return fetchedResultsController.fetchedObjects
     }
     
     private var useCaseDeletedAction: UseCaseDeletedAction?
@@ -48,7 +51,7 @@ class UseCaseListDataSource: NSObject {
     
     private lazy var fetchedResultsController: NSFetchedResultsController<UseCase> = {
         let fetchRequest: NSFetchRequest<UseCase> = UseCase.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: UseCase.Name.date, ascending: true)]
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: UseCase.PropertyKeys.date, ascending: true)]
         
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                     managedObjectContext: persistentContainer.viewContext,
@@ -67,45 +70,65 @@ class UseCaseListDataSource: NSObject {
         self.useCaseDeletedAction = useCaseDeletedAction
         self.useCaseChangedAction = useCaseChangedAction
         super.init()
+        
+        //NotificationCenter.default.addObserver(self, selector: #selector(self.contextChanged(_:)), name: .NSManagedObjectContextObjectsDidChange, object: nil)
     }
     
-    // MARK: Persistent Storage Interface
+//    deinit {
+//        NotificationCenter.default.removeObserver(self, name: .NSManagedObjectContextObjectsDidChange, object: nil)
+//    }
+    
+//    @objc
+//    func contextChanged(_ notification: NSNotification) {
+//       if let context = notification.object as? NSManagedObjectContext {
+//            context.refreshAllObjects()
+//        }
+//        print("AAAweilryvglwieurg")
+//        //useCaseChangedAction?()
+//    }
+    
+    // MARK: List Configuration
     
     func update(_ useCase: UseCase, at row: Int, completion: (Bool) -> Void) {
-        if let context = useCase.managedObjectContext {
-            persistentContainer.saveContext(backgroundContext: context)
-            context.refresh(useCase, mergeChanges: true)
-            completion(true)
-        } else {
-            completion(false)
+        saveUseCase(useCase) { id in
+            let success = id != nil
+            completion(success)
         }
     }
     
     func delete(at row: Int, completion: (Bool) -> Void) {
-        if let useCase = self.useCase(at: row), let context = useCase.managedObjectContext {
-            context.delete(useCase)
-            persistentContainer.saveContext(backgroundContext: context)
-            context.refresh(useCase, mergeChanges: true)
-            completion(true)
+        if let useCase = self.useCase(at: row) {
+            removeUseCase(useCase) { success in
+                completion(success)
+            }
         } else {
             completion(false)
         }
     }
     
-    func add(_ useCase: UseCase, completion: (Bool) -> Void) {
-        if let context = useCase.managedObjectContext {
-            persistentContainer.saveContext(backgroundContext: context)
-            context.refresh(useCase, mergeChanges: true)
-            completion(true)
-        } else {
-            completion(false)
+    func add(_ useCase: UseCase, completion: (Int?) -> Void) {
+        saveUseCase(useCase) { id in
+            if let id = id {
+                let index = filteredUseCases?.firstIndex { $0.id == id }
+                completion(index)
+            } else {
+                completion(nil)
+            }
         }
     }
     
     func useCase(at row: Int) -> UseCase? {
         return filteredUseCases?[row]
     }
-
+    
+    func index(for filteredIndex: Int) -> Int {
+        let filteredUseCase = filteredUseCases?[filteredIndex]
+        guard let index = useCases?.firstIndex(where: { $0.id == filteredUseCase?.id }) else {
+            fatalError("Couldn't retrieve index in source array")
+        }
+        return index
+    }
+    
 }
 
 // MARK: UITableViewDataSource
@@ -129,7 +152,7 @@ extension UseCaseListDataSource: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        guard  editingStyle == .delete else {
+        guard editingStyle == .delete else {
             return
         }
         delete(at: indexPath.row) { success in
@@ -190,16 +213,16 @@ extension UseCase {
 // MARK: - NSFetchedResultsControllerDelegate
 
 extension UseCaseListDataSource: NSFetchedResultsControllerDelegate {
-
+    
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         useCaseChangedAction?()
     }
 }
 
-// MARK: - UISearchResultsUpdating
+// MARK: UISearchResultsUpdating
 
 extension UseCaseListDataSource: UISearchResultsUpdating {
-
+    
     func updateSearchResults(for searchController: UISearchController) {
         let predicate: NSPredicate
         if let userInput = searchController.searchBar.text, !userInput.isEmpty {
@@ -207,14 +230,42 @@ extension UseCaseListDataSource: UISearchResultsUpdating {
         } else {
             predicate = NSPredicate(value: true)
         }
-
+        
         fetchedResultsController.fetchRequest.predicate = predicate
         do {
             try fetchedResultsController.performFetch()
         } catch {
             fatalError("###\(#function): Failed to performFetch: \(error)")
         }
-
+        
         useCaseChangedAction?()
     }
+}
+
+// MARK: Persistent Storage Interface
+
+extension UseCaseListDataSource {
+    
+    private func saveUseCase(_ useCase: UseCase, completion: (UUID?) -> Void) {
+        if let context = useCase.managedObjectContext {
+            persistentContainer.saveContext(backgroundContext: context)
+            context.refresh(useCase, mergeChanges: true)
+            completion(useCase.id)
+        } else {
+            completion(nil)
+        }
+    }
+    
+    private func removeUseCase(_ useCase: UseCase, completion: (Bool) -> Void) {
+        if let context = useCase.managedObjectContext {
+            context.delete(useCase)
+            persistentContainer.saveContext(backgroundContext: context)
+            context.refresh(useCase, mergeChanges: true)
+            completion(true)
+        } else {
+            completion(false)
+        }
+    }
+    
+    
 }

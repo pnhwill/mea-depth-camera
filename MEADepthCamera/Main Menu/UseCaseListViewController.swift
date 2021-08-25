@@ -27,9 +27,9 @@ class UseCaseListViewController: UITableViewController {
     // MARK: Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.showDetailSegueIdentifier,
-            let destination = segue.destination as? UseCaseDetailViewController,
-            let cell = sender as? UITableViewCell,
-            let indexPath = tableView.indexPath(for: cell) {
+           let destination = segue.destination as? UseCaseDetailViewController,
+           let cell = sender as? UITableViewCell,
+           let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
             guard let useCase = useCaseListDataSource?.useCase(at: rowIndex) else {
                 fatalError("Couldn't find data source for use case list.")
@@ -69,16 +69,15 @@ class UseCaseListViewController: UITableViewController {
         })
         tableView.dataSource = useCaseListDataSource
         // Search bar controller
-        let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = useCaseListDataSource
-        searchController.obscuresBackgroundDuringPresentation = false
-        navigationItem.searchController = searchController
+//        let searchController = UISearchController(searchResultsController: nil)
+//        searchController.searchResultsUpdater = useCaseListDataSource
+//        searchController.obscuresBackgroundDuringPresentation = false
+//        navigationItem.searchController = searchController
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        refreshBackground()
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -97,7 +96,6 @@ class UseCaseListViewController: UITableViewController {
     @IBAction func segmentControlChanged(_ sender: UISegmentedControl) {
         useCaseListDataSource?.filter = filter
         tableView.reloadData()
-        refreshBackground()
     }
     
     private func addUseCase() {
@@ -108,32 +106,16 @@ class UseCaseListViewController: UITableViewController {
         useCase.date = Date()
         useCase.id = UUID()
         detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-            self.useCaseListDataSource?.add(useCase, completion: { (success) in
+            self.useCaseListDataSource?.add(useCase, completion: { (index) in
                 DispatchQueue.main.async {
-                    if success {
-                        self.tableView.reloadData()
+                    if let index = index {
+                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
                     }
                 }
             })
         })
         let navigationController = UINavigationController(rootViewController: detailViewController)
         present(navigationController, animated: true, completion: nil)
-    }
-
-    
-    private func refreshBackground() {
-        tableView.backgroundView = nil
-        let backgroundView = UIView()
-        // update background colors
-//        if let backgroundColors = filter.backgroundColors {
-//            let gradientBackgroundLayer = CAGradientLayer()
-//            gradientBackgroundLayer.colors = backgroundColors
-//            gradientBackgroundLayer.frame = tableView.frame
-//            backgroundView.layer.addSublayer(gradientBackgroundLayer)
-//        } else {
-//            backgroundView.backgroundColor = filter.substituteBackgroundColor
-//        }
-        tableView.backgroundView = backgroundView
     }
     
 }

@@ -23,9 +23,12 @@ class UseCaseDetailViewController: UITableViewController {
         self.isNew = isNew
         self.useCaseAddAction = addAction
         self.useCaseEditAction = editAction
-        if isViewLoaded {
-            setEditing(isNew, animated: false)
+        DispatchQueue.main.async {
+            if self.isViewLoaded {
+                self.setEditing(isNew, animated: false)
+            }
         }
+
     }
     
     // MARK: Life Cycle
@@ -89,10 +92,10 @@ class UseCaseDetailViewController: UITableViewController {
         }
         if editing {
             transitionToEditMode(useCase)
-            tableView.backgroundColor = .secondarySystemBackground
+            //tableView.backgroundColor = .systemGroupedBackground
         } else {
             transitionToViewMode(useCase)
-            tableView.backgroundColor = .systemBackground
+            //tableView.backgroundColor = .systemGroupedBackground
         }
         tableView.dataSource = dataSource
         tableView.reloadData()
@@ -101,6 +104,7 @@ class UseCaseDetailViewController: UITableViewController {
     @objc
     func cancelButtonTrigger() {
         if isNew {
+            useCase?.managedObjectContext?.rollback()
             dismiss(animated: true, completion: nil)
         } else {
             useCaseChanges = nil
@@ -118,15 +122,17 @@ class UseCaseDetailViewController: UITableViewController {
     
 }
 
+// MARK: UITableViewController
+
 extension UseCaseDetailViewController {
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if isEditing {
-            cell.backgroundColor = .secondarySystemBackground
+            cell.backgroundColor = .tertiarySystemGroupedBackground
 //            guard let editRow = UseCaseDetailEditDataSource.UseCaseRow(rawValue: indexPath.row) else {
 //                return
 //            }
         } else {
-            cell.backgroundColor = .systemBackground
+            cell.backgroundColor = .systemGroupedBackground
             guard let viewRow = UseCaseDetailViewDataSource.UseCaseRow(rawValue: indexPath.row) else {
                 return
             }

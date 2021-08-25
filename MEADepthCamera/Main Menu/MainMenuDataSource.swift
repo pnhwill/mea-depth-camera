@@ -23,18 +23,33 @@ class MainMenuDataSource: NSObject {
         self.currentUseCaseChangedAction = currentUseCaseChangedAction
     }
     
+    // MARK: Current Use Case Configuration
+    
     func updateCurrentUseCase(_ useCase: UseCase?) {
         currentUseCase = useCase
         currentUseCaseChangedAction?(currentUseCase)
     }
     
     func add(_ useCase: UseCase, completion: (Bool) -> Void) {
+        saveUseCase(useCase) { id in
+            let success = id != nil
+            completion(success)
+        }
+    }
+    
+}
+
+// MARK: Persistent Storage Interface
+
+extension MainMenuDataSource {
+    
+    private func saveUseCase(_ useCase: UseCase, completion: (UUID?) -> Void) {
         if let context = useCase.managedObjectContext {
             persistentContainer.saveContext(backgroundContext: context)
             context.refresh(useCase, mergeChanges: true)
-            completion(true)
+            completion(useCase.id)
         } else {
-            completion(false)
+            completion(nil)
         }
     }
     
