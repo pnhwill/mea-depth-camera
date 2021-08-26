@@ -18,17 +18,17 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BrA-k0-goQ" customClass="PreviewMetalView" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="88" width="390" height="722"/>
+                                <rect key="frame" x="0.0" y="88" width="390" height="673"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <label hidden="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TrueDepth Camera Unavailable" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2hN-4O-nJT">
-                                <rect key="frame" x="34.666666666666657" y="434.66666666666669" width="321" height="28.666666666666686"/>
+                                <rect key="frame" x="34.666666666666657" y="410.33333333333331" width="321" height="28.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <color key="textColor" systemColor="systemYellowColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fWx-1M-8GV">
-                                <rect key="frame" x="122.66666666666669" y="428.66666666666669" width="145" height="41"/>
+                                <rect key="frame" x="122.66666666666669" y="404" width="145" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="Tap to resume">
                                     <color key="titleColor" systemColor="systemYellowColor"/>
@@ -38,7 +38,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cK1-YN-reQ">
-                                <rect key="frame" x="165" y="711" width="60" height="58.666666666666629"/>
+                                <rect key="frame" x="165" y="662" width="60" height="58.666666666666629"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="DuG-0a-dXR"/>
                                     <constraint firstAttribute="width" constant="60" id="fLV-fd-BLt"/>
@@ -51,10 +51,10 @@
                                 </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" image="kuang" translatesAutoresizingMaskIntoConstraints="NO" id="6nD-kv-GLw">
-                                <rect key="frame" x="0.0" y="-146.66666666666663" width="390" height="1191.333333333333"/>
+                                <rect key="frame" x="0.0" y="-171" width="390" height="1191"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="xmark.square" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="FGY-Eh-8ox">
-                                <rect key="frame" x="295" y="716.66666666666663" width="50" height="47"/>
+                                <rect key="frame" x="295" y="667.66666666666663" width="50" height="47"/>
                                 <color key="tintColor" systemColor="systemRedColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="50" id="546-8N-03r"/>
@@ -125,11 +125,15 @@
         <!--Navigation Controller-->
         <scene sceneID="NyR-TQ-UCc">
             <objects>
-                <navigationController id="ora-DF-xJ9" sceneMemberID="viewController">
+                <navigationController toolbarHidden="NO" id="ora-DF-xJ9" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="4L3-eO-Vfa">
                         <rect key="frame" x="0.0" y="44" width="390" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="dx1-no-MnB">
+                        <rect key="frame" x="0.0" y="761" width="390" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="A6m-RR-31J" kind="relationship" relationship="rootViewController" id="dea-gI-zHB"/>
                     </connections>
@@ -147,16 +151,16 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="SVL-W4-3tA">
-                                <rect key="frame" x="0.0" y="88" width="390" height="722"/>
+                                <rect key="frame" x="0.0" y="88" width="390" height="673"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MEA Depth Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="87G-3W-bDT">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="138"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="390" height="128.33333333333334"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="1ub-KI-ght" customClass="MainMenuUseCaseView" customModule="MEADepthCamera" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="146" width="390" height="138"/>
+                                        <rect key="frame" x="0.0" y="136.33333333333334" width="390" height="128.00000000000003"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WBs-tv-HdQ">
                                                 <rect key="frame" x="20.000000000000004" y="20" width="46.333333333333343" height="30"/>
@@ -165,7 +169,7 @@
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subject ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CNU-Am-2aP">
-                                                <rect key="frame" x="20" y="58" width="87" height="23"/>
+                                                <rect key="frame" x="20" y="57.999999999999972" width="87" height="23"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle2"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -186,14 +190,14 @@
                                         </connections>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PlJ-n2-oaw" userLabel="List Button Container View">
-                                        <rect key="frame" x="0.0" y="292" width="390" height="138"/>
+                                        <rect key="frame" x="0.0" y="272.33333333333331" width="390" height="128.33333333333331"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP1-pS-WxO">
-                                                <rect key="frame" x="124" y="48.666666666666686" width="142" height="41"/>
+                                                <rect key="frame" x="124" y="43.666666666666686" width="142" height="41"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Use Case List"/>
                                                 <connections>
-                                                    <segue destination="BgJ-ib-iGc" kind="show" id="fVD-IB-a6z"/>
+                                                    <segue destination="BgJ-ib-iGc" kind="show" identifier="ShowListSegue" id="fVD-IB-a6z"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -203,10 +207,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2fr-pK-hYL" userLabel="Add Button Container View">
-                                        <rect key="frame" x="0.0" y="438" width="390" height="138"/>
+                                        <rect key="frame" x="0.0" y="408.66666666666669" width="390" height="128.00000000000006"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dPC-OK-4ir">
-                                                <rect key="frame" x="119" y="48.666666666666629" width="152" height="41"/>
+                                                <rect key="frame" x="119" y="43.666666666666686" width="152" height="41"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="New Use Case"/>
                                                 <connections>
@@ -220,10 +224,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LaA-l4-u7l" userLabel="Start Button Container View">
-                                        <rect key="frame" x="0.0" y="584" width="390" height="138"/>
+                                        <rect key="frame" x="0.0" y="544.66666666666663" width="390" height="128.33333333333337"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5LW-dw-qij">
-                                                <rect key="frame" x="170" y="48.666666666666629" width="50" height="41"/>
+                                                <rect key="frame" x="170" y="43.666666666666742" width="50" height="41"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Start"/>
                                                 <connections>
@@ -443,7 +447,7 @@
                                     <outlet property="numRecordingsLabel" destination="bwn-cr-tZE" id="uMD-8J-Qrn"/>
                                     <outlet property="subjectIDLabel" destination="Mkc-D0-xua" id="Y2j-Lj-gPV"/>
                                     <outlet property="titleLabel" destination="cpC-xd-deY" id="MbK-pv-ATc"/>
-                                    <segue destination="qMB-TZ-QPO" kind="show" identifier="ShowUseCaseDetailSegue" id="dCL-ol-FVP"/>
+                                    <segue destination="Pag-a3-wwl" kind="unwind" identifier="UnwindFromUseCaseListSegue" unwindAction="unwindFromListWithUnwindSegue:" id="sYZ-36-mv3"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -480,8 +484,9 @@
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Pj8-Jn-xLH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <exit id="Pag-a3-wwl" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1130.7692307692307" y="541.70616113744074"/>
+            <point key="canvasLocation" x="1131" y="542"/>
         </scene>
     </scenes>
     <resources>

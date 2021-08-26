@@ -17,12 +17,31 @@ class MainMenuViewController: UIViewController {
     
     static let showCameraSegueIdentifier = "ShowCameraSegue"
     static let showListSegueIdentifier = "ShowListSegue"
+    static let unwindFromListSegueIdentifier = "UnwindFromUseCaseListSegue"
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
     
     private var mainMenuDataSource: MainMenuDataSource?
     
     // MARK: - Navigation
+    
+    func configure(with useCase: UseCase?) {
+        // Setup main menu
+        if mainMenuDataSource == nil {
+            mainMenuDataSource = MainMenuDataSource(currentUseCaseChangedAction: { currentUseCase in
+                DispatchQueue.main.async {
+                    if let useCase = currentUseCase {
+                        self.refreshUseCaseView(title: useCase.title, subjectID: useCase.subjectID)
+                        self.startButton.isEnabled = true
+                    } else {
+                        self.refreshUseCaseView(title: "No Use Case Selected", subjectID: nil)
+                        self.startButton.isEnabled = false
+                    }
+                }
+            })
+        }
+        mainMenuDataSource?.updateCurrentUseCase(useCase)
+    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.showCameraSegueIdentifier, let destination = segue.destination as? CameraViewController {
@@ -32,36 +51,32 @@ class MainMenuViewController: UIViewController {
             }
             destination.useCase = useCase
         }
-//        if segue.identifier == Self.showListSegueIdentifier, let destination = segue.destination as? UseCaseListViewController {
-//            //destination.persistentContainer = persistentContainer
-//        }
+        if segue.identifier == Self.showListSegueIdentifier, let destination = segue.destination as? UseCaseListViewController {
+            destination.configure(with: mainMenuDataSource?.currentUseCase)
+        }
+    }
+    
+    @IBAction func unwindFromList(unwindSegue: UIStoryboardSegue) {
+        
     }
     
     // MARK: - Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
 //        guard persistentContainer != nil else {
 //            fatalError("This view needs a persistent container.")
 //        }
-        mainMenuDataSource = MainMenuDataSource(currentUseCaseChangedAction: { currentUseCase in
-            DispatchQueue.main.async {
-                if let useCase = currentUseCase {
-                    self.refreshUseCaseView(title: useCase.title, subjectID: useCase.subjectID)
-                    self.startButton.isEnabled = true
-                } else {
-                    self.refreshUseCaseView(title: "No Use Case Selected", subjectID: nil)
-                    self.startButton.isEnabled = false
-                }
-            }
-        })
-        startButton.isEnabled = false
+        if mainMenuDataSource?.currentUseCase == nil {
+            configure(with: nil)
+        }
+        self.navigationItem.setHidesBackButton(true, animated: false)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        mainMenuDataSource?.updateCurrentUseCase(nil)
-    }
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//    }
     
     // MARK: - Actions
     

@@ -9,7 +9,7 @@ import UIKit
 import CoreData
 
 class UseCaseListDataSource: NSObject {
-    typealias UseCaseDeletedAction = () -> Void
+    typealias UseCaseDeletedAction = (UUID?) -> Void
     typealias UseCaseChangedAction = () -> Void
     
     enum Filter: Int {
@@ -38,6 +38,8 @@ class UseCaseListDataSource: NSObject {
     var useCases: [UseCase]? {
         return fetchedResultsController.fetchedObjects
     }
+    
+    var currentUseCaseID: UUID?
     
     private var useCaseDeletedAction: UseCaseDeletedAction?
     private var useCaseChangedAction: UseCaseChangedAction?
@@ -121,6 +123,11 @@ class UseCaseListDataSource: NSObject {
         return filteredUseCases?[row]
     }
     
+    func useCase(with ID: UUID?) -> UseCase? {
+        let useCase = useCases?.first(where: { $0.id == ID})
+        return useCase
+    }
+    
     func index(for filteredIndex: Int) -> Int {
         let filteredUseCase = filteredUseCases?[filteredIndex]
         guard let index = useCases?.firstIndex(where: { $0.id == filteredUseCase?.id }) else {
@@ -155,11 +162,12 @@ extension UseCaseListDataSource: UITableViewDataSource {
         guard editingStyle == .delete else {
             return
         }
+        let deletedUseCaseID = useCase(at: indexPath.row)?.id
         delete(at: indexPath.row) { success in
             if success {
                 DispatchQueue.main.async {
                     tableView.reloadData()
-                    self.useCaseDeletedAction?()
+                    self.useCaseDeletedAction?(deletedUseCaseID)
                 }
             }
         }

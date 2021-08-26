@@ -188,7 +188,9 @@ class CameraViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //print("camera view will appear")
+        
+        navigationController?.setToolbarHidden(true, animated: false)
+        
         let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
         let interfaceOrientation = mainWindowScene?.interfaceOrientation ?? .portrait
         //statusBarOrientation = interfaceOrientation
