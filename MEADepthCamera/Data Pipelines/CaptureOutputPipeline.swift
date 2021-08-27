@@ -73,7 +73,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     // Face landmarks post-processing
     
     private var faceLandmarksPipeline: FaceLandmarksPipeline?
-    private let savedRecordingsDataSource = SavedRecordingsDataSource()
+    private let savedRecordingsDataSource: SavedRecordingsDataSource
     
     let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
@@ -90,6 +90,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         self.videoDataOutput = videoDataOutput
         self.depthDataOutput = depthDataOutput
         self.audioDataOutput = audioDataOutput
+        self.savedRecordingsDataSource = SavedRecordingsDataSource(storedRecordingsCount: Int(useCase.recordingsCount))
     }
     
     // MARK: - Data Pipeline Setup
@@ -140,7 +141,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     
     func configureSavedRecordingsDataSource(container: PersistentContainer) {
         savedRecordingsDataSource.persistentContainer = container
-        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.savedRecordings.count)
+        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
     }
     
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
@@ -339,7 +340,8 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         audioFileWriter = nil
         depthMapFileWriter = nil
         recordingState = .finish
-        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.savedRecordings.count)
+        savedRecordingsDataSource.saveRecording(to: useCase)
+        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
     }
     
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {

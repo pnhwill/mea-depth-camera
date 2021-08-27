@@ -41,7 +41,7 @@ class UseCaseListViewController: UITableViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.unwindFromListSegueIdentifier,
-           let destination = segue.destination as? MainMenuViewController,
+           //let destination = segue.destination as? MainMenuViewController,
            let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             // Return to main menu with selected use case as current use case

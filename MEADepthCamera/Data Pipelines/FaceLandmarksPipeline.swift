@@ -8,6 +8,11 @@
 import AVFoundation
 import Vision
 
+protocol FaceLandmarksPipelineDelegate: AnyObject {
+    func displayFrameCounter(_ frame: Int)
+    func didFinishTracking()
+}
+
 class FaceLandmarksPipeline: DataPipeline {
     
     // Weak reference to camera view controller
@@ -54,7 +59,7 @@ class FaceLandmarksPipeline: DataPipeline {
     
     func startTracking() {
         visionTrackingQueue.async {
-            guard var lastSavedRecording = self.savedRecordingsDataSource.savedRecordings.last else {
+            guard var lastSavedRecording = self.savedRecordingsDataSource.savedRecording else {
                 print("Last saved recording not found")
                 return
             }

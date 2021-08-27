@@ -23,6 +23,9 @@ class CameraViewController: UIViewController {
     
     @IBOutlet private weak var indicatorImage: UIImageView!
     
+    // Navigation bar button
+    @IBOutlet private weak var doneButton: UIBarButtonItem!
+    
     // Post-processing in progress
     @IBOutlet private weak var frameCounterLabel: UILabel!
     @IBOutlet private weak var startStopButton: UIButton!
@@ -91,8 +94,9 @@ class CameraViewController: UIViewController {
     // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showRecordingSegueIdentifier, let destination = segue.destination as? RecordingDetailViewController {
-            destination.persistentContainer = persistentContainer
+        if segue.identifier == Self.showRecordingSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
+            //destination.persistentContainer = persistentContainer
+            destination.configure(with: useCase)
         }
     }
     
@@ -110,6 +114,7 @@ class CameraViewController: UIViewController {
             }
         }
         DispatchQueue.main.async { [weak self] in
+            self?.doneButton.isEnabled = count > 0
             self?.navigationItem.title = title
         }
     }
@@ -121,6 +126,7 @@ class CameraViewController: UIViewController {
         //print("camera view did load")
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
+        //doneButton.isEnabled = false
         
         sessionQueue.async {
             self.sessionManager = CaptureSessionManager(cameraViewController: self)

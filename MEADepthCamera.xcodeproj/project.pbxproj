@@ -204,11 +204,11 @@
 			children = (
 				B54215B926C316F600A4F984 /* MainMenuViewController.swift */,
 				B54215C926C3670E00A4F984 /* MainMenuDataSource.swift */,
+				B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */,
+				B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */,
 				B54215C126C3582C00A4F984 /* UseCaseDetailViewController.swift */,
 				B54215C726C366C900A4F984 /* UseCaseDetailEditDataSource.swift */,
 				B54215C326C3596F00A4F984 /* UseCaseDetailViewDataSource.swift */,
-				B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */,
-				B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */,
 				B54215BE26C34B2000A4F984 /* Use Case Views */,
 			);
 			path = "Main Menu";

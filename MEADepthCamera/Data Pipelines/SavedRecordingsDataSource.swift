@@ -16,16 +16,18 @@ class SavedRecordingsDataSource {
     
     let baseURL: URL
     let fileManager = FileManager.default
-    var savedRecordings = [SavedRecording]()
+    var savedRecording: SavedRecording?
+    var storedRecordingsCount: Int
     
     // Core Data
     var persistentContainer: PersistentContainer?
     
-    init() {
+    init(storedRecordingsCount: Int) {
         guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("Unable to locate Documents directory.")
         }
         self.baseURL = docsURL
+        self.storedRecordingsCount = storedRecordingsCount
     }
     
     func addRecording(_ folderURL: URL, outputFiles: [OutputType: URL]) {
@@ -37,8 +39,7 @@ class SavedRecordingsDataSource {
             let newFile = SavedFile(outputType: outputType, lastPathComponent: fileName)
             savedFiles.append(newFile)
         }
-        let newRecording = SavedRecording(name: folderName, folderURL: folderURL, duration: nil, task: nil, savedFiles: savedFiles)
-        savedRecordings.append(newRecording)
+        savedRecording = SavedRecording(name: folderName, folderURL: folderURL, duration: nil, task: nil, savedFiles: savedFiles)
     }
     
     func addFiles(to savedRecording: inout SavedRecording, newFiles: [OutputType: URL]) {
@@ -50,7 +51,8 @@ class SavedRecordingsDataSource {
         }
     }
     
-    func saveRecording(_ recording: SavedRecording, to useCase: UseCase) -> Recording? {
+    func saveRecording(to useCase: UseCase) {
+        guard let recording = savedRecording else { return }
         // Saves a recording to the persistent storage
         var newRecording: Recording?
         persistentContainer?.performBackgroundTask { context in
@@ -66,7 +68,7 @@ class SavedRecordingsDataSource {
             self.persistentContainer?.saveContext(backgroundContext: context)
 //            context.refresh(newRecording!, mergeChanges: true)
         }
-        return newRecording
+        storedRecordingsCount += 1
     }
     
     func saveFile(_ file: SavedFile, to recording: Recording) -> OutputFile? {
@@ -83,11 +85,11 @@ class SavedRecordingsDataSource {
         return newFile
     }
     
-    func removeSavedRecording(at index: Int) throws {
-        let savedRecording = savedRecordings[index]
-        try fileManager.removeItem(at: savedRecording.folderURL)
-        savedRecordings.remove(at: index)
-    }
+//    func removeSavedRecording(at index: Int) throws {
+//        let savedRecording = savedRecordings[index]
+//        try fileManager.removeItem(at: savedRecording.folderURL)
+//        savedRecordings.remove(at: index)
+//    }
 //
 //    func removeAllSavedRecordings() {
 //        guard let folders = try? fileManager.contentsOfDirectory(at: baseURL, includingPropertiesForKeys: nil) else {

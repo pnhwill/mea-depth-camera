@@ -107,9 +107,16 @@
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="vcm-Fq-Tlf"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="Nmy-QZ-inJ"/>
+                    <navigationItem key="navigationItem" id="Nmy-QZ-inJ">
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" style="done" systemItem="done" id="44R-A0-nmG">
+                            <connections>
+                                <segue destination="Z7g-vw-i9h" kind="show" identifier="ShowRecordingSegue" id="Nnh-sw-pHi"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="cameraUnavailableLabel" destination="2hN-4O-nJT" id="AgO-YF-2pX"/>
+                        <outlet property="doneButton" destination="44R-A0-nmG" id="oX0-A6-Xbi"/>
                         <outlet property="frameCounterLabel" destination="yKR-8T-bQM" id="eYN-vH-J9M"/>
                         <outlet property="indicatorImage" destination="FGY-Eh-8ox" id="p3x-7M-oSi"/>
                         <outlet property="previewView" destination="BrA-k0-goQ" id="HaZ-lt-X2n"/>
@@ -487,6 +494,128 @@
                 <exit id="Pag-a3-wwl" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="1131" y="542"/>
+        </scene>
+        <!--Recording List View Controller-->
+        <scene sceneID="ehe-MH-j3c">
+            <objects>
+                <tableViewController id="Z7g-vw-i9h" customClass="RecordingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="2ls-Ny-z9I">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <view key="tableHeaderView" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yfz-p3-DdZ" userLabel="Use Case Header View" customClass="MainMenuUseCaseView" customModule="MEADepthCamera" customModuleProvider="target">
+                            <rect key="frame" x="0.0" y="0.0" width="390" height="101"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Zf-6t-dt9">
+                                    <rect key="frame" x="20.000000000000004" y="20" width="46.333333333333343" height="30"/>
+                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Subject ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FS7-8N-hEj">
+                                    <rect key="frame" x="20" y="58" width="87" height="23"/>
+                                    <fontDescription key="fontDescription" style="UICTFontTextStyleTitle2"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
+                            <constraints>
+                                <constraint firstAttribute="bottom" secondItem="FS7-8N-hEj" secondAttribute="bottom" constant="20" symbolic="YES" id="5LP-4g-EqP"/>
+                                <constraint firstItem="FS7-8N-hEj" firstAttribute="top" secondItem="8Zf-6t-dt9" secondAttribute="bottom" constant="8" symbolic="YES" id="QsD-4l-sce"/>
+                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="8Zf-6t-dt9" secondAttribute="trailing" constant="20" symbolic="YES" id="aRx-ZH-cBp"/>
+                                <constraint firstItem="8Zf-6t-dt9" firstAttribute="top" secondItem="yfz-p3-DdZ" secondAttribute="top" constant="20" symbolic="YES" id="gYs-zN-IP3"/>
+                                <constraint firstItem="FS7-8N-hEj" firstAttribute="leading" secondItem="8Zf-6t-dt9" secondAttribute="leading" id="uPz-f8-Uv1"/>
+                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="FS7-8N-hEj" secondAttribute="trailing" constant="20" symbolic="YES" id="v5T-Bg-3DU"/>
+                                <constraint firstItem="8Zf-6t-dt9" firstAttribute="leading" secondItem="yfz-p3-DdZ" secondAttribute="leading" constant="20" symbolic="YES" id="yhZ-jw-RKa"/>
+                            </constraints>
+                            <connections>
+                                <outlet property="subjectIDLabel" destination="FS7-8N-hEj" id="2NP-vJ-SeP"/>
+                                <outlet property="titleLabel" destination="8Zf-6t-dt9" id="iPw-og-6LO"/>
+                            </connections>
+                        </view>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="RecordingListCell" id="GsT-aV-Vf3" customClass="RecordingListCell" customModule="MEADepthCamera" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="125.33333396911621" width="390" height="153.33332824707031"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GsT-aV-Vf3" id="cZo-Rr-YKt">
+                                    <rect key="frame" x="0.0" y="0.0" width="349.33333333333331" height="153.33332824707031"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cam-7G-qnF">
+                                            <rect key="frame" x="20" y="20" width="40" height="17"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Duration" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BOB-HA-l1X">
+                                            <rect key="frame" x="20" y="45" width="52" height="16"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Task" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ai-96-fC3">
+                                            <rect key="frame" x="20" y="69" width="28" height="16"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Processed" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Hj-oq-YoZ">
+                                            <rect key="frame" x="20" y="93" width="64" height="16"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="# Files" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EFy-Nq-xfn">
+                                            <rect key="frame" x="20" y="117" width="40" height="16"/>
+                                            <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="BOB-HA-l1X" secondAttribute="trailing" constant="20" symbolic="YES" id="3k4-Kg-zko"/>
+                                        <constraint firstItem="BOB-HA-l1X" firstAttribute="top" secondItem="Cam-7G-qnF" secondAttribute="bottom" constant="8" symbolic="YES" id="ExO-OU-kvp"/>
+                                        <constraint firstItem="7ai-96-fC3" firstAttribute="leading" secondItem="Cam-7G-qnF" secondAttribute="leading" id="Ogz-bn-LUw"/>
+                                        <constraint firstItem="0Hj-oq-YoZ" firstAttribute="leading" secondItem="Cam-7G-qnF" secondAttribute="leading" id="P6J-hq-Zhp"/>
+                                        <constraint firstItem="BOB-HA-l1X" firstAttribute="leading" secondItem="Cam-7G-qnF" secondAttribute="leading" id="Rpl-3C-2jg"/>
+                                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="EFy-Nq-xfn" secondAttribute="trailing" constant="20" symbolic="YES" id="Z7p-a0-UFY"/>
+                                        <constraint firstItem="EFy-Nq-xfn" firstAttribute="leading" secondItem="Cam-7G-qnF" secondAttribute="leading" id="hGr-cT-Qns"/>
+                                        <constraint firstItem="7ai-96-fC3" firstAttribute="top" secondItem="BOB-HA-l1X" secondAttribute="bottom" constant="8" symbolic="YES" id="hOT-yx-aR6"/>
+                                        <constraint firstItem="0Hj-oq-YoZ" firstAttribute="top" secondItem="7ai-96-fC3" secondAttribute="bottom" constant="8" symbolic="YES" id="hqw-y0-xRx"/>
+                                        <constraint firstItem="Cam-7G-qnF" firstAttribute="leading" secondItem="cZo-Rr-YKt" secondAttribute="leading" constant="20" symbolic="YES" id="idS-mC-PKO"/>
+                                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Cam-7G-qnF" secondAttribute="trailing" constant="20" symbolic="YES" id="itK-sY-J5V"/>
+                                        <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="EFy-Nq-xfn" secondAttribute="bottom" constant="20" symbolic="YES" id="mAa-bP-bUe"/>
+                                        <constraint firstItem="Cam-7G-qnF" firstAttribute="top" secondItem="cZo-Rr-YKt" secondAttribute="top" constant="20" symbolic="YES" id="mO1-Vx-WZE"/>
+                                        <constraint firstItem="EFy-Nq-xfn" firstAttribute="top" secondItem="0Hj-oq-YoZ" secondAttribute="bottom" constant="8" symbolic="YES" id="mk2-d4-zvR"/>
+                                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="7ai-96-fC3" secondAttribute="trailing" constant="20" symbolic="YES" id="qHt-7U-VrT"/>
+                                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="0Hj-oq-YoZ" secondAttribute="trailing" constant="20" symbolic="YES" id="qMK-T7-VJa"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" systemColor="secondarySystemBackgroundColor"/>
+                                <connections>
+                                    <outlet property="durationLabel" destination="BOB-HA-l1X" id="ta1-rL-GXm"/>
+                                    <outlet property="filesCountLabel" destination="EFy-Nq-xfn" id="fqi-D7-JbO"/>
+                                    <outlet property="isProcessedLabel" destination="0Hj-oq-YoZ" id="bzT-xr-aaK"/>
+                                    <outlet property="nameLabel" destination="Cam-7G-qnF" id="5h0-Kq-ee5"/>
+                                    <outlet property="taskLabel" destination="7ai-96-fC3" id="aG9-ZY-8SE"/>
+                                </connections>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="Z7g-vw-i9h" id="hfe-qf-5Ki"/>
+                            <outlet property="delegate" destination="Z7g-vw-i9h" id="E2U-As-Gvq"/>
+                        </connections>
+                    </tableView>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" id="hbc-1c-Gfe"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="useCaseView" destination="yfz-p3-DdZ" id="W8I-Nq-l2F"/>
+                    </connections>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="zhU-Yh-rPx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2127.6923076923076" y="-203.31753554502367"/>
         </scene>
     </scenes>
     <resources>
