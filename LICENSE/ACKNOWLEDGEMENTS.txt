@@ -1,0 +1,4 @@
+All task data used in this project is provided by Leif Simmatis of the University Health Network (UHN) for the VirtualSLP project. See https://www.uhn.ca/ or contact Leif.Simmatis@uhn.ca for additional information.
+
+Credit: Leif Simmatis
+University Health Network

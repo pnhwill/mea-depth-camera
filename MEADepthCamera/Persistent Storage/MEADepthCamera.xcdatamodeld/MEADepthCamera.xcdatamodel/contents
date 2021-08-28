@@ -22,6 +22,7 @@
         <attribute name="fileNameLabel" optional="YES" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="instructions" optional="YES" attributeType="String"/>
+        <attribute name="modality" optional="YES" attributeType="String"/>
         <attribute name="name" attributeType="String"/>
         <attribute name="recordAudio" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="recordVideo" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
@@ -43,7 +44,7 @@
     <elements>
         <element name="OutputFile" positionX="182.8414306640625" positionY="172.0172119140625" width="128" height="104"/>
         <element name="Recording" positionX="-45" positionY="54" width="128" height="178"/>
-        <element name="Task" positionX="-47.6707763671875" positionY="308.7855834960938" width="128" height="164"/>
+        <element name="Task" positionX="-47.6707763671875" positionY="308.7855834960938" width="128" height="179"/>
         <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="164"/>
     </elements>
 </model>

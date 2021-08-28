@@ -24,20 +24,14 @@ class RecordingListViewController: UITableViewController {
     
     // MARK: Navigation
     
-    func configure(with useCase: UseCase, processorSettings: ProcessorSettings) {
+    func configure(with useCase: UseCase) {
         self.useCase = useCase
-        recordingListDataSource = RecordingListDataSource(useCase: useCase, processorSettings: processorSettings, recordingDeletedAction: {
+        recordingListDataSource = RecordingListDataSource(useCase: useCase, recordingDeletedAction: {
             // handle recording deleted
         }, recordingChangedAction: {
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
-        },
-        recordingProcessedAction: { recordingIndex in
-            // update cell that processing has finished
-        },
-        frameProcessedAction: { recordingIndex, frameNumber in
-            // update cell progress indicator
         })
     }
     
@@ -70,7 +64,9 @@ class RecordingListViewController: UITableViewController {
 //                }
             })
         }
-        //if segue.identifier == Self.showCameraSegueIdentifier
+        if segue.identifier == Self.showCameraSegueIdentifier, let destination = segue.destination as? CameraViewController {
+            
+        }
     }
     
     // MARK: Life Cycle
@@ -101,62 +97,62 @@ class RecordingListViewController: UITableViewController {
     
     // MARK: Edit Mode
     
-    fileprivate func transitionToViewMode(_ useCase: UseCase) {
-        if isProcessing {
-            navigationItem.title = NSLocalizedString("Processing Recordings", comment: "processing recordings nav title")
-            editButtonItem.isEnabled = false
-        } else {
-            recordingListDataSource?.selectedRecordings.removeAll()
-            navigationItem.title = NSLocalizedString("Review Recordings", comment: "review recordings nav title")
-            editButtonItem.isEnabled = true
-        }
-        navigationItem.leftBarButtonItem = nil
-        editButtonItem.title = NSLocalizedString("Select", comment: "select edit button title")
-    }
+//    fileprivate func transitionToViewMode(_ useCase: UseCase) {
+//        if isProcessing {
+//            navigationItem.title = NSLocalizedString("Processing Recordings", comment: "processing recordings nav title")
+//            editButtonItem.isEnabled = false
+//        } else {
+//            recordingListDataSource?.selectedRecordings.removeAll()
+//            navigationItem.title = NSLocalizedString("Review Recordings", comment: "review recordings nav title")
+//            editButtonItem.isEnabled = true
+//        }
+//        navigationItem.leftBarButtonItem = nil
+//        editButtonItem.title = NSLocalizedString("Select", comment: "select edit button title")
+//    }
+//
+//    fileprivate func transitionToEditMode(_ useCase: UseCase) {
+//        navigationItem.title = NSLocalizedString("Select Recordings", comment: "select recordings nav title")
+//        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTrigger))
+//        editButtonItem.title = NSLocalizedString("Process", comment: "process edit button title")
+//    }
+//
+//    override func setEditing(_ editing: Bool, animated: Bool) {
+//        super.setEditing(editing, animated: animated)
+//        guard let useCase = useCase else {
+//            fatalError("No use case found")
+//        }
+//        if editing {
+//            transitionToEditMode(useCase)
+//        } else {
+//            transitionToViewMode(useCase)
+//        }
+//    }
+//
+//    @objc
+//    func cancelButtonTrigger() {
+//        isProcessing = false
+//        setEditing(false, animated: true)
+//    }
     
-    fileprivate func transitionToEditMode(_ useCase: UseCase) {
-        navigationItem.title = NSLocalizedString("Select Recordings", comment: "select recordings nav title")
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTrigger))
-        editButtonItem.title = NSLocalizedString("Process", comment: "process edit button title")
-    }
-    
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        guard let useCase = useCase else {
-            fatalError("No use case found")
-        }
-        if editing {
-            transitionToEditMode(useCase)
-        } else {
-            transitionToViewMode(useCase)
-        }
-    }
-    
-    @objc
-    func cancelButtonTrigger() {
-        isProcessing = false
-        setEditing(false, animated: true)
-    }
-    
-    // MARK: Cell Selection
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let recordingListDataSource = recordingListDataSource, let cell = tableView.cellForRow(at: indexPath) else { return }
-        
-        // Unselect the row, and instead, show the state with a checkmark.
-        tableView.deselectRow(at: indexPath, animated: false)
-        
-        recordingListDataSource.selectRecording(at: indexPath.row)
-        
-        if recordingListDataSource.isSelected(at: indexPath.row) {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
-        
-        let isAnyRecordingsSelected = !recordingListDataSource.selectedRecordings.isEmpty
-        editButtonItem.isEnabled = isAnyRecordingsSelected
-        isProcessing = isAnyRecordingsSelected
-    }
+//    // MARK: Cell Selection
+//
+//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        guard let recordingListDataSource = recordingListDataSource, let cell = tableView.cellForRow(at: indexPath) else { return }
+//
+//        // Unselect the row, and instead, show the state with a checkmark.
+//        tableView.deselectRow(at: indexPath, animated: false)
+//
+//        recordingListDataSource.selectRecording(at: indexPath.row)
+//
+//        if recordingListDataSource.isSelected(at: indexPath.row) {
+//            cell.accessoryType = .checkmark
+//        } else {
+//            cell.accessoryType = .none
+//        }
+//
+//        let isAnyRecordingsSelected = !recordingListDataSource.selectedRecordings.isEmpty
+//        editButtonItem.isEnabled = isAnyRecordingsSelected
+//        isProcessing = isAnyRecordingsSelected
+//    }
     
 }

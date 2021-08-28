@@ -59,6 +59,9 @@
 		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
 		B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3F926B2183C00CB1241 /* PassThrough.metal */; };
 		B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */; };
+		B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */ = {isa = PBXBuildFile; fileRef = B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */; };
+		B5D6CAED26D9AF4C002165C6 /* TasksProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6CAEC26D9AF4C002165C6 /* TasksProvider.swift */; };
+		B5D6CAEF26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5D6CAEE26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt */; };
 		B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */; };
 		B5DF4B8C26C496000045AE43 /* UseCaseListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */; };
 		B5DF4B8E26C496680045AE43 /* UseCaseListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */; };
@@ -152,6 +155,9 @@
 		B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		B5D4E3F926B2183C00CB1241 /* PassThrough.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PassThrough.metal; sourceTree = "<group>"; };
 		B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewMetalView.swift; sourceTree = "<group>"; };
+		B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = virtualSLP_tasks.json; sourceTree = "<group>"; };
+		B5D6CAEC26D9AF4C002165C6 /* TasksProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TasksProvider.swift; sourceTree = "<group>"; };
+		B5D6CAEE26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ACKNOWLEDGEMENTS.txt; sourceTree = "<group>"; };
 		B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListViewController.swift; sourceTree = "<group>"; };
 		B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListDataSource.swift; sourceTree = "<group>"; };
 		B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListCell.swift; sourceTree = "<group>"; };
@@ -234,6 +240,7 @@
 				B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */,
 				B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */,
 				B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */,
+				B5D6CAEC26D9AF4C002165C6 /* TasksProvider.swift */,
 				B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */,
 			);
 			path = "Persistent Storage";
@@ -297,6 +304,7 @@
 				B5ABE85926A9CC9B003D2AFD /* File IO */,
 				B587705E26B4AD8900E26C7D /* Utilities */,
 				B5886DF626AA168B00EB344C /* Shaders */,
+				B5D6CAE826D9A3AA002165C6 /* Resources */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
 				B579658A269DED600070C294 /* Assets.xcassets */,
 				B579658C269DED600070C294 /* LaunchScreen.storyboard */,
@@ -383,6 +391,7 @@
 			isa = PBXGroup;
 			children = (
 				B5ABE86026AA076F003D2AFD /* LICENSE.txt */,
+				B5D6CAEE26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt */,
 			);
 			path = LICENSE;
 			sourceTree = "<group>";
@@ -398,6 +407,14 @@
 				B575414626BA10DA004ED4E4 /* getNumberOfFrames.h */,
 			);
 			path = "Data Pipelines";
+			sourceTree = "<group>";
+		};
+		B5D6CAE826D9A3AA002165C6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		B5DF4B8826C4928D0045AE43 /* Recording VC */ = {
@@ -525,10 +542,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */,
 				B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */,
 				B579658E269DED600070C294 /* LaunchScreen.storyboard in Resources */,
 				B579658B269DED600070C294 /* Assets.xcassets in Resources */,
 				B5796589269DED5F0070C294 /* Main.storyboard in Resources */,
+				B5D6CAEF26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -554,6 +573,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */,
+				B5D6CAED26D9AF4C002165C6 /* TasksProvider.swift in Sources */,
 				B585A0A226C58A9500CA6546 /* Task+CoreDataClass.swift in Sources */,
 				B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */,
 				B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */,

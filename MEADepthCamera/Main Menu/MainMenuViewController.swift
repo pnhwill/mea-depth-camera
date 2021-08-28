@@ -15,8 +15,8 @@ class MainMenuViewController: UIViewController {
     @IBOutlet private weak var useCaseListButton: UIButton!
     @IBOutlet private weak var startButton: UIButton!
     
-    static let showCameraSegueIdentifier = "ShowCameraSegue"
-    static let showListSegueIdentifier = "ShowListSegue"
+    static let showRecordingListSegueIdentifier = "ShowRecordingListSegue"
+    static let showUseCaseListSegueIdentifier = "ShowUseCaseListSegue"
     static let unwindFromListSegueIdentifier = "UnwindFromUseCaseListSegue"
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
@@ -44,14 +44,14 @@ class MainMenuViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showCameraSegueIdentifier, let destination = segue.destination as? CameraViewController {
-            destination.persistentContainer = mainMenuDataSource?.persistentContainer
+        if segue.identifier == Self.showRecordingListSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
+//            destination.persistentContainer = mainMenuDataSource?.persistentContainer
             guard let useCase = mainMenuDataSource?.currentUseCase else {
                 fatalError("Couldn't find data source for use case.")
             }
-            destination.useCase = useCase
+            destination.configure(with: useCase)
         }
-        if segue.identifier == Self.showListSegueIdentifier, let destination = segue.destination as? UseCaseListViewController {
+        if segue.identifier == Self.showUseCaseListSegueIdentifier, let destination = segue.destination as? UseCaseListViewController {
             destination.configure(with: mainMenuDataSource?.currentUseCase)
         }
     }

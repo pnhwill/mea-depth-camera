@@ -9,17 +9,28 @@ import UIKit
 
 class RecordingListCell: UITableViewCell {
     
-    @IBOutlet var nameLabel: UILabel!
+    @IBOutlet var taskLabel: UILabel!
     @IBOutlet weak var durationLabel: UILabel!
-    @IBOutlet weak var taskLabel: UILabel!
+    @IBOutlet weak var folderLabel: UILabel!
     @IBOutlet weak var filesCountLabel: UILabel!
     @IBOutlet weak var isProcessedLabel: UILabel!
     
-    func configure(name: String?, durationText: String, taskText: String, filesCount: Int, isProcessed: Bool) {
-        nameLabel.text = name
+    @IBOutlet weak var startButton: UIButton!
+    @IBOutlet weak var instructionsButton: UIButton!
+    
+    func configure(taskName: String?, durationText: String, folderName: String, filesCount: Int, isProcessed: Bool) {
+        taskLabel.text = taskName
         durationLabel.text = durationText
-        taskLabel.text = taskText
+        folderLabel.text = folderName
         filesCountLabel.text = String(filesCount) + " Files"
         isProcessedLabel.text = "Processed: " + String(isProcessed)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        startButton.layer.cornerRadius = 10
+        startButton.layer.masksToBounds = true
+        instructionsButton.layer.cornerRadius = 10
+        instructionsButton.layer.masksToBounds = true
     }
 }

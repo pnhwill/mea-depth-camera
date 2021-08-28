@@ -95,8 +95,7 @@ class CameraViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.showRecordingSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
-            //destination.persistentContainer = persistentContainer
-            destination.configure(with: useCase)
+            
         }
     }
     

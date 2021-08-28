@@ -27,8 +27,6 @@ class RecordingListDataSource: NSObject {
     // Callbacks
     private var recordingDeletedAction: RecordingDeletedAction?
     private var recordingChangedAction: RecordingChangedAction?
-    private var recordingProcessedAction: RecordingProcessedAction?
-    private var frameProcessedAction: FrameProcessedAction?
     
     // Persistent storage
     
@@ -55,11 +53,8 @@ class RecordingListDataSource: NSObject {
     }()
     
     init(useCase: UseCase,
-         processorSettings: ProcessorSettings,
          recordingDeletedAction: @escaping RecordingDeletedAction,
-         recordingChangedAction: @escaping RecordingChangedAction,
-         recordingProcessedAction: @escaping RecordingProcessedAction,
-         frameProcessedAction: @escaping FrameProcessedAction) {
+         recordingChangedAction: @escaping RecordingChangedAction) {
         self.useCase = useCase
         self.recordingDeletedAction = recordingDeletedAction
         self.recordingChangedAction = recordingChangedAction
@@ -70,42 +65,39 @@ class RecordingListDataSource: NSObject {
         return recordings?[row]
     }
     
-    func isSelected(at row: Int) -> Bool {
-        guard let recording = recording(at: row) else { return false }
-        return selectedRecordings.contains(recording)
-    }
-    
-    func selectRecording(at row: Int) {
-        guard let recording = recording(at: row) else { return }
-        if isSelected(at: row) {
-            selectedRecordings.remove(at: selectedIndex(for: row))
-        } else {
-            selectedRecordings.append(recording)
-        }
-    }
-    
-    func selectedIndex(for index: Int) -> Int {
-        guard let recording = recording(at: index),
-              let selectedIndex = selectedRecordings.firstIndex(where: { $0.id == recording.id }) else {
-            fatalError("Couldn't retrieve index in source array")
-        }
-        return selectedIndex
-    }
-    
-    func index(for selectedIndex: Int) -> Int {
-        let recording = selectedRecordings[selectedIndex]
-        guard let index = recordings?.firstIndex(where: { $0.id == recording.id }) else {
-            fatalError("Couldn't retrieve index in source array")
-        }
-        return index
-    }
-    
-    func startProcessing() {
-        guard !selectedRecordings.isEmpty else { return }
-        
-        
-        
-    }
+//    func isSelected(at row: Int) -> Bool {
+//        guard let recording = recording(at: row) else { return false }
+//        return selectedRecordings.contains(recording)
+//    }
+//
+//    func selectRecording(at row: Int) {
+//        guard let recording = recording(at: row) else { return }
+//        if isSelected(at: row) {
+//            selectedRecordings.remove(at: selectedIndex(for: row))
+//        } else {
+//            selectedRecordings.append(recording)
+//        }
+//    }
+//
+//    func selectedIndex(for index: Int) -> Int {
+//        guard let recording = recording(at: index),
+//              let selectedIndex = selectedRecordings.firstIndex(where: { $0.id == recording.id }) else {
+//            fatalError("Couldn't retrieve index in source array")
+//        }
+//        return selectedIndex
+//    }
+//
+//    func index(for selectedIndex: Int) -> Int {
+//        let recording = selectedRecordings[selectedIndex]
+//        guard let index = recordings?.firstIndex(where: { $0.id == recording.id }) else {
+//            fatalError("Couldn't retrieve index in source array")
+//        }
+//        return index
+//    }
+//
+//    func startProcessing() {
+//        guard !selectedRecordings.isEmpty else { return }
+//    }
     
 }
 
@@ -124,7 +116,7 @@ extension RecordingListDataSource: UITableViewDataSource {
         }
         if let currentRecording = recording(at: indexPath.row) {
             let durationText = currentRecording.durationText()
-            cell.configure(name: currentRecording.name!, durationText: durationText, taskText: "task", filesCount: Int(currentRecording.filesCount), isProcessed: currentRecording.isProcessed)
+            cell.configure(taskName: currentRecording.name!, durationText: durationText, folderName: "task", filesCount: Int(currentRecording.filesCount), isProcessed: currentRecording.isProcessed)
         }
         return cell
     }
