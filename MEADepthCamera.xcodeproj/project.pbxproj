@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */; };
 		B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5235ECB26C207CB0042106C /* InfoFileWriter.swift */; };
+		B534ED0F26DDAC2800A138EA /* ProcessingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B534ED0E26DDAC2800A138EA /* ProcessingView.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
 		B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* CaptureOutputPipeline.swift */; };
@@ -96,6 +97,7 @@
 		B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksPipeline.swift; sourceTree = "<group>"; };
 		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		B5235ECB26C207CB0042106C /* InfoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoFileWriter.swift; sourceTree = "<group>"; };
+		B534ED0E26DDAC2800A138EA /* ProcessingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingView.swift; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
 		B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensDistortionPointForPoint.h; sourceTree = "<group>"; };
@@ -434,6 +436,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FB0A5126D577C900F65FA5 /* RecordingListCell.swift */,
+				B534ED0E26DDAC2800A138EA /* ProcessingView.swift */,
 			);
 			path = "Recording Views";
 			sourceTree = "<group>";
@@ -588,6 +591,7 @@
 				B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */,
 				B54215C026C34B5C00A4F984 /* EditSubjectIDCell.swift in Sources */,
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
+				B534ED0F26DDAC2800A138EA /* ProcessingView.swift in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */,

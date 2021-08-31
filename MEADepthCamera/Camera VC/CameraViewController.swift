@@ -55,8 +55,9 @@ class CameraViewController: UIViewController {
         }
     }
     
-    // Use case
+    // Use case and task
     var useCase: UseCase!
+    var task: Task!
     
     // App state
     var processingMode: ProcessingMode = .record {
@@ -85,38 +86,41 @@ class CameraViewController: UIViewController {
     private var keyValueObservations = [NSKeyValueObservation]()
     
     // Core Data
-    var persistentContainer: PersistentContainer?
+    private(set) lazy var persistentContainer: PersistentContainer = {
+        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        return appDelegate!.persistentContainer
+    }()
     
     // Navigation/Storyboard
-    static let showRecordingSegueIdentifier = "ShowRecordingSegue"
+    static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
     static let mainStoryboardName = "Main"
     
     // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showRecordingSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
+        if segue.identifier == Self.unwindFromCameraSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
             
         }
     }
     
     // MARK: - Recordings Count
     
-    func updateRecordingsCount(count: Int) {
-        var title: String {
-            switch count {
-            case 0:
-                return "No Recordings"
-            case 1:
-                return "One Recording"
-            default:
-                return "\(count) Recordings"
-            }
-        }
-        DispatchQueue.main.async { [weak self] in
-            self?.doneButton.isEnabled = count > 0
-            self?.navigationItem.title = title
-        }
-    }
+//    func updateRecordingsCount(count: Int) {
+//        var title: String {
+//            switch count {
+//            case 0:
+//                return "No Recordings"
+//            case 1:
+//                return "One Recording"
+//            default:
+//                return "\(count) Recordings"
+//            }
+//        }
+//        DispatchQueue.main.async { [weak self] in
+//            self?.doneButton.isEnabled = count > 0
+//            self?.navigationItem.title = title
+//        }
+//    }
     
     // MARK: - View Controller Life Cycle
     
@@ -172,19 +176,21 @@ class CameraViewController: UIViewController {
                 // Initialize the data output processor
                 self.dataOutputPipeline = CaptureOutputPipeline(cameraViewController: self,
                                                                 useCase: self.useCase,
+                                                                task: self.task,
                                                                 videoDataOutput: videoDataOutput,
                                                                 depthDataOutput: depthDataOutput,
                                                                 audioDataOutput: audioDataOutput)
                 self.dataOutputPipeline?.configureProcessors(for: videoDevice)
-                if let container = self.persistentContainer {
-                    self.dataOutputPipeline?.configureSavedRecordingsDataSource(container: container)
-                } else {
-                    self.sessionManager.setupResult = .configurationFailed
-                }
+            }
+            DispatchQueue.main.async {
+                self.dataOutputPipeline?.configureSavedRecordingsDataSource(container: self.persistentContainer)
             }
         }
+        
         // Configure the progress spinner
         DispatchQueue.main.async {
+            self.navigationItem.title = self.useCase.title
+            
             self.spinner = UIActivityIndicatorView(style: .large)
             self.spinner.color = UIColor.systemBlue
             self.view.addSubview(self.spinner)

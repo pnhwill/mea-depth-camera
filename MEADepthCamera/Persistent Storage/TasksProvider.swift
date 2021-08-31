@@ -21,7 +21,7 @@ class TasksProvider {
     static let resourcesDirectory = "Resources"
     static let fileName = "virtualSLP_tasks"
     static let fileExtension = "json"
-    let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension, subdirectory: resourcesDirectory)
+    let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)//, subdirectory: resourcesDirectory)
     
     // MARK: Logging
     
@@ -84,20 +84,20 @@ class TasksProvider {
         description.setOption(true as NSNumber,
                               forKey: NSPersistentHistoryTrackingKey)
 
-        container.loadPersistentStores { storeDescription, error in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
-            }
-        }
+//        container.loadPersistentStores { storeDescription, error in
+//            if let error = error as NSError? {
+//                fatalError("Unresolved error \(error), \(error.userInfo)")
+//            }
+//        }
 
         // This sample refreshes UI by consuming store changes via persistent history tracking.
         /// - Tag: viewContextMergeParentChanges
-        container.viewContext.automaticallyMergesChangesFromParent = false
+        //container.viewContext.automaticallyMergesChangesFromParent = false
         container.viewContext.name = "viewContext"
         /// - Tag: viewContextMergePolicy
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        container.viewContext.undoManager = nil
-        container.viewContext.shouldDeleteInaccessibleFaults = true
+        //container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        //container.viewContext.undoManager = nil
+        //container.viewContext.shouldDeleteInaccessibleFaults = true
         return container
     }()
     
@@ -122,7 +122,7 @@ class TasksProvider {
         }
 
         do {
-            // Decode the GeoJSON into a data model.
+            // Decode the TasksJSON into a data model.
             let jsonDecoder = JSONDecoder()
             jsonDecoder.dateDecodingStrategy = .secondsSince1970
             let taskJSON = try jsonDecoder.decode(TasksJSON.self, from: data)
@@ -150,19 +150,18 @@ class TasksProvider {
         taskContext.transactionAuthor = "importTasks"
         
         /// - Tag: perform
-        taskContext.perform {
+        taskContext.performAndWait {
             // Execute the batch insert.
             /// - Tag: batchInsertRequest
             let batchInsertRequest = self.newBatchInsertRequest(with: propertiesList)
             if let fetchResult = try? taskContext.execute(batchInsertRequest),
                let batchInsertResult = fetchResult as? NSBatchInsertResult,
                let success = batchInsertResult.result as? Bool, success {
+                self.logger.debug("Successfully inserted data.")
                 return
             }
             self.logger.debug("Failed to execute batch insert request.")
         }
-        
-        logger.debug("Successfully inserted data.")
     }
     
     private func newBatchInsertRequest(with propertyList: [TaskProperties]) -> NSBatchInsertRequest {
@@ -227,7 +226,7 @@ class TasksProvider {
         taskContext.name = "persistentHistoryContext"
         logger.debug("Start fetching persistent history changes from the store...")
 
-        taskContext.perform {
+        taskContext.performAndWait {
             // Execute the persistent history change since the last transaction.
             /// - Tag: fetchHistory
             let changeRequest = NSPersistentHistoryChangeRequest.fetchHistory(after: self.lastToken)

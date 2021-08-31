@@ -14,7 +14,10 @@ class RecordingListViewController: UITableViewController {
     @IBOutlet private weak var useCaseView: MainMenuUseCaseView!
     
     static let showDetailSegueIdentifier = "ShowRecordingDetailSegue"
+    static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
     static let showCameraSegueIdentifier = "ShowCameraSegue"
+    static let mainStoryboardName = "Main"
+    static let detailViewControllerIdentifier = "RecordingDetailViewController"
     
     private var recordingListDataSource: RecordingListDataSource?
     
@@ -33,6 +36,7 @@ class RecordingListViewController: UITableViewController {
                 self.tableView.reloadData()
             }
         })
+        recordingListDataSource?.fetchTasks()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -41,7 +45,8 @@ class RecordingListViewController: UITableViewController {
            let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
-            guard let recording = recordingListDataSource?.recording(at: rowIndex) else {
+            guard let task = recordingListDataSource?.task(at: rowIndex),
+                  let recording = recordingListDataSource?.recording(for: task) else {
                 fatalError("Couldn't find data source for recording list.")
             }
             destination.configure(with: recording, editAction: { recording in
@@ -64,9 +69,20 @@ class RecordingListViewController: UITableViewController {
 //                }
             })
         }
-        if segue.identifier == Self.showCameraSegueIdentifier, let destination = segue.destination as? CameraViewController {
-            
+        if segue.identifier == Self.showCameraSegueIdentifier,
+           let destination = segue.destination as? CameraViewController,
+           let button = sender as? UIButton,
+           let cell = button.superview?.superview?.superview as? UITableViewCell,
+           let indexPath = tableView.indexPath(for: cell) {
+            let rowIndex = indexPath.row
+            print("segue to camera")
+            destination.useCase = useCase
+            destination.task = recordingListDataSource?.task(at: rowIndex)
         }
+    }
+    
+    @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
+        
     }
     
     // MARK: Life Cycle
@@ -76,7 +92,8 @@ class RecordingListViewController: UITableViewController {
 
         tableView.dataSource = recordingListDataSource
         
-        navigationItem.setRightBarButton(editButtonItem, animated: false)
+        //navigationItem.setRightBarButton(editButtonItem, animated: false)
+        navigationItem.title = recordingListDataSource?.title
         
         useCaseView.configure(title: useCase?.title, subjectIDText: useCase?.subjectID)
         
@@ -93,6 +110,39 @@ class RecordingListViewController: UITableViewController {
            navigationController.isToolbarHidden {
             navigationController.setToolbarHidden(false, animated: animated)
         }
+    }
+    
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        // Push the detail view when the info button is pressed.
+        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
+        let detailViewController: RecordingDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+        
+        let rowIndex = indexPath.row
+        guard let task = recordingListDataSource?.task(at: rowIndex),
+              let recording = recordingListDataSource?.recording(for: task) else {
+            fatalError("Couldn't find data source for use case list.")
+        }
+        
+        detailViewController.configure(with: recording, editAction: { recording in
+//            self.useCaseListDataSource?.update(useCase, at: rowIndex) { success in
+//                if success {
+//                    DispatchQueue.main.async {
+//                        self.tableView.reloadData()
+//                    }
+//                } else {
+//                    DispatchQueue.main.async {
+//                        let alertTitle = NSLocalizedString("Can't Update Use Case", comment: "error updating use case title")
+//                        let alertMessage = NSLocalizedString("An error occured while attempting to update the use case.", comment: "error updating use case message")
+//                        let actionTitle = NSLocalizedString("OK", comment: "ok action title")
+//                        let actions = [UIAlertAction(title: actionTitle, style: .default, handler: { _ in
+//                            self.dismiss(animated: true, completion: nil)
+//                        })]
+//                        self.alert(title: alertTitle, message: alertMessage, actions: actions)
+//                    }
+//                }
+//            }
+        })
+        navigationController?.pushViewController(detailViewController, animated: true)
     }
     
     // MARK: Edit Mode

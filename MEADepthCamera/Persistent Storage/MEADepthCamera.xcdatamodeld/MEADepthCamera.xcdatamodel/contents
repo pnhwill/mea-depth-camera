@@ -29,6 +29,7 @@
         <attribute name="repetitions" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="repTime" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="Recording" inverseName="task" inverseEntity="Recording"/>
+        <relationship name="useCases" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="UseCase" inverseName="tasks" inverseEntity="UseCase"/>
     </entity>
     <entity name="UseCase" representedClassName="UseCase" syncable="YES" codeGenerationType="category">
         <attribute name="canonicalTitle" optional="YES" attributeType="String" derived="YES" derivationExpression="canonical:(title)"/>
@@ -40,11 +41,12 @@
         <attribute name="subjectID" attributeType="String"/>
         <attribute name="title" attributeType="String"/>
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Recording" inverseName="useCase" inverseEntity="Recording"/>
+        <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Task" inverseName="useCases" inverseEntity="Task"/>
     </entity>
     <elements>
         <element name="OutputFile" positionX="182.8414306640625" positionY="172.0172119140625" width="128" height="104"/>
         <element name="Recording" positionX="-45" positionY="54" width="128" height="178"/>
-        <element name="Task" positionX="-47.6707763671875" positionY="308.7855834960938" width="128" height="179"/>
-        <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="164"/>
+        <element name="Task" positionX="-268.1070556640625" positionY="278.8963012695313" width="128" height="194"/>
+        <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="179"/>
     </elements>
 </model>

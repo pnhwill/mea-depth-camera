@@ -19,10 +19,14 @@ class RecordingListDataSource: NSObject {
     
     // State
     private var useCase: UseCase
-    private var recordings: [Recording]? {
-        return fetchedResultsController.fetchedObjects
+    private var tasks: [Task]? {
+        return fetchedTasksResultsController.fetchedObjects
     }
-    var selectedRecordings = [Recording]()
+    private var recordings: [Recording]? {
+        return fetchedRecordingsResultsController.fetchedObjects
+    }
+    //var selectedRecordings = [Recording]()
+    var title: String = "Choose Task"
     
     // Callbacks
     private var recordingDeletedAction: RecordingDeletedAction?
@@ -35,10 +39,27 @@ class RecordingListDataSource: NSObject {
         return appDelegate!.persistentContainer
     }()
     
-    private lazy var fetchedResultsController: NSFetchedResultsController<Recording> = {
+    private lazy var fetchedTasksResultsController: NSFetchedResultsController<Task> = {
+        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
+        //let predicate = NSPredicate(format: "useCase.id.uuidString == %@", useCase.id!.uuidString)
+        //fetchRequest.predicate = predicate
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: Task.Name.name, ascending: true)]
+        let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
+                                                    managedObjectContext: tasksProvider.container.viewContext,
+                                                    sectionNameKeyPath: nil, cacheName: nil)
+        controller.delegate = self
+        do {
+            try controller.performFetch()
+        } catch {
+            fatalError("###\(#function): Failed to performFetch: \(error)")
+        }
+        return controller
+    }()
+    
+    private lazy var fetchedRecordingsResultsController: NSFetchedResultsController<Recording> = {
         let fetchRequest: NSFetchRequest<Recording> = Recording.fetchRequest()
-        let predicate = NSPredicate(format: "useCase.id.uuidString == %@", useCase.id!.uuidString)
-        fetchRequest.predicate = predicate
+        //let predicate = NSPredicate(format: "useCase.id.uuidString == %@", useCase.id!.uuidString)
+        //fetchRequest.predicate = predicate
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: Recording.Name.name, ascending: true)]
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                     managedObjectContext: persistentContainer.viewContext,
@@ -52,6 +73,13 @@ class RecordingListDataSource: NSObject {
         return controller
     }()
     
+    // Task list
+    var tasksProvider: TasksProvider = .shared
+    private var lastUpdated = Date.distantFuture.timeIntervalSince1970
+    private var isLoading = false
+    private var error: TaskError?
+    private var hasError = false
+    
     init(useCase: UseCase,
          recordingDeletedAction: @escaping RecordingDeletedAction,
          recordingChangedAction: @escaping RecordingChangedAction) {
@@ -61,10 +89,77 @@ class RecordingListDataSource: NSObject {
         super.init()
     }
     
-    func recording(at row: Int) -> Recording? {
-        return recordings?[row]
+    func task(at row: Int) -> Task? {
+        return tasks?[row]
     }
     
+    func recording(for task: Task) -> Recording? {
+        return recordings?.first(where: { $0.task == task })
+    }
+    
+    func fetchTasks() {
+        isLoading = true
+        do {
+            try tasksProvider.fetchTasks()
+            lastUpdated = Date().timeIntervalSince1970
+        } catch {
+            self.error = error as? TaskError ?? .unexpectedError(error: error)
+            self.hasError = true
+        }
+        isLoading = false
+        recordingChangedAction?()
+    }
+    
+}
+
+// MARK: UITableViewDataSource
+
+extension RecordingListDataSource: UITableViewDataSource {
+    static let recordingListCellIdentifier = "RecordingListCell"
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return tasks?.count ?? 0
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.recordingListCellIdentifier, for: indexPath) as? RecordingListCell else {
+            fatalError("###\(#function): Failed to dequeue a RecordingListCell. Check the cell reusable identifier in Main.storyboard.")
+        }
+        if let currentTask = task(at: indexPath.row) {
+            if let currentRecording = recording(for: currentTask) {
+                let durationText = currentRecording.durationText()
+                cell.configure(taskName: currentRecording.name!, durationText: durationText, folderName: "task", filesCount: Int(currentRecording.filesCount), isProcessed: currentRecording.isProcessed)
+                cell.accessoryType = .detailButton
+            } else {
+                cell.configure(taskName: currentTask.name!, durationText: "", folderName: "", filesCount: 0, isProcessed: false)
+                cell.accessoryType = .none
+            }
+        }
+        return cell
+    }
+    
+}
+
+// MARK: Duration Text Formatters
+extension Recording {
+    
+    func durationText() -> String {
+        return String(duration)
+    }
+}
+
+// MARK: NSFetchedResultsControllerDelegate
+
+extension RecordingListDataSource: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        recordingChangedAction?()
+    }
+}
+
+// MARK: Selection Interface
+
+//extension RecordingListDataSource {
+//
 //    func isSelected(at row: Int) -> Bool {
 //        guard let recording = recording(at: row) else { return false }
 //        return selectedRecordings.contains(recording)
@@ -98,46 +193,10 @@ class RecordingListDataSource: NSObject {
 //    func startProcessing() {
 //        guard !selectedRecordings.isEmpty else { return }
 //    }
-    
-}
+//
+//}
 
-// MARK: UITableViewDataSource
 
-extension RecordingListDataSource: UITableViewDataSource {
-    static let recordingListCellIdentifier = "RecordingListCell"
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return recordings?.count ?? 0
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.recordingListCellIdentifier, for: indexPath) as? RecordingListCell else {
-            fatalError("###\(#function): Failed to dequeue a RecordingListCell. Check the cell reusable identifier in Main.storyboard.")
-        }
-        if let currentRecording = recording(at: indexPath.row) {
-            let durationText = currentRecording.durationText()
-            cell.configure(taskName: currentRecording.name!, durationText: durationText, folderName: "task", filesCount: Int(currentRecording.filesCount), isProcessed: currentRecording.isProcessed)
-        }
-        return cell
-    }
-    
-}
-
-// MARK: Duration Text Formatters
-extension Recording {
-    
-    func durationText() -> String {
-        return String(duration)
-    }
-}
-
-// MARK: NSFetchedResultsControllerDelegate
-
-extension RecordingListDataSource: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        recordingChangedAction?()
-    }
-}
 
 // MARK: UISearchResultsUpdating
 

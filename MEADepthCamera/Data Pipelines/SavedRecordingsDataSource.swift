@@ -51,22 +51,22 @@ class SavedRecordingsDataSource {
         }
     }
     
-    func saveRecording(to useCase: UseCase) {
+    func saveRecording(to useCase: UseCase, for task: Task) {
         guard let recording = savedRecording else { return }
         // Saves a recording to the persistent storage
         var newRecording: Recording?
-        persistentContainer?.performBackgroundTask { context in
-            context.parent = self.persistentContainer?.viewContext
+        if let context = persistentContainer?.viewContext {
             newRecording = Recording(context: context)
             newRecording?.useCase = useCase
+            newRecording?.task = task
             newRecording?.folderURL = recording.folderURL
             newRecording?.name = recording.name
             newRecording?.duration = recording.duration ?? 0
+            newRecording?.id = UUID()
             let outputFiles = recording.savedFiles.map { self.saveFile($0, to: newRecording!) }
             newRecording?.files = NSSet(array: outputFiles as [Any])
-//            newRecording?.task = recording.task
             self.persistentContainer?.saveContext(backgroundContext: context)
-//            context.refresh(newRecording!, mergeChanges: true)
+            context.refresh(newRecording!, mergeChanges: true)
         }
         storedRecordingsCount += 1
     }

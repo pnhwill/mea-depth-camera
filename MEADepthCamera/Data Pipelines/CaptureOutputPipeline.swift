@@ -79,14 +79,17 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     
     // Use case
     private let useCase: UseCase
+    private let task: Task
     
     init(cameraViewController: CameraViewController,
          useCase: UseCase,
+         task: Task,
          videoDataOutput: AVCaptureVideoDataOutput,
          depthDataOutput: AVCaptureDepthDataOutput,
          audioDataOutput: AVCaptureAudioDataOutput) {
         self.cameraViewController = cameraViewController
         self.useCase = useCase
+        self.task = task
         self.videoDataOutput = videoDataOutput
         self.depthDataOutput = depthDataOutput
         self.audioDataOutput = audioDataOutput
@@ -94,6 +97,8 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     }
     
     // MARK: - Data Pipeline Setup
+    
+    
     func configureProcessors(for videoDevice: AVCaptureDevice) {
         
         // Use an AVCaptureDataOutputSynchronizer to synchronize the video data and depth data outputs.
@@ -141,7 +146,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     
     func configureSavedRecordingsDataSource(container: PersistentContainer) {
         savedRecordingsDataSource.persistentContainer = container
-        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
+        //cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
     }
     
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
@@ -340,8 +345,8 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         audioFileWriter = nil
         depthMapFileWriter = nil
         recordingState = .finish
-        savedRecordingsDataSource.saveRecording(to: useCase)
-        cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
+        savedRecordingsDataSource.saveRecording(to: useCase, for: task)
+        //cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
     }
     
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {

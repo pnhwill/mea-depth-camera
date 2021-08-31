@@ -13,6 +13,27 @@ import OSLog
 @objc(Task)
 public class Task: NSManagedObject {
 
+    struct Name {
+        static let name = "name"
+    }
+    
+    /// Updates a Task instance with the values from a TaskProperties.
+    func update(from taskProperties: TaskProperties) throws {
+        let dictionary = taskProperties.dictionaryValue
+        guard let newModality = dictionary["modality"] as? String,
+              let newFileNameLabel = dictionary["fileNameLabel"] as? String,
+              let newName = dictionary["name"] as? String,
+              let newInstructions = dictionary["instructions"] as? String
+        else {
+            throw TaskError.missingData
+        }
+        
+        modality = newModality
+        fileNameLabel = newFileNameLabel
+        name = newName
+        instructions = newInstructions
+    }
+    
 }
 
 // MARK: JSON Decoder
@@ -35,6 +56,15 @@ struct TasksJSON: Decodable {
     
     private(set) var taskPropertiesList = [TaskProperties]()
     
+    init(from decoder: Decoder) throws {
+        var rootContainer = try decoder.unkeyedContainer()
+        
+        while !rootContainer.isAtEnd {
+            if let properties = try? rootContainer.decode(TaskProperties.self) {
+                taskPropertiesList.append(properties)
+            }
+        }
+    }
 }
 
 
@@ -55,6 +85,7 @@ struct TaskProperties: Decodable {
     let fileName: String // "SubjectID_NSM_BIGSMILE_YYYYMMDD_time_r"
     let name: String // "Big smile"
     let instructions: String // "Smile big. Repeat 3 times."
+    let id: UUID
     
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -83,6 +114,7 @@ struct TaskProperties: Decodable {
         self.fileName = fileName
         self.name = name
         self.instructions = instructions
+        self.id = UUID()
     }
     
     // The keys must have the same name as the attributes of the Quake entity.
@@ -91,7 +123,8 @@ struct TaskProperties: Decodable {
             "modality": modality,
             "fileNameLabel": fileName,
             "name": name,
-            "instructions": instructions
+            "instructions": instructions,
+            "id": id
         ]
     }
     
@@ -102,6 +135,7 @@ enum TaskError: Error {
     case wrongDataFormat(error: Error)
     case missingData
     case batchInsertError
+    case unexpectedError(error: Error)
 }
 
 extension TaskError: LocalizedError {
@@ -113,6 +147,8 @@ extension TaskError: LocalizedError {
             return NSLocalizedString("Found and will discard a task missing a valid modality, file name, name, or instructions.", comment: "")
         case .batchInsertError:
             return NSLocalizedString("Failed to execute a batch insert request.", comment: "")
+        case .unexpectedError(let error):
+            return NSLocalizedString("Received unexpected error. \(error.localizedDescription)", comment: "")
         }
     }
 }

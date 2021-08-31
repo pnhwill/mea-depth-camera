@@ -7,17 +7,19 @@
 
 import UIKit
 
-class RecordingDetailViewController: UIViewController {
+class RecordingDetailViewController: UITableViewController {
     
     typealias RecordingChangeAction = (Recording) -> Void
+    
+    @IBOutlet private weak var processingHeaderView: ProcessingView!
     
     // Current recording
     private var recording: Recording?
     private var isNew = false
     
     private var dataSource: UITableViewDataSource?
-    private var useCaseEditAction: RecordingChangeAction?
-    private var useCaseAddAction: RecordingChangeAction?
+    private var recordingEditAction: RecordingChangeAction?
+    private var recordingAddAction: RecordingChangeAction?
     
     // Core Data
     var persistentContainer: PersistentContainer?
@@ -25,8 +27,8 @@ class RecordingDetailViewController: UIViewController {
     func configure(with recording: Recording, isNew: Bool = false, addAction: RecordingChangeAction? = nil, editAction: RecordingChangeAction? = nil) {
         self.recording = recording
         self.isNew = isNew
-        self.useCaseAddAction = addAction
-        self.useCaseEditAction = editAction
+        self.recordingAddAction = addAction
+        self.recordingEditAction = editAction
         if isViewLoaded {
             setEditing(isNew, animated: false)
         }
@@ -34,7 +36,21 @@ class RecordingDetailViewController: UIViewController {
     
     // MARK: Life Cycle
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        if let recording = recording {
+            dataSource = RecordingDetailViewDataSource(recording: recording)
+        }
+    }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let navigationController = navigationController,
+            !navigationController.isToolbarHidden {
+            navigationController.setToolbarHidden(true, animated: animated)
+        }
+    }
     
     
 }
