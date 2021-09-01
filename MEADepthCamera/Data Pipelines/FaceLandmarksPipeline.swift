@@ -9,116 +9,108 @@ import AVFoundation
 import Vision
 
 protocol FaceLandmarksPipelineDelegate: AnyObject {
-    func displayFrameCounter(_ frame: Int)
-    func didFinishTracking()
+    func displayFrameCounter(_ frame: Int, totalFrames: Int)
+    func didFinishTracking(success: Bool)
 }
 
 class FaceLandmarksPipeline: DataPipeline {
     
-    // Weak reference to camera view controller
-    private weak var cameraViewController: CameraViewController?
+    // Current recording being processed
+    private var recording: Recording
     
+    // Data Processors
     private var processorSettings: ProcessorSettings
-    
     var visionTrackerProcessor: LandmarksTrackerProcessor?
-    
-    // Point cloud Metal renderer with compute kernel
     private var pointCloudProcessor: PointCloudProcessor
     
+    // File Writers
     private(set) var faceLandmarks2DFileWriter: FaceLandmarksFileWriter
     private(set) var faceLandmarks3DFileWriter: FaceLandmarksFileWriter
     private(set) var infoFileWriter: InfoFileWriter
     
-    private let savedRecordingsDataSource: SavedRecordingsDataSource
-    
+    // Pixel buffer pool for concurrent tracking & file writing
     var depthMapPixelBufferPool: CVPixelBufferPool?
     
-    let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    weak var delegate: FaceLandmarksPipelineDelegate?
     
     var totalFrames: Int?
     
-    private var videoAsset: AVAsset?
+    // Video readers and assets
     private var videoReader: VideoReader?
-    private var depthAsset: AVAsset?
     private var depthReader: VideoReader?
+    private var videoAsset: AVAsset?
+    private var depthAsset: AVAsset?
     
     private var cancelRequested = false
     
-    init(cameraViewController: CameraViewController, processorSettings: ProcessorSettings, savedRecordingsDataSource: SavedRecordingsDataSource) {
-        self.cameraViewController = cameraViewController
+    init(recording: Recording, processorSettings: ProcessorSettings) {
         self.processorSettings = processorSettings
+        self.recording = recording
+        self.visionTrackerProcessor = LandmarksTrackerProcessor(processorSettings: processorSettings)
         self.pointCloudProcessor = PointCloudProcessor(settings: processorSettings)
         self.faceLandmarks2DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
         self.faceLandmarks3DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
         self.infoFileWriter = InfoFileWriter(processorSettings: processorSettings)
-        self.savedRecordingsDataSource = savedRecordingsDataSource
-        self.cameraViewController?.faceLandmarksPipeline = self
     }
     
     // MARK: - Pipeline Setup
     
-    func startTracking() {
-        visionTrackingQueue.async {
-            guard var lastSavedRecording = self.savedRecordingsDataSource.savedRecording else {
-                print("Last saved recording not found")
-                return
-            }
-            // Load RGB and depth map video files from saved URLs
-            guard let (videoAsset, depthAsset) = self.loadAssets(from: lastSavedRecording) else {
-                return
-            }
-            self.videoAsset = videoAsset
-            self.depthAsset = depthAsset
-            
-            // Create the landmarks csv files and save in recordings data source
-            let saveFolder = lastSavedRecording.folderURL
-            guard let landmarks2DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks2D.rawValue, fileType: "csv") else {
-                print("Failed to create landmarks2D file")
-                return
-            }
-            guard let landmarks3DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks3D.rawValue, fileType: "csv") else {
-                print("Failed to create landmarks2D file")
-                return
-            }
-            guard let infoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.info.rawValue, fileType: "csv") else {
-                print("Failed to create landmarks2D file")
-                return
-            }
-            self.savedRecordingsDataSource.addFiles(to: &lastSavedRecording, newFiles: [OutputType.landmarks2D: landmarks2DURL,
-                                                                                                    OutputType.landmarks3D: landmarks3DURL,
-                                                                                                    OutputType.info: infoURL])
-            
-            // Prepare the landmarks file writers
-            self.faceLandmarks2DFileWriter.prepare(saveURL: landmarks2DURL)
-            self.faceLandmarks3DFileWriter.prepare(saveURL: landmarks3DURL)
-            self.infoFileWriter.prepare(saveURL: infoURL)
-            if let totalFrames = self.totalFrames {
-                self.infoFileWriter.createInfoRow(startTime: saveFolder.lastPathComponent, totalFrames: totalFrames)
-            }
-            
-            // Initialize Vision tracker processor
-            self.visionTrackerProcessor = LandmarksTrackerProcessor(processorSettings: self.processorSettings)
-            do {
-                try self.performTracking()
-            } catch {
-                self.cameraViewController?.handleTrackerError(error)
-            }
+    func startTracking() throws {
+        // Load RGB and depth map video files from saved URLs
+        guard let (videoAsset, depthAsset) = self.loadAssets(from: recording),
+              let saveFolder = recording.folderURL else {
+            return
+        }
+        self.videoAsset = videoAsset
+        self.depthAsset = depthAsset
+        
+        // Create the landmarks csv files and save in recordings data source
+        
+        guard let landmarks2DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks2D.rawValue, fileType: "csv") else {
+            print("Failed to create landmarks2D file")
+            return
+        }
+        guard let landmarks3DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks3D.rawValue, fileType: "csv") else {
+            print("Failed to create landmarks2D file")
+            return
+        }
+        guard let infoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.info.rawValue, fileType: "csv") else {
+            print("Failed to create landmarks2D file")
+            return
+        }
+        self.recording.addFiles(newFiles: [OutputType.landmarks2D: landmarks2DURL,
+                                           OutputType.landmarks3D: landmarks3DURL,
+                                           OutputType.info: infoURL])
+        
+        
+        // Prepare the landmarks file writers
+        self.faceLandmarks2DFileWriter.prepare(saveURL: landmarks2DURL)
+        self.faceLandmarks3DFileWriter.prepare(saveURL: landmarks3DURL)
+        self.infoFileWriter.prepare(saveURL: infoURL)
+        if let totalFrames = self.totalFrames {
+            self.infoFileWriter.createInfoRow(startTime: saveFolder.lastPathComponent, totalFrames: totalFrames)
+        }
+        
+        // Try to perform the video tracking
+        do {
+            try self.performTracking()
+        } catch {
+            throw error
         }
     }
     
-    private func loadAssets(from savedRecording: SavedRecording) -> (AVAsset, AVAsset)? {
-
-        let folderURL = savedRecording.folderURL
-        guard let videoFile = savedRecording.savedFiles.first(where: { $0.outputType == OutputType.video }),
-              let depthFile = savedRecording.savedFiles.first(where: { $0.outputType == OutputType.depth }) else {
+    private func loadAssets(from recording: Recording) -> (AVAsset, AVAsset)? {
+        // Loads the video assets for the inputted recording
+        guard let videoFile = recording.files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.video.rawValue }) as? OutputFile,
+              let depthFile = recording.files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.depth.rawValue }) as? OutputFile,
+              let videoURL = videoFile.fileURL,
+              let depthURL = depthFile.fileURL else {
             print("Failed to access saved files")
             return nil
         }
-        let videoURL = folderURL.appendingPathComponent(videoFile.lastPathComponent)
-        let depthURL = folderURL.appendingPathComponent(depthFile.lastPathComponent)
+        
         if FileManager.default.fileExists(atPath: videoURL.path) {
             totalFrames = Int(getNumberOfFrames(videoURL))
-            print(totalFrames!)
         } else {
             print("File does not exist at specified URL")
             return nil
@@ -169,10 +161,14 @@ class FaceLandmarksPipeline: DataPipeline {
         if depthMapPixelBufferPool == nil {
             throw VisionTrackerProcessorError.readerInitializationFailed
         }
-
+        
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
             try visionTrackerProcessor?.performVisionRequests(on: video, orientation: videoReader.orientation, completion: { faceObservation in
                 self.recordLandmarks(of: faceObservation, with: depth, frame: frame, timeStamp: timeStamp)
+                // Display the frame counter on the UI
+                if let totalFrames = self.totalFrames {
+                    self.delegate?.displayFrameCounter(frame, totalFrames: totalFrames)
+                }
             })
         }
         
@@ -227,7 +223,7 @@ class FaceLandmarksPipeline: DataPipeline {
             
         }
         
-        didFinishTracking()
+        delegate?.didFinishTracking(success: !cancelRequested)
     }
     
     func cancelTracking() {
@@ -252,7 +248,7 @@ class FaceLandmarksPipeline: DataPipeline {
             boundingBox = VNImageRectForNormalizedRect(faceObservation.boundingBox, Int(processorSettings.videoResolution.width), Int(processorSettings.videoResolution.height))
             
             if let landmarks = faceObservation.landmarks?.allPoints {
-
+                
                 if let depthDataMap = depthDataMap, let correctedDepthMap = rectifyDepthDataMap(depthDataMap: depthDataMap) {
                     
                     let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
@@ -378,7 +374,7 @@ class FaceLandmarksPipeline: DataPipeline {
         }
         CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
         CVPixelBufferUnlockBaseAddress(outputBuffer, CVPixelBufferLockFlags(rawValue: 0))
-
+        
         return outputBuffer
     }
     
@@ -390,19 +386,6 @@ class FaceLandmarksPipeline: DataPipeline {
         faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
         if let landmarks3D = landmarks3D {
             faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
-        }
-        
-        // Display the frame counter on the UI
-        cameraViewController?.displayFrameCounter(frame)
-    }
-    
-    func didFinishTracking() {
-        faceLandmarks2DFileWriter.reset()
-        faceLandmarks3DFileWriter.reset()
-        depthMapPixelBufferPool = nil
-        DispatchQueue.main.async {
-            self.cameraViewController?.trackingState = .stopped
-            self.cameraViewController?.processingMode = .record
         }
     }
 }

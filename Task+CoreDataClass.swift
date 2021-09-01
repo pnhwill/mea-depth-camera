@@ -23,7 +23,8 @@ public class Task: NSManagedObject {
         guard let newModality = dictionary["modality"] as? String,
               let newFileNameLabel = dictionary["fileNameLabel"] as? String,
               let newName = dictionary["name"] as? String,
-              let newInstructions = dictionary["instructions"] as? String
+              let newInstructions = dictionary["instructions"] as? String,
+              let newID = dictionary["id"] as? UUID
         else {
             throw TaskError.missingData
         }
@@ -32,6 +33,7 @@ public class Task: NSManagedObject {
         fileNameLabel = newFileNameLabel
         name = newName
         instructions = newInstructions
+        id = newID
     }
     
 }
@@ -117,7 +119,7 @@ struct TaskProperties: Decodable {
         self.id = UUID()
     }
     
-    // The keys must have the same name as the attributes of the Quake entity.
+    // The keys must have the same name as the attributes of the Task entity.
     var dictionaryValue: [String: Any] {
         [
             "modality": modality,

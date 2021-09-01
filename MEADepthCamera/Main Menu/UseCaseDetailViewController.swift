@@ -28,7 +28,6 @@ class UseCaseDetailViewController: UITableViewController {
                 self.setEditing(isNew, animated: false)
             }
         }
-
     }
     
     // MARK: Life Cycle

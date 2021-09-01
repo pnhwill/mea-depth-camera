@@ -32,11 +32,10 @@ class TasksProvider {
     /// A shared tasks provider for use within the main app bundle.
     static let shared = TasksProvider()
     
-    private let inMemory: Bool
+    //private let inMemory: Bool
     private var notificationToken: NSObjectProtocol?
 
-    private init(inMemory: Bool = false) {
-        self.inMemory = inMemory
+    private init() {
 
         // Observe Core Data remote change notifications on the queue where the changes were made.
         notificationToken = NotificationCenter.default.addObserver(forName: .NSPersistentStoreRemoteChange, object: nil, queue: nil) { note in
@@ -70,10 +69,6 @@ class TasksProvider {
             fatalError("Failed to retrieve a persistent store description.")
         }
 
-        if inMemory {
-            description.url = URL(fileURLWithPath: "/dev/null")
-        }
-
         // Enable persistent store remote change notifications
         /// - Tag: persistentStoreRemoteChange
         description.setOption(true as NSNumber,
@@ -92,12 +87,12 @@ class TasksProvider {
 
         // This sample refreshes UI by consuming store changes via persistent history tracking.
         /// - Tag: viewContextMergeParentChanges
-        //container.viewContext.automaticallyMergesChangesFromParent = false
+        container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.name = "viewContext"
         /// - Tag: viewContextMergePolicy
-        //container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        //container.viewContext.undoManager = nil
-        //container.viewContext.shouldDeleteInaccessibleFaults = true
+        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        container.viewContext.undoManager = nil
+        container.viewContext.shouldDeleteInaccessibleFaults = true
         return container
     }()
     
@@ -150,6 +145,7 @@ class TasksProvider {
         taskContext.transactionAuthor = "importTasks"
         
         /// - Tag: perform
+        var performSuccess = false
         taskContext.performAndWait {
             // Execute the batch insert.
             /// - Tag: batchInsertRequest
@@ -157,11 +153,16 @@ class TasksProvider {
             if let fetchResult = try? taskContext.execute(batchInsertRequest),
                let batchInsertResult = fetchResult as? NSBatchInsertResult,
                let success = batchInsertResult.result as? Bool, success {
-                self.logger.debug("Successfully inserted data.")
+                performSuccess = success
                 return
             }
             self.logger.debug("Failed to execute batch insert request.")
         }
+        if !performSuccess {
+            throw TaskError.batchInsertError
+        }
+        
+        self.logger.debug("Successfully inserted data.")
     }
     
     private func newBatchInsertRequest(with propertyList: [TaskProperties]) -> NSBatchInsertRequest {

@@ -93,7 +93,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         self.videoDataOutput = videoDataOutput
         self.depthDataOutput = depthDataOutput
         self.audioDataOutput = audioDataOutput
-        self.savedRecordingsDataSource = SavedRecordingsDataSource(storedRecordingsCount: Int(useCase.recordingsCount))
+        self.savedRecordingsDataSource = SavedRecordingsDataSource()
     }
     
     // MARK: - Data Pipeline Setup
@@ -146,7 +146,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     
     func configureSavedRecordingsDataSource(container: PersistentContainer) {
         savedRecordingsDataSource.persistentContainer = container
-        //cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
     }
     
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
@@ -177,12 +176,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
                 processorSettings.cameraCalibrationData = cameraCalibrationData
             } else {
                 print("Failed to retrieve camera calibration data")
-            }
-            // Initialize face landmarks processor once we have the processor settings
-            if let cameraViewController = cameraViewController {
-                faceLandmarksPipeline = FaceLandmarksPipeline(cameraViewController: cameraViewController, processorSettings: processorSettings, savedRecordingsDataSource: savedRecordingsDataSource)
-            } else {
-                print("Failed to initialize face landmarks processor: camera view controller not found")
             }
         }
         
@@ -346,7 +339,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         depthMapFileWriter = nil
         recordingState = .finish
         savedRecordingsDataSource.saveRecording(to: useCase, for: task)
-        //cameraViewController?.updateRecordingsCount(count: savedRecordingsDataSource.storedRecordingsCount)
     }
     
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {
@@ -355,7 +347,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
             // update ui with success
             print("File writing success")
             DispatchQueue.main.async {
-                self.cameraViewController?.processingMode = .track
+                self.cameraViewController?.sessionMode = .record
             }
             break
         case .failure(let error):
@@ -451,7 +443,6 @@ extension CaptureOutputPipeline: AVCaptureDataOutputSynchronizerDelegate {
             //print("video output received at \(CMTimeGetSeconds(videoTimestamp))")
             if !syncedVideoData.sampleBufferWasDropped {
                 let videoSampleBuffer = syncedVideoData.sampleBuffer
-                //CMSampleBufferCreateCopy
                 processVideo(sampleBuffer: videoSampleBuffer, timestamp: videoTimestamp)
             } else {
                 print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
@@ -477,7 +468,6 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
     
     func displayFrame(_ faceObservations: [VNFaceObservation]) {
         cameraViewController?.displayFaceObservations(faceObservations)
-        //cameraViewController?.displayMetrics(confidence: confidence)
     }
     
     func checkAlignment(of faceObservation: VNFaceObservation) {
@@ -503,11 +493,6 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
         //print("width error: \(widthError) height error: \(heightError)")
         
         // Get face rotation
-        /*if faceObservation.yaw != nil, faceObservation.roll != nil {
-            print("rotation found")
-        } else {
-            print("rotation not found")
-        }*/
         // If the roll and/or yaw is not found, it will default to 0.0 so that the rotation condition is true (i.e. it doesn't check the rotation)
         let faceRoll = CGFloat(truncating: faceObservation.roll ?? 0.0)
         let faceYaw = CGFloat(truncating: faceObservation.yaw ?? 0.0)

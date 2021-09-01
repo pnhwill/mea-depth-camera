@@ -17,17 +17,15 @@ class SavedRecordingsDataSource {
     let baseURL: URL
     let fileManager = FileManager.default
     var savedRecording: SavedRecording?
-    var storedRecordingsCount: Int
     
     // Core Data
     var persistentContainer: PersistentContainer?
     
-    init(storedRecordingsCount: Int) {
+    init() {
         guard let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             fatalError("Unable to locate Documents directory.")
         }
         self.baseURL = docsURL
-        self.storedRecordingsCount = storedRecordingsCount
     }
     
     func addRecording(_ folderURL: URL, outputFiles: [OutputType: URL]) {
@@ -54,21 +52,32 @@ class SavedRecordingsDataSource {
     func saveRecording(to useCase: UseCase, for task: Task) {
         guard let recording = savedRecording else { return }
         // Saves a recording to the persistent storage
-        var newRecording: Recording?
         if let context = persistentContainer?.viewContext {
-            newRecording = Recording(context: context)
-            newRecording?.useCase = useCase
-            newRecording?.task = task
-            newRecording?.folderURL = recording.folderURL
-            newRecording?.name = recording.name
-            newRecording?.duration = recording.duration ?? 0
-            newRecording?.id = UUID()
-            let outputFiles = recording.savedFiles.map { self.saveFile($0, to: newRecording!) }
-            newRecording?.files = NSSet(array: outputFiles as [Any])
-            self.persistentContainer?.saveContext(backgroundContext: context)
-            context.refresh(newRecording!, mergeChanges: true)
+            context.performAndWait {
+                let newRecording = Recording(context: context)
+                newRecording.useCase = useCase
+                newRecording.task = task
+                newRecording.folderURL = recording.folderURL
+                newRecording.name = recording.name
+                newRecording.duration = recording.duration ?? 0
+                newRecording.id = UUID()
+                
+                let outputFiles = recording.savedFiles.map { self.saveFile($0, to: newRecording) }
+                newRecording.files = NSSet(array: outputFiles as [Any])
+                
+                useCase.addToRecordings(newRecording)
+                task.addToRecordings(newRecording)
+//                if let useCaseTasks = useCase.tasks, !useCaseTasks.contains(task) {
+//                    useCase.addToTasks(task)
+//                    task.addToUseCases(useCase)
+//                }
+                
+                self.persistentContainer?.saveContext(backgroundContext: context)
+                context.refresh(newRecording, mergeChanges: true)
+                context.refresh(useCase, mergeChanges: true)
+                context.refresh(task, mergeChanges: true)
+            }
         }
-        storedRecordingsCount += 1
     }
     
     func saveFile(_ file: SavedFile, to recording: Recording) -> OutputFile? {

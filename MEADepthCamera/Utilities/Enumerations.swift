@@ -17,8 +17,8 @@ enum OutputType: String, Codable {
     case frameIndex
 }
 
-enum ProcessingMode {
-    case record, track
+enum SessionMode {
+    case record, stop
 }
 
 enum RecordingState {

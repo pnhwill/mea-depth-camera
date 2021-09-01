@@ -17,7 +17,7 @@ class ProcessingView: UIView {
     private var startStopAction: StartStopAction?
     
     func configure(isProcessing: Bool, totalFrames: Int, processedFrames: Int, startStopAction: @escaping StartStopAction) {
-        let buttonImage = isProcessing ? UIImage(systemName: "play.fill") : UIImage(systemName: "stop.fill")
+        let buttonImage = isProcessing ? UIImage(systemName: "stop.fill") : UIImage(systemName: "play.fill")
         startStopButton.setBackgroundImage(buttonImage, for: [])
         
         let frameCounterText = "Frame: \(processedFrames)/\(totalFrames)"
@@ -30,7 +30,7 @@ class ProcessingView: UIView {
         self.startStopAction = startStopAction
     }
     
-    @IBAction func startStopButtonTriggered(_ sender: UIButton) {
+    @IBAction func handleStartStopButton(_ sender: UIButton) {
         startStopAction?()
     }
     

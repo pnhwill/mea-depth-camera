@@ -26,7 +26,7 @@ class RecordingListDataSource: NSObject {
         return fetchedRecordingsResultsController.fetchedObjects
     }
     //var selectedRecordings = [Recording]()
-    var title: String = "Choose Task"
+    var title: String = "Choose Task to Record"
     
     // Callbacks
     private var recordingDeletedAction: RecordingDeletedAction?
@@ -125,13 +125,17 @@ extension RecordingListDataSource: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.recordingListCellIdentifier, for: indexPath) as? RecordingListCell else {
             fatalError("###\(#function): Failed to dequeue a RecordingListCell. Check the cell reusable identifier in Main.storyboard.")
         }
-        if let currentTask = task(at: indexPath.row) {
-            if let currentRecording = recording(for: currentTask) {
+        if let currentTask = task(at: indexPath.row), let nameText = currentTask.name {
+            if let currentRecording = recording(for: currentTask), let folderText = currentRecording.folderURL?.lastPathComponent {
+                // A recording has already been taken
                 let durationText = currentRecording.durationText()
-                cell.configure(taskName: currentRecording.name!, durationText: durationText, folderName: "task", filesCount: Int(currentRecording.filesCount), isProcessed: currentRecording.isProcessed)
+                cell.configure(taskName: nameText, durationText: durationText, folderName: folderText, filesCount: Int(currentRecording.filesCount), isProcessed: currentRecording.isProcessed)
+                cell.backgroundColor = .systemGreen
                 cell.accessoryType = .detailButton
             } else {
-                cell.configure(taskName: currentTask.name!, durationText: "", folderName: "", filesCount: 0, isProcessed: false)
+                // A recording has not yet been taken
+                cell.configure(taskName: nameText, durationText: nil, folderName: nil, filesCount: nil, isProcessed: nil)
+                cell.backgroundColor = .secondarySystemBackground
                 cell.accessoryType = .none
             }
         }

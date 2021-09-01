@@ -27,8 +27,6 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var doneButton: UIBarButtonItem!
     
     // Post-processing in progress
-    @IBOutlet private weak var frameCounterLabel: UILabel!
-    @IBOutlet private weak var startStopButton: UIButton!
     private var spinner: UIActivityIndicatorView!
 
     // AVCapture session
@@ -39,7 +37,7 @@ class CameraViewController: UIViewController {
     // Capture data output delegate
     private var dataOutputPipeline: CaptureOutputPipeline?
     
-    var faceLandmarksPipeline: FaceLandmarksPipeline?
+    //var faceLandmarksPipeline: FaceLandmarksPipeline?
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
@@ -60,14 +58,9 @@ class CameraViewController: UIViewController {
     var task: Task!
     
     // App state
-    var processingMode: ProcessingMode = .record {
+    var sessionMode: SessionMode = .record {
         didSet {
-            self.handleProcessingModeChange()
-        }
-    }
-    var trackingState: TrackingState = .stopped {
-        didSet {
-            self.handleTrackingStateChange()
+            self.handleSessionModeChange()
         }
     }
     var renderingEnabled = true
@@ -99,28 +92,9 @@ class CameraViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.unwindFromCameraSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
-            
+            destination.processorSettings = dataOutputPipeline?.processorSettings
         }
     }
-    
-    // MARK: - Recordings Count
-    
-//    func updateRecordingsCount(count: Int) {
-//        var title: String {
-//            switch count {
-//            case 0:
-//                return "No Recordings"
-//            case 1:
-//                return "One Recording"
-//            default:
-//                return "\(count) Recordings"
-//            }
-//        }
-//        DispatchQueue.main.async { [weak self] in
-//            self?.doneButton.isEnabled = count > 0
-//            self?.navigationItem.title = title
-//        }
-//    }
     
     // MARK: - View Controller Life Cycle
     
@@ -272,8 +246,6 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        print("camera view will disappear")
-        //dataOutputProcessor?.visionProcessor?.cancelTracking()
         dataOutputPipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
         }
@@ -294,7 +266,6 @@ class CameraViewController: UIViewController {
 
     @objc
     func didEnterBackground(notification: NSNotification) {
-        print("camera view did enter background")
         // Free up resources.
         dataOutputPipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
@@ -306,7 +277,6 @@ class CameraViewController: UIViewController {
     
     @objc
     func willEnterForeground(notification: NSNotification) {
-        print("camera view will enter foreground")
         dataOutputPipeline?.dataOutputQueue.async {
             self.renderingEnabled = true
         }
@@ -573,7 +543,7 @@ class CameraViewController: UIViewController {
     // MARK: - Toggle Recording
     
     @IBAction private func toggleRecording(_ sender: UIButton) {
-        guard processingMode == .record else {
+        guard sessionMode == .record else {
             return
         }
         
@@ -604,12 +574,14 @@ class CameraViewController: UIViewController {
                 }
                 // Hide the navigation bar back button and update title
                 DispatchQueue.main.async {
-                    self.navigationItem.title = "Recording in Progress"
                     self.navigationItem.setHidesBackButton(true, animated: true)
                 }
                 self.dataOutputPipeline?.startRecording()
                 
             case .recording:
+                DispatchQueue.main.async {
+                    self.sessionMode = .stop
+                }
                 self.dataOutputPipeline?.stopRecording()
                 if let currentBackgroundRecordingID = self.backgroundRecordingID {
                     self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
@@ -617,10 +589,7 @@ class CameraViewController: UIViewController {
                         UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
                     }
                 }
-                // Unhide the navigation bar back button
-                DispatchQueue.main.async {
-                    self.navigationItem.setHidesBackButton(false, animated: true)
-                }
+
             default:
                 return
             }
@@ -676,24 +645,10 @@ class CameraViewController: UIViewController {
     
     // MARK: - Landmarks Post-Processing
     
-    @IBAction private func handleStartStopButton(_ sender: UIButton) {
-        switch trackingState {
-        case .tracking:
-            // Stop tracking
-            self.faceLandmarksPipeline?.cancelTracking()
-            self.trackingState = .stopped
-        case .stopped:
-            // Initialize processor and start tracking
-            self.trackingState = .tracking
-            self.faceLandmarksPipeline?.startTracking()
-        }
-    }
-    
-    func handleProcessingModeChange() {
-        switch processingMode {
-        case .track:
+    func handleSessionModeChange() {
+        switch sessionMode {
+        case .stop:
             // Switch from live recording mode to post-processing mode
-            self.startStopButton.isHidden = false
             dataOutputPipeline?.dataOutputQueue.async {
                 self.renderingEnabled = false
             }
@@ -703,9 +658,11 @@ class CameraViewController: UIViewController {
                     self.isSessionRunning = self.sessionManager.session.isRunning
                 }
             }
+            self.spinner.hidesWhenStopped = true
+            self.spinner.center = CGPoint(x: self.previewView.frame.size.width / 2.0, y: self.previewView.frame.size.height / 2.0)
+            self.spinner.startAnimating()
         case .record:
             // Switch back to live recording mode
-            self.startStopButton.isHidden = true
             dataOutputPipeline?.dataOutputQueue.async {
                 self.renderingEnabled = true
             }
@@ -715,52 +672,11 @@ class CameraViewController: UIViewController {
                     self.isSessionRunning = self.sessionManager.session.isRunning
                 }
             }
-        }
-    }
-    
-    private func handleTrackingStateChange() {
-        let newButtonImage: UIImage!
-        let frameCounterHidden: Bool!
-        switch trackingState {
-        case .stopped:
-            frameCounterHidden = true
-            newButtonImage = UIImage(systemName: "play.fill")
             self.spinner.stopAnimating()
-        case .tracking:
-            frameCounterHidden = false
-            newButtonImage = UIImage(systemName: "stop.fill")
-            self.spinner.hidesWhenStopped = true
-            self.spinner.center = CGPoint(x: self.previewView.frame.size.width / 2.0, y: self.previewView.frame.size.height / 2.0)
-            self.spinner.startAnimating()
-        }
-        UIView.animate(withDuration: 0.5, animations: {
-            self.view.layoutIfNeeded()
-            self.startStopButton.setBackgroundImage(newButtonImage, for: [])
-            self.frameCounterLabel.isHidden = frameCounterHidden
-        })
-    }
-    
-    func displayFrameCounter(_ frame: Int) {
-        let totalFrames = faceLandmarksPipeline?.totalFrames
-        let totalFramesString = totalFrames != nil ? String(totalFrames!) : "?"
-        DispatchQueue.main.async {
-            self.frameCounterLabel.text = "Frame: \(frame)/\(totalFramesString)"
-        }
-    }
-    
-    // MARK: - Error Presentation
-    
-    func handleTrackerError(_ error: Error) {
-        DispatchQueue.main.async {
-            var messageHeader: String
-            if error is VisionTrackerProcessorError {
-                messageHeader = "Vision Processor Error"
-            } else {
-                messageHeader = "Error"
+            // Enable the navigation bar done button
+            DispatchQueue.main.async {
+                self.doneButton.isEnabled = true
             }
-            let message: String = messageHeader + ": " + error.localizedDescription
-            let actions = [UIAlertAction(title: "OK", style: .cancel, handler: nil)]
-            self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
         }
     }
     

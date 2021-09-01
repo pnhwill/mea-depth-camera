@@ -21,4 +21,16 @@ public class Recording: NSManagedObject {
         folderURL = useCase?.folderURL?.appendingPathComponent(name!)
     }
     
+    func addFiles(newFiles: [OutputType: URL]) {
+        for file in newFiles {
+            let newFile = OutputFile()
+            newFile.outputType = file.key.rawValue
+            newFile.fileName = file.value.lastPathComponent
+            newFile.id = UUID()
+            newFile.fileURL = file.value
+            newFile.recording = self
+            self.addToFiles(newFile)
+        }
+    }
+    
 }

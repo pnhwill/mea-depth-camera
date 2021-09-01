@@ -9,6 +9,7 @@ import UIKit
 
 class RecordingDetailViewDataSource: NSObject {
     
+    // MARK: RecordingRow
     enum RecordingRow: Int, CaseIterable {
         case name
         case task
@@ -39,10 +40,9 @@ class RecordingDetailViewDataSource: NSObject {
         self.recording = recording
     }
     
-    
-    
 }
 
+// MARK: UITableViewDataSource
 extension RecordingDetailViewDataSource: UITableViewDataSource {
     static let recordingDetailCellIdentifier = "RecordingDetailCell"
     
@@ -57,5 +57,7 @@ extension RecordingDetailViewDataSource: UITableViewDataSource {
         //cell.imageView?.image = row?.cellImage
         return cell
     }
-    
 }
+
+
+

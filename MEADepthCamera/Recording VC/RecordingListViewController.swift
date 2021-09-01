@@ -25,6 +25,8 @@ class RecordingListViewController: UITableViewController {
     private var useCase: UseCase?
     private var isProcessing: Bool = false
     
+    var processorSettings: ProcessorSettings?
+    
     // MARK: Navigation
     
     func configure(with useCase: UseCase) {
@@ -49,6 +51,7 @@ class RecordingListViewController: UITableViewController {
                   let recording = recordingListDataSource?.recording(for: task) else {
                 fatalError("Couldn't find data source for recording list.")
             }
+            destination.processorSettings = processorSettings
             destination.configure(with: recording, editAction: { recording in
 //                self.recordingListDataSource?.update(recording, at: rowIndex) { success in
 //                    if success {
@@ -75,14 +78,13 @@ class RecordingListViewController: UITableViewController {
            let cell = button.superview?.superview?.superview as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
-            print("segue to camera")
             destination.useCase = useCase
             destination.task = recordingListDataSource?.task(at: rowIndex)
         }
     }
     
     @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
-        
+        tableView.reloadData()
     }
     
     // MARK: Life Cycle
@@ -104,13 +106,13 @@ class RecordingListViewController: UITableViewController {
 //        navigationItem.searchController = searchController
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if let navigationController = navigationController,
-           navigationController.isToolbarHidden {
-            navigationController.setToolbarHidden(false, animated: animated)
-        }
-    }
+//    override func viewDidAppear(_ animated: Bool) {
+//        super.viewDidAppear(animated)
+//        if let navigationController = navigationController,
+//           navigationController.isToolbarHidden {
+//            navigationController.setToolbarHidden(false, animated: animated)
+//        }
+//    }
     
     override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
         // Push the detail view when the info button is pressed.
@@ -124,7 +126,7 @@ class RecordingListViewController: UITableViewController {
         }
         
         detailViewController.configure(with: recording, editAction: { recording in
-//            self.useCaseListDataSource?.update(useCase, at: rowIndex) { success in
+//            self.recordingListDataSource?.update(useCase, at: rowIndex) { success in
 //                if success {
 //                    DispatchQueue.main.async {
 //                        self.tableView.reloadData()

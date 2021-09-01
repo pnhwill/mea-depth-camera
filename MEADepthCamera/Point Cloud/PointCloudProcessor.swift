@@ -4,6 +4,7 @@
 //
 //  Created by Will on 7/26/21.
 //
+// Point cloud Metal renderer with compute kernel
 
 import AVFoundation
 import Metal

@@ -18,12 +18,21 @@ class RecordingListCell: UITableViewCell {
     @IBOutlet weak var startButton: UIButton!
     @IBOutlet weak var instructionsButton: UIButton!
     
-    func configure(taskName: String?, durationText: String, folderName: String, filesCount: Int, isProcessed: Bool) {
+    func configure(taskName: String?, durationText: String?, folderName: String?, filesCount: Int?, isProcessed: Bool?) {
         taskLabel.text = taskName
         durationLabel.text = durationText
+        durationLabel.isHidden = durationText == nil
         folderLabel.text = folderName
-        filesCountLabel.text = String(filesCount) + " Files"
-        isProcessedLabel.text = "Processed: " + String(isProcessed)
+        folderLabel.isHidden = folderName == nil
+        if let filesCount = filesCount {
+            filesCountLabel.text = String(filesCount) + " Files"
+        }
+        filesCountLabel.isHidden = filesCount == nil
+        if let isProcessed = isProcessed {
+            let isProcessedText = isProcessed ? "Yes" : "No"
+            isProcessedLabel.text = "Processed: " + isProcessedText
+        }
+        isProcessedLabel.isHidden = isProcessed == nil
     }
     
     override func layoutSubviews() {
