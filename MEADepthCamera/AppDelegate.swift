@@ -10,14 +10,18 @@ import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
-
+    
+    static let shared: AppDelegate = {
+        guard let delegate = UIApplication.shared.delegate as? AppDelegate else {
+            fatalError("Unexpected app delegate type, did it change? \(String(describing: UIApplication.shared.delegate))")
+        }
+        return delegate
+    }()
+    
+    lazy var coreDataStack: CoreDataStack = { return CoreDataStack() }()
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-//        if let rootVC = window?.rootViewController as? ViewController {
-//            rootVC.container = persistentContainer
-//        }
         return true
     }
     

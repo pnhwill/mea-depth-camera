@@ -1,5 +1,5 @@
 //
-//  TasksProvider.swift
+//  TaskProvider.swift
 //  MEADepthCamera
 //
 //  Created by Will on 8/27/21.
@@ -13,7 +13,7 @@ import CoreData
 import OSLog
 import UIKit
 
-class TasksProvider {
+class TaskProvider {
     
     // MARK: Tasks Data
     
@@ -30,7 +30,7 @@ class TasksProvider {
     // MARK: Core Data
     
     /// A shared tasks provider for use within the main app bundle.
-    static let shared = TasksProvider()
+    static let shared = TaskProvider()
     
     //private let inMemory: Bool
     private var notificationToken: NSObjectProtocol?

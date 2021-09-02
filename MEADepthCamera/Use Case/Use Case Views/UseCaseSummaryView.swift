@@ -1,5 +1,5 @@
 //
-//  MainMenuUseCaseView.swift
+//  UseCaseSummaryView.swift
 //  MEADepthCamera
 //
 //  Created by Will on 8/10/21.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MainMenuUseCaseView: UIView {
+class UseCaseSummaryView: UIView {
     
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet weak var subjectIDLabel: UILabel!

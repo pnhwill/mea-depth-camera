@@ -21,5 +21,11 @@ class PersistentContainer: NSPersistentContainer {
         }
     }
     
+//    func backgroundContext() -> NSManagedObjectContext {
+//        let context = newBackgroundContext()
+//        return context
+//    }
+    
+    // func handleSavingError
     
 }

@@ -74,7 +74,7 @@ class RecordingListDataSource: NSObject {
     }()
     
     // Task list
-    var tasksProvider: TasksProvider = .shared
+    var tasksProvider: TaskProvider = .shared
     private var lastUpdated = Date.distantFuture.timeIntervalSince1970
     private var isLoading = false
     private var error: TaskError?

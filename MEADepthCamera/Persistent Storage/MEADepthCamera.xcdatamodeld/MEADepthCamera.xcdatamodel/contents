@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20G95" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Experiment" representedClassName="Experiment" syncable="YES" codeGenerationType="category">
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Task" inverseName="experiments" inverseEntity="Task"/>
+        <relationship name="useCases" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="UseCase" inverseName="experiment" inverseEntity="UseCase"/>
+    </entity>
     <entity name="OutputFile" representedClassName="OutputFile" syncable="YES" codeGenerationType="category">
         <attribute name="fileName" attributeType="String"/>
         <attribute name="fileURL" optional="YES" transient="YES" attributeType="URI"/>
@@ -28,8 +34,8 @@
         <attribute name="recordVideo" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="repetitions" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="repTime" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="experiments" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Experiment" inverseName="tasks" inverseEntity="Experiment"/>
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="Recording" inverseName="task" inverseEntity="Recording"/>
-        <relationship name="useCases" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="UseCase" inverseName="tasks" inverseEntity="UseCase"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="name"/>
@@ -45,13 +51,14 @@
         <attribute name="recordingsCount" optional="YES" attributeType="Integer 64" derived="YES" derivationExpression="recordings.@count" usesScalarValueType="YES"/>
         <attribute name="subjectID" attributeType="String"/>
         <attribute name="title" attributeType="String"/>
+        <relationship name="experiment" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Experiment" inverseName="useCases" inverseEntity="Experiment"/>
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Recording" inverseName="useCase" inverseEntity="Recording"/>
-        <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Task" inverseName="useCases" inverseEntity="Task"/>
     </entity>
     <elements>
         <element name="OutputFile" positionX="182.8414306640625" positionY="172.0172119140625" width="128" height="104"/>
         <element name="Recording" positionX="-45" positionY="54" width="128" height="164"/>
         <element name="Task" positionX="-268.1070556640625" positionY="278.8963012695313" width="128" height="194"/>
         <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="179"/>
+        <element name="Experiment" positionX="-90" positionY="45" width="128" height="89"/>
     </elements>
 </model>

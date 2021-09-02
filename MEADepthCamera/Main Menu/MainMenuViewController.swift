@@ -10,7 +10,7 @@ import CoreData
 
 class MainMenuViewController: UIViewController {
     
-    @IBOutlet private weak var useCaseView: MainMenuUseCaseView!
+    @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     @IBOutlet private weak var addUseCaseButton: UIButton!
     @IBOutlet private weak var useCaseListButton: UIButton!
     @IBOutlet private weak var startButton: UIButton!

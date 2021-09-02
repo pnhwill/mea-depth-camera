@@ -11,7 +11,7 @@ class RecordingListViewController: UITableViewController {
     
     // MARK: Properties
     
-    @IBOutlet private weak var useCaseView: MainMenuUseCaseView!
+    @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     
     static let showDetailSegueIdentifier = "ShowRecordingDetailSegue"
     static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
@@ -84,6 +84,7 @@ class RecordingListViewController: UITableViewController {
     }
     
     @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
+        print("unwind from camera")
         tableView.reloadData()
     }
     
