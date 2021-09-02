@@ -13,7 +13,7 @@ import CoreData
 
 class RecordingProvider: DataProvider {
     
-    typealias Entity = Recording
+    typealias Object = Recording
     
     private(set) var persistentContainer: PersistentContainer
     

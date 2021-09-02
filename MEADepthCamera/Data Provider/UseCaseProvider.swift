@@ -13,7 +13,7 @@ import CoreData
 
 class UseCaseProvider: DataProvider {
     
-    typealias Entity = UseCase
+    typealias Object = UseCase
     
     private(set) var persistentContainer: PersistentContainer
     private weak var fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?
@@ -40,12 +40,35 @@ class UseCaseProvider: DataProvider {
         return controller
     }()
     
-    init(with persistentContainer: PersistentContainer) {
+    init(with persistentContainer: PersistentContainer, fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?) {
         self.persistentContainer = persistentContainer
+        self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
     
-    //func add
+    func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
+        context.perform {
+            let useCase = UseCase(context: context)
+            useCase.date = Date()
+            useCase.id = UUID()
+            if shouldSave {
+                self.persistentContainer.saveContext(backgroundContext: context)
+            }
+            completionHandler?(useCase)
+        }
+    }
     
-    //func delete
+    func delete(_ useCase: UseCase, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
+        if let context = useCase.managedObjectContext {
+            context.perform {
+                context.delete(useCase)
+                if shouldSave {
+                    self.persistentContainer.saveContext(backgroundContext: context)
+                }
+                completionHandler?(true)
+            }
+        } else {
+            completionHandler?(false)
+        }
+    }
 
 }

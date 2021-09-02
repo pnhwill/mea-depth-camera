@@ -9,7 +9,9 @@ import CoreData
 
 protocol DataProvider: AnyObject {
     
-    associatedtype Entity: NSManagedObject
+    associatedtype Object: NSManagedObject
+    typealias AddAction = (Object) -> Void
+    typealias DeleteAction = (Bool) -> Void
     
     var persistentContainer: PersistentContainer { get }
     

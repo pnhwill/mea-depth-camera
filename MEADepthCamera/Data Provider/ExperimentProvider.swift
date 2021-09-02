@@ -13,7 +13,7 @@ import CoreData
 
 class ExperimentProvider: DataProvider {
     
-    typealias Entity = Experiment
+    typealias Object = Experiment
     
     private(set) var persistentContainer: PersistentContainer
     private weak var fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?

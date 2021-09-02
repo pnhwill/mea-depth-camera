@@ -14,10 +14,7 @@ class MainMenuDataSource: NSObject {
     private var currentUseCaseChangedAction: CurrentUseCaseChangedAction?
     
     // Core Data persistent container
-    private(set) lazy var persistentContainer: PersistentContainer = {
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        return appDelegate!.persistentContainer
-    }()
+    private(set) var persistentContainer = AppDelegate.shared.coreDataStack.persistentContainer
     
     init(currentUseCaseChangedAction: @escaping CurrentUseCaseChangedAction) {
         self.currentUseCaseChangedAction = currentUseCaseChangedAction
@@ -53,4 +50,24 @@ extension MainMenuDataSource {
         }
     }
     
+}
+
+// MARK: UseCaseInteractionDelegate
+
+extension MainMenuDataSource: UseCaseInteractionDelegate {
+    /**
+     didUpdateUseCase is called as part of UseCaseInteractionDelegate, or whenever a use case update requires a UI update.
+     
+     Respond by updating the UI as follows.
+     - add: make the new item visible and select it.
+     - delete: select the first item if possible.
+     - update from detailViewController: reload the row, make it visible, and select it.
+     - initial load: select the first item if needed.
+     */
+    func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool = true) {
+        currentUseCase = useCase
+        if shouldReloadRow {
+            currentUseCaseChangedAction?(useCase)
+        }
+    }
 }

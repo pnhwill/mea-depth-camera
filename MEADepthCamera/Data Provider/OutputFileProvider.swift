@@ -13,7 +13,7 @@ import CoreData
 
 class OutputFileProvider: DataProvider {
     
-    typealias Entity = OutputFile
+    typealias Object = OutputFile
     
     private(set) var persistentContainer: PersistentContainer
     

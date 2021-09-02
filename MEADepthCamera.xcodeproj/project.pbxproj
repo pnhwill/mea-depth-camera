@@ -33,6 +33,7 @@
 		B56F1A9126E07B2F00A29C42 /* Experiment+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A8F26E07B2F00A29C42 /* Experiment+CoreDataClass.swift */; };
 		B56F1A9426E0813D00A29C42 /* ExperimentProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A9326E0813D00A29C42 /* ExperimentProvider.swift */; };
 		B56F1A9626E0903100A29C42 /* OutputFileProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A9526E0903100A29C42 /* OutputFileProvider.swift */; };
+		B56F1A9826E0A29200A29C42 /* UseCaseInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A9726E0A29200A29C42 /* UseCaseInteractionDelegate.swift */; };
 		B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA626AB654B00998C27 /* PointCloud.metal */; };
 		B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */; };
 		B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414026B8E08D004ED4E4 /* VideoReader.swift */; };
@@ -130,6 +131,7 @@
 		B56F1A8F26E07B2F00A29C42 /* Experiment+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Experiment+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B56F1A9326E0813D00A29C42 /* ExperimentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentProvider.swift; sourceTree = "<group>"; };
 		B56F1A9526E0903100A29C42 /* OutputFileProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileProvider.swift; sourceTree = "<group>"; };
+		B56F1A9726E0A29200A29C42 /* UseCaseInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseInteractionDelegate.swift; sourceTree = "<group>"; };
 		B56F2EA626AB654B00998C27 /* PointCloud.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PointCloud.metal; sourceTree = "<group>"; };
 		B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarksTrackerProcessor.swift; sourceTree = "<group>"; };
 		B575414026B8E08D004ED4E4 /* VideoReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoReader.swift; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 				B54215C126C3582C00A4F984 /* UseCaseDetailViewController.swift */,
 				B54215C726C366C900A4F984 /* UseCaseDetailEditDataSource.swift */,
 				B54215C326C3596F00A4F984 /* UseCaseDetailViewDataSource.swift */,
+				B56F1A9726E0A29200A29C42 /* UseCaseInteractionDelegate.swift */,
 				B54215BE26C34B2000A4F984 /* Use Case Views */,
 			);
 			path = "Use Case";
@@ -653,6 +656,7 @@
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B5FB0A4D26D5765000F65FA5 /* RecordingListViewController.swift in Sources */,
 				B56F1A8C26E0786200A29C42 /* UseCaseProvider.swift in Sources */,
+				B56F1A9826E0A29200A29C42 /* UseCaseInteractionDelegate.swift in Sources */,
 				B54215CA26C3670E00A4F984 /* MainMenuDataSource.swift in Sources */,
 				B5FB0A4B26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift in Sources */,
 				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,
