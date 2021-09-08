@@ -16,40 +16,29 @@ class UseCaseListViewController: UITableViewController {
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
     
-    private var useCaseListDataSource: UseCaseListDataSource?
+    private var dataSource: UseCaseListDataSource?
     private var filter: UseCaseListDataSource.Filter {
         return UseCaseListDataSource.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
     }
     
+    //weak var delegate: UseCaseInteractionDelegate?
+    private var currentUseCaseID: UUID?
+    
     // MARK: Navigation
-    func configure(with currentUseCase: UseCase?) {
-        if useCaseListDataSource == nil {
-            useCaseListDataSource = UseCaseListDataSource(useCaseDeletedAction: { deletedUseCaseID in
-                // handle use case deleted
-                if deletedUseCaseID == self.useCaseListDataSource?.currentUseCaseID {
-                    self.useCaseListDataSource?.currentUseCaseID = nil
-                }
-            }, useCaseChangedAction: {
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            })
-        }
-        useCaseListDataSource?.currentUseCaseID = currentUseCase?.id
-        tableView.dataSource = useCaseListDataSource
+    func configure(with useCase: UseCase?) {
+        currentUseCaseID = useCase?.id
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.unwindFromListSegueIdentifier,
-           //let destination = segue.destination as? MainMenuViewController,
            let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             // Return to main menu with selected use case as current use case
             let rowIndex = indexPath.row
-            guard let useCase = useCaseListDataSource?.useCase(at: rowIndex) else {
+            guard let useCase = dataSource?.useCase(at: rowIndex) else {
                 fatalError("Couldn't find data source for use case list.")
             }
-            useCaseListDataSource?.currentUseCaseID = useCase.id
+            currentUseCaseID = useCase.id
         }
     }
     
@@ -57,10 +46,19 @@ class UseCaseListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        dataSource = UseCaseListDataSource(useCaseDeletedAction: { deletedUseCaseID in
+            if deletedUseCaseID == self.currentUseCaseID {
+                self.currentUseCaseID = nil
+            }
+        }, useCaseChangedAction: {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        })
+        tableView.dataSource = dataSource
         // Search bar controller
         let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = useCaseListDataSource
+        searchController.searchResultsUpdater = dataSource
         searchController.obscuresBackgroundDuringPresentation = false
         navigationItem.searchController = searchController
     }
@@ -86,26 +84,18 @@ class UseCaseListViewController: UITableViewController {
     }
     
     @IBAction func segmentControlChanged(_ sender: UISegmentedControl) {
-        useCaseListDataSource?.filter = filter
+        dataSource?.filter = filter
         tableView.reloadData()
     }
     
     private func addUseCase() {
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-        guard let context = useCaseListDataSource?.persistentContainer.viewContext else { return }
-        let useCase = UseCase(context: context)
-        useCase.date = Date()
-        useCase.id = UUID()
-        detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-            self.useCaseListDataSource?.add(useCase, completion: { (index) in
-                DispatchQueue.main.async {
-                    if let index = index {
-                        self.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
-                    }
-                }
+        dataSource?.add() { useCase in
+            detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
+                self.tableView.reloadData()
             })
-        })
+        }
         let navigationController = UINavigationController(rootViewController: detailViewController)
         present(navigationController, animated: true, completion: nil)
     }
@@ -117,12 +107,12 @@ class UseCaseListViewController: UITableViewController {
         
         
         let rowIndex = indexPath.row
-        guard let useCase = useCaseListDataSource?.useCase(at: rowIndex) else {
+        guard let useCase = dataSource?.useCase(at: rowIndex) else {
             fatalError("Couldn't find data source for use case list.")
         }
         
         detailViewController.configure(with: useCase, editAction: { useCase in
-            self.useCaseListDataSource?.update(useCase, at: rowIndex) { success in
+            self.dataSource?.update(useCase, at: rowIndex) { success in
                 if success {
                     DispatchQueue.main.async {
                         self.tableView.reloadData()
@@ -147,10 +137,11 @@ class UseCaseListViewController: UITableViewController {
 // MARK: UINavigationControllerDelegate
 
 extension UseCaseListViewController: UINavigationControllerDelegate {
-    
+    //TODO: replace this with UseCaseInteractionDelegate methods
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
         if let mainMenuViewController = viewController as? MainMenuViewController {
-            mainMenuViewController.configure(with: useCaseListDataSource?.useCase(with: useCaseListDataSource?.currentUseCaseID))
+            mainMenuViewController.configure(with: dataSource?.useCase(with: currentUseCaseID))
         }
     }
 }
+

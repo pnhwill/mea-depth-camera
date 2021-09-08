@@ -8,45 +8,33 @@
 import UIKit
 
 class MainMenuDataSource: NSObject {
-    typealias CurrentUseCaseChangedAction = (UseCase?) -> Void
+    typealias UseCaseChangedAction = () -> Void
     
-    var currentUseCase: UseCase?
-    private var currentUseCaseChangedAction: CurrentUseCaseChangedAction?
-    
-    // Core Data persistent container
-    private(set) var persistentContainer = AppDelegate.shared.coreDataStack.persistentContainer
-    
-    init(currentUseCaseChangedAction: @escaping CurrentUseCaseChangedAction) {
-        self.currentUseCaseChangedAction = currentUseCaseChangedAction
-    }
-    
-    // MARK: Current Use Case Configuration
-    
-    func updateCurrentUseCase(_ useCase: UseCase?) {
-        currentUseCase = useCase
-        currentUseCaseChangedAction?(currentUseCase)
-    }
-    
-    func add(_ useCase: UseCase, completion: (Bool) -> Void) {
-        saveUseCase(useCase) { id in
-            let success = id != nil
-            completion(success)
+    var useCase: UseCase? {
+        didSet {
+            DispatchQueue.main.async {
+                self.useCaseChangedAction?()
+            }
         }
     }
+    private var useCaseChangedAction: UseCaseChangedAction?
     
-}
-
-// MARK: Persistent Storage Interface
-
-extension MainMenuDataSource {
+    // Core Data provider
+    lazy var dataProvider: UseCaseProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = UseCaseProvider(with: container, fetchedResultsControllerDelegate: nil)
+        return provider
+    }()
     
-    private func saveUseCase(_ useCase: UseCase, completion: (UUID?) -> Void) {
-        if let context = useCase.managedObjectContext {
-            persistentContainer.saveContext(backgroundContext: context)
-            context.refresh(useCase, mergeChanges: true)
-            completion(useCase.id)
-        } else {
-            completion(nil)
+    init(useCaseChangedAction: @escaping UseCaseChangedAction) {
+        self.useCaseChangedAction = useCaseChangedAction
+    }
+    
+    // MARK: Add Use Case
+    
+    func add(completion: @escaping (UseCase) -> Void) {
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext) { useCase in
+            completion(useCase)
         }
     }
     
@@ -65,9 +53,6 @@ extension MainMenuDataSource: UseCaseInteractionDelegate {
      - initial load: select the first item if needed.
      */
     func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool = true) {
-        currentUseCase = useCase
-        if shouldReloadRow {
-            currentUseCaseChangedAction?(useCase)
-        }
+        self.useCase = useCase
     }
 }

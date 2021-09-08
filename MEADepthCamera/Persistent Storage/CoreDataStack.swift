@@ -11,16 +11,18 @@ A class to set up the Core Data stack, observe Core Data notifications, process 
 
 import Foundation
 import CoreData
+import OSLog
 
-// MARK: - Core Data Stack
+// MARK: Core Data Stack
 
 /**
  Core Data stack setup including history processing.
  */
 class CoreDataStack {
     
-    private var persistentStore: NSPersistentStore?
+    let logger = Logger(subsystem: "com.mea-lab.MEADepthCamera", category: "persistence")
     
+    // MARK: Persistent Container
     lazy var persistentContainer: PersistentContainer = {
         /*
          The persistent container for the application. This implementation
@@ -34,9 +36,6 @@ class CoreDataStack {
         guard let description = container.persistentStoreDescriptions.first else {
             fatalError("Failed to retrieve a persistent store description.")
         }
-        // Enable persistent store remote change notifications
-        description.setOption(true as NSNumber,
-                              forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         // Enable persistent history tracking
         description.setOption(true as NSNumber,
                               forKey: NSPersistentHistoryTrackingKey)
@@ -63,9 +62,69 @@ class CoreDataStack {
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         
+        // Pin the viewContext to the current generation token and set it to keep itself up to date with local changes.
+        do {
+            try container.viewContext.setQueryGenerationFrom(.current)
+        } catch {
+            fatalError("###\(#function): Failed to pin viewContext to the current generation:\(error)")
+        }
+        
         return container
     }()
     
-    //TODO: persistent history processing
+    // MARK: Persistent History Token
+    /**
+     Track the last history token processed for a store, and write its value to file.
+     
+     The historyQueue reads the token when executing operations, and updates it after processing is complete.
+     */
+    private var lastHistoryToken: NSPersistentHistoryToken? = nil {
+        didSet {
+            guard let token = lastHistoryToken,
+                let data = try? NSKeyedArchiver.archivedData( withRootObject: token, requiringSecureCoding: true) else { return }
+            
+            do {
+                try data.write(to: tokenFile)
+            } catch {
+                print("###\(#function): Failed to write token data. Error = \(error)")
+            }
+        }
+    }
     
+    /**
+     The file URL for persisting the persistent history token.
+    */
+    private lazy var tokenFile: URL = {
+        let url = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("MEADepthCamera", isDirectory: true)
+        if !FileManager.default.fileExists(atPath: url.path) {
+            do {
+                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("###\(#function): Failed to create persistent container URL. Error = \(error)")
+            }
+        }
+        return url.appendingPathComponent("token.data", isDirectory: false)
+    }()
+    
+    /**
+     An operation queue for handling history processing tasks: watching changes, deduplicating tags, and triggering UI updates if needed.
+     */
+    private lazy var historyQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
+    
+    // MARK: INIT
+    init() {
+        // Load the last token from the token file.
+        if let tokenData = try? Data(contentsOf: tokenFile) {
+            do {
+                lastHistoryToken = try NSKeyedUnarchiver.unarchivedObject(ofClass: NSPersistentHistoryToken.self, from: tokenData)
+            } catch {
+                print("###\(#function): Failed to unarchive NSPersistentHistoryToken. Error = \(error)")
+            }
+        }
+    }
 }
+

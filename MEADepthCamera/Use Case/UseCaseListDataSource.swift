@@ -36,58 +36,24 @@ class UseCaseListDataSource: NSObject {
         return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
     }
     var useCases: [UseCase]? {
-        return fetchedResultsController.fetchedObjects
+        return dataProvider.fetchedResultsController.fetchedObjects
     }
-    
-    var currentUseCaseID: UUID?
     
     private var useCaseDeletedAction: UseCaseDeletedAction?
     private var useCaseChangedAction: UseCaseChangedAction?
     
-    // Persistent storage
-    
-    private(set) lazy var persistentContainer: PersistentContainer = {
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        return appDelegate!.persistentContainer
-    }()
-    
-    private lazy var fetchedResultsController: NSFetchedResultsController<UseCase> = {
-        let fetchRequest: NSFetchRequest<UseCase> = UseCase.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: UseCase.PropertyKeys.date, ascending: true)]
-        
-        let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
-                                                    managedObjectContext: persistentContainer.viewContext,
-                                                    sectionNameKeyPath: nil, cacheName: nil)
-        controller.delegate = self
-        
-        do {
-            try controller.performFetch()
-        } catch {
-            fatalError("###\(#function): Failed to performFetch: \(error)")
-        }
-        return controller
+    // Core Data provider
+    lazy var dataProvider: UseCaseProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = UseCaseProvider(with: container, fetchedResultsControllerDelegate: self)
+        return provider
     }()
     
     init(useCaseDeletedAction: @escaping UseCaseDeletedAction, useCaseChangedAction: @escaping UseCaseChangedAction) {
         self.useCaseDeletedAction = useCaseDeletedAction
         self.useCaseChangedAction = useCaseChangedAction
         super.init()
-        
-        //NotificationCenter.default.addObserver(self, selector: #selector(self.contextChanged(_:)), name: .NSManagedObjectContextObjectsDidChange, object: nil)
     }
-    
-//    deinit {
-//        NotificationCenter.default.removeObserver(self, name: .NSManagedObjectContextObjectsDidChange, object: nil)
-//    }
-    
-//    @objc
-//    func contextChanged(_ notification: NSNotification) {
-//       if let context = notification.object as? NSManagedObjectContext {
-//            context.refreshAllObjects()
-//        }
-//        print("AAAweilryvglwieurg")
-//        //useCaseChangedAction?()
-//    }
     
     // MARK: List Configuration
     
@@ -98,9 +64,9 @@ class UseCaseListDataSource: NSObject {
         }
     }
     
-    func delete(at row: Int, completion: (Bool) -> Void) {
+    func delete(at row: Int, completion: @escaping (Bool) -> Void) {
         if let useCase = self.useCase(at: row) {
-            removeUseCase(useCase) { success in
+            dataProvider.delete(useCase) { success in
                 completion(success)
             }
         } else {
@@ -108,14 +74,9 @@ class UseCaseListDataSource: NSObject {
         }
     }
     
-    func add(_ useCase: UseCase, completion: (Int?) -> Void) {
-        saveUseCase(useCase) { id in
-            if let id = id {
-                let index = filteredUseCases?.firstIndex { $0.id == id }
-                completion(index)
-            } else {
-                completion(nil)
-            }
+    func add(completion: @escaping (UseCase) -> Void) {
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext) { useCase in
+            completion(useCase)
         }
     }
     
@@ -239,9 +200,9 @@ extension UseCaseListDataSource: UISearchResultsUpdating {
             predicate = NSPredicate(value: true)
         }
         
-        fetchedResultsController.fetchRequest.predicate = predicate
+        dataProvider.fetchedResultsController.fetchRequest.predicate = predicate
         do {
-            try fetchedResultsController.performFetch()
+            try dataProvider.fetchedResultsController.performFetch()
         } catch {
             fatalError("###\(#function): Failed to performFetch: \(error)")
         }
@@ -256,24 +217,12 @@ extension UseCaseListDataSource {
     
     private func saveUseCase(_ useCase: UseCase, completion: (UUID?) -> Void) {
         if let context = useCase.managedObjectContext {
-            persistentContainer.saveContext(backgroundContext: context)
+            dataProvider.persistentContainer.saveContext(backgroundContext: context)
             context.refresh(useCase, mergeChanges: true)
             completion(useCase.id)
         } else {
             completion(nil)
         }
     }
-    
-    private func removeUseCase(_ useCase: UseCase, completion: (Bool) -> Void) {
-        if let context = useCase.managedObjectContext {
-            context.delete(useCase)
-            persistentContainer.saveContext(backgroundContext: context)
-            context.refresh(useCase, mergeChanges: true)
-            completion(true)
-        } else {
-            completion(false)
-        }
-    }
-    
     
 }

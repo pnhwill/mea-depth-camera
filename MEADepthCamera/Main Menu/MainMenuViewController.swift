@@ -21,38 +21,23 @@ class MainMenuViewController: UIViewController {
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
     
-    private var mainMenuDataSource: MainMenuDataSource?
+    private var dataSource: MainMenuDataSource?
     
     // MARK: - Navigation
     
     func configure(with useCase: UseCase?) {
-        // Setup main menu
-        if mainMenuDataSource == nil {
-            mainMenuDataSource = MainMenuDataSource(currentUseCaseChangedAction: { currentUseCase in
-                DispatchQueue.main.async {
-                    if let useCase = currentUseCase {
-                        self.refreshUseCaseView(title: useCase.title, subjectID: useCase.subjectID)
-                        self.startButton.isEnabled = true
-                    } else {
-                        self.refreshUseCaseView(title: "No Use Case Selected", subjectID: nil)
-                        self.startButton.isEnabled = false
-                    }
-                }
-            })
-        }
-        mainMenuDataSource?.updateCurrentUseCase(useCase)
+        dataSource?.didUpdateUseCase(useCase)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Self.showRecordingListSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
-//            destination.persistentContainer = mainMenuDataSource?.persistentContainer
-            guard let useCase = mainMenuDataSource?.currentUseCase else {
+            guard let useCase = dataSource?.useCase else {
                 fatalError("Couldn't find data source for use case.")
             }
             destination.configure(with: useCase)
         }
         if segue.identifier == Self.showUseCaseListSegueIdentifier, let destination = segue.destination as? UseCaseListViewController {
-            destination.configure(with: mainMenuDataSource?.currentUseCase)
+            destination.configure(with: dataSource?.useCase)
         }
     }
     
@@ -64,19 +49,14 @@ class MainMenuViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        guard persistentContainer != nil else {
-//            fatalError("This view needs a persistent container.")
-//        }
-        if mainMenuDataSource?.currentUseCase == nil {
-            configure(with: nil)
-        }
+        dataSource = MainMenuDataSource(useCaseChangedAction: {
+            DispatchQueue.main.async {
+                self.refreshUI()
+            }
+        })
+        refreshUI()
         self.navigationItem.setHidesBackButton(true, animated: false)
     }
-    
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//    }
     
     // MARK: - Actions
     
@@ -84,28 +64,28 @@ class MainMenuViewController: UIViewController {
         addUseCase()
     }
     
-    // MARK: - Use Case View
-    
     private func addUseCase() {
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-        guard let context = mainMenuDataSource?.persistentContainer.viewContext else { return }
-        let useCase = UseCase(context: context)
-        useCase.date = Date()
-        useCase.id = UUID()
-        detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-            self.mainMenuDataSource?.add(useCase, completion: { success in
-                if success {
-                    self.mainMenuDataSource?.updateCurrentUseCase(useCase)
-                }
+        dataSource?.add() { useCase in
+            detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
+                self.dataSource?.didUpdateUseCase(useCase)
             })
-        })
+        }
         let navigationController = UINavigationController(rootViewController: detailViewController)
         present(navigationController, animated: true, completion: nil)
     }
     
-    private func refreshUseCaseView(title: String?, subjectID: String?) {
-        useCaseView.configure(title: title, subjectIDText: subjectID)
+    // MARK: - Use Case View
+    
+    private func refreshUI() {
+        if let useCase = dataSource?.useCase {
+            useCaseView.configure(title: useCase.title, subjectIDText: useCase.subjectID)
+            startButton.isEnabled = true
+        } else {
+            useCaseView.configure(title: "No Use Case Selected", subjectIDText: nil)
+            startButton.isEnabled = false
+        }
     }
     
 }

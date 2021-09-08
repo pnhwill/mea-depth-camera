@@ -15,5 +15,4 @@ protocol DataProvider: AnyObject {
     
     var persistentContainer: PersistentContainer { get }
     
-    
 }
