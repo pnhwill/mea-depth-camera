@@ -69,7 +69,11 @@ class MainMenuViewController: UIViewController {
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
         dataSource?.add() { useCase in
             detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-                self.dataSource?.didUpdateUseCase(useCase)
+                self.dataSource?.saveUseCase(useCase) { success in
+                    if success {
+                        self.dataSource?.didUpdateUseCase(useCase)
+                    }
+                }
             })
         }
         let navigationController = UINavigationController(rootViewController: detailViewController)
@@ -80,7 +84,8 @@ class MainMenuViewController: UIViewController {
     
     private func refreshUI() {
         if let useCase = dataSource?.useCase {
-            useCaseView.configure(title: useCase.title, subjectIDText: useCase.subjectID)
+            let titleText = [useCase.experiment?.title, useCase.title].compactMap { $0 }.joined(separator: ": ")
+            useCaseView.configure(title: titleText, subjectIDText: useCase.subjectID)
             startButton.isEnabled = true
         } else {
             useCaseView.configure(title: "No Use Case Selected", subjectIDText: nil)

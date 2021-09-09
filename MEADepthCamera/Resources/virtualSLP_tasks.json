@@ -1,193 +1,193 @@
 [
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_RST_REST1_YYYYMMDD_time_r",
+        "FileName": "RST_REST1",
         "TaskName": "Rest",
         "Instructions": "Look straight at the camera, with your face in a neutral position for 10 seconds. Please have your teeth together in the normal bite but without clenching."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_BIGSMILE_YYYYMMDD_time_r",
+        "FileName": "NSM_BIGSMILE",
         "TaskName": "Big smile",
         "Instructions": "Smile big. Repeat 3 times."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_PUCKER_YYYYMMDD_time_r",
+        "FileName": "NSM_PUCKER",
         "TaskName": "Lip pucker",
         "Instructions": "Pucker your lips and then return to neutral. Repeat 3 times"
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_SMILEFAST_YYYYMMDD_time_r",
+        "FileName": "NSM_SMILEFAST",
         "TaskName": "Alternate smile and pucker fast",
         "Instructions": "Alternate between a big smile and puckering your lips as fast as possible for 5-6 seconds."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_PUFF_YYYYMMDD_time_r",
+        "FileName": "NSM_PUFF",
         "TaskName": "Cheek puff",
         "Instructions": "We provided you with a nose clip. Please attach  it on your nose when ready to perform the task. With the nose clip on your nose, puff out your cheeks with your mouth firmly closed and hold it for 5 seconds if possible. If not possible, please skip this task."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_PRESS_YYYYMMDD_time_r",
+        "FileName": "NSM_PRESS",
         "TaskName": "Press tongue against the cheeks",
         "Instructions": "Press your tongue against the inside your left cheek for 3-5 seconds, then go back to normal. Press your tongue against the inside your right cheek for 3-5 seconds, then go back to normal."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_TNG_RELAX_YYYYMMDD_time_r",
+        "FileName": "NSM_TNG_RELAX",
         "TaskName": "Relax tongue",
         "Instructions": "Move your face close to the camera. Open your mouth and relax your tongue for about 10 seconds."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_TNG_PROTRUSION_YYYYMMDD_time_r",
+        "FileName": "NSM_TNG_PROTRUSION",
         "TaskName": "Tongue protrusion",
         "Instructions": "Please position yourself back at the correct distance from the camera and sit straight. Turn your head towards your right shoulder. Stick your tongue straight out, as far as possible. Repeat 3 times. "
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_TNG_LATNORMAL_YYYYMMDD_time_r",
+        "FileName": "NSM_TNG_LATNORMAL",
         "TaskName": "Tongue lateral movement",
         "Instructions": "Look straight. Stick our your tongue and move it far as your can to the right. (pause) Move it as far as you can to the left. Repeat 3 times."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_TNG_NOSE_YYYYMMDD_time_r",
+        "FileName": "NSM_TNG_NOSE",
         "TaskName": "Tongue to nose and down",
         "Instructions": "Point the tip of your tongue up towards your nose and down towards your chin. Repeat 3 times."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_TNG_LATFAST_YYYYMMDD_time_r",
+        "FileName": "NSM_TNG_LATFAST",
         "TaskName": "Tongue side to side fast",
         "Instructions": "Stick out your tongue and move it from side-to-side, touching the corners of your mouth, as fast as you can for 5-6 seconds."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_NSM_NAS_PUFF_YYYYMMDD_time_r",
+        "FileName": "NSM_NAS_PUFF",
         "TaskName": "Cheek puff with tongue out",
         "Instructions": "Stick your tongue out with your lips firmly closed around it. Puff out your cheeks and hold it for 5-6 seconds."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_NSM_NAS_PINCH_YYYYMMDD_time_r",
+        "FileName": "NSM_NAS_PINCH",
         "TaskName": "Sustained phonation with nose pinching",
         "Instructions": "Say \"a\" for about 5-6 seconds, while alternating between pinching and un-pinching your nose."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_NSM_NAS_WSTG_YYYYMMDD_time_r",
+        "FileName": "NSM_NAS_WSTG",
         "TaskName": "\"We see three geese\"",
         "Instructions": "Say \"We see three geese\" at your comfortable speaking rate and loudness, pausing briefly between each repetition. Repeat 3 times."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_JAW_NORMAL_YYYYMMDD_time_r",
+        "FileName": "NSM_JAW_NORMAL",
         "TaskName": "Open jaw normal",
         "Instructions": "Open your mouth as wide as is comfortable, without hurting yourself, then go back to normal. Repeat 3 times."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_NSM_JAW_FAST_YYYYMMDD_time_r",
+        "FileName": "NSM_JAW_FAST",
         "TaskName": "Open jaw fast",
-        "Instructions": "Open and close your mouth as wide and as fast as you can, without hurting yourself. Keep on moving for 5-6 seconds.\""
+        "Instructions": "Open and close your mouth as wide and as fast as you can, without hurting yourself. Keep on moving for 5-6 seconds."
     },
     {
         "Modality": "Audio only",
-        "FileName": "SubjectID_VWL_SUSTAIN_YYYYMMDD_time_r",
+        "FileName": "VWL_SUSTAIN",
         "TaskName": "Sustained phonation",
         "Instructions": "Please say \"aaa\" at your normal pitch and loudness for 10-12 seconds."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_SENT_CAPEV_YYYYMMDD_time_r",
+        "FileName": "SENT_CAPEV",
         "TaskName": "CAPE-V sentences",
         "Instructions": "Read the sentences below at your normal speaking rate and loudness."
     },
     {
         "Modality": "Audio only",
-        "FileName": "SubjectID_VWL_ELEVATE_YYYYMMDD_time_r",
+        "FileName": "VWL_ELEVATE",
         "TaskName": "Elevate pitch",
         "Instructions": "Say /a/ starting at your normal pitch, then glide your pitch up high and hold it as high as you can for a few seconds. Repeat 2 times. "
     },
     {
         "Modality": "Audio only",
-        "FileName": "SubjectID_PSG_BAMBOO_YYYYMMDD_time_r",
+        "FileName": "PSG_BAMBOO",
         "TaskName": "Bamboo passage",
         "Instructions": "Please read out loud at normal comfortable speaking rate and loudness. "
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_DDK_PA_YYYYMMDD_time_r",
+        "FileName": "DDK_PA",
         "TaskName": "DDK /pa/",
         "Instructions": "Take a deep breath and repeat \"pa\" as fast and as clearly as you can, until you run out of one breath."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_DDK_TA_YYYYMMDD_time_r",
+        "FileName": "DDK_TA",
         "TaskName": "DDK /ta/",
         "Instructions": "Take a deep breath and repeat \"ta\" as fast and as clearly as you can, until you run out of one breath."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_DDK_KA_YYYYMMDD_time_r",
+        "FileName": "DDK_KA",
         "TaskName": "DDK /ka/",
         "Instructions": "Take a deep breath and repeat ka\" as fast and as clearly as you can, until you run out of one breath."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_DDK_PATAKA_YYYYMMDD_time_r",
+        "FileName": "DDK_PATAKA",
         "TaskName": "DDK /pataka/",
         "Instructions": "Take a deep breath and repeat \"pataka\" as fast and as clearly as you can, until you run out of one breath."
     },
     {
         "Modality": "Audio only",
-        "FileName": "SubjectID_NSM_COUGH_YYYYMMDD_time_r",
+        "FileName": "NSM_COUGH",
         "TaskName": "Voluntary cough",
         "Instructions": "Cough hard as if you have something stuck in your throat. Repeat 2 times. Do not cover your mouth."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_NSM_SWALLOW_YYYYMMDD_time_r",
+        "FileName": "NSM_SWALLOW",
         "TaskName": "Water swallow",
         "Instructions": "Please fill the cup you were provided with water. It must be full. Drink the cup of water completely and without stopping. After you're done swallowing, say \"aaa\" for 2-3 seconds. Ensure to tilt the cup, not your head."
     },
     {
         "Modality": "Video only",
-        "FileName": "SubjectID_CHEW_CRACKER_YYYYMMDD_time_r",
+        "FileName": "CHEW_CRACKER",
         "TaskName": "Chewing",
         "Instructions": "Eat the cracker, as quickly as is comfortably and safely as possible. When you are finished chewing and swallowing the cracker in its entirety, say \"I'm done\"."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_BBP_NORMAL_YYYYMMDD_time_r",
+        "FileName": "BBP_NORMAL",
         "TaskName": "\"Buy Bobby a puppy\"",
         "Instructions": "Say \"Buy Bobby a Puppy\" 10 times at your comfortable speaking rate and loudness. Pause briefly between each repetition."
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_PICT_DESC_YYYYMMDD_time_r",
+        "FileName": "PICT_DESC",
         "TaskName": "Picture description",
         "Instructions": "Please carefully look at the picture below. Describe the picture in as much detail as possible. Please try to speak for at least 1 to 2 minutes.  Start recording when ready and then stop recording when finished. "
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_FLUENCY_PHONEMIC_YYYYMMDD_time_r",
+        "FileName": "FLUENCY_PHONEMIC",
         "TaskName": "Phonemic fluency",
         "Instructions": "Say as many words as you can that start with the letter \"F\" in 1 minute. You cannot say the names of people, places or numbers. Please do not say the same word with just a different ending, like \"truck\" and \"trucks\". Start recording when ready and then stop recording when finished. "
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_STORY_YYYYMMDD_time_r",
+        "FileName": "STORY",
         "TaskName": "Story telling",
         "Instructions": "Please tell me about a memorable vacation or trip you have taken. Please try to speak for at least 1 to 2 minutes. Start recording when ready and then stop recording when finished. "
     },
     {
         "Modality": "Video + audio",
-        "FileName": "SubjectID_FLUENCY_SEMANTIC_YYYYMMDD_time_r",
+        "FileName": "FLUENCY_SEMANTIC",
         "TaskName": "Semantic fluency",
         "Instructions": "Please name as many animals as you can in 1 minute.  Start recording when ready and then stop recording when finished. "
     }

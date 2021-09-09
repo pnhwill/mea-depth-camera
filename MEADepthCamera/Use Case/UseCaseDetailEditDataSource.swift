@@ -6,12 +6,14 @@
 //
 
 import UIKit
+import CoreData
 
 class UseCaseDetailEditDataSource: NSObject {
     typealias UseCaseChangeAction = (UseCaseChanges) -> Void
     
     enum UseCaseSection: Int, CaseIterable {
         case title
+        case experiment
         case subjectID
         case notes
         
@@ -19,6 +21,8 @@ class UseCaseDetailEditDataSource: NSObject {
             switch self {
             case .title:
                 return "Title"
+            case .experiment:
+                return "Experiment"
             case .subjectID:
                 return "Subject ID"
             case .notes:
@@ -37,6 +41,8 @@ class UseCaseDetailEditDataSource: NSObject {
             switch self {
             case .title:
                 return "EditTitleCell"
+            case .experiment:
+                return "EditExperimentCell"
             case .subjectID:
                 return "EditSubjectIDCell"
             case .notes:
@@ -47,6 +53,7 @@ class UseCaseDetailEditDataSource: NSObject {
     
     struct UseCaseChanges {
         var title: String?
+        var experiment: Experiment?
         var subjectID: String?
         var notes: String?
     }
@@ -55,10 +62,23 @@ class UseCaseDetailEditDataSource: NSObject {
     private var useCaseChanges: UseCaseChanges
     private var useCaseChangeAction: UseCaseChangeAction?
     
+    // Core Data provider for experiment selection
+    lazy var experimentProvider: ExperimentProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: self)
+        return provider
+    }()
+    
+    var experiments: [Experiment]? {
+        return experimentProvider.fetchedResultsController.fetchedObjects
+    }
+    
     init(useCase: UseCase, changeAction: @escaping UseCaseChangeAction) {
         self.useCase = useCase
         self.useCaseChanges = UseCaseChanges(title: useCase.title, subjectID: useCase.subjectID, notes: useCase.notes)
         self.useCaseChangeAction = changeAction
+        super.init()
+        fetchExperiments()
     }
     
     private func dequeueAndConfigureCell(for indexPath: IndexPath, from tableView: UITableView) -> UITableViewCell {
@@ -76,6 +96,13 @@ class UseCaseDetailEditDataSource: NSObject {
                     self.useCaseChangeAction?(self.useCaseChanges)
                 }
             }
+        case .experiment:
+            if let experimentCell = cell as? EditExperimentCell {
+                experimentCell.configure(dataSource: self, delegate: self)
+                let selectedRow = experimentCell.pickerView.selectedRow(inComponent: 0)
+                useCaseChanges.experiment = experiments?[selectedRow]
+                useCaseChangeAction?(useCaseChanges)
+            }
         case .subjectID:
             if let subjectIDCell = cell as? EditSubjectIDCell {
                 subjectIDCell.configure(subjectID: useCase.subjectID) { subjectID in
@@ -92,6 +119,15 @@ class UseCaseDetailEditDataSource: NSObject {
             }
         }
         return cell
+    }
+    
+    private func fetchExperiments() {
+        do {
+            try experimentProvider.fetchExperiments()
+        } catch {
+            let error = error as? JSONError ?? .unexpectedError(error: error)
+            fatalError("Failed to fetch experiments: \(error)")
+        }
     }
     
 }
@@ -122,4 +158,32 @@ extension UseCaseDetailEditDataSource: UITableViewDataSource {
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return false
     }
+}
+
+// MARK: UIPickerViewDataSource
+extension UseCaseDetailEditDataSource: UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return experiments?.count ?? 0
+    }
+}
+
+// MARK: UIPickerViewDelegate
+extension UseCaseDetailEditDataSource: UIPickerViewDelegate {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return experiments?[row].title
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        useCaseChanges.experiment = experiments?[row]
+        useCaseChangeAction?(useCaseChanges)
+    }
+}
+
+// MARK: NSFetchedResultsControllerDelegate
+extension UseCaseDetailEditDataSource: NSFetchedResultsControllerDelegate {
+    
 }

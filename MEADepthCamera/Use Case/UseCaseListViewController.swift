@@ -93,7 +93,13 @@ class UseCaseListViewController: UITableViewController {
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
         dataSource?.add() { useCase in
             detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-                self.tableView.reloadData()
+                self.dataSource?.update(useCase) { success in
+                    if success {
+                        DispatchQueue.main.async {
+                            self.tableView.reloadData()
+                        }
+                    }
+                }
             })
         }
         let navigationController = UINavigationController(rootViewController: detailViewController)
@@ -105,14 +111,13 @@ class UseCaseListViewController: UITableViewController {
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
         
-        
         let rowIndex = indexPath.row
         guard let useCase = dataSource?.useCase(at: rowIndex) else {
             fatalError("Couldn't find data source for use case list.")
         }
         
         detailViewController.configure(with: useCase, editAction: { useCase in
-            self.dataSource?.update(useCase, at: rowIndex) { success in
+            self.dataSource?.update(useCase) { success in
                 if success {
                     DispatchQueue.main.async {
                         self.tableView.reloadData()

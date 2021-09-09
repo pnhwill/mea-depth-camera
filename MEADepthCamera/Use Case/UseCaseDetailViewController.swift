@@ -23,10 +23,8 @@ class UseCaseDetailViewController: UITableViewController {
         self.isNew = isNew
         self.useCaseAddAction = addAction
         self.useCaseEditAction = editAction
-        DispatchQueue.main.async {
-            if self.isViewLoaded {
-                self.setEditing(isNew, animated: false)
-            }
+        if isViewLoaded {
+            setEditing(isNew, animated: false)
         }
     }
     
@@ -34,7 +32,9 @@ class UseCaseDetailViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setEditing(isNew, animated: false)
+        if useCase != nil {
+            setEditing(isNew, animated: false)
+        }
         navigationItem.setRightBarButton(editButtonItem, animated: false)
     }
     
@@ -115,6 +115,7 @@ class UseCaseDetailViewController: UITableViewController {
     private func setUseCaseChanges() {
         guard let useCaseChanges = useCaseChanges else { return }
         useCase?.title = useCaseChanges.title
+        useCase?.experiment = useCaseChanges.experiment
         useCase?.subjectID = useCaseChanges.subjectID
         useCase?.notes = useCaseChanges.notes
     }

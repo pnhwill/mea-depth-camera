@@ -11,6 +11,7 @@ class UseCaseDetailViewDataSource: NSObject {
     
     enum UseCaseRow: Int, CaseIterable {
         case title
+        case experiment
         case date
         case subjectID
         case numRecordings
@@ -34,6 +35,8 @@ class UseCaseDetailViewDataSource: NSObject {
             switch self {
             case .title:
                 return useCase.title
+            case .experiment:
+                return useCase.experiment?.title
             case .date:
                 guard let date = useCase.date else { return nil }
                 let timeText = Self.timeFormatter.string(from: date)
@@ -55,6 +58,8 @@ class UseCaseDetailViewDataSource: NSObject {
             switch self {
             case .title:
                 return nil
+            case .experiment:
+                return UIImage(systemName: "chart.bar.xaxis")
             case .date:
                 return UIImage(systemName: "calendar.circle")
             case .subjectID:

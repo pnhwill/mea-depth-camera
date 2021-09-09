@@ -5,6 +5,11 @@
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Task" inverseName="experiments" inverseEntity="Task"/>
         <relationship name="useCases" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="UseCase" inverseName="experiment" inverseEntity="UseCase"/>
+        <uniquenessConstraints>
+            <uniquenessConstraint>
+                <constraint value="title"/>
+            </uniquenessConstraint>
+        </uniquenessConstraints>
     </entity>
     <entity name="OutputFile" representedClassName="OutputFile" syncable="YES" codeGenerationType="category">
         <attribute name="fileName" attributeType="String"/>
@@ -38,13 +43,13 @@
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="Recording" inverseName="task" inverseEntity="Recording"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
-                <constraint value="name"/>
+                <constraint value="fileNameLabel"/>
             </uniquenessConstraint>
         </uniquenessConstraints>
     </entity>
     <entity name="UseCase" representedClassName="UseCase" syncable="YES" codeGenerationType="category">
-        <attribute name="canonicalTitle" optional="YES" attributeType="String" derived="YES" derivationExpression="canonical:(title)"/>
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="experimentTitle" optional="YES" attributeType="String" derived="YES" derivationExpression="experiment.title"/>
         <attribute name="folderURL" optional="YES" attributeType="URI"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="notes" optional="YES" attributeType="String"/>
@@ -55,10 +60,10 @@
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Recording" inverseName="useCase" inverseEntity="Recording"/>
     </entity>
     <elements>
+        <element name="Experiment" positionX="-90" positionY="45" width="128" height="89"/>
         <element name="OutputFile" positionX="182.8414306640625" positionY="172.0172119140625" width="128" height="104"/>
         <element name="Recording" positionX="-45" positionY="54" width="128" height="164"/>
         <element name="Task" positionX="-268.1070556640625" positionY="278.8963012695313" width="128" height="194"/>
         <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="179"/>
-        <element name="Experiment" positionX="-90" positionY="45" width="128" height="89"/>
     </elements>
 </model>

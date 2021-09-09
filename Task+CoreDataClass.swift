@@ -12,10 +12,6 @@ import OSLog
 
 @objc(Task)
 public class Task: NSManagedObject {
-
-    struct Name {
-        static let name = "name"
-    }
     
     /// Updates a Task instance with the values from a TaskProperties.
     func update(from taskProperties: TaskProperties) throws {
@@ -26,7 +22,7 @@ public class Task: NSManagedObject {
               let newInstructions = dictionary["instructions"] as? String,
               let newID = dictionary["id"] as? UUID
         else {
-            throw TaskError.missingData
+            throw JSONError.missingData
         }
         
         modality = newModality
@@ -109,7 +105,7 @@ struct TaskProperties: Decodable {
 
             let logger = Logger(subsystem: "com.mea-lab.MEADepthCamera", category: "parsing")
             logger.debug("Ignored: \(values)")
-            throw TaskError.missingData
+            throw JSONError.missingData
         }
         
         self.modality = modality
@@ -132,31 +128,4 @@ struct TaskProperties: Decodable {
     
 }
 
-// MARK: Task Error
-enum TaskError: Error {
-    case wrongDataFormat(error: Error)
-    case missingData
-    case batchInsertError
-    case unexpectedError(error: Error)
-}
 
-extension TaskError: LocalizedError {
-    var errorDescription: String? {
-        switch self {
-        case .wrongDataFormat(let error):
-            return NSLocalizedString("Could not digest the fetched data. \(error.localizedDescription)", comment: "")
-        case .missingData:
-            return NSLocalizedString("Found and will discard a task missing a valid modality, file name, name, or instructions.", comment: "")
-        case .batchInsertError:
-            return NSLocalizedString("Failed to execute a batch insert request.", comment: "")
-        case .unexpectedError(let error):
-            return NSLocalizedString("Received unexpected error. \(error.localizedDescription)", comment: "")
-        }
-    }
-}
-
-extension TaskError: Identifiable {
-    var id: String? {
-        errorDescription
-    }
-}

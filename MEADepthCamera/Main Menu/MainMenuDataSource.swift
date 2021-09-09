@@ -33,7 +33,7 @@ class MainMenuDataSource: NSObject {
     // MARK: Add Use Case
     
     func add(completion: @escaping (UseCase) -> Void) {
-        dataProvider.add(in: dataProvider.persistentContainer.viewContext) { useCase in
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
             completion(useCase)
         }
     }
@@ -54,5 +54,17 @@ extension MainMenuDataSource: UseCaseInteractionDelegate {
      */
     func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool = true) {
         self.useCase = useCase
+    }
+}
+
+extension MainMenuDataSource {
+    func saveUseCase(_ useCase: UseCase, completion: (Bool) -> Void) {
+        if let context = useCase.managedObjectContext {
+            dataProvider.persistentContainer.saveContext(backgroundContext: context)
+            //context.refresh(useCase, mergeChanges: true)
+            completion(true)
+        } else {
+            completion(false)
+        }
     }
 }

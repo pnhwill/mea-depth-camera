@@ -57,7 +57,7 @@ class UseCaseListDataSource: NSObject {
     
     // MARK: List Configuration
     
-    func update(_ useCase: UseCase, at row: Int, completion: (Bool) -> Void) {
+    func update(_ useCase: UseCase, completion: (Bool) -> Void) {
         saveUseCase(useCase) { id in
             let success = id != nil
             completion(success)
@@ -75,7 +75,7 @@ class UseCaseListDataSource: NSObject {
     }
     
     func add(completion: @escaping (UseCase) -> Void) {
-        dataProvider.add(in: dataProvider.persistentContainer.viewContext) { useCase in
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
             completion(useCase)
         }
     }
@@ -114,7 +114,8 @@ extension UseCaseListDataSource: UITableViewDataSource {
         }
         if let currentUseCase = useCase(at: indexPath.row) {
             let dateText = currentUseCase.dateTimeText(for: filter)
-            cell.configure(title: currentUseCase.title, dateText: dateText, subjectIDText: currentUseCase.subjectID, numRecordings: Int(currentUseCase.recordingsCount))
+            let titleText = [currentUseCase.experiment?.title, currentUseCase.title].compactMap { $0 }.joined(separator: ": ")
+            cell.configure(title: titleText, dateText: dateText, subjectIDText: currentUseCase.subjectID, numRecordings: Int(currentUseCase.recordingsCount))
         }
         return cell
     }
@@ -195,7 +196,7 @@ extension UseCaseListDataSource: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         let predicate: NSPredicate
         if let userInput = searchController.searchBar.text, !userInput.isEmpty {
-            predicate = NSPredicate(format: "title CONTAINS[cd] %@", userInput)
+            predicate = NSPredicate(format: "(title CONTAINS[cd] %@) OR (subjectID CONTAINS[cd] %@) OR (experimentTitle CONTAINS[cd] %@)", userInput, userInput, userInput)
         } else {
             predicate = NSPredicate(value: true)
         }

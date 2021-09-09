@@ -286,7 +286,7 @@
                                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="k7p-jr-E0T"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits"/>
+                                            <textInputTraits key="textInputTraits" autocapitalizationType="words"/>
                                         </textField>
                                     </subviews>
                                     <constraints>
@@ -300,8 +300,30 @@
                                     <outlet property="titleTextField" destination="6m9-sR-gaD" id="sFq-qS-p4o"/>
                                 </connections>
                             </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditExperimentCell" id="IAe-Dn-Tm1" customClass="EditExperimentCell" customModule="MEADepthCamera" customModuleProvider="target">
+                                <rect key="frame" x="20" y="137" width="350" height="136.33332824707031"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="IAe-Dn-Tm1" id="VB3-yd-XsQ">
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="136.33332824707031"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cu2-O2-aku">
+                                            <rect key="frame" x="0.0" y="-40" width="350" height="216.33333333333334"/>
+                                        </pickerView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="cu2-O2-aku" firstAttribute="leading" secondItem="VB3-yd-XsQ" secondAttribute="leading" id="LdH-mB-uel"/>
+                                        <constraint firstItem="cu2-O2-aku" firstAttribute="top" secondItem="VB3-yd-XsQ" secondAttribute="top" constant="-40" id="bpd-vq-yk7"/>
+                                        <constraint firstAttribute="bottom" secondItem="cu2-O2-aku" secondAttribute="bottom" constant="-40" id="c5O-Ae-dl2"/>
+                                        <constraint firstAttribute="trailing" secondItem="cu2-O2-aku" secondAttribute="trailing" id="fpb-CO-fnL"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="pickerView" destination="cu2-O2-aku" id="UtF-u7-Duj"/>
+                                </connections>
+                            </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditSubjectIDCell" id="1En-hu-nXa" customClass="EditSubjectIDCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="137" width="350" height="44.333332061767578"/>
+                                <rect key="frame" x="20" y="273.33332824707031" width="350" height="44.333332061767578"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1En-hu-nXa" id="da2-1m-u2a">
                                     <rect key="frame" x="0.0" y="0.0" width="350" height="44.333332061767578"/>
@@ -313,7 +335,7 @@
                                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="pZe-AC-Zjq"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits"/>
+                                            <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
                                         </textField>
                                     </subviews>
                                     <constraints>
@@ -328,7 +350,7 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditNotesCell" id="3pQ-4b-sF8" customClass="EditNotesCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="181.33333206176758" width="350" height="216.33332824707031"/>
+                                <rect key="frame" x="20" y="317.66666030883789" width="350" height="216.33332824707031"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="3pQ-4b-sF8" id="cqJ-a3-NMw">
                                     <rect key="frame" x="0.0" y="0.0" width="350" height="216.33332824707031"/>
