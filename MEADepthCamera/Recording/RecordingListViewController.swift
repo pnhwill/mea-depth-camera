@@ -19,26 +19,24 @@ class RecordingListViewController: UITableViewController {
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "RecordingDetailViewController"
     
-    private var recordingListDataSource: RecordingListDataSource?
+    private var dataSource: RecordingListDataSource?
     
     // State
     private var useCase: UseCase?
-    private var isProcessing: Bool = false
-    
-    var processorSettings: ProcessorSettings?
+    //private var isProcessing: Bool = false
     
     // MARK: Navigation
     
     func configure(with useCase: UseCase) {
         self.useCase = useCase
-        recordingListDataSource = RecordingListDataSource(useCase: useCase, recordingDeletedAction: {
+        dataSource = RecordingListDataSource(useCase: useCase, recordingDeletedAction: {
             // handle recording deleted
         }, recordingChangedAction: {
             DispatchQueue.main.async {
                 self.tableView.reloadData()
             }
         })
-        recordingListDataSource?.fetchTasks()
+        //dataSource?.fetchTasks()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -47,11 +45,10 @@ class RecordingListViewController: UITableViewController {
            let cell = sender as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
-            guard let task = recordingListDataSource?.task(at: rowIndex),
-                  let recording = recordingListDataSource?.recording(for: task) else {
+            guard let task = dataSource?.task(at: rowIndex),
+                  let recording = dataSource?.recording(for: task) else {
                 fatalError("Couldn't find data source for recording list.")
             }
-            destination.processorSettings = processorSettings
             destination.configure(with: recording, editAction: { recording in
 //                self.recordingListDataSource?.update(recording, at: rowIndex) { success in
 //                    if success {
@@ -79,7 +76,7 @@ class RecordingListViewController: UITableViewController {
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
             destination.useCase = useCase
-            destination.task = recordingListDataSource?.task(at: rowIndex)
+            destination.task = dataSource?.task(at: rowIndex)
         }
     }
     
@@ -93,12 +90,12 @@ class RecordingListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.dataSource = recordingListDataSource
+        tableView.dataSource = dataSource
         
         //navigationItem.setRightBarButton(editButtonItem, animated: false)
-        navigationItem.title = recordingListDataSource?.title
-        
-        useCaseView.configure(title: useCase?.title, subjectIDText: useCase?.subjectID)
+        navigationItem.title = dataSource?.title
+        let titleText = [useCase?.experiment?.title, useCase?.title].compactMap { $0 }.joined(separator: ": ")
+        useCaseView.configure(title: titleText, subjectIDText: useCase?.subjectID)
         
         // Search bar controller
 //        let searchController = UISearchController(searchResultsController: nil)
@@ -121,8 +118,8 @@ class RecordingListViewController: UITableViewController {
         let detailViewController: RecordingDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
         
         let rowIndex = indexPath.row
-        guard let task = recordingListDataSource?.task(at: rowIndex),
-              let recording = recordingListDataSource?.recording(for: task) else {
+        guard let task = dataSource?.task(at: rowIndex),
+              let recording = dataSource?.recording(for: task) else {
             fatalError("Couldn't find data source for use case list.")
         }
         

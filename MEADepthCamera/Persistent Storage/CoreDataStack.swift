@@ -31,6 +31,10 @@ class CoreDataStack {
          error conditions that could cause the creation of the store to fail.
         */
         
+        // Register the transformer at the very beginning.
+        // .processorSettingsToDataTransformer is a name defined with an NSValueTransformerName extension.
+        ValueTransformer.setValueTransformer(ProcessorSettingsToDataTransformer(), forName: .processorSettingsToDataTransformer)
+        
         let container = PersistentContainer(name: "MEADepthCamera")
         
         guard let description = container.persistentStoreDescriptions.first else {

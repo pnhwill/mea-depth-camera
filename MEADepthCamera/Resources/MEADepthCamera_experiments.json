@@ -1,0 +1,103 @@
+[
+    {
+        "title": "Parkinson's",
+        "tasks": [
+            {
+                "name": "RST_REST1"
+            },
+            {
+                "name": "NSM_BIGSMILE"
+            },
+            {
+                "name": "NSM_PUCKER"
+            },
+            {
+                "name": "NSM_SMILEFAST"
+            },
+            {
+                "name": "NSM_PUFF"
+            },
+            {
+                "name": "NSM_PRESS"
+            },
+            {
+                "name": "NSM_TNG_RELAX"
+            },
+            {
+                "name": "NSM_TNG_PROTRUSION"
+            },
+            {
+                "name": "NSM_TNG_LATNORMAL"
+            },
+            {
+                "name": "NSM_TNG_NOSE"
+            },
+            {
+                "name": "NSM_TNG_LATFAST"
+            },
+            {
+                "name": "NSM_NAS_PUFF"
+            },
+            {
+                "name": "NSM_NAS_PINCH"
+            },
+            {
+                "name": "NSM_NAS_WSTG"
+            },
+            {
+                "name": "NSM_JAW_NORMAL"
+            },
+            {
+                "name": "NSM_JAW_FAST"
+            },
+            {
+                "name": "VWL_SUSTAIN"
+            },
+            {
+                "name": "SENT_CAPEV"
+            },
+            {
+                "name": "VWL_ELEVATE"
+            },
+            {
+                "name": "PSG_BAMBOO"
+            },
+            {
+                "name": "DDK_PA"
+            },
+            {
+                "name": "DDK_TA"
+            },
+            {
+                "name": "DDK_KA"
+            },
+            {
+                "name": "DDK_PATAKA"
+            },
+            {
+                "name": "NSM_COUGH"
+            },
+            {
+                "name": "NSM_SWALLOW"
+            },
+            {
+                "name": "CHEW_CRACKER"
+            },
+            {
+                "name": "BBP_NORMAL"
+            },
+            {
+                "name": "PICT_DESC"
+            },
+            {
+                "name": "FLUENCY_PHONEMIC"
+            },
+            {
+                "name": "STORY"
+            },
+            {
+                "name": "FLUENCY_SEMANTIC"
+            }
+        ]
+    }
+]

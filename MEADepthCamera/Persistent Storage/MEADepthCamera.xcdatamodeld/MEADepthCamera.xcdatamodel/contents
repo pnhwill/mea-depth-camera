@@ -19,12 +19,13 @@
         <relationship name="recording" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Recording" inverseName="files" inverseEntity="Recording"/>
     </entity>
     <entity name="Recording" representedClassName="Recording" syncable="YES" codeGenerationType="category">
-        <attribute name="duration" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="duration" optional="YES" attributeType="Double" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="filesCount" optional="YES" attributeType="Integer 64" derived="YES" derivationExpression="files.@count" usesScalarValueType="YES"/>
         <attribute name="folderURL" transient="YES" attributeType="URI"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="isProcessed" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
+        <attribute name="processorSettings" optional="YES" attributeType="Transformable" valueTransformerName="ProcessorSettingsToDataTransformer" customClassName="ProcessorSettings"/>
         <relationship name="files" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="OutputFile" inverseName="recording" inverseEntity="OutputFile"/>
         <relationship name="task" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Task" inverseName="recordings" inverseEntity="Task"/>
         <relationship name="useCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UseCase" inverseName="recordings" inverseEntity="UseCase"/>
@@ -62,7 +63,7 @@
     <elements>
         <element name="Experiment" positionX="-90" positionY="45" width="128" height="89"/>
         <element name="OutputFile" positionX="182.8414306640625" positionY="172.0172119140625" width="128" height="104"/>
-        <element name="Recording" positionX="-45" positionY="54" width="128" height="164"/>
+        <element name="Recording" positionX="-45" positionY="54" width="128" height="179"/>
         <element name="Task" positionX="-268.1070556640625" positionY="278.8963012695313" width="128" height="194"/>
         <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="179"/>
     </elements>

@@ -51,7 +51,7 @@ class UseCaseProvider: DataProvider {
             useCase.date = Date()
             useCase.id = UUID()
             if shouldSave {
-                self.persistentContainer.saveContext(backgroundContext: context)
+                self.persistentContainer.saveContext(backgroundContext: context, with: .addUseCase)
             }
             completionHandler?(useCase)
         }
@@ -62,7 +62,7 @@ class UseCaseProvider: DataProvider {
             context.perform {
                 context.delete(useCase)
                 if shouldSave {
-                    self.persistentContainer.saveContext(backgroundContext: context)
+                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteUseCase)
                 }
                 completionHandler?(true)
             }

@@ -78,12 +78,6 @@ class CameraViewController: UIViewController {
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
     
-    // Core Data
-    private(set) lazy var persistentContainer: PersistentContainer = {
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        return appDelegate!.persistentContainer
-    }()
-    
     // Navigation/Storyboard
     static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
     static let mainStoryboardName = "Main"
@@ -91,9 +85,8 @@ class CameraViewController: UIViewController {
     // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.unwindFromCameraSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
-            destination.processorSettings = dataOutputPipeline?.processorSettings
-        }
+//        if segue.identifier == Self.unwindFromCameraSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
+//        }
     }
     
     // MARK: - View Controller Life Cycle
@@ -155,9 +148,6 @@ class CameraViewController: UIViewController {
                                                                 depthDataOutput: depthDataOutput,
                                                                 audioDataOutput: audioDataOutput)
                 self.dataOutputPipeline?.configureProcessors(for: videoDevice)
-            }
-            DispatchQueue.main.async {
-                self.dataOutputPipeline?.configureSavedRecordingsDataSource(container: self.persistentContainer)
             }
         }
         

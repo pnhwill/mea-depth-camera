@@ -144,10 +144,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
                                                                        transform: videoTransform)
     }
     
-    func configureSavedRecordingsDataSource(container: PersistentContainer) {
-        savedRecordingsDataSource.persistentContainer = container
-    }
-    
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
         guard let connection = output.connection(with: .video) else {
             print("Could not find the camera video connection")
@@ -299,7 +295,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
             }
 
             let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL]
-            self.savedRecordingsDataSource.addRecording(saveFolder, outputFiles: fileDictionary)
+            self.savedRecordingsDataSource.addRecording(saveFolder, outputFiles: fileDictionary, processorSettings: self.processorSettings)
             
             do {
                 self.videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: self.videoWriterSubject!)

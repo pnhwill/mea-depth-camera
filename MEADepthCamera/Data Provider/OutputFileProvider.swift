@@ -20,4 +20,15 @@ class OutputFileProvider: DataProvider {
     init(with persistentContainer: PersistentContainer) {
         self.persistentContainer = persistentContainer
     }
+    
+    func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
+        context.performAndWait {
+            let outputFile = OutputFile(context: context)
+            outputFile.id = UUID()
+            if shouldSave {
+                self.persistentContainer.saveContext(backgroundContext: context, with: .addOutputFile)
+            }
+            completionHandler?(outputFile)
+        }
+    }
 }

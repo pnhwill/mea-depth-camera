@@ -26,14 +26,14 @@ public class Experiment: NSManagedObject {
         let container = AppDelegate.shared.coreDataStack.persistentContainer
         let taskProvider = TaskProvider(with: container, fetchedResultsControllerDelegate: nil)
 
-        let context = container.newBackgroundContext()
+        let context = managedObjectContext
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
 
         do {
             try taskProvider.fetchTasks()
-            let fetchedTasks = try context.fetch(fetchRequest)
+            let fetchedTasks = try context?.fetch(fetchRequest)
             for taskName in newTasks {
-                if let newTask = fetchedTasks.first(where: { $0.fileNameLabel == taskName }) {
+                if let newTask = fetchedTasks?.first(where: { $0.fileNameLabel == taskName }) {
                     addToTasks(newTask)
                 }
             }

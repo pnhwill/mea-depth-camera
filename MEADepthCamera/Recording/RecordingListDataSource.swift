@@ -10,8 +10,6 @@ import CoreData
 
 class RecordingListDataSource: NSObject {
 
-    typealias RecordingProcessedAction = (Int) -> Void
-    typealias FrameProcessedAction = (Int, Int) -> Void
     typealias RecordingDeletedAction = () -> Void
     typealias RecordingChangedAction = () -> Void
 
@@ -20,34 +18,27 @@ class RecordingListDataSource: NSObject {
     // State
     private var useCase: UseCase
     private var tasks: [Task]? {
-        //return fetchedTasksResultsController.fetchedObjects
-        return nil
+        if let tasks = useCase.experiment?.tasks?.allObjects as? [Task] {
+            return tasks
+        } else {
+            print("Failed to load task list for: \(useCase.experimentTitle ?? "UNKNOWN EXPERIMENT")")
+            return nil
+        }
     }
     private var recordings: [Recording]? {
-        //return fetchedRecordingsResultsController.fetchedObjects
-        return nil
+        if let recordings = useCase.recordings?.allObjects as? [Recording] {
+            return recordings
+        } else {
+            print("Failed to load recording list for: \(useCase.title ?? "UNKNOWN USE CASE")")
+            return nil
+        }
     }
-    //var selectedRecordings = [Recording]()
+    
     var title: String = "Choose Task to Record"
 
     // Callbacks
     private var recordingDeletedAction: RecordingDeletedAction?
     private var recordingChangedAction: RecordingChangedAction?
-
-    // Persistent storage
-
-    private(set) lazy var persistentContainer: PersistentContainer = {
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        return appDelegate!.persistentContainer
-    }()
-
-
-    // Task list
-    //var tasksProvider: TaskProvider = .shared
-    private var lastUpdated = Date.distantFuture.timeIntervalSince1970
-    private var isLoading = false
-    private var error: JSONError?
-    private var hasError = false
 
     init(useCase: UseCase,
          recordingDeletedAction: @escaping RecordingDeletedAction,
@@ -64,19 +55,6 @@ class RecordingListDataSource: NSObject {
 
     func recording(for task: Task) -> Recording? {
         return recordings?.first(where: { $0.task == task })
-    }
-
-    func fetchTasks() {
-        isLoading = true
-        do {
-            //try tasksProvider.fetchTasks()
-            lastUpdated = Date().timeIntervalSince1970
-        } catch {
-            self.error = error as? JSONError ?? .unexpectedError(error: error)
-            self.hasError = true
-        }
-        isLoading = false
-        recordingChangedAction?()
     }
 
 }
@@ -133,6 +111,10 @@ extension RecordingListDataSource: NSFetchedResultsControllerDelegate {
 
 //extension RecordingListDataSource {
 //
+//    typealias RecordingProcessedAction = (Int) -> Void
+//    typealias FrameProcessedAction = (Int, Int) -> Void
+//    var selectedRecordings = [Recording]()
+//
 //    func isSelected(at row: Int) -> Bool {
 //        guard let recording = recording(at: row) else { return false }
 //        return selectedRecordings.contains(recording)
@@ -168,8 +150,6 @@ extension RecordingListDataSource: NSFetchedResultsControllerDelegate {
 //    }
 //
 //}
-
-
 
 // MARK: UISearchResultsUpdating
 
@@ -226,5 +206,35 @@ extension RecordingListDataSource: NSFetchedResultsControllerDelegate {
 //        } else {
 //            completion(false)
 //        }
+//    }
+//
+//    // Core Data providers
+//    lazy var taskProvider: TaskProvider = {
+//        let container = AppDelegate.shared.coreDataStack.persistentContainer
+//        let provider = TaskProvider(with: container, fetchedResultsControllerDelegate: nil)
+//        return provider
+//    }()
+//
+//    lazy var recordingProvider: RecordingProvider = {
+//        let container = AppDelegate.shared.coreDataStack.persistentContainer
+//        let provider = RecordingProvider(with: container)
+//        return provider
+//    }()
+//    // Task list
+//    private var lastUpdated = Date.distantFuture.timeIntervalSince1970
+//    private var isLoading = false
+//    private var error: JSONError?
+//    private var hasError = false
+//    func fetchTasks() {
+//        isLoading = true
+//        do {
+//            //try tasksProvider.fetchTasks()
+//            lastUpdated = Date().timeIntervalSince1970
+//        } catch {
+//            self.error = error as? JSONError ?? .unexpectedError(error: error)
+//            self.hasError = true
+//        }
+//        isLoading = false
+//        recordingChangedAction?()
 //    }
 //}

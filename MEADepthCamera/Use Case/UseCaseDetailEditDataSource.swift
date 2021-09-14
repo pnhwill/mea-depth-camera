@@ -91,7 +91,7 @@ class UseCaseDetailEditDataSource: NSObject {
         switch section {
         case .title:
             if let titleCell = cell as? EditTitleCell {
-                titleCell.configure(title: useCase.title) { title in
+                titleCell.configure(title: useCaseChanges.title) { title in
                     self.useCaseChanges.title = title
                     self.useCaseChangeAction?(self.useCaseChanges)
                 }
@@ -105,14 +105,14 @@ class UseCaseDetailEditDataSource: NSObject {
             }
         case .subjectID:
             if let subjectIDCell = cell as? EditSubjectIDCell {
-                subjectIDCell.configure(subjectID: useCase.subjectID) { subjectID in
+                subjectIDCell.configure(subjectID: useCaseChanges.subjectID) { subjectID in
                     self.useCaseChanges.subjectID = subjectID
                     self.useCaseChangeAction?(self.useCaseChanges)
                 }
             }
         case .notes:
             if let notesCell = cell as? EditNotesCell {
-                notesCell.configure(notes: useCase.notes) { notes in
+                notesCell.configure(notes: useCaseChanges.notes) { notes in
                     self.useCaseChanges.notes = notes
                     self.useCaseChangeAction?(self.useCaseChanges)
                 }

@@ -20,4 +20,17 @@ class RecordingProvider: DataProvider {
     init(with persistentContainer: PersistentContainer) {
         self.persistentContainer = persistentContainer
     }
+    
+    func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
+        context.perform {
+            let recording = Recording(context: context)
+            recording.id = UUID()
+            recording.isProcessed = false
+            if shouldSave {
+                self.persistentContainer.saveContext(backgroundContext: context, with: .addRecording)
+            }
+            completionHandler?(recording)
+        }
+    }
+    
 }

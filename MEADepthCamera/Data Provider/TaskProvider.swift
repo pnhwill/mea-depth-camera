@@ -59,6 +59,10 @@ class TaskProvider: DataProvider {
         self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
     
+}
+
+// MARK: JSON Fetching & Import
+extension TaskProvider {
     /// Creates and configures a private queue context.
     private func newTaskContext() -> NSManagedObjectContext {
         // Create a private queue context.
