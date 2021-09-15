@@ -64,8 +64,8 @@ class SavedRecordingsDataSource {
     }
     
     func saveRecording(to useCase: UseCase, for task: Task) {
-        guard let recording = savedRecording else { return }
-        let context = recordingProvider.persistentContainer.newBackgroundContext()
+        guard let recording = savedRecording, let context = useCase.managedObjectContext else { return }
+        
         // Saves a recording to the persistent storage
         recordingProvider.add(in: context, shouldSave: false, completionHandler: { newRecording in
             newRecording.useCase = useCase

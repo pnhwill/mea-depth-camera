@@ -110,12 +110,17 @@ extension ExperimentProvider {
         taskContext.performAndWait {
             // Execute the batch insert.
             let batchInsertRequest = self.newBatchInsertRequest(with: propertiesList)
+            batchInsertRequest.resultType = .objectIDs
             if let fetchResult = try? taskContext.execute(batchInsertRequest),
                let batchInsertResult = fetchResult as? NSBatchInsertResult,
-               let success = batchInsertResult.result as? Bool, success {
-                performSuccess = success
+               let experimentIDs = batchInsertResult.result as? [NSManagedObjectID] {
+                print("experiment batch insert success")
+                importTasksForExperiments(with: experimentIDs, in: taskContext, from: propertiesList)
+                print("experiment task import success")
+                performSuccess = true
                 return
             }
+            
             self.logger.debug("Failed to execute batch insert request.")
         }
         if !performSuccess {
@@ -138,4 +143,41 @@ extension ExperimentProvider {
         })
         return batchInsertRequest
     }
+    
+    private func importTasksForExperiments(with objectIDs: [NSManagedObjectID], in context: NSManagedObjectContext, from propertiesList: [ExperimentProperties]) {
+        for experimentID in objectIDs {
+            if let experiment = context.object(with: experimentID) as? Experiment,
+               let experimentProperties = propertiesList.first(where: { $0.dictionaryValue["title"] as? String == experiment.title }) {
+                do {
+                    try updateTaskList(for: experiment, in: context, with: experimentProperties)
+                } catch {
+                    fatalError("Failed to fetch tasks while importing experiment: \(error)")
+                }
+            }
+        }
+        persistentContainer.saveContext(backgroundContext: context)
+    }
+    
+    private func updateTaskList(for experiment: Experiment, in context: NSManagedObjectContext, with experimentProperties: ExperimentProperties) throws {
+        let dictionary = experimentProperties.dictionaryValue
+        guard let newTasks = dictionary["tasks"] as? [String]
+        else {
+            throw JSONError.missingData
+        }
+        let taskProvider = TaskProvider(with: persistentContainer, fetchedResultsControllerDelegate: nil)
+        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
+
+        do {
+            try taskProvider.fetchTasks()
+            let fetchedTasks = try context.fetch(fetchRequest)
+            for taskName in newTasks {
+                if let newTask = fetchedTasks.first(where: { $0.fileNameLabel == taskName }) {
+                    experiment.addToTasks(newTask)
+                }
+            }
+        } catch {
+            throw JSONError.unexpectedError(error: error)
+        }
+    }
+    
 }

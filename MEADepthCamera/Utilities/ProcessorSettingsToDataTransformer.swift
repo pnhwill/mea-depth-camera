@@ -33,10 +33,10 @@ class ProcessorSettingsToDataTransformer: NSSecureUnarchiveFromDataTransformer {
     }
     
     override func reverseTransformedValue(_ value: Any?) -> Any? {
-        guard let color = value as? ProcessorSettings else {
+        guard let processorSettings = value as? ProcessorSettings else {
             fatalError("Wrong data type: value must be a ProcessorSettings object; received \(type(of: value))")
         }
-        return super.reverseTransformedValue(color)
+        return super.reverseTransformedValue(processorSettings)
     }
 }
 
