@@ -31,4 +31,19 @@ class OutputFileProvider: DataProvider {
             completionHandler?(outputFile)
         }
     }
+    
+    func delete(_ outputFile: OutputFile, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
+        if let context = outputFile.managedObjectContext {
+            context.perform {
+                context.delete(outputFile)
+                if shouldSave {
+                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteOutputFile)
+                }
+                completionHandler?(true)
+            }
+        } else {
+            completionHandler?(false)
+        }
+    }
+    
 }

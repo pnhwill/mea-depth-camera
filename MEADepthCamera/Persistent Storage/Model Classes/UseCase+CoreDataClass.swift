@@ -12,8 +12,6 @@ import CoreData
 @objc(UseCase)
 public class UseCase: NSManagedObject {
 
-    struct PropertyKeys {
-        static let date = "date"
-    }
+    
     
 }

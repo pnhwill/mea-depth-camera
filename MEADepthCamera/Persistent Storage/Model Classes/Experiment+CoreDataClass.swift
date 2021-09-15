@@ -17,28 +17,10 @@ public class Experiment: NSManagedObject {
     func update(from experimentProperties: ExperimentProperties) throws {
         let dictionary = experimentProperties.dictionaryValue
         guard let newTitle = dictionary["title"] as? String,
-              let newTasks = dictionary["tasks"] as? [String],
+              //let newTasks = dictionary["tasks"] as? [String],
               let newID = dictionary["id"] as? UUID
         else {
             throw JSONError.missingData
-        }
-        
-        let container = AppDelegate.shared.coreDataStack.persistentContainer
-        let taskProvider = TaskProvider(with: container, fetchedResultsControllerDelegate: nil)
-
-        let context = managedObjectContext
-        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
-
-        do {
-            try taskProvider.fetchTasks()
-            let fetchedTasks = try context?.fetch(fetchRequest)
-            for taskName in newTasks {
-                if let newTask = fetchedTasks?.first(where: { $0.fileNameLabel == taskName }) {
-                    addToTasks(newTask)
-                }
-            }
-        } catch {
-            fatalError("Failed to fetch tasks: \(error)")
         }
         
         title = newTitle

@@ -11,10 +11,6 @@ import CoreData
 
 @objc(Recording)
 public class Recording: NSManagedObject {
-
-    struct Name {
-        static let name = "name"
-    }
     
     public override func awakeFromFetch() {
         super.awakeFromFetch()
@@ -22,8 +18,9 @@ public class Recording: NSManagedObject {
     }
     
     func addFiles(newFiles: [OutputType: URL]) {
+        guard let context = managedObjectContext else { return }
         for file in newFiles {
-            let newFile = OutputFile()
+            let newFile = OutputFile(context: context)
             newFile.outputType = file.key.rawValue
             newFile.fileName = file.value.lastPathComponent
             newFile.id = UUID()

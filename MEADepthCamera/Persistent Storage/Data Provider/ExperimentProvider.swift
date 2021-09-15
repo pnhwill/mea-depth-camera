@@ -12,7 +12,7 @@ A class to wrap everything related to fetching, creating, and deleting experimen
 import CoreData
 import OSLog
 
-class ExperimentProvider: DataProvider {
+class ExperimentProvider: FetchingDataProvider {
     
     typealias Object = Experiment
     
@@ -55,6 +55,32 @@ class ExperimentProvider: DataProvider {
         self.persistentContainer = persistentContainer
         self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
+    
+    func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?) {
+        context.perform {
+            let experiment = Experiment(context: context)
+            experiment.id = UUID()
+            if shouldSave {
+                self.persistentContainer.saveContext(backgroundContext: context, with: .addExperiment)
+            }
+            completionHandler?(experiment)
+        }
+    }
+    
+    func delete(_ experiment: Experiment, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
+        if let context = experiment.managedObjectContext {
+            context.perform {
+                context.delete(experiment)
+                if shouldSave {
+                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteExperiment)
+                }
+                completionHandler?(true)
+            }
+        } else {
+            completionHandler?(false)
+        }
+    }
+    
 }
 
 // MARK: JSON Fetching & Import
@@ -71,7 +97,7 @@ extension ExperimentProvider {
     }
     
     /// Fetches the experiments list from the JSON file, and imports it into Core Data.
-    func fetchExperiments() throws {
+    func fetchJSONData() throws {
         guard let url = url, let data = try? Data(contentsOf: url)
         else {
             logger.debug("Failed to receive valid directory and/or data.")
@@ -168,7 +194,7 @@ extension ExperimentProvider {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
 
         do {
-            try taskProvider.fetchTasks()
+            try taskProvider.fetchJSONData()
             let fetchedTasks = try context.fetch(fetchRequest)
             for taskName in newTasks {
                 if let newTask = fetchedTasks.first(where: { $0.fileNameLabel == taskName }) {

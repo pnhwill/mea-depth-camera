@@ -11,7 +11,7 @@ A class to wrap everything related to fetching, creating, and deleting use cases
 
 import CoreData
 
-class UseCaseProvider: DataProvider {
+class UseCaseProvider: FetchingDataProvider {
     
     typealias Object = UseCase
     

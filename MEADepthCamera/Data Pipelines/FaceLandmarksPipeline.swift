@@ -165,9 +165,11 @@ class FaceLandmarksPipeline: DataPipeline {
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
             try visionTrackerProcessor?.performVisionRequests(on: video, orientation: videoReader.orientation, completion: { faceObservation in
                 self.recordLandmarks(of: faceObservation, with: depth, frame: frame, timeStamp: timeStamp)
-                // Display the frame counter on the UI
+                // Display the frame counter in the UI on the main thread
                 if let totalFrames = self.totalFrames {
-                    self.delegate?.displayFrameCounter(frame, totalFrames: totalFrames)
+                    DispatchQueue.main.async {
+                        self.delegate?.displayFrameCounter(frame, totalFrames: totalFrames)
+                    }
                 }
             })
         }

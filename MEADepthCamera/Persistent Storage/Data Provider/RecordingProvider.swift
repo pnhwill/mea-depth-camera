@@ -33,4 +33,18 @@ class RecordingProvider: DataProvider {
         }
     }
     
+    func delete(_ recording: Recording, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
+        if let context = recording.managedObjectContext {
+            context.perform {
+                context.delete(recording)
+                if shouldSave {
+                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteRecording)
+                }
+                completionHandler?(true)
+            }
+        } else {
+            completionHandler?(false)
+        }
+    }
+    
 }

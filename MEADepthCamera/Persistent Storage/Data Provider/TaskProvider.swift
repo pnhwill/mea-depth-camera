@@ -12,7 +12,7 @@ A class to wrap everything related to fetching, creating, and deleting tasks, an
 import CoreData
 import OSLog
 
-class TaskProvider: DataProvider {
+class TaskProvider: FetchingDataProvider {
     typealias Object = Task
     
     private(set) var persistentContainer: PersistentContainer
@@ -59,6 +59,31 @@ class TaskProvider: DataProvider {
         self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
     
+    func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?) {
+        context.perform {
+            let task = Task(context: context)
+            task.id = UUID()
+            if shouldSave {
+                self.persistentContainer.saveContext(backgroundContext: context, with: .addTask)
+            }
+            completionHandler?(task)
+        }
+    }
+    
+    func delete(_ task: Task, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
+        if let context = task.managedObjectContext {
+            context.perform {
+                context.delete(task)
+                if shouldSave {
+                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteTask)
+                }
+                completionHandler?(true)
+            }
+        } else {
+            completionHandler?(false)
+        }
+    }
+    
 }
 
 // MARK: JSON Fetching & Import
@@ -76,7 +101,7 @@ extension TaskProvider {
     }
     
     /// Fetches the task list from the JSON file, and imports it into Core Data.
-    func fetchTasks() throws {
+    func fetchJSONData() throws {
         guard let url = url, let data = try? Data(contentsOf: url)
         else {
             logger.debug("Failed to receive valid directory and/or data.")

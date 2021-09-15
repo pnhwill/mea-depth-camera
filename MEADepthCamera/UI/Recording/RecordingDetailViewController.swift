@@ -37,6 +37,7 @@ class RecordingDetailViewController: UITableViewController {
     
     func configure(with recording: Recording, isNew: Bool = false, addAction: RecordingChangeAction? = nil, editAction: RecordingChangeAction? = nil) {
         self.recording = recording
+        self.processorSettings = recording.processorSettings
         self.isNew = isNew
         self.isProcessed = recording.isProcessed
         self.recordingAddAction = addAction

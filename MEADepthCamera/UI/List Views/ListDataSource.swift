@@ -6,3 +6,9 @@
 //
 
 import UIKit
+
+protocol ListDataSource: UITableViewDataSource {
+    
+    
+    
+}

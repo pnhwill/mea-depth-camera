@@ -140,7 +140,7 @@
 		B56F1A8926E06B2300A29C42 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
 		B56F1A8B26E0786200A29C42 /* UseCaseProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseProvider.swift; sourceTree = "<group>"; };
 		B56F1A8D26E0787800A29C42 /* RecordingProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingProvider.swift; sourceTree = "<group>"; };
-		B56F1A8F26E07B2F00A29C42 /* Experiment+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Experiment+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
+		B56F1A8F26E07B2F00A29C42 /* Experiment+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Experiment+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Experiment+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B56F1A9326E0813D00A29C42 /* ExperimentProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExperimentProvider.swift; sourceTree = "<group>"; };
 		B56F1A9526E0903100A29C42 /* OutputFileProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputFileProvider.swift; sourceTree = "<group>"; };
 		B56F1A9726E0A29200A29C42 /* UseCaseInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseInteractionDelegate.swift; sourceTree = "<group>"; };
@@ -165,9 +165,9 @@
 		B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEADepthCameraUITests.swift; sourceTree = "<group>"; };
 		B57965A5269DED600070C294 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
-		B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Recording+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
-		B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
-		B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "OutputFile+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
+		B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Recording+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Recording+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
+		B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Task+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Task+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
+		B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OutputFile+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/OutputFile+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A0A626C5CB3A00CA6546 /* EditNotesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNotesCell.swift; sourceTree = "<group>"; };
 		B587705F26B4ADAC00E26C7D /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
 		B587706126B4AEAC00E26C7D /* CommonTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTypes.swift; sourceTree = "<group>"; };
@@ -193,7 +193,7 @@
 		B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListViewController.swift; sourceTree = "<group>"; };
 		B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListDataSource.swift; sourceTree = "<group>"; };
 		B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListCell.swift; sourceTree = "<group>"; };
-		B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UseCase+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
+		B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "UseCase+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/UseCase+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
 		B5F447EB26EFF7A100528ACA /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B5F447ED26EFF8B100528ACA /* ListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDataSource.swift; sourceTree = "<group>"; };
@@ -274,16 +274,13 @@
 		B542161126C46C1A00A4F984 /* Persistent Storage */ = {
 			isa = PBXGroup;
 			children = (
+				B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */,
 				B56F1A6326E0430600A29C42 /* CoreDataStack.swift */,
 				B542160F26C45F7300A4F984 /* PersistentContainer.swift */,
 				B56F1A6526E045AF00A29C42 /* Schema.swift */,
-				B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */,
-				B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */,
-				B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */,
-				B56F1A8F26E07B2F00A29C42 /* Experiment+CoreDataClass.swift */,
-				B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */,
-				B50944B326E94FEC0020971D /* JSONError.swift */,
-				B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */,
+				B57FBD3726F27EE100ACC129 /* Model Classes */,
+				B56F1A6226E0401200A29C42 /* Data Provider */,
+				B57FBD3B26F281E900ACC129 /* Archiving */,
 			);
 			path = "Persistent Storage";
 			sourceTree = "<group>";
@@ -306,6 +303,7 @@
 				B56F1A9526E0903100A29C42 /* OutputFileProvider.swift */,
 				B56F1A9326E0813D00A29C42 /* ExperimentProvider.swift */,
 				B5D6CAEC26D9AF4C002165C6 /* TaskProvider.swift */,
+				B50944B326E94FEC0020971D /* JSONError.swift */,
 			);
 			path = "Data Provider";
 			sourceTree = "<group>";
@@ -357,17 +355,10 @@
 				B5796581269DED5F0070C294 /* AppDelegate.swift */,
 				B5796583269DED5F0070C294 /* SceneDelegate.swift */,
 				B542161126C46C1A00A4F984 /* Persistent Storage */,
-				B56F1A6226E0401200A29C42 /* Data Provider */,
-				B5F447EA26EFF72400528ACA /* Object Lists */,
-				B56F1A6126E03F9100A29C42 /* Main Menu */,
-				B54215BB26C31E9300A4F984 /* Use Case */,
-				B5F447EF26EFFB3200528ACA /* Task */,
-				B5DF4B8826C4928D0045AE43 /* Recording */,
+				B57FBD3A26F2816E00ACC129 /* UI */,
 				B50CD98D26C478B400192E7F /* Camera */,
 				B5C732AD26BDCC72002B01C2 /* Data Pipelines */,
-				B575413D26B8DB36004ED4E4 /* Vision Face Detection */,
-				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
-				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
+				B57FBD3926F280DD00ACC129 /* Data Processors */,
 				B5ABE85926A9CC9B003D2AFD /* File IO */,
 				B587705E26B4AD8900E26C7D /* Utilities */,
 				B5886DF626AA168B00EB344C /* Shaders */,
@@ -399,12 +390,53 @@
 			path = MEADepthCameraUITests;
 			sourceTree = "<group>";
 		};
+		B57FBD3726F27EE100ACC129 /* Model Classes */ = {
+			isa = PBXGroup;
+			children = (
+				B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */,
+				B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */,
+				B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */,
+				B56F1A8F26E07B2F00A29C42 /* Experiment+CoreDataClass.swift */,
+				B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */,
+			);
+			path = "Model Classes";
+			sourceTree = "<group>";
+		};
+		B57FBD3926F280DD00ACC129 /* Data Processors */ = {
+			isa = PBXGroup;
+			children = (
+				B575413D26B8DB36004ED4E4 /* Vision Face Detection */,
+				B5ABE85A26AA0442003D2AFD /* Depth Map Rendering */,
+				B56F2EAA26AB7EC300998C27 /* Point Cloud */,
+			);
+			path = "Data Processors";
+			sourceTree = "<group>";
+		};
+		B57FBD3A26F2816E00ACC129 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B5F447EA26EFF72400528ACA /* List Views */,
+				B56F1A6126E03F9100A29C42 /* Main Menu */,
+				B54215BB26C31E9300A4F984 /* Use Case */,
+				B5DF4B8826C4928D0045AE43 /* Recording */,
+				B5F447EF26EFFB3200528ACA /* Task */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		B57FBD3B26F281E900ACC129 /* Archiving */ = {
+			isa = PBXGroup;
+			children = (
+				B5F447F626F008E600528ACA /* ProcessorSettingsToDataTransformer.swift */,
+			);
+			path = Archiving;
+			sourceTree = "<group>";
+		};
 		B587705E26B4AD8900E26C7D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
 				B587706126B4AEAC00E26C7D /* CommonTypes.swift */,
 				B5F447F426F0047800528ACA /* ProcessorSettings.swift */,
-				B5F447F626F008E600528ACA /* ProcessorSettingsToDataTransformer.swift */,
 				B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */,
 				B5886E0026AA7F8500EB344C /* Extensions.swift */,
 				B587705F26B4ADAC00E26C7D /* Functions.swift */,
@@ -500,13 +532,13 @@
 			path = Recording;
 			sourceTree = "<group>";
 		};
-		B5F447EA26EFF72400528ACA /* Object Lists */ = {
+		B5F447EA26EFF72400528ACA /* List Views */ = {
 			isa = PBXGroup;
 			children = (
 				B5F447EB26EFF7A100528ACA /* ListViewController.swift */,
 				B5F447ED26EFF8B100528ACA /* ListDataSource.swift */,
 			);
-			path = "Object Lists";
+			path = "List Views";
 			sourceTree = "<group>";
 		};
 		B5F447EF26EFFB3200528ACA /* Task */ = {

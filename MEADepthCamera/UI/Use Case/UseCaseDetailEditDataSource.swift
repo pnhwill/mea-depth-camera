@@ -123,7 +123,8 @@ class UseCaseDetailEditDataSource: NSObject {
     
     private func fetchExperiments() {
         do {
-            try experimentProvider.fetchExperiments()
+            try experimentProvider.fetchJSONData()
+            experimentProvider.persistentContainer.viewContext.refreshAllObjects()
         } catch {
             let error = error as? JSONError ?? .unexpectedError(error: error)
             fatalError("Failed to fetch experiments: \(error)")
