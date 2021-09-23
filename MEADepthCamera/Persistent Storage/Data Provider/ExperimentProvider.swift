@@ -140,9 +140,7 @@ extension ExperimentProvider {
             if let fetchResult = try? taskContext.execute(batchInsertRequest),
                let batchInsertResult = fetchResult as? NSBatchInsertResult,
                let experimentIDs = batchInsertResult.result as? [NSManagedObjectID] {
-                print("experiment batch insert success")
                 importTasksForExperiments(with: experimentIDs, in: taskContext, from: propertiesList)
-                print("experiment task import success")
                 performSuccess = true
                 return
             }

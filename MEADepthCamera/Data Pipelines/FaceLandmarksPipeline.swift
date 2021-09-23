@@ -213,7 +213,7 @@ class FaceLandmarksPipeline: DataPipeline {
                 }
             } else {
                 // No more depth data
-                print("No depth data found")
+                print("No more depth data frames found")
                 try trackAndRecord(video: videoImage, depth: nil, frames, videoTime)
             }
             

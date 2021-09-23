@@ -41,7 +41,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
             }
             
             guard let faceDetectionRequest = request as? VNDetectFaceRectanglesRequest,
-                  let results = faceDetectionRequest.results as? [VNFaceObservation] else {
+                  let results = faceDetectionRequest.results else {
                 return
             }
             DispatchQueue.main.async {
@@ -142,7 +142,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
                 }
                 
                 guard let landmarksRequest = request as? VNDetectFaceLandmarksRequest,
-                      let results = landmarksRequest.results as? [VNFaceObservation] else {
+                      let results = landmarksRequest.results else {
                     return
                 }
                 

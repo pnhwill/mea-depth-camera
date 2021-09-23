@@ -38,7 +38,7 @@ class LiveFaceDetectionProcessor: VisionProcessor {
         let faceDetectionRequest = VNDetectFaceRectanglesRequest()
         do {
             try handler.perform([faceDetectionRequest])
-            guard let faceObservations = faceDetectionRequest.results as? [VNFaceObservation] else {
+            guard let faceObservations = faceDetectionRequest.results else {
                 return
             }
             if let face = faceObservations.first {

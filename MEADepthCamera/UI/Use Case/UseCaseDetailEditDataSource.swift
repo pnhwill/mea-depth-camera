@@ -78,7 +78,6 @@ class UseCaseDetailEditDataSource: NSObject {
         self.useCaseChanges = UseCaseChanges(title: useCase.title, subjectID: useCase.subjectID, notes: useCase.notes)
         self.useCaseChangeAction = changeAction
         super.init()
-        fetchExperiments()
     }
     
     private func dequeueAndConfigureCell(for indexPath: IndexPath, from tableView: UITableView) -> UITableViewCell {
@@ -119,16 +118,6 @@ class UseCaseDetailEditDataSource: NSObject {
             }
         }
         return cell
-    }
-    
-    private func fetchExperiments() {
-        do {
-            try experimentProvider.fetchJSONData()
-            experimentProvider.persistentContainer.viewContext.refreshAllObjects()
-        } catch {
-            let error = error as? JSONError ?? .unexpectedError(error: error)
-            fatalError("Failed to fetch experiments: \(error)")
-        }
     }
     
 }

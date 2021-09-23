@@ -15,7 +15,7 @@ class MainMenuViewController: UIViewController {
     @IBOutlet private weak var useCaseListButton: UIButton!
     @IBOutlet private weak var startButton: UIButton!
     
-    static let showRecordingListSegueIdentifier = "ShowRecordingListSegue"
+    static let showTaskListSegueIdentifier = "ShowTaskListSegue"
     static let showUseCaseListSegueIdentifier = "ShowUseCaseListSegue"
     static let unwindFromListSegueIdentifier = "UnwindFromUseCaseListSegue"
     static let mainStoryboardName = "Main"
@@ -30,7 +30,7 @@ class MainMenuViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showRecordingListSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
+        if segue.identifier == Self.showTaskListSegueIdentifier, let destination = segue.destination as? TaskListViewController {
             guard let useCase = dataSource?.useCase else {
                 fatalError("Couldn't find data source for use case.")
             }

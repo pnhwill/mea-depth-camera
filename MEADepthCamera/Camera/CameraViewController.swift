@@ -84,6 +84,11 @@ class CameraViewController: UIViewController {
     
     // MARK: - Navigation
     
+    func configure(useCase: UseCase, task: Task) {
+        self.useCase = useCase
+        self.task = task
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 //        if segue.identifier == Self.unwindFromCameraSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
 //        }
