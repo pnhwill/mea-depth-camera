@@ -101,9 +101,8 @@ extension TaskProvider {
     }
     
     /// Fetches the task list from the JSON file, and imports it into Core Data.
-    func fetchJSONData() throws {
-        guard let url = url, let data = try? Data(contentsOf: url)
-        else {
+    func fetchJSONData() async throws {
+        guard let url = url, let data = try? Data(contentsOf: url) else {
             logger.debug("Failed to receive valid directory and/or data.")
             throw JSONError.missingData
         }
@@ -118,7 +117,7 @@ extension TaskProvider {
 
             // Import the TasksJSON into Core Data.
             logger.debug("Start importing data to the store...")
-            try importTasks(from: taskPropertiesList)
+            try await importTasks(from: taskPropertiesList)
             logger.debug("Finished importing data.")
         } catch {
             throw JSONError.wrongDataFormat(error: error)
@@ -126,31 +125,25 @@ extension TaskProvider {
     }
     
     /// Uses `NSBatchInsertRequest` (BIR) to import a JSON dictionary into the Core Data store on a private queue.
-    private func importTasks(from propertiesList: [TaskProperties]) throws {
-        guard !propertiesList.isEmpty else {
-            throw JSONError.batchInsertError
-        }
+    private func importTasks(from propertiesList: [TaskProperties]) async throws {
+        guard !propertiesList.isEmpty else { return }
 
         let taskContext = newTaskContext()
         // Add name and author to identify source of persistent history changes.
         taskContext.name = "importContext"
         taskContext.transactionAuthor = "importTasks"
         
-        /// - Tag: perform
-        var performSuccess = false
-        taskContext.performAndWait {
+        /// - Tag: performAndWait
+        try await taskContext.perform {
             // Execute the batch insert.
             /// - Tag: batchInsertRequest
             let batchInsertRequest = self.newBatchInsertRequest(with: propertiesList)
             if let fetchResult = try? taskContext.execute(batchInsertRequest),
                let batchInsertResult = fetchResult as? NSBatchInsertResult,
                let success = batchInsertResult.result as? Bool, success {
-                performSuccess = success
                 return
             }
             self.logger.debug("Failed to execute batch insert request.")
-        }
-        if !performSuccess {
             throw JSONError.batchInsertError
         }
         
@@ -171,43 +164,43 @@ extension TaskProvider {
         return batchInsertRequest
     }
     
-    /// Synchronously deletes given records in the Core Data store with the specified object IDs.
-    func deleteTasks(identifiedBy objectIDs: [NSManagedObjectID]) {
-        let viewContext = persistentContainer.viewContext
-        logger.debug("Start deleting data from the store...")
-
-        viewContext.perform {
-            objectIDs.forEach { objectID in
-                let task = viewContext.object(with: objectID)
-                viewContext.delete(task)
-            }
-        }
-
-        logger.debug("Successfully deleted data.")
-    }
-
-    /// Asynchronously deletes records in the Core Data store with the specified `Task` managed objects.
-    func deleteTasks(_ tasks: [Task]) {
-        let objectIDs = tasks.map { $0.objectID }
-        let taskContext = newTaskContext()
-        // Add name and author to identify source of persistent history changes.
-        taskContext.name = "deleteContext"
-        taskContext.transactionAuthor = "deleteTasks"
-        logger.debug("Start deleting data from the store...")
-
-        taskContext.perform {
-            // Execute the batch delete.
-            let batchDeleteRequest = NSBatchDeleteRequest(objectIDs: objectIDs)
-            guard let fetchResult = try? taskContext.execute(batchDeleteRequest),
-                  let batchDeleteResult = fetchResult as? NSBatchDeleteResult,
-                  let success = batchDeleteResult.result as? Bool, success
-            else {
-                self.logger.debug("Failed to execute batch delete request.")
-                return
-            }
-        }
-
-        logger.debug("Successfully deleted data.")
-    }
+//    /// Synchronously deletes given records in the Core Data store with the specified object IDs.
+//    func deleteTasks(identifiedBy objectIDs: [NSManagedObjectID]) {
+//        let viewContext = persistentContainer.viewContext
+//        logger.debug("Start deleting data from the store...")
+//
+//        viewContext.perform {
+//            objectIDs.forEach { objectID in
+//                let task = viewContext.object(with: objectID)
+//                viewContext.delete(task)
+//            }
+//        }
+//
+//        logger.debug("Successfully deleted data.")
+//    }
+//
+//    /// Asynchronously deletes records in the Core Data store with the specified `Task` managed objects.
+//    func deleteTasks(_ tasks: [Task]) {
+//        let objectIDs = tasks.map { $0.objectID }
+//        let taskContext = newTaskContext()
+//        // Add name and author to identify source of persistent history changes.
+//        taskContext.name = "deleteContext"
+//        taskContext.transactionAuthor = "deleteTasks"
+//        logger.debug("Start deleting data from the store...")
+//
+//        taskContext.perform {
+//            // Execute the batch delete.
+//            let batchDeleteRequest = NSBatchDeleteRequest(objectIDs: objectIDs)
+//            guard let fetchResult = try? taskContext.execute(batchDeleteRequest),
+//                  let batchDeleteResult = fetchResult as? NSBatchDeleteResult,
+//                  let success = batchDeleteResult.result as? Bool, success
+//            else {
+//                self.logger.debug("Failed to execute batch delete request.")
+//                return
+//            }
+//        }
+//
+//        logger.debug("Successfully deleted data.")
+//    }
     
 }

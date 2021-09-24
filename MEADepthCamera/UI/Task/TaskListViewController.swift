@@ -20,8 +20,6 @@ class TaskListViewController: UITableViewController {
     static let recordingsViewControllerIdentifier = "RecordingListViewController"
     
     private var dataSource: TaskListDataSource?
-    
-    // State
     private var useCase: UseCase?
     
     // MARK: Navigation
@@ -44,6 +42,7 @@ class TaskListViewController: UITableViewController {
     
     @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
         tableView.reloadData()
+        dataSource?.sortTasks()
     }
     
     // MARK: Life Cycle
@@ -52,6 +51,11 @@ class TaskListViewController: UITableViewController {
         super.viewDidLoad()
         tableView.dataSource = dataSource
         navigationItem.title = dataSource?.navigationTitle
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshUseCaseView()
     }
     
     private func refreshUseCaseView() {

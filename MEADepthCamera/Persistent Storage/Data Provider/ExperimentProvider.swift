@@ -97,9 +97,8 @@ extension ExperimentProvider {
     }
     
     /// Fetches the experiments list from the JSON file, and imports it into Core Data.
-    func fetchJSONData() throws {
-        guard let url = url, let data = try? Data(contentsOf: url)
-        else {
+    func fetchJSONData() async throws {
+        guard let url = url, let data = try? Data(contentsOf: url) else {
             logger.debug("Failed to receive valid directory and/or data.")
             throw JSONError.missingData
         }
@@ -114,7 +113,7 @@ extension ExperimentProvider {
 
             // Import the ExperimentsJSON into Core Data.
             logger.debug("Start importing data to the store...")
-            try importExperiments(from: experimentPropertiesList)
+            try await importExperiments(from: experimentPropertiesList)
             logger.debug("Finished importing data.")
         } catch {
             throw JSONError.wrongDataFormat(error: error)
@@ -122,33 +121,31 @@ extension ExperimentProvider {
     }
     
     /// Uses `NSBatchInsertRequest` (BIR) to import a JSON dictionary into the Core Data store on a private queue.
-    private func importExperiments(from propertiesList: [ExperimentProperties]) throws {
-        guard !propertiesList.isEmpty else {
-            throw JSONError.batchInsertError
-        }
+    private func importExperiments(from propertiesList: [ExperimentProperties]) async throws {
+        guard !propertiesList.isEmpty else { return }
 
         let taskContext = newTaskContext()
         // Add name and author to identify source of persistent history changes.
         taskContext.name = "importContext"
         taskContext.transactionAuthor = "importExperiments"
         
-        var performSuccess = false
-        taskContext.performAndWait {
+        let experimentIDs: [NSManagedObjectID] = try await taskContext.perform {
             // Execute the batch insert.
             let batchInsertRequest = self.newBatchInsertRequest(with: propertiesList)
             batchInsertRequest.resultType = .objectIDs
             if let fetchResult = try? taskContext.execute(batchInsertRequest),
                let batchInsertResult = fetchResult as? NSBatchInsertResult,
                let experimentIDs = batchInsertResult.result as? [NSManagedObjectID] {
-                importTasksForExperiments(with: experimentIDs, in: taskContext, from: propertiesList)
-                performSuccess = true
-                return
+                return experimentIDs
             }
-            
             self.logger.debug("Failed to execute batch insert request.")
-        }
-        if !performSuccess {
             throw JSONError.batchInsertError
+        }
+        
+        do {
+            try await self.importTasksForExperiments(with: experimentIDs, in: taskContext, from: propertiesList)
+        } catch {
+            throw error as? JSONError ?? .unexpectedError(error: error)
         }
         
         self.logger.debug("Successfully inserted data.")
@@ -165,34 +162,34 @@ extension ExperimentProvider {
             index += 1
             return false
         })
+        
         return batchInsertRequest
     }
     
-    private func importTasksForExperiments(with objectIDs: [NSManagedObjectID], in context: NSManagedObjectContext, from propertiesList: [ExperimentProperties]) {
+    private func importTasksForExperiments(with objectIDs: [NSManagedObjectID], in context: NSManagedObjectContext, from propertiesList: [ExperimentProperties]) async throws {
         for experimentID in objectIDs {
             if let experiment = context.object(with: experimentID) as? Experiment,
                let experimentProperties = propertiesList.first(where: { $0.dictionaryValue["title"] as? String == experiment.title }) {
                 do {
-                    try updateTaskList(for: experiment, in: context, with: experimentProperties)
+                    try await updateTaskList(for: experiment, in: context, with: experimentProperties)
                 } catch {
-                    fatalError("Failed to fetch tasks while importing experiment: \(error)")
+                    throw error as? JSONError ?? .unexpectedError(error: error)
                 }
             }
         }
         persistentContainer.saveContext(backgroundContext: context)
     }
     
-    private func updateTaskList(for experiment: Experiment, in context: NSManagedObjectContext, with experimentProperties: ExperimentProperties) throws {
+    private func updateTaskList(for experiment: Experiment, in context: NSManagedObjectContext, with experimentProperties: ExperimentProperties) async throws {
         let dictionary = experimentProperties.dictionaryValue
-        guard let newTasks = dictionary["tasks"] as? [String]
-        else {
+        guard let newTasks = dictionary["tasks"] as? [String] else {
             throw JSONError.missingData
         }
         let taskProvider = TaskProvider(with: persistentContainer, fetchedResultsControllerDelegate: nil)
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
 
         do {
-            try taskProvider.fetchJSONData()
+            try await taskProvider.fetchJSONData()
             let fetchedTasks = try context.fetch(fetchRequest)
             for taskName in newTasks {
                 if let newTask = fetchedTasks.first(where: { $0.fileNameLabel == taskName }) {
@@ -200,7 +197,7 @@ extension ExperimentProvider {
                 }
             }
         } catch {
-            throw JSONError.unexpectedError(error: error)
+            throw error as? JSONError ?? .unexpectedError(error: error)
         }
     }
     

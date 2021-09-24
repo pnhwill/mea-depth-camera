@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -23,9 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        // Load the stored JSON data into the Core Data store
-        fetchExperiments()
-        
+        // Asynchronously load the stored JSON data into the Core Data store
+        _Concurrency.Task {
+            await fetchExperiments()
+        }
         return true
     }
     
@@ -47,20 +47,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
     
-    private func fetchExperiments() {
+    private func fetchExperiments() async {
         // Core Data provider to load experiments
-        lazy var experimentProvider: ExperimentProvider = {
-            let container = AppDelegate.shared.coreDataStack.persistentContainer
-            let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
-            return provider
-        }()
+        let container = coreDataStack.persistentContainer
+        let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
+        
         do {
-            try experimentProvider.fetchJSONData()
+            try await provider.fetchJSONData()
         } catch {
             let error = error as? JSONError ?? .unexpectedError(error: error)
             fatalError("Failed to fetch experiments: \(error)")
         }
     }
-    
 }
 
