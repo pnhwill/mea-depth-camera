@@ -17,6 +17,7 @@ class TaskListViewController: UITableViewController {
     static let showCameraSegueIdentifier = "ShowCameraSegue"
     static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
     static let showRecordingsSegueIdentifier = "ShowRecordingListSegue"
+    static let showInstructionsSegueIdentifier = "ShowInstructionsSegue"
     static let recordingsViewControllerIdentifier = "RecordingListViewController"
     
     private var dataSource: TaskListDataSource?
@@ -37,6 +38,14 @@ class TaskListViewController: UITableViewController {
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
             destination.configure(useCase: useCase!, task: (dataSource?.task(at: rowIndex))!)
+        }
+        if segue.identifier == Self.showInstructionsSegueIdentifier,
+           let destination = segue.destination as? TaskInstructionsViewController,
+           let button = sender as? UIButton,
+           let cell = button.superview?.superview?.superview as? UITableViewCell,
+           let indexPath = tableView.indexPath(for: cell) {
+            let rowIndex = indexPath.row
+            destination.configure(with: (dataSource?.task(at: rowIndex))!)
         }
     }
     

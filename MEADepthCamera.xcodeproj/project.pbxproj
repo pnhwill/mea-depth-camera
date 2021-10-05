@@ -52,6 +52,8 @@
 		B5796599269DED600070C294 /* MEADepthCameraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796598269DED600070C294 /* MEADepthCameraTests.swift */; };
 		B57965A4269DED600070C294 /* MEADepthCameraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */; };
 		B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B526A096B10070C294 /* VideoFileWriter.swift */; };
+		B5824A85270C078B0030C9CF /* TaskInstructionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5824A84270C078B0030C9CF /* TaskInstructionsViewController.swift */; };
+		B5824A87270C07A90030C9CF /* TaskInstructionsDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5824A86270C07A90030C9CF /* TaskInstructionsDataSource.swift */; };
 		B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */; };
 		B585A0A226C58A9500CA6546 /* Task+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */; };
 		B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */; };
@@ -167,6 +169,8 @@
 		B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEADepthCameraUITests.swift; sourceTree = "<group>"; };
 		B57965A5269DED600070C294 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
+		B5824A84270C078B0030C9CF /* TaskInstructionsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskInstructionsViewController.swift; sourceTree = "<group>"; };
+		B5824A86270C07A90030C9CF /* TaskInstructionsDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskInstructionsDataSource.swift; sourceTree = "<group>"; };
 		B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Recording+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Recording+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Task+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Task+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OutputFile+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/OutputFile+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
@@ -556,6 +560,8 @@
 			children = (
 				B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */,
 				B5F447F226EFFB7A00528ACA /* TaskListDataSource.swift */,
+				B5824A84270C078B0030C9CF /* TaskInstructionsViewController.swift */,
+				B5824A86270C07A90030C9CF /* TaskInstructionsDataSource.swift */,
 				B53B3A6326FC11CC00B4B35F /* Task Views */,
 			);
 			path = Task;
@@ -717,6 +723,7 @@
 				B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
 				B54215C626C35FAF00A4F984 /* EditTitleCell.swift in Sources */,
+				B5824A85270C078B0030C9CF /* TaskInstructionsViewController.swift in Sources */,
 				B5FB0A5426D5858600F65FA5 /* RecordingDetailEditDataSource.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
 				B53B3A6526FC11E100B4B35F /* TaskListCell.swift in Sources */,
@@ -739,6 +746,7 @@
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
 				B5F447F726F008E600528ACA /* ProcessorSettingsToDataTransformer.swift in Sources */,
+				B5824A87270C07A90030C9CF /* TaskInstructionsDataSource.swift in Sources */,
 				B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */,
 				B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */,
 				B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */,
