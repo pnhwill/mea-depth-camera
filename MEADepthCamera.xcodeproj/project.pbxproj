@@ -83,6 +83,7 @@
 		B5DF4B8E26C496680045AE43 /* UseCaseListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */; };
 		B5DF4B9126C4ADA60045AE43 /* UseCase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
+		B5ED04BB270D194F00A282FC /* ProcessingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B5ED04BA270D194F00A282FC /* ProcessingView.xib */; };
 		B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447EB26EFF7A100528ACA /* ListViewController.swift */; };
 		B5F447EE26EFF8B100528ACA /* ListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447ED26EFF8B100528ACA /* ListDataSource.swift */; };
 		B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */; };
@@ -201,6 +202,7 @@
 		B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListCell.swift; sourceTree = "<group>"; };
 		B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "UseCase+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/UseCase+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
+		B5ED04BA270D194F00A282FC /* ProcessingView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProcessingView.xib; sourceTree = "<group>"; };
 		B5F447EB26EFF7A100528ACA /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B5F447ED26EFF8B100528ACA /* ListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDataSource.swift; sourceTree = "<group>"; };
 		B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewController.swift; sourceTree = "<group>"; };
@@ -378,6 +380,7 @@
 				B5886DF626AA168B00EB344C /* Shaders */,
 				B5D6CAE826D9A3AA002165C6 /* Resources */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
+				B5ED04BA270D194F00A282FC /* ProcessingView.xib */,
 				B579658A269DED600070C294 /* Assets.xcassets */,
 				B579658C269DED600070C294 /* LaunchScreen.storyboard */,
 				B579658F269DED600070C294 /* Info.plist */,
@@ -683,6 +686,7 @@
 				B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */,
 				B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */,
 				B50944B226E94E8D0020971D /* MEADepthCamera_experiments.json in Resources */,
+				B5ED04BB270D194F00A282FC /* ProcessingView.xib in Resources */,
 				B579658E269DED600070C294 /* LaunchScreen.storyboard in Resources */,
 				B579658B269DED600070C294 /* Assets.xcassets in Resources */,
 				B5796589269DED5F0070C294 /* Main.storyboard in Resources */,
