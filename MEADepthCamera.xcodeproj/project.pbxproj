@@ -69,7 +69,6 @@
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
 		B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */; };
-		B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5ABE86026AA076F003D2AFD /* LICENSE.txt */; };
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
 		B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */; };
 		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
@@ -77,7 +76,6 @@
 		B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */; };
 		B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */ = {isa = PBXBuildFile; fileRef = B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */; };
 		B5D6CAED26D9AF4C002165C6 /* TaskProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6CAEC26D9AF4C002165C6 /* TaskProvider.swift */; };
-		B5D6CAEF26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt in Resources */ = {isa = PBXBuildFile; fileRef = B5D6CAEE26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt */; };
 		B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */; };
 		B5DF4B8C26C496000045AE43 /* UseCaseListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */; };
 		B5DF4B8E26C496680045AE43 /* UseCaseListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */; };
@@ -187,7 +185,6 @@
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderer.swift; sourceTree = "<group>"; };
-		B5ABE86026AA076F003D2AFD /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthToGrayscaleConverter.swift; sourceTree = "<group>"; };
 		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
 		B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPipeline.swift; sourceTree = "<group>"; };
@@ -196,7 +193,6 @@
 		B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewMetalView.swift; sourceTree = "<group>"; };
 		B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = virtualSLP_tasks.json; sourceTree = "<group>"; };
 		B5D6CAEC26D9AF4C002165C6 /* TaskProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskProvider.swift; sourceTree = "<group>"; };
-		B5D6CAEE26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ACKNOWLEDGEMENTS.txt; sourceTree = "<group>"; };
 		B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListViewController.swift; sourceTree = "<group>"; };
 		B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListDataSource.swift; sourceTree = "<group>"; };
 		B5DF4B8D26C496680045AE43 /* UseCaseListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListCell.swift; sourceTree = "<group>"; };
@@ -351,7 +347,6 @@
 				B5796597269DED600070C294 /* MEADepthCameraTests */,
 				B57965A2269DED600070C294 /* MEADepthCameraUITests */,
 				B579657F269DED5F0070C294 /* Products */,
-				B5ABE86226AA0778003D2AFD /* LICENSE */,
 			);
 			sourceTree = "<group>";
 		};
@@ -503,15 +498,6 @@
 				B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */,
 			);
 			path = "Depth Map Rendering";
-			sourceTree = "<group>";
-		};
-		B5ABE86226AA0778003D2AFD /* LICENSE */ = {
-			isa = PBXGroup;
-			children = (
-				B5ABE86026AA076F003D2AFD /* LICENSE.txt */,
-				B5D6CAEE26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt */,
-			);
-			path = LICENSE;
 			sourceTree = "<group>";
 		};
 		B5C732AD26BDCC72002B01C2 /* Data Pipelines */ = {
@@ -684,13 +670,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */,
-				B5ABE86126AA076F003D2AFD /* LICENSE.txt in Resources */,
 				B50944B226E94E8D0020971D /* MEADepthCamera_experiments.json in Resources */,
 				B5ED04BB270D194F00A282FC /* ProcessingView.xib in Resources */,
 				B579658E269DED600070C294 /* LaunchScreen.storyboard in Resources */,
 				B579658B269DED600070C294 /* Assets.xcassets in Resources */,
 				B5796589269DED5F0070C294 /* Main.storyboard in Resources */,
-				B5D6CAEF26D9B084002165C6 /* ACKNOWLEDGEMENTS.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
