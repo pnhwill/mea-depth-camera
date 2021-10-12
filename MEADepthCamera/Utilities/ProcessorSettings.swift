@@ -33,7 +33,10 @@ public class ProcessorSettings: NSObject {
         let videoResolution = coder.decodeCGSize(forKey: CodingKeys.videoResolution.rawValue)
         let depthResolution = coder.decodeCGSize(forKey: CodingKeys.depthResolution.rawValue)
         guard let videoOrientation = AVCaptureVideoOrientation(rawValue: coder.decodeInteger(forKey: CodingKeys.videoOrientation.rawValue)) else { return nil }
-        let cameraCalibrationData = coder.decodeObject(of: CodingCameraCalibrationData.self, forKey: CodingKeys.cameraCalibrationData.rawValue)
+        guard let cameraCalibrationData = coder.decodeObject(of: CodingCameraCalibrationData.self, forKey: CodingKeys.cameraCalibrationData.rawValue) else {
+            print("ProcessorSettings failed to decode the camera calibration data")
+            return nil
+        }
         
         self.numLandmarks = numLandmarks
         self.videoResolution = videoResolution
@@ -84,7 +87,21 @@ extension ProcessorSettings: NSSecureCoding {
 }
 
 // MARK: CodingCameraCalibrationData
-class CodingCameraCalibrationData: NSObject, NSSecureCoding {
+
+protocol CameraCalibrationDataProtocol {
+    var intrinsicMatrix: matrix_float3x3 { get }
+    var intrinsicMatrixReferenceDimensions: CGSize { get }
+    var extrinsicMatrix: matrix_float4x3 { get }
+    var pixelSize: Float { get }
+    var lensDistortionLookupTable: Data? { get }
+    var inverseLensDistortionLookupTable: Data? { get }
+    var lensDistortionCenter: CGPoint { get }
+}
+
+extension AVCameraCalibrationData: CameraCalibrationDataProtocol {
+}
+
+class CodingCameraCalibrationData: NSObject, NSSecureCoding, CameraCalibrationDataProtocol {
     // Helper class to encode/decode all the properties from AVCameraCalibrationData
     
     static var supportsSecureCoding: Bool {

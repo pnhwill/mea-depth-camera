@@ -65,7 +65,8 @@ class LandmarksTrackerProcessor: VisionProcessor {
         
         var requestHandlerOptions: [VNImageOption: AnyObject] = [:]
         
-        if let cameraIntrinsics = processorSettings.cameraCalibrationData?.intrinsicMatrix {
+        if let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol {
+            let cameraIntrinsics = cameraCalibrationData.intrinsicMatrix
             requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsics as AnyObject
         } else {
             print("\(description): Camera intrinsic data not found.")

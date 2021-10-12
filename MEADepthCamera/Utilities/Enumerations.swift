@@ -35,7 +35,7 @@ enum FileWriteResult {
 }
 
 enum TrackingState {
-    case tracking
+    case tracking(Int)
     case stopped
 }
 

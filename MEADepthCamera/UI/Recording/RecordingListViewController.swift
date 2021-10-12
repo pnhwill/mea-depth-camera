@@ -15,7 +15,8 @@ class RecordingListViewController: UITableViewController {
     private var useCase: UseCase?
     
     // Post-Processing
-    private var faceLandmarksPipelines: [FaceLandmarksPipeline] = []
+    private var recordingsToTrack: [Int: Recording] = [:]
+    private var faceLandmarksPipeline: FaceLandmarksPipeline?
     private var trackingState: TrackingState = .stopped {
         didSet {
             self.handleTrackingStateChange()
@@ -34,6 +35,7 @@ class RecordingListViewController: UITableViewController {
         super.viewDidLoad()
         tableView.dataSource = dataSource
         navigationItem.title = dataSource?.navigationTitle
+        tableView.register(UINib(nibName: Self.processingHeaderNibName, bundle: nil), forHeaderFooterViewReuseIdentifier: Self.processingViewIdentifier)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -51,6 +53,7 @@ class RecordingListViewController: UITableViewController {
 // MARK: UITableViewDelegate
 extension RecordingListViewController {
     static let processingHeaderNibName = "ProcessingView"
+    static let processingViewIdentifier = "ProcessingHeaderFooterView"
     
     override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         switch section {
@@ -68,15 +71,18 @@ extension RecordingListViewController {
         default:
             guard let isProcessed = dataSource?.isRecordingProcessed(at: section), !isProcessed else { return nil }
 
-            guard let views = Bundle.main.loadNibNamed(Self.processingHeaderNibName, owner: self, options: nil),
-                  let processingHeaderView = views[0] as? ProcessingView else { return nil }
+//            guard let views = Bundle.main.loadNibNamed(Self.processingHeaderNibName, owner: self, options: nil),
+//                  let processingHeaderView = views[0] as? ProcessingView else { return nil }
 
-            processingHeaderView.section = section
+            guard let processingView = tableView.dequeueReusableHeaderFooterView(withIdentifier: Self.processingViewIdentifier) as? ProcessingView else { return nil }
+            
+            processingView.section = section
+            
             let displayText = "Tap to Start Processing"
-            processingHeaderView.configure(isProcessing: false, frameCounterText: displayText, progress: nil, startStopAction: { section in
+            processingView.configure(isProcessing: false, frameCounterText: displayText, progress: nil, startStopAction: { section in
                 self.handleStartStopButton(in: section)
             })
-            return processingHeaderView
+            return processingView
         }
     }
 }
@@ -86,17 +92,36 @@ extension RecordingListViewController {
     
     private func handleStartStopButton(in section: Int) {
         switch trackingState {
-        case .tracking:
-            // Stop tracking
-            self.faceLandmarksPipelines[section].cancelTracking()
-            self.trackingState = .stopped
+        case .tracking(let index):
+            if index == section {
+                // Stop tracking
+                self.faceLandmarksPipeline?.cancelTracking()
+                self.trackingState = .stopped
+            } else {
+                var displayText = "Waiting..."
+                if let _ = recordingsToTrack[section] {
+                    recordingsToTrack.removeValue(forKey: section)
+                    displayText = "Tap to Start Processing"
+                } else {
+                    guard let recording = dataSource?.recording(at: section) else {
+                        print("Failed to start tracking: recording not found")
+                        return
+                    }
+                    recordingsToTrack[section] = recording
+                }
+                guard let processingView = tableView.footerView(forSection: section) as? ProcessingView else { return }
+                processingView.configure(isProcessing: false, frameCounterText: displayText, progress: nil, startStopAction: { section in
+                    self.handleStartStopButton(in: section)
+                })
+            }
         case .stopped:
             // Initialize processor and start tracking
-            self.trackingState = .tracking
+            self.trackingState = .tracking(section)
             guard let recording = dataSource?.recording(at: section) else {
                 print("Failed to start tracking: recording not found")
                 return
             }
+            recordingsToTrack[section] = recording
             visionTrackingQueue.async {
                 self.startTracking(recording)
             }
@@ -108,11 +133,10 @@ extension RecordingListViewController {
             print("Failed to start tracking: processor settings not found")
             return
         }
-        let newFaceLandmarksPipeline = FaceLandmarksPipeline(recording: recording, processorSettings: processorSettings)
-        newFaceLandmarksPipeline.delegate = self
-        faceLandmarksPipelines.append(newFaceLandmarksPipeline)
+        faceLandmarksPipeline = FaceLandmarksPipeline(recording: recording, processorSettings: processorSettings)
+        faceLandmarksPipeline?.delegate = self
         do {
-            try newFaceLandmarksPipeline.startTracking()
+            try faceLandmarksPipeline?.startTracking()
         } catch {
             self.handleTrackerError(error)
         }
@@ -133,44 +157,70 @@ extension RecordingListViewController {
     }
     
     private func handleTrackingStateChange() {
-//        var processingHeaderHidden: Bool!
-//        switch trackingState {
-//        case .stopped:
-//            processingHeaderHidden = isProcessed
-//            processingHeaderView.configure(isProcessing: false, totalFrames: 0, processedFrames: 0, startStopAction: {
-//                self.handleStartStopButton()
-//            })
-//        case .tracking:
-//            processingHeaderHidden = false
-//        }
-//        UIView.animate(withDuration: 0.5, animations: {
-//            self.view.layoutIfNeeded()
-//            self.processingHeaderView.isHidden = processingHeaderHidden
-//        })
+         //disable navigation from page
+         //start tracking next in queue
+        switch trackingState {
+        case .tracking(let index):
+            guard let processingView = tableView.footerView(forSection: index) as? ProcessingView else { break }
+            let displayText = "Analyzing..."
+            processingView.configure(isProcessing: true, frameCounterText: displayText, progress: nil, startStopAction: { section in
+                self.handleStartStopButton(in: section)
+            })
+        case .stopped:
+            if !recordingsToTrack.isEmpty {
+                guard let nextRecording = recordingsToTrack.first else { break }
+                self.trackingState = .tracking(nextRecording.key)
+                visionTrackingQueue.async {
+                    self.startTracking(nextRecording.value)
+                }
+            }
+        }
+        self.tableView.reloadData()
+        UIView.animate(withDuration: 0.5, animations: {
+            self.view.layoutIfNeeded()
+        })
     }
 }
 
 // MARK: FaceLandmarksPipelineDelegate
 extension RecordingListViewController: FaceLandmarksPipelineDelegate {
     func displayFrameCounter(_ frame: Int, totalFrames: Int) {
-//        processingHeaderView.configure(isProcessing: true, totalFrames: totalFrames, processedFrames: frame, startStopAction: {
-//            self.handleStartStopButton()
-//        })
+        switch trackingState {
+        case .tracking(let index):
+            guard let processingView = tableView.footerView(forSection: index) as? ProcessingView else { return }
+            let displayText = "Frame: \(frame)/\(totalFrames)"
+            let progress = Float(frame) / Float(totalFrames)
+            processingView.configure(isProcessing: true, frameCounterText: displayText, progress: progress, startStopAction: { section in
+                self.handleStartStopButton(in: section)
+            })
+        case .stopped:
+            return
+        }
     }
     
     func didFinishTracking(success: Bool) {
-//        isProcessed = success
-//        DispatchQueue.main.async {
-//            self.trackingState = .stopped
-//        }
-//        if let recording = recording {
-//            let context = recording.managedObjectContext
-//            if isProcessed {
-//                persistentContainer?.saveContext(backgroundContext: context)
-//            } else {
-//                context?.rollback()
-//            }
-//            context?.refresh(recording, mergeChanges: true)
-//        }
+        switch trackingState {
+        case .tracking(let index):
+            guard let recording = recordingsToTrack[index] else { return }
+
+            let context = recording.managedObjectContext
+            let container = dataSource?.recordingProvider.persistentContainer
+            if success {
+                // save the recording to persistent storage
+                recording.isProcessed = true
+                container?.saveContext(backgroundContext: context)
+            } else {
+                context?.rollback()
+            }
+            container?.viewContext.refresh(recording, mergeChanges: true)
+            // remove recording from tracking waiting list
+            recordingsToTrack.removeValue(forKey: index)
+            
+            DispatchQueue.main.async {
+                self.trackingState = .stopped
+            }
+        case .stopped:
+            return
+        }
     }
 }

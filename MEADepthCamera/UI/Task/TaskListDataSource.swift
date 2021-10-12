@@ -52,9 +52,10 @@ extension TaskListDataSource: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.taskListCellIdentifier, for: indexPath) as? TaskListCell else {
             fatalError("###\(#function): Failed to dequeue a TaskListCell. Check the cell reusable identifier in Main.storyboard.")
         }
-        if let currentTask = task(at: indexPath.row),
-           let taskName = currentTask.name {
-            cell.configure(name: taskName, recordingsCount: recordingsCount(for: currentTask))
+        if let currentTask = task(at: indexPath.row), let taskName = currentTask.name {
+            let recordingsCount = recordingsCount(for: currentTask)
+            cell.configure(name: taskName, recordingsCount: recordingsCount)
+            //cell.isUserInteractionEnabled = recordingsCount > 0
         }
         return cell
     }

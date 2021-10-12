@@ -9,11 +9,13 @@ import Foundation
 
 class InfoFileWriter: CSVFileWriter {
     
+    private var recording: Recording
     private var processorSettings: ProcessorSettings
     
     private var saveURL: URL?
     
-    init(processorSettings: ProcessorSettings) {
+    init(recording: Recording, processorSettings: ProcessorSettings) {
+        self.recording = recording
         self.processorSettings = processorSettings
     }
     
@@ -41,13 +43,10 @@ class InfoFileWriter: CSVFileWriter {
     }
     
     func createInfoRow(startTime: String, totalFrames: Int) {
-        guard let fileURL = saveURL else {
+        guard let fileURL = saveURL, let patientID = recording.useCase?.subjectID, let task = recording.task?.name else {
             print("No save path found")
             return
         }
-        
-        let patientID = NSUUID().uuidString
-        let task = ""
         
         let (portraitVideoResolution, portraitDepthResolution) = processorSettings.getPortraitResolutions()
         

@@ -101,11 +101,12 @@ class PointCloudProcessor {
         }
         
         // Get camera instrinsics
-        guard var intrinsics: float3x3 = processorSettings.cameraCalibrationData?.intrinsicMatrix,
-              let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions else {
-            print("Could not find camera calibration data")
+        guard let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol else {
+            print("\(description): Could not find camera calibration data")
             return nil
         }
+        var intrinsics: float3x3 = cameraCalibrationData.intrinsicMatrix
+        let referenceDimensions: CGSize = cameraCalibrationData.intrinsicMatrixReferenceDimensions
         
         // Bring focal and principal points into the same coordinate system as the depth map
         let ratio: Float = Float(referenceDimensions.width) / Float(CVPixelBufferGetWidth(depthFrame))

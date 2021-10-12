@@ -12,6 +12,12 @@ class RecordingListDataSource: NSObject {
     
     var navigationTitle: String = "Review Recordings"
     
+    lazy var recordingProvider: RecordingProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = RecordingProvider(with: container)
+        return provider
+    }()
+    
     private var useCase: UseCase
     private var task: Task
     private lazy var recordings: [Recording]? = {
@@ -22,10 +28,13 @@ class RecordingListDataSource: NSObject {
     init(useCase: UseCase, task: Task) {
         self.useCase = useCase
         self.task = task
+        super.init()
+        sortRecordings()
     }
     
     func sortRecordings() {
-        // sort recordings by most recent
+        // sort recordings by most recent (abusing the fact that they are currently always named by datetime)
+        recordings?.sort { $0.name! < $1.name! }
     }
     
     func recording(at section: Int) -> Recording? {

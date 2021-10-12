@@ -11,7 +11,7 @@ A UIView subclass that manages the section processing header for the recording l
 
 import UIKit
 
-class ProcessingView: UIView {
+class ProcessingView: UITableViewHeaderFooterView {
     typealias StartStopAction = (Int) -> Void
     
     var section: Int = -1

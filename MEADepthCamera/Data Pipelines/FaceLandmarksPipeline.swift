@@ -50,7 +50,7 @@ class FaceLandmarksPipeline: DataPipeline {
         self.pointCloudProcessor = PointCloudProcessor(settings: processorSettings)
         self.faceLandmarks2DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
         self.faceLandmarks3DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
-        self.infoFileWriter = InfoFileWriter(processorSettings: processorSettings)
+        self.infoFileWriter = InfoFileWriter(recording: recording, processorSettings: processorSettings)
     }
     
     // MARK: - Pipeline Setup
@@ -112,7 +112,7 @@ class FaceLandmarksPipeline: DataPipeline {
         if FileManager.default.fileExists(atPath: videoURL.path) {
             totalFrames = Int(getNumberOfFrames(videoURL))
         } else {
-            print("File does not exist at specified URL")
+            print("File does not exist at specified URL: \(videoURL.path)")
             return nil
         }
         let videoAsset = AVAsset(url: videoURL)
@@ -300,12 +300,14 @@ class FaceLandmarksPipeline: DataPipeline {
     
     private func rectifyLandmark(landmark: CGPoint) -> CGPoint? {
         // Get camera instrinsics
-        guard let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions,
-              let opticalCenter: CGPoint = processorSettings.cameraCalibrationData?.lensDistortionCenter,
-              let lookupTable = processorSettings.cameraCalibrationData?.inverseLensDistortionLookupTable else {
-            print("Could not find camera calibration data")
+        guard let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
+              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
+            print("FaceLandmarksPipeline.rectifyLandmark: Could not find camera calibration data")
             return nil
         }
+        let referenceDimensions: CGSize = cameraCalibrationData.intrinsicMatrixReferenceDimensions
+        let opticalCenter: CGPoint = cameraCalibrationData.lensDistortionCenter
+        
         let ratio: Float = Float(referenceDimensions.width) / Float(processorSettings.depthResolution.width)
         let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
         
@@ -318,12 +320,14 @@ class FaceLandmarksPipeline: DataPipeline {
         // Method to rectify the depth data map from lens-distorted to rectilinear coordinate space
         
         // Get camera instrinsics
-        guard let referenceDimensions: CGSize = processorSettings.cameraCalibrationData?.intrinsicMatrixReferenceDimensions,
-              let opticalCenter: CGPoint = processorSettings.cameraCalibrationData?.lensDistortionCenter,
-              let lookupTable = processorSettings.cameraCalibrationData?.inverseLensDistortionLookupTable else {
-            print("Could not find camera calibration data")
+        guard let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
+              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
+            print("FaceLandmarksPipeline.rectifyDepthDataMap: Could not find camera calibration data")
             return nil
         }
+        let referenceDimensions: CGSize = cameraCalibrationData.intrinsicMatrixReferenceDimensions
+        let opticalCenter: CGPoint = cameraCalibrationData.lensDistortionCenter
+        
         let ratio: Float = Float(referenceDimensions.width) / Float(CVPixelBufferGetWidth(depthDataMap))
         let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
         
