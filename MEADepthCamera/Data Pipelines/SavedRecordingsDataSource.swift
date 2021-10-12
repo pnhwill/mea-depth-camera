@@ -43,6 +43,7 @@ class SavedRecordingsDataSource {
     
     func addRecording(_ folderURL: URL, outputFiles: [OutputType: URL], processorSettings: ProcessorSettings) {
         let folderName = folderURL.lastPathComponent
+        print(folderName)
         var savedFiles = [SavedFile]()
         for file in outputFiles {
             let outputType = file.key

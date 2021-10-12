@@ -187,7 +187,7 @@ class CodingMatrixFloat3: NSObject, NSSecureCoding {
             bytePointer.withMemoryRebound(to: Float3.self, capacity: numColumns) { pointer in
                 let bufferPointer = UnsafeBufferPointer<Float3>(start: pointer, count: numColumns)
                 self.columns = Array<Float3>(bufferPointer)
-                print("Finished decoding matrix float3")
+                //print("Finished decoding matrix float3")
             }
         }
     }

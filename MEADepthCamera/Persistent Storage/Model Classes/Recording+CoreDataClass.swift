@@ -14,7 +14,7 @@ public class Recording: NSManagedObject {
     
     public override func awakeFromFetch() {
         super.awakeFromFetch()
-        folderURL = useCase?.folderURL?.appendingPathComponent(name!)
+        //folderURL = useCase?.folderURL?.appendingPathComponent(name!)
     }
     
     func addFiles(newFiles: [OutputType: URL]) {

@@ -37,7 +37,10 @@ class TaskListViewController: UITableViewController {
            let cell = button.superview?.superview?.superview as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
-            destination.configure(useCase: useCase!, task: (dataSource?.task(at: rowIndex))!)
+            guard let task = dataSource?.task(at: rowIndex), let useCase = useCase else {
+                fatalError("Couldn't find use case or data source for task list.")
+            }
+            destination.configure(useCase: useCase, task: task)
         }
         if segue.identifier == Self.showInstructionsSegueIdentifier,
            let destination = segue.destination as? TaskInstructionsViewController,
@@ -45,7 +48,20 @@ class TaskListViewController: UITableViewController {
            let cell = button.superview?.superview?.superview as? UITableViewCell,
            let indexPath = tableView.indexPath(for: cell) {
             let rowIndex = indexPath.row
-            destination.configure(with: (dataSource?.task(at: rowIndex))!)
+            guard let task = dataSource?.task(at: rowIndex) else {
+                fatalError("Couldn't find data source for task list.")
+            }
+            destination.configure(with: task)
+        }
+        if segue.identifier == Self.showRecordingsSegueIdentifier,
+           let destination = segue.destination as? RecordingListViewController,
+           let cell = sender as? UITableViewCell,
+           let indexPath = tableView.indexPath(for: cell) {
+            let rowIndex = indexPath.row
+            guard let task = dataSource?.task(at: rowIndex), let useCase = useCase else {
+                fatalError("Couldn't find use case or data source for task list.")
+            }
+            destination.configure(useCase: useCase, task: task)
         }
     }
     

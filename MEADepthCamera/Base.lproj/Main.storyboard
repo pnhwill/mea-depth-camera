@@ -506,7 +506,7 @@
         <scene sceneID="ehe-MH-j3c">
             <objects>
                 <tableViewController id="Z7g-vw-i9h" customClass="TaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="2ls-Ny-z9I">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="2ls-Ny-z9I">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -542,7 +542,7 @@
                             </connections>
                         </view>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="TaskListCell" id="xIt-f8-TOj" customClass="TaskListCell" customModule="MEADepthCamera" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TaskListCell" id="xIt-f8-TOj" customClass="TaskListCell" customModule="MEADepthCamera" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="145.66666603088379" width="390" height="122.33333587646484"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xIt-f8-TOj" id="RkN-ch-tG5">
@@ -608,6 +608,7 @@
                                     <outlet property="nameLabel" destination="bVd-ds-Q63" id="FJt-DU-SVq"/>
                                     <outlet property="recordingsCountLabel" destination="Y4b-2t-JOq" id="fc0-SM-Gun"/>
                                     <outlet property="startButton" destination="KVg-Xt-Fg6" id="thc-Dx-aOj"/>
+                                    <segue destination="3zb-Uo-vhB" kind="show" identifier="ShowRecordingListSegue" id="k4T-Mi-BIl"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -630,7 +631,7 @@
         <!--Recording List View Controller-->
         <scene sceneID="YVd-zm-NXq">
             <objects>
-                <tableViewController storyboardIdentifier="RecordingDetailViewController" id="3zb-Uo-vhB" customClass="RecordingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="RecordingListViewController" id="3zb-Uo-vhB" customClass="RecordingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="J99-GO-jst">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -736,6 +737,7 @@
                             <outlet property="delegate" destination="3zb-Uo-vhB" id="qyu-uB-fP3"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="2UX-sI-N1d"/>
                     <connections>
                         <outlet property="useCaseView" destination="BeD-Sn-hNW" id="AnW-nm-ybM"/>
                     </connections>

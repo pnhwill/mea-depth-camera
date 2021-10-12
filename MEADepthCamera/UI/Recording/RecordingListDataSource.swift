@@ -9,11 +9,14 @@ import UIKit
 import CoreData
 
 class RecordingListDataSource: NSObject {
-
+    
+    var navigationTitle: String = "Review Recordings"
+    
     private var useCase: UseCase
     private var task: Task
     private lazy var recordings: [Recording]? = {
-        return useCase.recordings?.filter { ($0 as! Recording).task == task } as? [Recording]
+        let recordings = useCase.recordings?.filter { ($0 as! Recording).task == task } as? [Recording]
+        return recordings
     }()
     
     init(useCase: UseCase, task: Task) {
@@ -59,7 +62,7 @@ extension RecordingListDataSource: UITableViewDataSource {
             guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.recordingListCellIdentifier, for: indexPath) as? RecordingListCell else {
                 fatalError("###\(#function): Failed to dequeue a RecordingListCell. Check the cell reusable identifier in Main.storyboard.")
             }
-            if let currentRecording = recording(at: indexPath.section), let folderText = currentRecording.folderURL?.lastPathComponent {
+            if let currentRecording = recording(at: section), let folderText = currentRecording.folderURL?.lastPathComponent {
                 cell.configure(folderName: folderText,
                                durationText: currentRecording.durationText(),
                                filesCountText: currentRecording.filesCountText())
@@ -69,9 +72,14 @@ extension RecordingListDataSource: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        guard let currentRecording = recording(at: section) else { return nil }
-        let sectionTitleText = currentRecording.isProcessed ? "Processed" : "Not Processed"
-        return sectionTitleText
+        switch section {
+        case 0:
+            return nil
+        default:
+            guard let currentRecording = recording(at: section) else { return nil }
+            let sectionTitleText = currentRecording.isProcessed ? "Processed" : "Not Processed"
+            return sectionTitleText
+        }
     }
     
     //TODO: delete recordings
@@ -86,4 +94,11 @@ extension Recording {
     func filesCountText() -> String {
         return String(filesCount) + " Files"
     }
+}
+
+// MARK: Face Landmarks Processing
+extension RecordingListDataSource {
+    
+
+    
 }
