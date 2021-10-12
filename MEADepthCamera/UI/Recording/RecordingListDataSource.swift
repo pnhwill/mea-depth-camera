@@ -104,10 +104,3 @@ extension Recording {
         return String(filesCount) + " Files"
     }
 }
-
-// MARK: Face Landmarks Processing
-extension RecordingListDataSource {
-    
-
-    
-}

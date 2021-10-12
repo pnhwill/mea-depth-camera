@@ -41,8 +41,3 @@ class ProcessingView: UITableViewHeaderFooterView {
         startStopAction?(section)
     }
 }
-
-//let frameCounterText = "Frame: \(processedFrames)/\(totalFrames)"
-//let progress = Float(processedFrames) / Float(totalFrames)
-//var frameCounterText = 
-//frameCounterText = "Analyzing..."

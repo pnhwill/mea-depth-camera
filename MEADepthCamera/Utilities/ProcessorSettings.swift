@@ -81,8 +81,12 @@ extension ProcessorSettings: NSSecureCoding {
         coder.encode(videoResolution, forKey: CodingKeys.videoResolution.rawValue)
         coder.encode(depthResolution, forKey: CodingKeys.depthResolution.rawValue)
         coder.encode(videoOrientation.rawValue, forKey: CodingKeys.videoOrientation.rawValue)
-        let codingCameraCalibrationData = CodingCameraCalibrationData(from: cameraCalibrationData!)
-        coder.encode(codingCameraCalibrationData, forKey: CodingKeys.cameraCalibrationData.rawValue)
+        if let cameraCalibrationData = cameraCalibrationData {
+            let codingCameraCalibrationData = CodingCameraCalibrationData(from: cameraCalibrationData)
+            coder.encode(codingCameraCalibrationData, forKey: CodingKeys.cameraCalibrationData.rawValue)
+        } else {
+            coder.encode(decodedCameraCalibrationData, forKey: CodingKeys.cameraCalibrationData.rawValue)
+        }
     }
 }
 

@@ -12,19 +12,17 @@ class TaskInstructionsViewController: UIViewController {
     @IBOutlet private weak var nameLabel: UILabel!
     @IBOutlet private weak var instructionsLabel: UILabel!
     
-    private var task: Task?
-    //private var dataSource: TaskInstructionsDataSource?
+    private var dataSource: TaskInstructionsDataSource?
     
     func configure(with task: Task) {
-        self.task = task
+        dataSource = TaskInstructionsDataSource(task: task)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        guard let _ = task else {
-            fatalError("No task found for instructions view")
+        guard dataSource != nil else {
+            fatalError("No data source found for task instructions view")
         }
-        //dataSource = TaskInstructionsDataSource(task: task)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -33,8 +31,8 @@ class TaskInstructionsViewController: UIViewController {
     }
     
     private func refreshUI() {
-        nameLabel.text = task?.name
-        instructionsLabel.text = task?.instructions
+        nameLabel.text = dataSource?.task.name
+        instructionsLabel.text = dataSource?.task.instructions
     }
     
 }

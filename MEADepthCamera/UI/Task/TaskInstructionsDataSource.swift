@@ -9,7 +9,7 @@ import Foundation
 
 class TaskInstructionsDataSource {
     
-    private var task: Task
+    private(set) var task: Task
     
     init(task: Task) {
         self.task = task
