@@ -70,9 +70,7 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     
     var fileWritingDone: AnyCancellable?
     
-    // Face landmarks post-processing
-    
-    private var faceLandmarksPipeline: FaceLandmarksPipeline?
+    // Save recordings to persistent storage
     private let savedRecordingsDataSource: SavedRecordingsDataSource
     
     let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
@@ -470,7 +468,7 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
         let faceBounds = faceObservation.boundingBox
         //print("x: \(faceBounds.midX)")
         //print("y: \(faceBounds.midY)")
-        print("size: \(faceBounds.size)")
+        //print("size: \(faceBounds.size)")
         
         // Check if face is centered on the screen
         let centerPoint = CGPoint(x: 0.5, y: 0.43)
