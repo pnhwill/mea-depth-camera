@@ -15,9 +15,9 @@ class TaskListCell: UITableViewCell {
     @IBOutlet weak var startButton: UIButton!
     @IBOutlet weak var instructionsButton: UIButton!
     
-    func configure(name: String, recordingsCount: Int) {
+    func configure(name: String, recordingsCountText: String) {
         nameLabel.text = name
-        recordingsCountLabel.text = String(recordingsCount) + " Recordings"
+        recordingsCountLabel.text = recordingsCountText
     }
     
     override func layoutSubviews() {

@@ -13,5 +13,20 @@ import CoreData
 public class UseCase: NSManagedObject {
 
     
-    
+    func recordingsCount(for task: Task) -> Int {
+        let recordings = recordings as! Set<Recording>
+        return recordings.reduce(0) { $0 + ($1.task == task ? 1 : 0) }
+    }
+}
+
+// MARK: Text Formatters
+extension UseCase {
+    func recordingsCountText() -> String {
+        switch recordingsCount {
+        case 1:
+            return String(recordingsCount) + " Recording"
+        default:
+            return String(recordingsCount) + " Recordings"
+        }
+    }
 }

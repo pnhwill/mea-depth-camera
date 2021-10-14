@@ -7,13 +7,12 @@
 
 import UIKit
 
-class TaskListViewController: UITableViewController {
+class TaskListViewController: ListViewController {
     
     // MARK: Properties
     
     @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     
-    static let mainStoryboardName = "Main"
     static let showCameraSegueIdentifier = "ShowCameraSegue"
     static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
     static let showRecordingsSegueIdentifier = "ShowRecordingListSegue"
@@ -61,13 +60,13 @@ class TaskListViewController: UITableViewController {
             guard let task = dataSource?.task(at: rowIndex), let useCase = useCase else {
                 fatalError("Couldn't find use case or data source for task list.")
             }
-            destination.configure(useCase: useCase, task: task)
+            destination.configure(useCase: useCase, task: task, delegate: self)
         }
     }
     
     @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
-        tableView.reloadData()
         dataSource?.sortTasks()
+        tableView.reloadData()
     }
     
     // MARK: Life Cycle
@@ -87,4 +86,43 @@ class TaskListViewController: UITableViewController {
         let titleText = [useCase?.experiment?.title, useCase?.title].compactMap { $0 }.joined(separator: ": ")
         useCaseView.configure(title: titleText, subjectIDText: useCase?.subjectID)
     }
+}
+
+// MARK: RecordingInteractionDelegate
+extension TaskListViewController: RecordingInteractionDelegate {
+    /**
+     didUpdateRecording is called as part of RecordingInteractionDelegate, or whenever a recording update requires a UI update.
+     
+     Respond by updating the UI as follows.
+     - delete: reload selected row.
+     - delete all: sort the task list and reload entire table.
+     */
+    func didUpdateRecording(_ recording: Recording?, shouldReloadRow: Bool) {
+        
+        // Get the indexPath for the recording. Use the currently selected indexPath if any, or the first row otherwise.
+        // indexPath will remain nil if the tableView has no data.
+        var indexPath: IndexPath?
+        if let _ = recording {
+            // indexPath = dataSource.index(for: recording.task)
+        } else {
+            indexPath = tableView.indexPathForSelectedRow
+            if indexPath == nil && tableView.numberOfRows(inSection: 0) > 0 {
+                indexPath = IndexPath(row: 0, section: 0)
+            }
+        }
+        
+        // Update the taskListViewController: make sure the row is visible and the content is up to date.
+        if let indexPath = indexPath {
+            if shouldReloadRow {
+                tableView.reloadRows(at: [indexPath], with: .none)
+                // If we deleted a the last recording for a task, sort the tasks again and reload the whole table
+                if let task = dataSource?.task(at: indexPath.row), useCase?.recordingsCount(for: task) == 0 {
+                    dataSource?.sortTasks()
+                    tableView.reloadData()
+                }
+            }
+            tableView.scrollToRow(at: indexPath, at: .none, animated: false)
+        }
+    }
+    
 }

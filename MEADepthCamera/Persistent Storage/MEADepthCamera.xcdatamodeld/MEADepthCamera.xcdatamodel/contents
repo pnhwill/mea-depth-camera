@@ -61,10 +61,10 @@
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Recording" inverseName="useCase" inverseEntity="Recording"/>
     </entity>
     <elements>
-        <element name="Experiment" positionX="-90" positionY="45" width="128" height="89"/>
-        <element name="OutputFile" positionX="182.8414306640625" positionY="172.0172119140625" width="128" height="104"/>
-        <element name="Recording" positionX="-45" positionY="54" width="128" height="179"/>
-        <element name="Task" positionX="-268.1070556640625" positionY="278.8963012695313" width="128" height="194"/>
-        <element name="UseCase" positionX="-291.281005859375" positionY="-106.6669311523438" width="128" height="179"/>
+        <element name="Experiment" positionX="-887.7432861328125" positionY="5.99066162109375" width="128" height="89"/>
+        <element name="OutputFile" positionX="-571.6380615234375" positionY="554.7482299804688" width="128" height="104"/>
+        <element name="Recording" positionX="-570.1903076171875" positionY="228.2449951171875" width="128" height="179"/>
+        <element name="Task" positionX="-925.098388671875" positionY="211.0825805664063" width="128" height="194"/>
+        <element name="UseCase" positionX="-566.7933349609375" positionY="-38.43167114257818" width="128" height="179"/>
     </elements>
 </model>

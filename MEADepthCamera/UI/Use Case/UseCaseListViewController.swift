@@ -7,12 +7,11 @@
 
 import UIKit
 
-class UseCaseListViewController: UITableViewController {
+class UseCaseListViewController: ListViewController {
     
     @IBOutlet var filterSegmentedControl: UISegmentedControl!
     
     static let unwindFromListSegueIdentifier = "UnwindFromUseCaseListSegue"
-    static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
     
     private var dataSource: UseCaseListDataSource?
@@ -26,6 +25,15 @@ class UseCaseListViewController: UITableViewController {
     // MARK: Navigation
     func configure(with useCase: UseCase?) {
         currentUseCaseID = useCase?.id
+        dataSource = UseCaseListDataSource(useCaseDeletedAction: { deletedUseCaseID in
+            if deletedUseCaseID == self.currentUseCaseID {
+                self.currentUseCaseID = nil
+            }
+        }, useCaseChangedAction: {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        })
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -45,16 +53,8 @@ class UseCaseListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        dataSource = UseCaseListDataSource(useCaseDeletedAction: { deletedUseCaseID in
-            if deletedUseCaseID == self.currentUseCaseID {
-                self.currentUseCaseID = nil
-            }
-        }, useCaseChangedAction: {
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        })
         tableView.dataSource = dataSource
+        navigationItem.title = dataSource?.navigationTitle
         // Search bar controller
         let searchController = UISearchController(searchResultsController: nil)
         searchController.searchResultsUpdater = dataSource
@@ -104,7 +104,10 @@ class UseCaseListViewController: UITableViewController {
         let navigationController = UINavigationController(rootViewController: detailViewController)
         present(navigationController, animated: true, completion: nil)
     }
-    
+}
+
+// MARK: UITableViewDelegate
+extension UseCaseListViewController {
     override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
         // Push the detail view when the info button is pressed.
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)

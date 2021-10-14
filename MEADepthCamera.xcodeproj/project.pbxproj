@@ -29,6 +29,9 @@
 		B54215CC26C36D6B00A4F984 /* UseCaseSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54215CB26C36D6B00A4F984 /* UseCaseSummaryView.swift */; };
 		B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B54215CD26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld */; };
 		B542161026C45F7300A4F984 /* PersistentContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B542160F26C45F7300A4F984 /* PersistentContainer.swift */; };
+		B56BF7682717402D003622F1 /* CodingCameraCalibrationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */; };
+		B56BF76A27174089003622F1 /* CodingMatrixFloat3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */; };
+		B56BF76C271784DD003622F1 /* RecordingInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56BF76B271784DD003622F1 /* RecordingInteractionDelegate.swift */; };
 		B56F1A6426E0430600A29C42 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A6326E0430600A29C42 /* CoreDataStack.swift */; };
 		B56F1A6626E045AF00A29C42 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A6526E045AF00A29C42 /* Schema.swift */; };
 		B56F1A8A26E06B2300A29C42 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A8926E06B2300A29C42 /* DataProvider.swift */; };
@@ -138,6 +141,9 @@
 		B54215CB26C36D6B00A4F984 /* UseCaseSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseSummaryView.swift; sourceTree = "<group>"; };
 		B54215CE26C45A3900A4F984 /* MEADepthCamera.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MEADepthCamera.xcdatamodel; sourceTree = "<group>"; };
 		B542160F26C45F7300A4F984 /* PersistentContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentContainer.swift; sourceTree = "<group>"; };
+		B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingCameraCalibrationData.swift; sourceTree = "<group>"; };
+		B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingMatrixFloat3.swift; sourceTree = "<group>"; };
+		B56BF76B271784DD003622F1 /* RecordingInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingInteractionDelegate.swift; sourceTree = "<group>"; };
 		B56F1A6326E0430600A29C42 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		B56F1A6526E045AF00A29C42 /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
 		B56F1A8926E06B2300A29C42 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
@@ -292,7 +298,7 @@
 				B56F1A6526E045AF00A29C42 /* Schema.swift */,
 				B57FBD3726F27EE100ACC129 /* Model Classes */,
 				B56F1A6226E0401200A29C42 /* Data Provider */,
-				B57FBD3B26F281E900ACC129 /* Archiving */,
+				B57FBD3B26F281E900ACC129 /* Processor Settings */,
 			);
 			path = "Persistent Storage";
 			sourceTree = "<group>";
@@ -436,19 +442,21 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
-		B57FBD3B26F281E900ACC129 /* Archiving */ = {
+		B57FBD3B26F281E900ACC129 /* Processor Settings */ = {
 			isa = PBXGroup;
 			children = (
+				B5F447F426F0047800528ACA /* ProcessorSettings.swift */,
+				B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */,
+				B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */,
 				B5F447F626F008E600528ACA /* ProcessorSettingsToDataTransformer.swift */,
 			);
-			path = Archiving;
+			path = "Processor Settings";
 			sourceTree = "<group>";
 		};
 		B587705E26B4AD8900E26C7D /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
 				B587706126B4AEAC00E26C7D /* CommonTypes.swift */,
-				B5F447F426F0047800528ACA /* ProcessorSettings.swift */,
 				B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */,
 				B5886E0026AA7F8500EB344C /* Extensions.swift */,
 				B587705F26B4ADAC00E26C7D /* Functions.swift */,
@@ -530,6 +538,7 @@
 				B5FB0A4826D44FBB00F65FA5 /* RecordingDetailViewController.swift */,
 				B5FB0A4A26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift */,
 				B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */,
+				B56BF76B271784DD003622F1 /* RecordingInteractionDelegate.swift */,
 				B5FB0A5026D577AE00F65FA5 /* Recording Views */,
 			);
 			path = Recording;
@@ -700,6 +709,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B56F1A8A26E06B2300A29C42 /* DataProvider.swift in Sources */,
+				B56BF7682717402D003622F1 /* CodingCameraCalibrationData.swift in Sources */,
 				B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */,
 				B5D6CAED26D9AF4C002165C6 /* TaskProvider.swift in Sources */,
 				B585A0A226C58A9500CA6546 /* Task+CoreDataClass.swift in Sources */,
@@ -757,6 +767,7 @@
 				B5FB0A5226D577C900F65FA5 /* RecordingListCell.swift in Sources */,
 				B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */,
 				B50944B626E97D120020971D /* EditExperimentCell.swift in Sources */,
+				B56BF76C271784DD003622F1 /* RecordingInteractionDelegate.swift in Sources */,
 				B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */,
 				B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
@@ -776,6 +787,7 @@
 				B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */,
 				B5DF4B9126C4ADA60045AE43 /* UseCase+CoreDataClass.swift in Sources */,
 				B5886DFD26AA61E100EB344C /* LiveFaceDetectionProcessor.swift in Sources */,
+				B56BF76A27174089003622F1 /* CodingMatrixFloat3.swift in Sources */,
 				B542161026C45F7300A4F984 /* PersistentContainer.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 			);

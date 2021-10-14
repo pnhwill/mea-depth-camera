@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class UseCaseListDataSource: NSObject {
+class UseCaseListDataSource: NSObject, ListDataSource {
     typealias UseCaseDeletedAction = (UUID?) -> Void
     typealias UseCaseChangedAction = () -> Void
     
@@ -29,6 +29,8 @@ class UseCaseListDataSource: NSObject {
             }
         }
     }
+    
+    var navigationTitle: String = "Use Case List"
     
     var filter: Filter = .all
     
@@ -114,8 +116,9 @@ extension UseCaseListDataSource: UITableViewDataSource {
         }
         if let currentUseCase = useCase(at: indexPath.row) {
             let dateText = currentUseCase.dateTimeText(for: filter)
-            let titleText = [currentUseCase.experiment?.title, currentUseCase.title].compactMap { $0 }.joined(separator: ": ")
-            cell.configure(title: titleText, dateText: dateText, subjectIDText: currentUseCase.subjectID, numRecordings: Int(currentUseCase.recordingsCount))
+            let titleText = [currentUseCase.experimentTitle, currentUseCase.title].compactMap { $0 }.joined(separator: ": ")
+            let recordingsCountText = currentUseCase.recordingsCountText()
+            cell.configure(title: titleText, dateText: dateText, subjectIDText: currentUseCase.subjectID, recordingsCountText: recordingsCountText)
         }
         return cell
     }

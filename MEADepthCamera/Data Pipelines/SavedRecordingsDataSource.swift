@@ -72,7 +72,7 @@ class SavedRecordingsDataSource {
             newRecording.useCase = useCase
             newRecording.task = task
             newRecording.folderURL = recording.folderURL
-            print(recording.folderURL)
+            print("Recording saved in folder named: \(recording.folderURL)")
             newRecording.name = recording.name
             newRecording.duration = recording.duration ?? 0
             newRecording.processorSettings = self.processorSettings

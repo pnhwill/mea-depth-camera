@@ -10,9 +10,11 @@ import CoreData
 
 class RecordingListDataSource: NSObject {
     
+    typealias RecordingDeletedAction = () -> Void
+    
     var navigationTitle: String = "Review Recordings"
     
-    lazy var recordingProvider: RecordingProvider = {
+    lazy var dataProvider: RecordingProvider = {
         let container = AppDelegate.shared.coreDataStack.persistentContainer
         let provider = RecordingProvider(with: container)
         return provider
@@ -25,9 +27,12 @@ class RecordingListDataSource: NSObject {
         return recordings
     }()
     
-    init(useCase: UseCase, task: Task) {
+    private var recordingDeletedAction: RecordingDeletedAction?
+    
+    init(useCase: UseCase, task: Task, recordingDeletedAction: @escaping RecordingDeletedAction) {
         self.useCase = useCase
         self.task = task
+        self.recordingDeletedAction = recordingDeletedAction
         super.init()
         sortRecordings()
     }
@@ -37,6 +42,20 @@ class RecordingListDataSource: NSObject {
         recordings?.sort { $0.name! < $1.name! }
     }
     
+    func delete(at section: Int, completion: @escaping (Bool) -> Void) {
+        if let recording = self.recording(at: section) {
+            dataProvider.delete(recording) { success in
+                if success {
+                    let index = self.index(for: section)
+                    self.recordings?.remove(at: index)
+                }
+                completion(success)
+            }
+        } else {
+            completion(false)
+        }
+    }
+    
     func recording(at section: Int) -> Recording? {
         return recordings?[section - 1]
     }
@@ -44,6 +63,16 @@ class RecordingListDataSource: NSObject {
     func isRecordingProcessed(at section: Int) -> Bool? {
         let recording = recording(at: section)
         return recording?.isProcessed
+    }
+    
+    func index(for section: Int) -> Int {
+        // Below implementation is only needed once dynamic sorting is added.
+//        let filteredReminder = filteredReminders[filteredIndex]
+//        guard let index = reminders.firstIndex(where: { $0.id == filteredReminder.id }) else {
+//            fatalError("Couldn't retrieve index in source array")
+//        }
+//        return index
+        return section - 1
     }
 }
 
@@ -91,16 +120,19 @@ extension RecordingListDataSource: UITableViewDataSource {
         }
     }
     
-    //TODO: delete recordings
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        guard editingStyle == .delete else {
+            return
+        }
+        delete(at: indexPath.section) { success in
+            if success {
+                DispatchQueue.main.async {
+                    tableView.reloadData()
+                    self.recordingDeletedAction?()
+                }
+            }
+        }
+    }
     
 }
 
-// MARK: Duration Text Formatters
-extension Recording {
-    func durationText() -> String {
-        return String(duration)
-    }
-    func filesCountText() -> String {
-        return String(filesCount) + " Files"
-    }
-}

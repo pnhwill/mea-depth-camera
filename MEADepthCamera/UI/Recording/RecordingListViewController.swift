@@ -7,12 +7,14 @@
 
 import UIKit
 
-class RecordingListViewController: UITableViewController {
+class RecordingListViewController: ListViewController {
     
     @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     
     private var dataSource: RecordingListDataSource?
     private var useCase: UseCase?
+    
+    private weak var delegate: RecordingInteractionDelegate?
     
     // Post-Processing
     private var recordingsToTrack: [Int: Recording] = [:]
@@ -24,9 +26,12 @@ class RecordingListViewController: UITableViewController {
     }
     let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
-    func configure(useCase: UseCase, task: Task) {
+    func configure(useCase: UseCase, task: Task, delegate: RecordingInteractionDelegate) {
         self.useCase = useCase
-        dataSource = RecordingListDataSource(useCase: useCase, task: task)
+        self.delegate = delegate
+        dataSource = RecordingListDataSource(useCase: useCase, task: task, recordingDeletedAction: {
+            self.delegate?.didUpdateRecording(nil, shouldReloadRow: true)
+        })
     }
     
     // MARK: Life Cycle
@@ -204,7 +209,7 @@ extension RecordingListViewController: FaceLandmarksPipelineDelegate {
             guard let recording = recordingsToTrack[index] else { return }
 
             let context = recording.managedObjectContext
-            let container = dataSource?.recordingProvider.persistentContainer
+            let container = dataSource?.dataProvider.persistentContainer
             if success {
                 // save the recording to persistent storage
                 recording.isProcessed = true

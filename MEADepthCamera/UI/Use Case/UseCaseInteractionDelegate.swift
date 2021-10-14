@@ -13,7 +13,7 @@ protocol UseCaseInteractionDelegate: AnyObject {
     /**
      When the detail view controller has finished an edit, it calls didUpdateUseCase for the delegate (the presenting view controller) to update the UI.
      
-     When deleting a use case, pass nil for post.
+     When deleting a use case, pass nil for use case.
      */
     func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool)
     

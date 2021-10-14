@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class TaskListDataSource: NSObject {
+class TaskListDataSource: NSObject, ListDataSource {
     
     // MARK: Properties
     var navigationTitle: String = "Choose Task to Record"
@@ -29,15 +29,11 @@ class TaskListDataSource: NSObject {
     }
     
     func sortTasks() {
-        guard let p = tasks?.partition(by: { recordingsCount(for: $0) > 0 }) else { return }
+        guard let p = tasks?.partition(by: { useCase.recordingsCount(for: $0) > 0 }) else { return }
         tasks?[..<p].sort { $0.name! < $1.name! }
         tasks?[p...].sort { $0.name! < $1.name! }
     }
     
-    private func recordingsCount(for task: Task) -> Int {
-        let recordings = useCase.recordings as! Set<Recording>
-        return recordings.reduce(0) { $0 + ($1.task == task ? 1 : 0) }
-    }
 }
 
 // MARK: UITableViewDataSource
@@ -53,9 +49,8 @@ extension TaskListDataSource: UITableViewDataSource {
             fatalError("###\(#function): Failed to dequeue a TaskListCell. Check the cell reusable identifier in Main.storyboard.")
         }
         if let currentTask = task(at: indexPath.row), let taskName = currentTask.name {
-            let recordingsCount = recordingsCount(for: currentTask)
-            cell.configure(name: taskName, recordingsCount: recordingsCount)
-            //cell.isUserInteractionEnabled = recordingsCount > 0
+            let recordingsCountText = currentTask.recordingsCountText(for: useCase)
+            cell.configure(name: taskName, recordingsCountText: recordingsCountText)
         }
         return cell
     }

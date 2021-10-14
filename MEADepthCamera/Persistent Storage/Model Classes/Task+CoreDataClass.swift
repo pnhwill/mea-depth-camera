@@ -34,6 +34,19 @@ public class Task: NSManagedObject {
     
 }
 
+// MARK: Text Formatters
+extension Task {
+    func recordingsCountText(for useCase: UseCase) -> String {
+        let recordingsCount = useCase.recordingsCount(for: self)
+        switch recordingsCount {
+        case 1:
+            return String(recordingsCount) + " Recording"
+        default:
+            return String(recordingsCount) + " Recordings"
+        }
+    }
+}
+
 // MARK: JSON Decoder
 
 /// A struct for decoding JSON with the following structure:

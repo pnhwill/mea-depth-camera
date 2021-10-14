@@ -14,14 +14,13 @@ class UseCaseListCell: UITableViewCell {
     @IBOutlet weak var subjectIDLabel: UILabel!
     @IBOutlet weak var numRecordingsLabel: UILabel!
     
-    func configure(title: String?, dateText: String?, subjectIDText: String?, numRecordings: Int) {
+    func configure(title: String?, dateText: String?, subjectIDText: String?, recordingsCountText: String) {
         titleLabel.text = title
         dateLabel.text = dateText
         if let subjectIDText = subjectIDText {
             subjectIDLabel.text = "Subject ID: " + subjectIDText
         }
-        numRecordingsLabel.text = String(numRecordings) + " Recordings"
+        numRecordingsLabel.text = recordingsCountText
     }
-    
     
 }

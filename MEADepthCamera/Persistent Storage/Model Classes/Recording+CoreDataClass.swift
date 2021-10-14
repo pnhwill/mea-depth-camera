@@ -31,3 +31,18 @@ public class Recording: NSManagedObject {
     }
     
 }
+
+// MARK: Text Formatters
+extension Recording {
+    func durationText() -> String {
+        return String(duration)
+    }
+    func filesCountText() -> String {
+        switch filesCount {
+        case 1:
+            return String(filesCount) + " File"
+        default:
+            return String(filesCount) + " Files"
+        }
+    }
+}

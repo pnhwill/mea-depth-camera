@@ -17,6 +17,8 @@ class RecordingProvider: DataProvider {
     
     private(set) var persistentContainer: PersistentContainer
     
+    private let fileManager = FileManager.default
+    
     init(with persistentContainer: PersistentContainer) {
         self.persistentContainer = persistentContainer
     }
@@ -36,6 +38,7 @@ class RecordingProvider: DataProvider {
     func delete(_ recording: Recording, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
         if let context = recording.managedObjectContext {
             context.perform {
+                self.trashFiles(for: recording)
                 context.delete(recording)
                 if shouldSave {
                     self.persistentContainer.saveContext(backgroundContext: context, with: .deleteRecording)
@@ -44,6 +47,16 @@ class RecordingProvider: DataProvider {
             }
         } else {
             completionHandler?(false)
+        }
+    }
+    
+    private func trashFiles(for recording: Recording) {
+        if let url = recording.folderURL {
+            do {
+                try fileManager.trashItem(at: url, resultingItemURL: nil)
+            } catch {
+                debugPrint("###\(#function): Failed to trash files for recording at: \(url.path)")
+            }
         }
     }
     
