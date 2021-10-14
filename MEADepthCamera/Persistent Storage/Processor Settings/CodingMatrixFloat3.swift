@@ -25,6 +25,8 @@ class CodingMatrixFloat3: NSObject, NSSecureCoding {
     
     var columns: [Float3] = []
     
+    private let strideOfFloat3 = MemoryLayout<Float3>.stride
+    
     init(_ columns: [Float3]) {
         self.columns = columns
     }
@@ -35,7 +37,7 @@ class CodingMatrixFloat3: NSObject, NSSecureCoding {
         var length = 0
         if let bytePointer = coder.decodeBytes(forKey: CodingKeys.columns.rawValue, returnedLength: &length) {
             // Convert it to a buffer pointer of the appropriate type and count and create the array.
-            let numColumns = length / MemoryLayout<Float3>.stride
+            let numColumns = length / strideOfFloat3
             bytePointer.withMemoryRebound(to: Float3.self, capacity: numColumns) { pointer in
                 let bufferPointer = UnsafeBufferPointer<Float3>(start: pointer, count: numColumns)
                 self.columns = Array<Float3>(bufferPointer)
@@ -46,7 +48,7 @@ class CodingMatrixFloat3: NSObject, NSSecureCoding {
     
     func encode(with coder: NSCoder) {
         // This encodes both the number of bytes and the data itself.
-        let numBytes = columns.count * MemoryLayout<Float3>.stride
+        let numBytes = columns.count * strideOfFloat3
         columns.withUnsafeBufferPointer { bufferPointer in
             bufferPointer.baseAddress?.withMemoryRebound(to: UInt8.self, capacity: numBytes) { pointer in
                 coder.encodeBytes(pointer, length: numBytes, forKey: CodingKeys.columns.rawValue)

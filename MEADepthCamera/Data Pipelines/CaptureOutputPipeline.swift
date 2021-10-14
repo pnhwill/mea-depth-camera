@@ -470,7 +470,7 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
         let faceBounds = faceObservation.boundingBox
         //print("x: \(faceBounds.midX)")
         //print("y: \(faceBounds.midY)")
-        //print("size: \(faceBounds.size)")
+        print("size: \(faceBounds.size)")
         
         // Check if face is centered on the screen
         let centerPoint = CGPoint(x: 0.5, y: 0.43)
@@ -481,7 +481,7 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
         //print("x error: \(xError) y error: \(yError)")
         
         // Check if face is correct size on screen
-        let size = CGSize(width: 0.6, height: 0.48)
+        let size = CGSize(width: 0.45, height: 0.25)
         let sizeErrorMargin: CGFloat = 0.15
         let widthError = (faceBounds.width - size.width).magnitude
         let heightError = (faceBounds.height - size.height).magnitude
