@@ -7,10 +7,11 @@
 
 import UIKit
 
-class UseCaseListViewController: ListViewController {
+class UseCaseListViewController: UITableViewController {
     
     @IBOutlet var filterSegmentedControl: UISegmentedControl!
     
+    static let mainStoryboardName = "Main"
     static let unwindFromListSegueIdentifier = "UnwindFromUseCaseListSegue"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
     

@@ -10,26 +10,64 @@ import CoreData
 
 protocol ListViewControllerProtocol {
     
-//    associatedtype Object: NSManagedObject
-//    func configure(with object: Object)
-    
-//    associatedtype DataSource
 }
 
-/// Base class for UITableViewControllers that list object data from the Core Data model and present a detail view for selected cells.
-class ListViewController: UITableViewController {
+/// Base class for UIViewControllers that list object data from the Core Data model and present a detail view for selected cells.
+class ListViewController: UIViewController {
+    
+    typealias ListDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
     
     static let mainStoryboardName = "Main"
     
-//    var dataSource: ListDataSource?
+    struct Section: Identifiable {
+        
+        enum Identifier: Int {
+            case header
+            case list
+            
+            var appearance: UICollectionLayoutListConfiguration.Appearance {
+                switch self {
+                case .header:
+                    return .insetGrouped
+                case .list:
+                    return .grouped
+                }
+            }
+        }
+        
+        var id: Identifier
+        var items: [Item]?
+    }
     
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        guard dataSource != nil else {
-//            fatalError("No data source found for list view controller")
-//        }
-//        tableView.dataSource = dataSource
-//        navigationItem.title = dataSource?.navigationTitle
-//    }
+    struct Item: Identifiable {
+        var id: UUID
+        var object: NSManagedObject
+    }
+    
+    private var collectionView: UICollectionView!
+    private var dataSource: ListDataSource?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+    }
+}
+
+extension ListViewController {
+    private func configureHierarchy() {
+        
+    }
+    
+    private func createLayout() {
+        let sectionProvider = { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            
+            guard let sectionID = Section.ID(rawValue: sectionIndex) else { return nil }
+            
+            let configuration = UICollectionLayoutListConfiguration(appearance: sectionID.appearance)
+            let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: layoutEnvironment)
+            return section
+        }
+    }
+    
     
 }

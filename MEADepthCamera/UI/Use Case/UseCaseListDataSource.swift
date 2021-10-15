@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class UseCaseListDataSource: NSObject, ListDataSource {
+class UseCaseListDataSource: NSObject {
     typealias UseCaseDeletedAction = (UUID?) -> Void
     typealias UseCaseChangedAction = () -> Void
     

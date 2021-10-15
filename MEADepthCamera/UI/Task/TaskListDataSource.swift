@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class TaskListDataSource: NSObject, ListDataSource {
+class TaskListDataSource: NSObject {
     
     // MARK: Properties
     var navigationTitle: String = "Choose Task to Record"

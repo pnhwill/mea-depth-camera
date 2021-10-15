@@ -7,7 +7,7 @@
 
 import UIKit
 
-class RecordingListViewController: ListViewController {
+class RecordingListViewController: UITableViewController {
     
     @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     
