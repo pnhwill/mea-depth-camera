@@ -8,6 +8,52 @@
 import UIKit
 import CoreData
 
+class UseCaseListViewModel: NSObject, ListViewModel {
+    
+    var navigationTitle: String = "Use Case List"
+    
+    var sectionsStore: AnyModelStore<Section>? {
+        guard let items = useCases?.map({ Item(object: $0).id! }) else { return nil }
+        return AnyModelStore([
+            //Section(id: .header, items: []),
+            Section(id: .list, items: items)
+        ])
+    }
+    var itemsStore: AnyModelStore<Item>? {
+        guard let items = useCases?.map({ Item(object: $0) }) else { return nil }
+        return AnyModelStore(items)
+    }
+    
+    // Core Data provider
+    private lazy var dataProvider: UseCaseProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = UseCaseProvider(with: container, fetchedResultsControllerDelegate: self)
+        return provider
+    }()
+    
+    private var useCases: [UseCase]? {
+        return dataProvider.fetchedResultsController.fetchedObjects
+    }
+    
+    
+    
+}
+
+// MARK: NSFetchedResultsControllerDelegate
+extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    }
+}
+
+// MARK: UISearchResultsUpdating
+extension UseCaseListViewModel {
+    func updateSearchResults(for searchController: UISearchController) {
+    }
+}
+
+
+
+
 class UseCaseListDataSource: NSObject {
     typealias UseCaseDeletedAction = (UUID?) -> Void
     typealias UseCaseChangedAction = () -> Void

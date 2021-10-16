@@ -7,6 +7,44 @@
 
 import UIKit
 
+class NewUseCaseListViewController: ListViewController<UseCaseListViewModel> {
+    
+    
+    // MARK: Life Cycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        viewModel = UseCaseListViewModel()
+        configureNavItem()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let navigationController = navigationController,
+           navigationController.isToolbarHidden {
+            navigationController.setToolbarHidden(false, animated: animated)
+        }
+    }
+
+}
+
+extension NewUseCaseListViewController {
+    private func configureNavItem() {
+        navigationItem.title = viewModel?.navigationTitle
+        
+        // Search bar controller
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = viewModel
+        searchController.obscuresBackgroundDuringPresentation = false
+        navigationItem.searchController = searchController
+    }
+}
+
+
+
+
+
+
 class UseCaseListViewController: UITableViewController {
     
     @IBOutlet var filterSegmentedControl: UISegmentedControl!

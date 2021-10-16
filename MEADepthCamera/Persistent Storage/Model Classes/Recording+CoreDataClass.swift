@@ -32,6 +32,12 @@ public class Recording: NSManagedObject {
     
 }
 
+extension Recording: ModelObject {
+    static func generateListContentConfiguration() -> ListContentConfiguration {
+        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
+    }
+}
+
 // MARK: Text Formatters
 extension Recording {
     func durationText() -> String {

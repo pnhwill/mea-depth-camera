@@ -7,8 +7,8 @@
 
 import UIKit
 
-protocol ListDataSource: UITableViewDataSource {
-    
-    var navigationTitle: String { get }
-    
-}
+//protocol ListDataSource: UITableViewDataSource {
+//
+//    var navigationTitle: String { get }
+//
+//}

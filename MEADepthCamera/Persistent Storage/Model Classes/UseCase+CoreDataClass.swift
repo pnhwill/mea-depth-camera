@@ -19,6 +19,13 @@ public class UseCase: NSManagedObject {
     }
 }
 
+extension UseCase: ModelObject {
+    static func generateListContentConfiguration() -> ListContentConfiguration {
+        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
+    }
+    
+}
+
 // MARK: Text Formatters
 extension UseCase {
     func recordingsCountText() -> String {

@@ -34,6 +34,12 @@ public class Task: NSManagedObject {
     
 }
 
+extension Task: ModelObject {
+    static func generateListContentConfiguration() -> ListContentConfiguration {
+        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
+    }
+}
+
 // MARK: Text Formatters
 extension Task {
     func recordingsCountText(for useCase: UseCase) -> String {

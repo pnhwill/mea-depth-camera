@@ -75,6 +75,9 @@
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
 		B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */; };
 		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
+		B5D209A4271A19EA005CEC9A /* ModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A3271A19EA005CEC9A /* ModelStore.swift */; };
+		B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A6271A2087005CEC9A /* ItemListCell.swift */; };
+		B5D209A9271A295A005CEC9A /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A8271A295A005CEC9A /* ListViewModel.swift */; };
 		B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3F926B2183C00CB1241 /* PassThrough.metal */; };
 		B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */; };
 		B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */ = {isa = PBXBuildFile; fileRef = B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */; };
@@ -97,6 +100,7 @@
 		B5FB0A4F26D5767500F65FA5 /* RecordingListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A4E26D5767500F65FA5 /* RecordingListDataSource.swift */; };
 		B5FB0A5226D577C900F65FA5 /* RecordingListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A5126D577C900F65FA5 /* RecordingListCell.swift */; };
 		B5FB0A5426D5858600F65FA5 /* RecordingDetailEditDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */; };
+		BEBD1494271972C6007AC466 /* ModelObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBD1493271972C6007AC466 /* ModelObject.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -195,6 +199,9 @@
 		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
 		B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPipeline.swift; sourceTree = "<group>"; };
 		B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
+		B5D209A3271A19EA005CEC9A /* ModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStore.swift; sourceTree = "<group>"; };
+		B5D209A6271A2087005CEC9A /* ItemListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemListCell.swift; sourceTree = "<group>"; };
+		B5D209A8271A295A005CEC9A /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		B5D4E3F926B2183C00CB1241 /* PassThrough.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PassThrough.metal; sourceTree = "<group>"; };
 		B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewMetalView.swift; sourceTree = "<group>"; };
 		B5D6CAEA26D9A4CC002165C6 /* virtualSLP_tasks.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = virtualSLP_tasks.json; sourceTree = "<group>"; };
@@ -217,6 +224,7 @@
 		B5FB0A4E26D5767500F65FA5 /* RecordingListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingListDataSource.swift; sourceTree = "<group>"; };
 		B5FB0A5126D577C900F65FA5 /* RecordingListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingListCell.swift; sourceTree = "<group>"; };
 		B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailEditDataSource.swift; sourceTree = "<group>"; };
+		BEBD1493271972C6007AC466 /* ModelObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -521,6 +529,14 @@
 			path = "Data Pipelines";
 			sourceTree = "<group>";
 		};
+		B5D209A5271A2057005CEC9A /* Cells */ = {
+			isa = PBXGroup;
+			children = (
+				B5D209A6271A2087005CEC9A /* ItemListCell.swift */,
+			);
+			path = Cells;
+			sourceTree = "<group>";
+		};
 		B5D6CAE826D9A3AA002165C6 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -547,8 +563,12 @@
 		B5F447EA26EFF72400528ACA /* List Views */ = {
 			isa = PBXGroup;
 			children = (
+				BEBD1493271972C6007AC466 /* ModelObject.swift */,
+				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
+				B5D209A8271A295A005CEC9A /* ListViewModel.swift */,
 				B5F447EB26EFF7A100528ACA /* ListViewController.swift */,
 				B5F447ED26EFF8B100528ACA /* ListDataSource.swift */,
+				B5D209A5271A2057005CEC9A /* Cells */,
 			);
 			path = "List Views";
 			sourceTree = "<group>";
@@ -727,6 +747,7 @@
 				B53B3A6526FC11E100B4B35F /* TaskListCell.swift in Sources */,
 				B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
+				BEBD1494271972C6007AC466 /* ModelObject.swift in Sources */,
 				B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */,
 				B54215C026C34B5C00A4F984 /* EditSubjectIDCell.swift in Sources */,
 				B56F1A6426E0430600A29C42 /* CoreDataStack.swift in Sources */,
@@ -768,6 +789,7 @@
 				B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */,
 				B50944B626E97D120020971D /* EditExperimentCell.swift in Sources */,
 				B56BF76C271784DD003622F1 /* RecordingInteractionDelegate.swift in Sources */,
+				B5D209A4271A19EA005CEC9A /* ModelStore.swift in Sources */,
 				B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */,
 				B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
@@ -775,6 +797,7 @@
 				B5F447F326EFFB7A00528ACA /* TaskListDataSource.swift in Sources */,
 				B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */,
 				B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */,
+				B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */,
 				B5DF4B8E26C496680045AE43 /* UseCaseListCell.swift in Sources */,
 				B54215C226C3582C00A4F984 /* UseCaseDetailViewController.swift in Sources */,
 				B54215BA26C316F600A4F984 /* MainMenuViewController.swift in Sources */,
@@ -785,6 +808,7 @@
 				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,
 				B54215CC26C36D6B00A4F984 /* UseCaseSummaryView.swift in Sources */,
 				B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */,
+				B5D209A9271A295A005CEC9A /* ListViewModel.swift in Sources */,
 				B5DF4B9126C4ADA60045AE43 /* UseCase+CoreDataClass.swift in Sources */,
 				B5886DFD26AA61E100EB344C /* LiveFaceDetectionProcessor.swift in Sources */,
 				B56BF76A27174089003622F1 /* CodingMatrixFloat3.swift in Sources */,
@@ -895,7 +919,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -950,7 +974,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
