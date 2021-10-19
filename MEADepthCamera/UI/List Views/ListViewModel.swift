@@ -5,7 +5,7 @@
 //  Created by Will on 10/15/21.
 //
 
-import Foundation
+import CoreData
 import UIKit
 
 protocol ListViewModel: UISearchResultsUpdating {
@@ -17,3 +17,24 @@ protocol ListViewModel: UISearchResultsUpdating {
     
 }
 
+struct Section: Identifiable {
+    enum Identifier: Int, CaseIterable {
+        case header
+        case list
+    }
+    
+    var id: Identifier
+    var items: [Item.ID]?
+}
+
+struct Item: Identifiable, Equatable, Hashable {
+    static func == (lhs: Item, rhs: Item) -> Bool {
+        return lhs.id == rhs.id
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    var id: UUID?
+    var object: ModelObject
+}

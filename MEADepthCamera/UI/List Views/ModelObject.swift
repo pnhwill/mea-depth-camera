@@ -8,29 +8,12 @@
 import UIKit
 import CoreData
 
-protocol ModelObject: AnyObject, Identifiable where ID == UUID? {
+/// Protocol to which all NSManagedObject subclasses from the Core Data model conform to interface with the UI.
+protocol ModelObject: AnyObject {
+    
+    var id: UUID? { get set }
     
     static func generateListContentConfiguration() -> ListContentConfiguration
     
 }
 
-struct Section: Identifiable {
-    enum Identifier: Int, CaseIterable {
-        case header
-        case list
-        
-    }
-    
-    var id: Identifier
-    var items: [Item.ID]?
-}
-
-struct Item: Identifiable, Hashable {
-    var id: UUID?
-    var object: NSManagedObject
-    
-    init<T>(object: T) where T: NSManagedObject, T: ModelObject {
-        self.object = object
-        self.id = object.id
-    }
-}

@@ -16,16 +16,13 @@ class ListViewController<ViewModel: ListViewModel>: UIViewController, UICollecti
     
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
     
-    //static let mainStoryboardName = "Main"
+    var viewModel: ViewModel?
     
     private var collectionView: UICollectionView!
     private var dataSource: ListDiffableDataSource?
     
-    var viewModel: ViewModel?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         configureHierarchy()
         configureDataSource()
         applyInitialSnapshots()

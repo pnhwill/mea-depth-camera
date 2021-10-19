@@ -40,7 +40,7 @@ extension UICellConfigurationState {
 
 class ListCell: ItemListCell {
     
-    func defaultListContentConfiguration() -> UIListContentConfiguration { return .subtitleCell() }
+//    func defaultListContentConfiguration() -> UIListContentConfiguration { return .subtitleCell() }
     
     override func updateConfiguration(using state: UICellConfigurationState) {
         
@@ -68,7 +68,7 @@ struct ListContentConfiguration: UIContentConfiguration, Hashable {
     
     func updated(for state: UIConfigurationState) -> Self {
         guard let state = state as? UICellConfigurationState else { return self }
-        
+        print(state)
         // change things depending on type of state.item.object
         
         return self
