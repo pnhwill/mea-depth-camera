@@ -40,27 +40,24 @@ extension UICellConfigurationState {
 
 class ListCell: ItemListCell {
     
-//    func defaultListContentConfiguration() -> UIListContentConfiguration { return .subtitleCell() }
+    func defaultListContentConfiguration() -> UIListContentConfiguration { return .subtitleCell() }
     
-    override func updateConfiguration(using state: UICellConfigurationState) {
-        
-//        let object = state.item?.object
+//    override func updateConfiguration(using state: UICellConfigurationState) {
 //
-//        guard let objectType = object.type else { return }
-        //let content =
-//        self.contentConfiguration = content
-        
-        
-        
-        
-    }
+////        let object = state.item?.object
+////
+////        guard let objectType = object.type else { return }
+//        //let content =
+////        self.contentConfiguration = content
+//
+//    }
 }
 
 struct ListContentConfiguration: UIContentConfiguration, Hashable {
     
-    var titleText: String
-    var bodyText: [String]
-    var buttonConfigurations: [UIButton.Configuration]
+    var titleConfiguration: UIListContentConfiguration
+    var bodyConfigurations: [[UIListContentConfiguration]]
+    var buttonConfigurations: [UIButton.Configuration]?
     
     func makeContentView() -> UIView & UIContentView {
         return DynamicListContentView(configuration: self)
@@ -68,18 +65,27 @@ struct ListContentConfiguration: UIContentConfiguration, Hashable {
     
     func updated(for state: UIConfigurationState) -> Self {
         guard let state = state as? UICellConfigurationState else { return self }
-        print(state)
-        // change things depending on type of state.item.object
-        
-        return self
+        var updatedConfiguration = self
+        // Update subconfigurations
+        updatedConfiguration.titleConfiguration = titleConfiguration.updated(for: state)
+        updatedConfiguration.bodyConfigurations = bodyConfigurations.map { $0.map { $0.updated(for: state) } }
+        return updatedConfiguration
     }
 }
 
+//protocol StackListContentConfiguration: UIContentConfiguration, Hashable {
+//
+//    var titleConfiguration: UIListContentConfiguration { get }
+//    var bodyConfiguration: [[UIListContentConfiguration]] { get }
+//    var buttonConfiguration: [UIButton.Configuration] { get }
+//
+//}
+
 class DynamicListContentView: UIView, UIContentView {
     
-    var stackView: ReadjustingStackView?
-    var labels: [UILabel]?
-    var buttons: [UIButton]?
+    private lazy var stackView = ReadjustingStackView(frame: .zero)
+//    var labels: [UILabel]?
+//    var buttons: [UIButton]?
     
     init(configuration: ListContentConfiguration) {
         super.init(frame: .zero)
@@ -96,13 +102,13 @@ class DynamicListContentView: UIView, UIContentView {
     func configure() {
         // To enable our button labels to automatically adjust to dynamic type settings changes,
         // we have to set `adjustsFontForContentSizeCategory` to `true`.
-        buttons?.forEach { button in
-            button.titleLabel?.adjustsFontForContentSizeCategory = true
-        }
-        
-        labels?.forEach { label in
-            label.adjustsFontForContentSizeCategory = true
-        }
+//        buttons?.forEach { button in
+//            button.titleLabel?.adjustsFontForContentSizeCategory = true
+//        }
+//
+//        labels?.forEach { label in
+//            label.adjustsFontForContentSizeCategory = true
+//        }
     }
     
     var configuration: UIContentConfiguration {
@@ -113,10 +119,16 @@ class DynamicListContentView: UIView, UIContentView {
         }
     }
     
-    private let imageView = UIImageView()
-    
     private func setupInternalViews() {
-        
+        addSubview(stackView)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            stackView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+            stackView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor)
+        ])
+        stackView.isHidden = true
     }
     
     private var appliedConfiguration: ListContentConfiguration!
@@ -124,11 +136,6 @@ class DynamicListContentView: UIView, UIContentView {
     private func apply(configuration: ListContentConfiguration) {
         guard appliedConfiguration != configuration else { return }
         appliedConfiguration = configuration
-        
-        
-        
-        
-        
     }
 }
 

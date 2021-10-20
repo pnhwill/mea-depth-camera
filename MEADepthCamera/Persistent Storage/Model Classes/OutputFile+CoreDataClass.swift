@@ -19,8 +19,8 @@ public class OutputFile: NSManagedObject {
     
 }
 
-extension OutputFile: ModelObject {
-    static func generateListContentConfiguration() -> ListContentConfiguration {
-        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
-    }
-}
+//extension OutputFile: ModelObject {
+//    static func generateListContentConfiguration() -> ListContentConfiguration {
+//        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
+//    }
+//}

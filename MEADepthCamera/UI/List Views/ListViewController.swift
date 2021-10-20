@@ -107,15 +107,15 @@ extension ListViewController {
         }
     }
     
-    private func createListCellRegistration() -> UICollectionView.CellRegistration<ListCell, Item.ID> {
-        return UICollectionView.CellRegistration<ListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createListCellRegistration() -> UICollectionView.CellRegistration<ViewModel.ListCell, Item.ID> {
+        return UICollectionView.CellRegistration<ViewModel.ListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }
     }
     
-    private func createHeaderCellRegistration() -> UICollectionView.CellRegistration<HeaderCell, Item.ID> {
-        return UICollectionView.CellRegistration<HeaderCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createHeaderCellRegistration() -> UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> {
+        return UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }

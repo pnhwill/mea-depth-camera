@@ -9,18 +9,22 @@ import UIKit
 import CoreData
 
 class UseCaseListViewModel: NSObject, ListViewModel {
+    typealias ListCell = NewUseCaseListCell
+    
+    typealias HeaderCell = NewUseCaseListCell
+    
     
     var navigationTitle: String = "Use Case List"
     
     var sectionsStore: AnyModelStore<Section>? {
-        guard let items = useCases?.map({ Item(object: $0).id! }) else { return nil }
+        guard let items = useCases?.compactMap({ Item(object: $0)?.id }) else { return nil }
         return AnyModelStore([
             //Section(id: .header, items: []),
             Section(id: .list, items: items)
         ])
     }
     var itemsStore: AnyModelStore<Item>? {
-        guard let items = useCases?.map({ Item(object: $0) }) else { return nil }
+        guard let items = useCases?.compactMap({ Item(object: $0) }) else { return nil }
         return AnyModelStore(items)
     }
     

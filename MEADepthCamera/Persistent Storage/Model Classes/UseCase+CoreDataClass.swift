@@ -8,6 +8,7 @@
 
 import Foundation
 import CoreData
+import UIKit
 
 @objc(UseCase)
 public class UseCase: NSManagedObject {
@@ -20,10 +21,11 @@ public class UseCase: NSManagedObject {
 }
 
 extension UseCase: ModelObject {
-    static func generateListContentConfiguration() -> ListContentConfiguration {
-        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
+    func listContentConfiguration() -> ListContentConfiguration {
+        let titleContent = UIListContentConfiguration.subtitleCell()
+        let bodyContent = [[UIListContentConfiguration.subtitleCell()]]
+        return ListContentConfiguration(titleConfiguration: titleContent, bodyConfigurations: bodyContent, buttonConfigurations: nil)
     }
-    
 }
 
 // MARK: Text Formatters
