@@ -184,7 +184,7 @@
                                                     <fontDescription key="titleFontDescription" type="system" pointSize="24"/>
                                                 </buttonConfiguration>
                                                 <connections>
-                                                    <segue destination="BgJ-ib-iGc" kind="show" identifier="ShowUseCaseListSegue" id="fVD-IB-a6z"/>
+                                                    <action selector="showList:" destination="A6m-RR-31J" eventType="touchUpInside" id="pwG-0o-iSh"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -398,16 +398,16 @@
             </objects>
             <point key="canvasLocation" x="1131" y="1246"/>
         </scene>
-        <!--Use Case List View Controller-->
+        <!--Old Use Case List View Controller-->
         <scene sceneID="jBy-gR-meX">
             <objects>
-                <tableViewController id="BgJ-ib-iGc" customClass="UseCaseListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="BgJ-ib-iGc" customClass="OldUseCaseListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="nKo-9v-9aQ">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="detailDisclosureButton" indentationWidth="10" reuseIdentifier="UseCaseListCell" id="oXa-MG-CgV" customClass="UseCaseListCell" customModule="MEADepthCamera" customModuleProvider="target">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="detailDisclosureButton" indentationWidth="10" reuseIdentifier="UseCaseListCell" id="oXa-MG-CgV" customClass="OldUseCaseListCell" customModule="MEADepthCamera" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="44.666666030883789" width="390" height="129.33332824707031"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="oXa-MG-CgV" id="yc0-r9-XMZ">
@@ -500,7 +500,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Pj8-Jn-xLH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <exit id="Pag-a3-wwl" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1131" y="542"/>
+            <point key="canvasLocation" x="1083" y="503"/>
         </scene>
         <!--Task List View Controller-->
         <scene sceneID="ehe-MH-j3c">
@@ -511,7 +511,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="yfz-p3-DdZ" userLabel="Use Case Header View" customClass="UseCaseSummaryView" customModule="MEADepthCamera" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="390" height="101"/>
+                            <rect key="frame" x="0.0" y="0.0" width="390" height="488"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Zf-6t-dt9">
@@ -543,7 +543,7 @@
                         </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TaskListCell" id="xIt-f8-TOj" customClass="TaskListCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="145.66666603088379" width="390" height="122.33333587646484"/>
+                                <rect key="frame" x="0.0" y="532.66666603088379" width="390" height="122.33333587646484"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xIt-f8-TOj" id="RkN-ch-tG5">
                                     <rect key="frame" x="0.0" y="0.0" width="390" height="122.33333587646484"/>
@@ -637,11 +637,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="BeD-Sn-hNW" userLabel="Use Case Header View" customClass="UseCaseSummaryView" customModule="MEADepthCamera" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="390" height="101"/>
+                            <rect key="frame" x="0.0" y="0.0" width="390" height="488"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8j4-57-1nk">
-                                    <rect key="frame" x="20.000000000000004" y="20" width="46.333333333333343" height="30"/>
+                                    <rect key="frame" x="19.999999999999996" y="20" width="46.666666666666657" height="30"/>
                                     <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -669,7 +669,7 @@
                         </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TaskNameCell" textLabel="n7h-zP-WLe" style="IBUITableViewCellStyleDefault" id="JwJ-yd-ePr">
-                                <rect key="frame" x="0.0" y="145.66666603088379" width="390" height="43.666667938232422"/>
+                                <rect key="frame" x="0.0" y="532.66666603088379" width="390" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="JwJ-yd-ePr" id="CM3-s3-KHw">
                                     <rect key="frame" x="0.0" y="0.0" width="390" height="43.666667938232422"/>
@@ -686,7 +686,7 @@
                                 </tableViewCellContentView>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="RecordingListCell" id="ODm-Vw-NxS" customClass="RecordingListCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="189.33333396911621" width="390" height="104.66666412353516"/>
+                                <rect key="frame" x="0.0" y="576.33333396911621" width="390" height="104.66666412353516"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ODm-Vw-NxS" id="Al4-2K-Opc">
                                     <rect key="frame" x="0.0" y="0.0" width="390" height="104.66666412353516"/>
@@ -755,7 +755,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Hoc-Ip-BgO">
-                                <rect key="frame" x="0.0" y="88.000000000000014" width="390" height="137.33333333333337"/>
+                                <rect key="frame" x="0.0" y="87.999999999999986" width="390" height="137.66666666666663"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g8K-LA-a21" userLabel="Name Label Container View">
                                         <rect key="frame" x="0.0" y="0.0" width="390" height="77"/>
@@ -776,10 +776,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ASF-Df-aQv" userLabel="Instructions Label Container View">
-                                        <rect key="frame" x="0.0" y="77" width="390" height="60.333333333333343"/>
+                                        <rect key="frame" x="0.0" y="77" width="390" height="60.666666666666657"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Instructions" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7fz-7S-ang">
-                                                <rect key="frame" x="20" y="20" width="350" height="20.333333333333329"/>
+                                                <rect key="frame" x="20" y="20" width="350" height="20.666666666666671"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>

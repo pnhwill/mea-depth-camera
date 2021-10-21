@@ -13,7 +13,7 @@ protocol ModelObject: AnyObject {
     
     var id: UUID? { get set }
     
-    func listContentConfiguration() -> ListContentConfiguration
+//    func listContentConfiguration() -> ListContentConfiguration
     
 }
 

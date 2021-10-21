@@ -13,8 +13,20 @@ import UIKit
 
 class ReadjustingStackView: UIStackView {
     
-    // The size of our margins.
     var marginSize: CGFloat = 0
+    var readjustingEnabled: Bool = true
+    var desiredAxis: NSLayoutConstraint.Axis = .horizontal
+    
+    private var desiredAlignment: UIStackView.Alignment {
+        switch desiredAxis {
+        case .horizontal:
+            return .firstBaseline
+        case .vertical:
+            return .fill
+        @unknown default:
+            return .fill
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -32,14 +44,18 @@ class ReadjustingStackView: UIStackView {
     // This takes care of recalculating our orientation whenever our content or layout changes
     // (such as due to device rotation, addition of more buttons to the stack view, etc).
     override func layoutSubviews() {
+        super.layoutSubviews()
         adjustOrientation()
     }
     
     @objc
     func adjustOrientation() {
+        
         // Always attempt to fit everything horizontally first
-        axis = .horizontal
-        alignment = .firstBaseline
+        axis = desiredAxis
+        alignment = desiredAlignment
+        
+        guard readjustingEnabled else { return }
         
         let desiredStackViewWidth = systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
         if let parent = superview {

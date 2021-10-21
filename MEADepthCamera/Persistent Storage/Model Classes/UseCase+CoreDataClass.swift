@@ -21,11 +21,11 @@ public class UseCase: NSManagedObject {
 }
 
 extension UseCase: ModelObject {
-    func listContentConfiguration() -> ListContentConfiguration {
-        let titleContent = UIListContentConfiguration.subtitleCell()
-        let bodyContent = [[UIListContentConfiguration.subtitleCell()]]
-        return ListContentConfiguration(titleConfiguration: titleContent, bodyConfigurations: bodyContent, buttonConfigurations: nil)
-    }
+//    func listContentConfiguration() -> ListContentConfiguration {
+//        let titleContent = UIListContentConfiguration.subtitleCell()
+//        let bodyContent = [[UIListContentConfiguration.subtitleCell()]]
+//        return ListContentConfiguration(titleConfiguration: titleContent, bodyConfigurations: bodyContent, buttonConfigurations: nil)
+//    }
 }
 
 // MARK: Text Formatters

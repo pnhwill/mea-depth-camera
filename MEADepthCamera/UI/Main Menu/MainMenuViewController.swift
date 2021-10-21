@@ -36,9 +36,14 @@ class MainMenuViewController: UIViewController {
             }
             destination.configure(with: useCase)
         }
-        if segue.identifier == Self.showUseCaseListSegueIdentifier, let destination = segue.destination as? UseCaseListViewController {
-            destination.configure(with: dataSource?.useCase)
-        }
+//        if segue.identifier == Self.showUseCaseListSegueIdentifier, let destination = segue.destination as? OldUseCaseListViewController {
+//            destination.configure(with: dataSource?.useCase)
+//        }
+    }
+    
+    @IBAction func showList(_ sender: UIButton) {
+        let useCaseListVC = UseCaseListViewController()
+        show(useCaseListVC, sender: self)
     }
     
     @IBAction func unwindFromList(unwindSegue: UIStoryboardSegue) {

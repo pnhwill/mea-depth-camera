@@ -21,6 +21,15 @@ class ListViewController<ViewModel: ListViewModel>: UIViewController, UICollecti
     private var collectionView: UICollectionView!
     private var dataSource: ListDiffableDataSource?
     
+    init(viewModel: ViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: .main)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
@@ -35,6 +44,7 @@ extension ListViewController {
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemGroupedBackground
         collectionView.delegate = self
+        view.addSubview(collectionView)
     }
     
     private func createLayout() -> UICollectionViewLayout {
@@ -113,6 +123,18 @@ extension ListViewController {
             cell.updateWithItem(item)
         }
     }
+    
+//    private func createListCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item.ID> {
+//        return UICollectionView.CellRegistration<UICollectionViewListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+//            guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
+//
+//            var content = cell.defaultContentConfiguration()
+//            content.text = item.object.id?.uuidString
+//            cell.contentConfiguration = content
+//
+////            cell.updateWithItem(item)
+//        }
+//    }
     
     private func createHeaderCellRegistration() -> UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> {
         return UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> { [weak self] (cell, indexPath, itemID) in

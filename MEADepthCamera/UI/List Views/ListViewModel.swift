@@ -17,6 +17,7 @@ protocol ListViewModel: UISearchResultsUpdating {
     
     var sectionsStore: AnyModelStore<Section>? { get }
     var itemsStore: AnyModelStore<Item>? { get }
+    
 }
 
 struct Section: Identifiable {
