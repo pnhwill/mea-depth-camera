@@ -456,9 +456,9 @@
 			isa = PBXGroup;
 			children = (
 				B5F447F426F0047800528ACA /* ProcessorSettings.swift */,
-				B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */,
-				B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */,
 				B5F447F626F008E600528ACA /* ProcessorSettingsToDataTransformer.swift */,
+				B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */,
+				B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */,
 			);
 			path = "Processor Settings";
 			sourceTree = "<group>";

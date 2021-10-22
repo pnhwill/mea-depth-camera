@@ -50,18 +50,185 @@ class ListTextCell: ItemListCell {
     override func updateConfiguration(using state: UICellConfigurationState) {
         super.updateConfiguration(using: state)
         
+//        let content = TextCellContentConfiguration()
+//        contentConfiguration = content
+    }
+}
+
+struct TextCellContentConfiguration: UIContentConfiguration, Hashable {
+    
+    var titleText: String
+    var bodyText: [[String]]
+    var listContentConfiguration = UIListContentConfiguration.sidebarCell()
+    var titleContentConfiguration = UIListContentConfiguration.sidebarHeader()
+    
+    func makeContentView() -> UIView & UIContentView {
+        return TextCellContentView(configuration: self)
+    }
+    
+    func updated(for state: UIConfigurationState) -> TextCellContentConfiguration {
+        guard let state = state as? UICellConfigurationState else { return self }
+        var updatedConfiguration = self
+        updatedConfiguration.listContentConfiguration = listContentConfiguration.updated(for: state)
+        updatedConfiguration.titleContentConfiguration = titleContentConfiguration.updated(for: state)
+        return updatedConfiguration
+    }
+}
+
+class TextCellContentView: UIView, UIContentView {
+    
+    var configuration: UIContentConfiguration {
+        get { appliedConfiguration }
+        set {
+            guard let newConfig = newValue as? TextCellContentConfiguration else { return }
+            apply(configuration: newConfig)
+        }
+    }
+    
+    private var appliedConfiguration: TextCellContentConfiguration!
+    
+    
+    private lazy var titleView = UIListContentView(configuration: defaultListContentConfiguration())
+    private lazy var bodyStackView = ReadjustingStackView()
+//    private var columnStackViews: [UIStackView] = []
+//    private var rowTextViews: [UIListContentView] = []
+    
+    init(configuration: TextCellContentConfiguration) {
+        super.init(frame: .zero)
+        setupInternalViews()
+        apply(configuration: configuration)
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func defaultListContentConfiguration() -> UIListContentConfiguration {
+        return .sidebarHeader()
+    }
+    
+    private func setupInternalViews() {
+        directionalLayoutMargins = .zero
         
+//        let labels = [UILabel(), UILabel(), UILabel()]
+//        labels.forEach { $0.text = "AAAAAAAAAAAAAAAAAA" }
+//        labels.forEach { $0.translatesAutoresizingMaskIntoConstraints = false }
+//        let bodyStackView = LabelListView(labels: labels, contentConfiguration: .sidebarCell())
+        
+        addSubview(titleView)
+        addSubview(bodyStackView)
+        
+        titleView.translatesAutoresizingMaskIntoConstraints = false
+        bodyStackView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            titleView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            titleView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            titleView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
+            bodyStackView.topAnchor.constraint(equalTo: titleView.bottomAnchor),
+            bodyStackView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            bodyStackView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            bodyStackView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor)
+        ])
         
     }
     
+    private func apply(configuration: TextCellContentConfiguration) {
+        guard appliedConfiguration != configuration else { return }
+        appliedConfiguration = configuration
+        
+        var titleContent = configuration.titleContentConfiguration
+        titleContent.text = configuration.titleText
+        titleContent.axesPreservingSuperviewLayoutMargins = []
+        titleContent.directionalLayoutMargins.bottom = titleContent.textToSecondaryTextVerticalPadding
+        titleView.configuration = titleContent
+        NSLayoutConstraint.activate([
+            titleView.heightAnchor.constraint(equalToConstant: titleView.intrinsicContentSize.height)
+        ])
+        
+        let listConfig = configuration.listContentConfiguration
+        let textProperties = listConfig.textProperties
+        
+        for listColumn in configuration.bodyText {
+            var rowLabels: [UILabel] = []
+            for rowText in listColumn {
+                
+                let label = UILabel()
+                label.translatesAutoresizingMaskIntoConstraints = false
+                label.text = rowText
+                label.font = textProperties.font
+                label.textColor = textProperties.resolvedColor()
+                label.adjustsFontForContentSizeCategory = true
+                label.numberOfLines = 1
+                
+                rowLabels.append(label)
+            }
+//            let stackView = UIStackView(arrangedSubviews: rowLabels)
+//            stackView.translatesAutoresizingMaskIntoConstraints = false
+//            stackView.axis = .vertical
+//            stackView.distribution = .fill
+//            stackView.alignment = .fill
+//            stackView.spacing = listConfig.textToSecondaryTextVerticalPadding
+//            stackView.isLayoutMarginsRelativeArrangement = true
+//            stackView.directionalLayoutMargins = listConfig.directionalLayoutMargins
+//            stackView.directionalLayoutMargins.top = listConfig.textToSecondaryTextVerticalPadding
+//            bodyStackView.addArrangedSubview(stackView)
+            let labelListView = LabelListView(labels: rowLabels, contentConfiguration: configuration.listContentConfiguration)
+            labelListView.translatesAutoresizingMaskIntoConstraints = false
+            labelListView.setContentCompressionResistancePriority(.required, for: .vertical)
+            bodyStackView.addArrangedSubview(labelListView)
+        }
+    }
+}
+
+class LabelListView: UIView {
     
+    var contentConfiguration: UIListContentConfiguration
+    private(set) var labels: [UILabel]
     
+    init(labels: [UILabel], contentConfiguration: UIListContentConfiguration) {
+        self.labels = labels
+        self.contentConfiguration = contentConfiguration
+        super.init(frame: .zero)
+        setupInternalViews()
+    }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupInternalViews() {
+        directionalLayoutMargins = contentConfiguration.directionalLayoutMargins
+        guard var currentLabel = labels.first else { return }
+        addSubview(currentLabel)
+        NSLayoutConstraint.activate([
+            currentLabel.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
+            currentLabel.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
+            currentLabel.firstBaselineAnchor.constraint(equalToSystemSpacingBelow: layoutMarginsGuide.topAnchor, multiplier: 1)
+        ])
+        for label in labels[1...] {
+            addSubview(label)
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(equalTo: currentLabel.leadingAnchor),
+                label.trailingAnchor.constraint(equalTo: currentLabel.trailingAnchor),
+                label.firstBaselineAnchor.constraint(equalToSystemSpacingBelow: currentLabel.lastBaselineAnchor, multiplier: 1)
+            ])
+            currentLabel = label
+        }
+        layoutMarginsGuide.bottomAnchor.constraint(equalToSystemSpacingBelow: currentLabel.lastBaselineAnchor, multiplier: 1).isActive = true
+    }
 }
 
 
 
 
+
+struct StackContentConfiguration {
+    
+}
+
+struct ReadjustingStackContentConfiguration {
+    
+}
 
 
 
@@ -144,23 +311,28 @@ class StackListContentView: UIView, UIContentView {
             
 //            newView.translatesAutoresizingMaskIntoConstraints = false
 //
-//            if let listContentView = newView as? UIListContentView {
-//                guard let textLayoutGuide = listContentView.textLayoutGuide else { fatalError() }
-//
-//                NSLayoutConstraint.activate([
-//                    listContentView.heightAnchor.constraint(equalTo: textLayoutGuide.heightAnchor)
-//                ])
-//            }
+            if let listContentView = newView as? UIListContentView {
+                guard let textLayoutGuide = listContentView.textLayoutGuide else { fatalError() }
+
+                NSLayoutConstraint.activate([
+                    listContentView.heightAnchor.constraint(equalTo: textLayoutGuide.heightAnchor)
+                ])
+            }
             
             
 
             stackView.addArrangedSubview(newView)
         }
-        stackView.readjustingEnabled = configuration.isStackViewDynamic
-        stackView.desiredAxis = configuration.stackViewAxis
+//        stackView.readjustingEnabled = configuration.isStackViewDynamic
+//        stackView.desiredAxis = configuration.stackViewAxis
 //        stackView.isHidden = false
     }
 }
+
+
+
+
+
 /*
 protocol DynamicContentConfiguration: UIContentConfiguration, Hashable {
 

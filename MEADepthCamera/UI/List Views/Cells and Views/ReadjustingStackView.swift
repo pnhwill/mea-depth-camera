@@ -14,19 +14,6 @@ import UIKit
 class ReadjustingStackView: UIStackView {
     
     var marginSize: CGFloat = 0
-    var readjustingEnabled: Bool = true
-    var desiredAxis: NSLayoutConstraint.Axis = .horizontal
-    
-    private var desiredAlignment: UIStackView.Alignment {
-        switch desiredAxis {
-        case .horizontal:
-            return .firstBaseline
-        case .vertical:
-            return .fill
-        @unknown default:
-            return .fill
-        }
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -52,10 +39,9 @@ class ReadjustingStackView: UIStackView {
     func adjustOrientation() {
         
         // Always attempt to fit everything horizontally first
-        axis = desiredAxis
-        alignment = desiredAlignment
-        
-        guard readjustingEnabled else { return }
+        axis = .horizontal
+        alignment = .firstBaseline
+        distribution = .fillEqually
         
         let desiredStackViewWidth = systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).width
         if let parent = superview {
@@ -63,6 +49,7 @@ class ReadjustingStackView: UIStackView {
             if desiredStackViewWidth > availableWidth {
                 axis = .vertical
                 alignment = .fill
+                distribution = .fill
             }
         }
     }

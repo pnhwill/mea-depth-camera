@@ -21,8 +21,8 @@ extension AVCameraCalibrationData: CameraCalibrationDataProtocol {
 }
 
 // MARK: CodingCameraCalibrationData
+/// Helper class to encode/decode all the properties from AVCameraCalibrationData.
 class CodingCameraCalibrationData: NSObject, NSSecureCoding, CameraCalibrationDataProtocol {
-    // Helper class to encode/decode all the properties from AVCameraCalibrationData
     
     static var supportsSecureCoding: Bool {
         return true
