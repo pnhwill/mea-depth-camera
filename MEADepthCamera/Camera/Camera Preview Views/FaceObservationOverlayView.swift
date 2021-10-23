@@ -5,8 +5,6 @@
 //  Created by Will on 7/22/21.
 //
 /*
- See LICENSE folder for this sample’s licensing information.
- 
  Abstract:
  Implements the image view responsible for displaying face landmarks results
  coming from processing frames from a live video stream.
@@ -67,7 +65,7 @@ class FaceObservationOverlayView: UIView {
     
     // MARK: Drawing Vision Observations
     
-    fileprivate func setupVisionDrawingLayers() {
+    private func setupVisionDrawingLayers() {
         guard let (captureDeviceResolution, _) = processorSettings?.getPortraitResolutions() else {
             print("No video resolution found")
             return
@@ -127,7 +125,7 @@ class FaceObservationOverlayView: UIView {
         self.updateLayerGeometry()
     }
     
-    fileprivate func updateLayerGeometry() {
+    private func updateLayerGeometry() {
         guard let overlayLayer = self.detectionOverlayLayer,
               let rootLayer = self.rootLayer
         else {
@@ -185,7 +183,7 @@ class FaceObservationOverlayView: UIView {
 
     }
     
-    fileprivate func addPoints(in landmarkRegion: VNFaceLandmarkRegion2D, to path: CGMutablePath, applying affineTransform: CGAffineTransform, closingWhenComplete closePath: Bool) {
+    private func addPoints(in landmarkRegion: VNFaceLandmarkRegion2D, to path: CGMutablePath, applying affineTransform: CGAffineTransform, closingWhenComplete closePath: Bool) {
         let pointCount = landmarkRegion.pointCount
         if pointCount > 1 {
             let points: [CGPoint] = landmarkRegion.normalizedPoints
@@ -198,7 +196,7 @@ class FaceObservationOverlayView: UIView {
         }
     }
     
-    fileprivate func addIndicators(to faceRectanglePath: CGMutablePath, faceLandmarksPath: CGMutablePath, for faceObservation: VNFaceObservation) {
+    private func addIndicators(to faceRectanglePath: CGMutablePath, faceLandmarksPath: CGMutablePath, for faceObservation: VNFaceObservation) {
         guard let (displaySize, _) = processorSettings?.getPortraitResolutions() else {
             print("No video resolution found")
             return
@@ -238,7 +236,7 @@ class FaceObservationOverlayView: UIView {
         }
     }
     
-    fileprivate func drawFaceObservation(_ faceObservation: VNFaceObservation) {
+    private func drawFaceObservation(_ faceObservation: VNFaceObservation) {
         guard let faceRectangleShapeLayer = self.detectedFaceRectangleShapeLayer,
               let faceLandmarksShapeLayer = self.detectedFaceLandmarksShapeLayer
         else {

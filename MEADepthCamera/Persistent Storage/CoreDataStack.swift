@@ -6,7 +6,7 @@
 //
 /*
 Abstract:
-A class to set up the Core Data stack, observe Core Data notifications, process persistent history, and deduplicate tags.
+A class to set up the Core Data stack, observe Core Data notifications, process persistent history, and deduplicate.
 */
 
 import Foundation

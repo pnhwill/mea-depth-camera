@@ -70,6 +70,8 @@
 		B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0026AA7F8500EB344C /* Extensions.swift */; };
 		B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0226AB249A00EB344C /* FileConfigurations.swift */; };
 		B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0426AB2CEE00EB344C /* FileWriter.swift */; };
+		B5916151272362E8005604BF /* LabelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5916150272362E8005604BF /* LabelListView.swift */; };
+		B591615327236D67005604BF /* TextCellContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B591615227236D67005604BF /* TextCellContentView.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
 		B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */; };
@@ -194,6 +196,8 @@
 		B5886E0026AA7F8500EB344C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		B5886E0226AB249A00EB344C /* FileConfigurations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileConfigurations.swift; sourceTree = "<group>"; };
 		B5886E0426AB2CEE00EB344C /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
+		B5916150272362E8005604BF /* LabelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelListView.swift; sourceTree = "<group>"; };
+		B591615227236D67005604BF /* TextCellContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCellContentView.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderer.swift; sourceTree = "<group>"; };
@@ -535,6 +539,8 @@
 			isa = PBXGroup;
 			children = (
 				B5D209A6271A2087005CEC9A /* ItemListCell.swift */,
+				B591615227236D67005604BF /* TextCellContentView.swift */,
+				B5916150272362E8005604BF /* LabelListView.swift */,
 				B536DA3C271F781200A9C3BB /* ReadjustingStackView.swift */,
 			);
 			path = "Cells and Views";
@@ -782,6 +788,7 @@
 				B54215CA26C3670E00A4F984 /* MainMenuDataSource.swift in Sources */,
 				B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */,
 				B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */,
+				B591615327236D67005604BF /* TextCellContentView.swift in Sources */,
 				B5FB0A4B26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift in Sources */,
 				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
@@ -800,6 +807,7 @@
 				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
 				B5F447F326EFFB7A00528ACA /* TaskListDataSource.swift in Sources */,
 				B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */,
+				B5916151272362E8005604BF /* LabelListView.swift in Sources */,
 				B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */,
 				B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */,
 				B5DF4B8E26C496680045AE43 /* UseCaseListCell.swift in Sources */,

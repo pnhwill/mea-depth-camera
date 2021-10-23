@@ -8,17 +8,15 @@
 import UIKit
 import CoreData
 
-protocol ListViewControllerProtocol {
-}
-
 /// Base class for UIViewControllers that list object data from the Core Data model and present a detail view for selected cells.
 class ListViewController<ViewModel: ListViewModel>: UIViewController, UICollectionViewDelegate {
     
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
     
     var viewModel: ViewModel?
+    var collectionView: UICollectionView!
+    var appearance = UICollectionLayoutListConfiguration.Appearance.sidebarPlain
     
-    private var collectionView: UICollectionView!
     private var dataSource: ListDiffableDataSource?
     
     init(viewModel: ViewModel) {
@@ -68,7 +66,7 @@ extension ListViewController {
                 section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
                 
             case .list:
-                let configuration = UICollectionLayoutListConfiguration(appearance: .plain)
+                let configuration = UICollectionLayoutListConfiguration(appearance: self.appearance)
                 section = NSCollectionLayoutSection.list(using: configuration,
                                                          layoutEnvironment: layoutEnvironment)
             }
@@ -124,30 +122,10 @@ extension ListViewController {
         }
     }
     
-//    private func createListCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item.ID> {
-//        return UICollectionView.CellRegistration<UICollectionViewListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
-//            guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
-//
-//            var content = cell.defaultContentConfiguration()
-//            content.text = item.object.id?.uuidString
-//            cell.contentConfiguration = content
-//
-////            cell.updateWithItem(item)
-//        }
-//    }
-    
     private func createHeaderCellRegistration() -> UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> {
         return UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }
     }
-    
 }
-
-// MARK: UICollectionViewDelegate
-extension ListViewController {
-    
-}
-
-

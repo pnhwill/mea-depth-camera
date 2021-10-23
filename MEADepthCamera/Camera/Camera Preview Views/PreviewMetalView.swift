@@ -5,8 +5,6 @@
 //  Created by Will on 7/28/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 The Metal preview view.
 */

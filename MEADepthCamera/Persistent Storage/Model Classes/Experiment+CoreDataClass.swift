@@ -41,7 +41,7 @@ public class Experiment: NSManagedObject {
 ///
 /// [
 ///     {
-///         "title": "Parkinson's - Full",
+///         "title": "All Tasks",
 ///         "tasks": [
 ///             {
 ///                 "name": "RST_REST1"

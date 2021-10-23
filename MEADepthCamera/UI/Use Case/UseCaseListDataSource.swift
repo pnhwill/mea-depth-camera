@@ -13,6 +13,24 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     typealias ListCell = UseCaseListCell
     typealias HeaderCell = UseCaseListCell
     
+    enum Filter: Int {
+        case today
+        case past
+        case all
+
+        func shouldInclude(date: Date) -> Bool {
+            let isInToday = Locale.current.calendar.isDateInToday(date)
+            switch self {
+            case .today:
+                return isInToday
+            case .past:
+                return (date < Date()) && !isInToday
+            case .all:
+                return true
+            }
+        }
+    }
+    
     var navigationTitle: String = "Use Case List"
     
     var sectionsStore: AnyModelStore<Section>? {
@@ -58,27 +76,9 @@ class UseCaseListDataSource: NSObject {
     typealias UseCaseDeletedAction = (UUID?) -> Void
     typealias UseCaseChangedAction = () -> Void
 
-    enum Filter: Int {
-        case today
-        case past
-        case all
-
-        func shouldInclude(date: Date) -> Bool {
-            let isInToday = Locale.current.calendar.isDateInToday(date)
-            switch self {
-            case .today:
-                return isInToday
-            case .past:
-                return (date < Date()) && !isInToday
-            case .all:
-                return true
-            }
-        }
-    }
-
     var navigationTitle: String = "Use Case List"
 
-    var filter: Filter = .all
+    var filter: UseCaseListViewModel.Filter = .all
 
     var filteredUseCases: [UseCase]? {
         return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
@@ -211,7 +211,7 @@ extension UseCase {
         return dateFormatter
     }()
 
-    func dateTimeText(for filter: UseCaseListDataSource.Filter) -> String? {
+    func dateTimeText(for filter: UseCaseListViewModel.Filter) -> String? {
         guard let date = date else { return nil }
         let isInToday = Locale.current.calendar.isDateInToday(date)
         switch filter {

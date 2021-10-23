@@ -9,49 +9,54 @@ import UIKit
 
 class UseCaseListCell: ItemListCell {
     
-//    static let reuseIdentifier = "UseCaseListCell"
+    var row: Int = -1
+    weak var delegate: UseCaseInteractionDelegate?
+    private let detailButton = UIButton(type: .detailDisclosure)
     
-    private func defaultListContentConfiguration() -> UIListContentConfiguration { return .cell() }
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configureAccessories()
+    }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: updateConfiguration(using:)
     override func updateConfiguration(using state: UICellConfigurationState) {
-        super.updateConfiguration(using: state)
         guard let useCase = state.item?.object as? UseCase else { fatalError() }
         
-        guard let titleText = useCase.title else { return }
-        let dateText = "date"
-        let subjectIDText = "Subject ID: 123"
-        let experimentText = "experiment title"
-        let recordedTasksText = "number of tasks recorded out of total"
-        let bodyText = [[dateText, subjectIDText], [experimentText, recordedTasksText]]
-        
-        let content = TextCellContentConfiguration(titleText: titleText, bodyText: bodyText)
-        
+        guard let titleText = useCase.title,
+              let experimentText = useCase.experimentTitle,
+              let dateText = useCase.dateTimeText(for: .all),
+              let subjectID = useCase.subjectID
+        else { fatalError() }
+        let subjectIDText = "Subject ID: " + subjectID
+        let recordedTasksText = "X out of X tasks completed"
+        let bodyText = [subjectIDText, dateText, recordedTasksText]
+        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
         contentConfiguration = content
+    }
+    
+    private func configureAccessories() {
+        print("setting up accessories for use case list cell")
+        
+        let disclosure = UICellAccessory.outlineDisclosure()
+        
+        detailButton.addTarget(self, action: #selector(UseCaseListCell.buttonClicked(_:)), for: .touchUpInside)
+//        let buttonConfiguration = UICellAccessory.CustomViewConfiguration(
+        
+        
+        accessories = [disclosure]
+    }
+    
+    @objc
+    func buttonClicked(_ sender: UIButton) {
+        delegate?.accessoryButtonTapped(for: self)
     }
 }
 
-//var titleContent = defaultContentConfiguration().updated(for: state)
-//titleContent.text = useCase.title
-//
-//var dateContent = defaultContentConfiguration().updated(for: state)
-//dateContent.text = "date"
-//
-//var subjectIDContent = defaultContentConfiguration().updated(for: state)
-//subjectIDContent.text = "subject ID"
-//
-//let firstStack = StackListContentConfiguration(subContent: [dateContent, subjectIDContent], isStackViewDynamic: false, stackViewAxis: .vertical).updated(for: state)
-//
-//var experimentContent = defaultContentConfiguration().updated(for: state)
-//experimentContent.text = "experiment title"
-//
-//var recordedTasksContent = defaultContentConfiguration().updated(for: state)
-//recordedTasksContent.text = "number of tasks recorded out of total"
-//
-//let secondStack = StackListContentConfiguration(subContent: [experimentContent, recordedTasksContent], isStackViewDynamic: false, stackViewAxis: .vertical).updated(for: state)
-//
-//let bodyContent = StackListContentConfiguration(subContent: [firstStack, secondStack], isStackViewDynamic: false, stackViewAxis: .vertical).updated(for: state)
-//
-//let content = StackListContentConfiguration(subContent: [titleContent, bodyContent], isStackViewDynamic: false, stackViewAxis: .vertical).updated(for: state)
+
 
 
 

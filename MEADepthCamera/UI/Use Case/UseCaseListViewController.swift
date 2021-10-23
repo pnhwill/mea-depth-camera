@@ -34,6 +34,33 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
 
 }
 
+// MARK: UICollectionViewDelegate
+extension UseCaseListViewController {
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let useCaseCell = cell as? UseCaseListCell else { fatalError() }
+        print("displaying cell at row \(indexPath.row)")
+        
+        useCaseCell.row = indexPath.row
+        useCaseCell.delegate = self
+    }
+}
+
+
+extension UseCaseListViewController: UseCaseInteractionDelegate {
+    func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool) {
+        
+    }
+    
+    func accessoryButtonTapped(for cell: UseCaseListCell) {
+//        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        
+        // TODO: show detail view controller
+//        let row = indexPath.row
+    }
+}
+
+
 extension UseCaseListViewController {
     private func configureNavItem() {
         navigationItem.title = viewModel?.navigationTitle
@@ -57,8 +84,8 @@ class OldUseCaseListViewController: UITableViewController {
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
 
     private var dataSource: UseCaseListDataSource?
-    private var filter: UseCaseListDataSource.Filter {
-        return UseCaseListDataSource.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
+    private var filter: UseCaseListViewModel.Filter {
+        return UseCaseListViewModel.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
     }
 
     //weak var delegate: UseCaseInteractionDelegate?

@@ -5,8 +5,6 @@
 //  Created by Will on 7/24/21.
 //
 /*
-See LICENSE folder for this sample’s licensing information.
-
 Abstract:
 Header containing types and enum constants shared between Metal shaders and Swift sources
 */

@@ -17,7 +17,6 @@ protocol ListViewModel: UISearchResultsUpdating {
     
     var sectionsStore: AnyModelStore<Section>? { get }
     var itemsStore: AnyModelStore<Item>? { get }
-    
 }
 
 struct Section: Identifiable {
@@ -31,7 +30,7 @@ struct Section: Identifiable {
     var items: [Item.ID]?
 }
 
-struct Item: Identifiable, Equatable, Hashable {
+struct Item: Identifiable, Hashable {
 
     var id: UUID
     var object: ModelObject
