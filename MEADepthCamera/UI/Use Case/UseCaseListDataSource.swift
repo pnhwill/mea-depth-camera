@@ -31,14 +31,12 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         }
     }
     
-    var navigationTitle: String = "Use Case List"
-    
-    var sectionsStore: AnyModelStore<Section>? {
-        guard let items = useCases?.compactMap({ Item(object: $0)?.id }) else { return nil }
-        return AnyModelStore([Section(id: .list, items: items)])
+    var sectionsStore: AnyModelStore<ListSection>? {
+        guard let items = useCases?.compactMap({ ListItem(object: $0)?.id }) else { return nil }
+        return AnyModelStore([ListSection(id: .list, items: items)])
     }
-    var itemsStore: AnyModelStore<Item>? {
-        guard let items = useCases?.compactMap({ Item(object: $0) }) else { return nil }
+    var itemsStore: AnyModelStore<ListItem>? {
+        guard let items = useCases?.compactMap({ ListItem(object: $0) }) else { return nil }
         return AnyModelStore(items)
     }
     
@@ -53,6 +51,15 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         return dataProvider.fetchedResultsController.fetchedObjects
     }
     
+    func update(_ useCase: UseCase, completion: (Bool) -> Void) {
+        if let context = useCase.managedObjectContext {
+            dataProvider.persistentContainer.saveContext(backgroundContext: context, with: .updateUseCase)
+            context.refresh(useCase, mergeChanges: true)
+            completion(true)
+        } else {
+            completion(false)
+        }
+    }
     
     
 }
@@ -64,7 +71,7 @@ extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
 }
 
 // MARK: UISearchResultsUpdating
-extension UseCaseListViewModel {
+extension UseCaseListViewModel: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
     }
 }

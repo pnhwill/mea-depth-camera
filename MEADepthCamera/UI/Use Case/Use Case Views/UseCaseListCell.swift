@@ -9,10 +9,6 @@ import UIKit
 
 class UseCaseListCell: ItemListCell {
     
-    var row: Int = -1
-    weak var delegate: UseCaseInteractionDelegate?
-    private let detailButton = UIButton(type: .detailDisclosure)
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureAccessories()
@@ -39,21 +35,11 @@ class UseCaseListCell: ItemListCell {
     }
     
     private func configureAccessories() {
-        print("setting up accessories for use case list cell")
-        
-        let disclosure = UICellAccessory.outlineDisclosure()
-        
-        detailButton.addTarget(self, action: #selector(UseCaseListCell.buttonClicked(_:)), for: .touchUpInside)
-//        let buttonConfiguration = UICellAccessory.CustomViewConfiguration(
-        
-        
-        accessories = [disclosure]
+        let disclosure = UICellAccessory.disclosureIndicator()
+        let delete = UICellAccessory.delete()
+        accessories = [delete, disclosure]
     }
     
-    @objc
-    func buttonClicked(_ sender: UIButton) {
-        delegate?.accessoryButtonTapped(for: self)
-    }
 }
 
 

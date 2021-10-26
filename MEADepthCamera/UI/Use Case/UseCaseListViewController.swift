@@ -9,6 +9,9 @@ import UIKit
 
 class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
     
+    static let mainStoryboardName = "Main"
+    static let detailViewControllerIdentifier = "UseCaseDetailViewController"
+    
     init() {
         super.init(viewModel: UseCaseListViewModel())
     }
@@ -19,10 +22,11 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
     
     // MARK: Life Cycle
     
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        configureNavItem()
-//    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureNavigationItem()
+        collectionView.delegate = self
+    }
     
 //    override func viewDidAppear(_ animated: Bool) {
 //        super.viewDidAppear(animated)
@@ -35,14 +39,28 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
 }
 
 // MARK: UICollectionViewDelegate
-extension UseCaseListViewController {
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let useCaseCell = cell as? UseCaseListCell else { fatalError() }
-        print("displaying cell at row \(indexPath.row)")
-        
-        useCaseCell.row = indexPath.row
-        useCaseCell.delegate = self
+extension UseCaseListViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // Push the detail view when the cell is tapped.
+        guard let itemID = dataSource?.itemIdentifier(for: indexPath),
+              let item = viewModel?.itemsStore?.fetchByID(itemID),
+              let useCase = item.object as? UseCase
+        else {
+            collectionView.deselectItem(at: indexPath, animated: true)
+            return
+        }
+        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
+        let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+        detailViewController.configure(with: useCase, editAction: { useCase in
+            self.viewModel?.update(useCase) { success in
+                if success, let dataSource = self.dataSource {
+                    var snapshot = dataSource.snapshot()
+                    snapshot.reloadItems([itemID])
+                    dataSource.apply(snapshot)
+                }
+            }
+        })
+        show(detailViewController, sender: self)
     }
 }
 
@@ -51,25 +69,17 @@ extension UseCaseListViewController: UseCaseInteractionDelegate {
     func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool) {
         
     }
-    
-    func accessoryButtonTapped(for cell: UseCaseListCell) {
-//        guard let indexPath = collectionView.indexPath(for: cell) else { return }
-        
-        // TODO: show detail view controller
-//        let row = indexPath.row
-    }
 }
 
 
 extension UseCaseListViewController {
-    private func configureNavItem() {
-        navigationItem.title = viewModel?.navigationTitle
-        
+    private func configureNavigationItem() {
+        navigationItem.setRightBarButton(editButtonItem, animated: false)
         // Search bar controller
-        let searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = viewModel
-        searchController.obscuresBackgroundDuringPresentation = false
-        navigationItem.searchController = searchController
+//        let searchController = UISearchController(searchResultsController: nil)
+//        searchController.searchResultsUpdater = viewModel
+//        searchController.obscuresBackgroundDuringPresentation = false
+//        navigationItem.searchController = searchController
     }
 }
 

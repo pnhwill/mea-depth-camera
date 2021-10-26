@@ -5,33 +5,27 @@
 //  Created by Will on 10/15/21.
 //
 
-import CoreData
-import UIKit
+import Foundation
 
-protocol ListViewModel: UISearchResultsUpdating {
-    
+protocol ListViewModel {
     associatedtype ListCell: ItemListCell
     associatedtype HeaderCell: ItemListCell
     
-    var navigationTitle: String { get set }
-    
-    var sectionsStore: AnyModelStore<Section>? { get }
-    var itemsStore: AnyModelStore<Item>? { get }
+    var sectionsStore: AnyModelStore<ListSection>? { get }
+    var itemsStore: AnyModelStore<ListItem>? { get }
 }
 
-struct Section: Identifiable {
-    
+struct ListSection: Identifiable {
     enum Identifier: Int, CaseIterable {
         case header
         case list
     }
     
     var id: Identifier
-    var items: [Item.ID]?
+    var items: [ListItem.ID]?
 }
 
-struct Item: Identifiable, Hashable {
-
+struct ListItem: Identifiable, Hashable {
     var id: UUID
     var object: ModelObject
     
@@ -41,7 +35,7 @@ struct Item: Identifiable, Hashable {
         self.id = id
     }
     
-    static func == (lhs: Item, rhs: Item) -> Bool {
+    static func == (lhs: ListItem, rhs: ListItem) -> Bool {
         return lhs.id == rhs.id
     }
     

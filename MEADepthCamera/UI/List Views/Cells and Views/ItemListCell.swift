@@ -10,9 +10,9 @@ import UIKit
 /// This list cell subclass is an abstract class with a property that holds the item the cell is displaying,
 /// which is added to the cell's configuration state for subclasses to use when updating their configuration.
 class ItemListCell: UICollectionViewListCell {
-    private var item: Item? = nil
+    private var item: ListItem? = nil
     
-    func updateWithItem(_ newItem: Item) {
+    func updateWithItem(_ newItem: ListItem) {
         guard item != newItem else { return }
         item = newItem
         setNeedsUpdateConfiguration()
@@ -27,9 +27,9 @@ class ItemListCell: UICollectionViewListCell {
 
 // Declare an extension on the cell state struct to provide a typed property for this custom state.
 extension UICellConfigurationState {
-    var item: Item? {
+    var item: ListItem? {
         set { self[.item] = newValue }
-        get { return self[.item] as? Item }
+        get { return self[.item] as? ListItem }
     }
 }
 
@@ -37,6 +37,9 @@ extension UICellConfigurationState {
 extension UIConfigurationStateCustomKey {
     static let item = UIConfigurationStateCustomKey("com.mea-lab.ItemListCell.item")
 }
+
+
+
 
 /*
 class ListTextCell: ItemListCell {

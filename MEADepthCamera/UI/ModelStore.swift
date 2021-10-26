@@ -6,7 +6,7 @@
 //
 /*
 Abstract:
-The generic model store for ListViewModels.
+The generic model store for UICollectionView-based view controllers.
 */
 
 import Foundation

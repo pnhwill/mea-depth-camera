@@ -9,15 +9,16 @@ import UIKit
 import CoreData
 
 /// Base class for UIViewControllers that list object data from the Core Data model and present a detail view for selected cells.
-class ListViewController<ViewModel: ListViewModel>: UIViewController, UICollectionViewDelegate {
+class ListViewController<ViewModel: ListViewModel>: UIViewController {
     
+    typealias Item = ListItem
+    typealias Section = ListSection
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
     
+    private(set) var test = 0
     var viewModel: ViewModel?
     var collectionView: UICollectionView!
-    var appearance = UICollectionLayoutListConfiguration.Appearance.sidebarPlain
-    
-    private var dataSource: ListDiffableDataSource?
+    var dataSource: ListDiffableDataSource?
     
     init(viewModel: ViewModel) {
         self.viewModel = viewModel
@@ -34,6 +35,24 @@ class ListViewController<ViewModel: ListViewModel>: UIViewController, UICollecti
         configureDataSource()
         applyInitialSnapshots()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Deselect selected cells after returning from the detail view
+        if let indexPath = self.collectionView.indexPathsForSelectedItems?.first {
+            if let coordinator = self.transitionCoordinator {
+                coordinator.animate(alongsideTransition: { context in
+                    self.collectionView.deselectItem(at: indexPath, animated: true)
+                }) { (context) in
+                    if context.isCancelled {
+                        self.collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                    }
+                }
+            } else {
+                self.collectionView.deselectItem(at: indexPath, animated: animated)
+            }
+        }
+    }
 }
 
 extension ListViewController {
@@ -41,7 +60,6 @@ extension ListViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemGroupedBackground
-        collectionView.delegate = self
         view.addSubview(collectionView)
     }
     
@@ -60,13 +78,13 @@ extension ListViewController {
                                                        heightDimension: .fractionalHeight(1.0))
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
                                                                subitems: [item])
-                group.interItemSpacing = .flexible(10)
+//                group.interItemSpacing = .flexible(10)
                 section = NSCollectionLayoutSection(group: group)
-                section.interGroupSpacing = 10
+//                section.interGroupSpacing = 10
                 section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
                 
             case .list:
-                let configuration = UICollectionLayoutListConfiguration(appearance: self.appearance)
+                let configuration = UICollectionLayoutListConfiguration(appearance: .sidebarPlain)
                 section = NSCollectionLayoutSection.list(using: configuration,
                                                          layoutEnvironment: layoutEnvironment)
             }
@@ -75,7 +93,7 @@ extension ListViewController {
         }
         
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
-        configuration.interSectionSpacing = 20
+//        configuration.interSectionSpacing = 20
         
         return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider,
                                                    configuration: configuration)
@@ -99,7 +117,6 @@ extension ListViewController {
     }
     
     private func applyInitialSnapshots() {
-        
         // Set the order for our sections
         let sections = Section.ID.allCases
         var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()

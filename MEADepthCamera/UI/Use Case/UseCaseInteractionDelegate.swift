@@ -24,7 +24,7 @@ protocol UseCaseInteractionDelegate: AnyObject {
      
      When the user taps the detail disclosure button on a cell, the cell calls this method to notify the delegate (the list view controller) to present the detail view.
      */
-    func accessoryButtonTapped(for cell: UseCaseListCell)
+//    func accessoryButtonTapped(for cell: UseCaseListCell)
     
     /**
      UISplitViewController can show the detail view controller when it is appropriate.

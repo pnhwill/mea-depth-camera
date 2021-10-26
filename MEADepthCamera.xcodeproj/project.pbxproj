@@ -72,6 +72,8 @@
 		B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0426AB2CEE00EB344C /* FileWriter.swift */; };
 		B5916151272362E8005604BF /* LabelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5916150272362E8005604BF /* LabelListView.swift */; };
 		B591615327236D67005604BF /* TextCellContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B591615227236D67005604BF /* TextCellContentView.swift */; };
+		B59161562727AA33005604BF /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161552727AA33005604BF /* DetailViewController.swift */; };
+		B59161582727AA95005604BF /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161572727AA95005604BF /* DetailViewModel.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
 		B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */; };
@@ -92,7 +94,6 @@
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
 		B5ED04BB270D194F00A282FC /* ProcessingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = B5ED04BA270D194F00A282FC /* ProcessingView.xib */; };
 		B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447EB26EFF7A100528ACA /* ListViewController.swift */; };
-		B5F447EE26EFF8B100528ACA /* ListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447ED26EFF8B100528ACA /* ListDataSource.swift */; };
 		B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */; };
 		B5F447F326EFFB7A00528ACA /* TaskListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F226EFFB7A00528ACA /* TaskListDataSource.swift */; };
 		B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F426F0047800528ACA /* ProcessorSettings.swift */; };
@@ -198,6 +199,8 @@
 		B5886E0426AB2CEE00EB344C /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
 		B5916150272362E8005604BF /* LabelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelListView.swift; sourceTree = "<group>"; };
 		B591615227236D67005604BF /* TextCellContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCellContentView.swift; sourceTree = "<group>"; };
+		B59161552727AA33005604BF /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		B59161572727AA95005604BF /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderer.swift; sourceTree = "<group>"; };
@@ -219,7 +222,6 @@
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
 		B5ED04BA270D194F00A282FC /* ProcessingView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ProcessingView.xib; sourceTree = "<group>"; };
 		B5F447EB26EFF7A100528ACA /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
-		B5F447ED26EFF8B100528ACA /* ListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDataSource.swift; sourceTree = "<group>"; };
 		B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewController.swift; sourceTree = "<group>"; };
 		B5F447F226EFFB7A00528ACA /* TaskListDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListDataSource.swift; sourceTree = "<group>"; };
 		B5F447F426F0047800528ACA /* ProcessorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessorSettings.swift; sourceTree = "<group>"; };
@@ -425,6 +427,7 @@
 		B57FBD3726F27EE100ACC129 /* Model Classes */ = {
 			isa = PBXGroup;
 			children = (
+				BEBD1493271972C6007AC466 /* ModelObject.swift */,
 				B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */,
 				B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */,
 				B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */,
@@ -447,6 +450,8 @@
 		B57FBD3A26F2816E00ACC129 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
+				B591615427279630005604BF /* Detail Views */,
 				B5F447EA26EFF72400528ACA /* List Views */,
 				B56F1A6126E03F9100A29C42 /* Main Menu */,
 				B54215BB26C31E9300A4F984 /* Use Case */,
@@ -496,6 +501,15 @@
 				B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */,
 			);
 			path = "Camera Preview Views";
+			sourceTree = "<group>";
+		};
+		B591615427279630005604BF /* Detail Views */ = {
+			isa = PBXGroup;
+			children = (
+				B59161552727AA33005604BF /* DetailViewController.swift */,
+				B59161572727AA95005604BF /* DetailViewModel.swift */,
+			);
+			path = "Detail Views";
 			sourceTree = "<group>";
 		};
 		B5ABE85926A9CC9B003D2AFD /* File IO */ = {
@@ -572,11 +586,8 @@
 		B5F447EA26EFF72400528ACA /* List Views */ = {
 			isa = PBXGroup;
 			children = (
-				BEBD1493271972C6007AC466 /* ModelObject.swift */,
-				B5D209A8271A295A005CEC9A /* ListViewModel.swift */,
-				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
 				B5F447EB26EFF7A100528ACA /* ListViewController.swift */,
-				B5F447ED26EFF8B100528ACA /* ListDataSource.swift */,
+				B5D209A8271A295A005CEC9A /* ListViewModel.swift */,
 				B5D209A5271A2057005CEC9A /* Cells and Views */,
 			);
 			path = "List Views";
@@ -750,6 +761,7 @@
 				B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
 				B54215C626C35FAF00A4F984 /* EditTitleCell.swift in Sources */,
+				B59161582727AA95005604BF /* DetailViewModel.swift in Sources */,
 				B5824A85270C078B0030C9CF /* TaskInstructionsViewController.swift in Sources */,
 				B5FB0A5426D5858600F65FA5 /* RecordingDetailEditDataSource.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
@@ -763,7 +775,7 @@
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B534ED0F26DDAC2800A138EA /* ProcessingView.swift in Sources */,
 				B56F1A9626E0903100A29C42 /* OutputFileProvider.swift in Sources */,
-				B5F447EE26EFF8B100528ACA /* ListDataSource.swift in Sources */,
+				B59161562727AA33005604BF /* DetailViewController.swift in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */,
