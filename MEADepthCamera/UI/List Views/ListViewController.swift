@@ -15,10 +15,8 @@ class ListViewController<ViewModel: ListViewModel>: UIViewController {
     typealias Section = ListSection
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
     
-    private(set) var test = 0
-    var viewModel: ViewModel?
+    var viewModel: ViewModel
     var collectionView: UICollectionView!
-    var dataSource: ListDiffableDataSource?
     
     init(viewModel: ViewModel) {
         self.viewModel = viewModel
@@ -33,7 +31,7 @@ class ListViewController<ViewModel: ListViewModel>: UIViewController {
         super.viewDidLoad()
         configureHierarchy()
         configureDataSource()
-        applyInitialSnapshots()
+        viewModel.applyInitialSnapshots()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -103,7 +101,7 @@ extension ListViewController {
         let headerCellRegistration = createHeaderCellRegistration()
         let listCellRegistration = createListCellRegistration()
         
-        dataSource = ListDiffableDataSource(collectionView: collectionView) {
+        viewModel.dataSource = ListDiffableDataSource(collectionView: collectionView) {
             (collectionView, indexPath, itemID) -> UICollectionViewCell? in
             guard let sectionID = Section.ID(rawValue: indexPath.section) else { return nil }
             
@@ -116,32 +114,16 @@ extension ListViewController {
         }
     }
     
-    private func applyInitialSnapshots() {
-        // Set the order for our sections
-        let sections = Section.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
-        snapshot.appendSections(sections)
-        dataSource?.apply(snapshot, animatingDifferences: false)
-        
-        // Set section snapshots for each section
-        for sectionID in sections {
-            guard let items = viewModel?.sectionsStore?.fetchByID(sectionID)?.items else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
-            sectionSnapshot.append(items)
-            dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
-        }
-    }
-    
     private func createListCellRegistration() -> UICollectionView.CellRegistration<ViewModel.ListCell, Item.ID> {
         return UICollectionView.CellRegistration<ViewModel.ListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
-            guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
+            guard let self = self, let item = self.viewModel.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }
     }
     
     private func createHeaderCellRegistration() -> UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> {
         return UICollectionView.CellRegistration<ViewModel.HeaderCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
-            guard let self = self, let item = self.viewModel?.itemsStore?.fetchByID(itemID) else { return }
+            guard let self = self, let item = self.viewModel.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }
     }

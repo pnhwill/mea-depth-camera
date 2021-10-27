@@ -427,7 +427,6 @@
 		B57FBD3726F27EE100ACC129 /* Model Classes */ = {
 			isa = PBXGroup;
 			children = (
-				BEBD1493271972C6007AC466 /* ModelObject.swift */,
 				B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */,
 				B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */,
 				B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */,
@@ -450,9 +449,10 @@
 		B57FBD3A26F2816E00ACC129 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				BEBD1493271972C6007AC466 /* ModelObject.swift */,
 				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
-				B591615427279630005604BF /* Detail Views */,
 				B5F447EA26EFF72400528ACA /* List Views */,
+				B591615427279630005604BF /* Detail Views */,
 				B56F1A6126E03F9100A29C42 /* Main Menu */,
 				B54215BB26C31E9300A4F984 /* Use Case */,
 				B5DF4B8826C4928D0045AE43 /* Recording */,

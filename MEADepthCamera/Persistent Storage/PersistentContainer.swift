@@ -25,6 +25,11 @@ class PersistentContainer: NSPersistentContainer {
         }
     }
     
+//    func backgroundContext() -> NSManagedObjectContext {
+//        let context = newBackgroundContext()
+//        return context
+//    }
+    
     /**
      Handles save error by presenting an alert.
      */
@@ -48,12 +53,6 @@ class PersistentContainer: NSPersistentContainer {
             }
         }
     }
-    
-    //    func backgroundContext() -> NSManagedObjectContext {
-    //        let context = newBackgroundContext()
-    //        return context
-    //    }
-    
 }
 
 /**

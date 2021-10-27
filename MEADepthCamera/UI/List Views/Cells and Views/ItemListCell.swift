@@ -25,6 +25,16 @@ class ItemListCell: UICollectionViewListCell {
     }
 }
 
+/// The delegate protocol for ItemListCell subclasses, to support interaction with the cell's item from within the cell.
+protocol ItemListCellDelegate {
+    /**
+     Deletes the ListItem's stored NSManagedObject.
+     
+     When the user deletes a cell, the cell calls this method to notify the delegate (the list view model) to delete the item's object.
+     */
+    func delete(objectFor item: ListItem)
+}
+
 // Declare an extension on the cell state struct to provide a typed property for this custom state.
 extension UICellConfigurationState {
     var item: ListItem? {
@@ -37,6 +47,13 @@ extension UICellConfigurationState {
 extension UIConfigurationStateCustomKey {
     static let item = UIConfigurationStateCustomKey("com.mea-lab.ItemListCell.item")
 }
+
+
+
+
+
+
+
 
 
 

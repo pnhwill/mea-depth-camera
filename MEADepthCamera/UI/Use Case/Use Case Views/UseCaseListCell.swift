@@ -9,6 +9,8 @@ import UIKit
 
 class UseCaseListCell: ItemListCell {
     
+    weak var delegate: UseCaseInteractionDelegate?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureAccessories()
@@ -26,7 +28,7 @@ class UseCaseListCell: ItemListCell {
               let experimentText = useCase.experimentTitle,
               let dateText = useCase.dateTimeText(for: .all),
               let subjectID = useCase.subjectID
-        else { fatalError() }
+        else { return }
         let subjectIDText = "Subject ID: " + subjectID
         let recordedTasksText = "X out of X tasks completed"
         let bodyText = [subjectIDText, dateText, recordedTasksText]
@@ -36,10 +38,14 @@ class UseCaseListCell: ItemListCell {
     
     private func configureAccessories() {
         let disclosure = UICellAccessory.disclosureIndicator()
-        let delete = UICellAccessory.delete()
+        let delete = UICellAccessory.delete() { self.deleteAction() }
         accessories = [delete, disclosure]
     }
     
+    private func deleteAction() {
+        guard let useCase = configurationState.item?.object as? UseCase else { fatalError() }
+        delegate?.delete(useCase)
+    }
 }
 
 

@@ -94,8 +94,7 @@ extension TaskListViewController: RecordingInteractionDelegate {
      didUpdateRecording is called as part of RecordingInteractionDelegate, or whenever a recording update requires a UI update.
      
      Respond by updating the UI as follows.
-     - delete: reload selected row.
-     - delete all: sort the task list and reload entire table.
+     - delete: reload selected row and sort the task list.
      */
     func didUpdateRecording(_ recording: Recording?, shouldReloadRow: Bool) {
         

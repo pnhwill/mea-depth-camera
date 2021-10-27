@@ -12,6 +12,10 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
     
+    var addButton: UIBarButtonItem {
+        return UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(UseCaseListViewController.addUseCase(_:)))
+    }
+    
     init() {
         super.init(viewModel: UseCaseListViewModel())
     }
@@ -28,49 +32,38 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
         collectionView.delegate = self
     }
     
-//    override func viewDidAppear(_ animated: Bool) {
-//        super.viewDidAppear(animated)
-//        if let navigationController = navigationController,
-//           navigationController.isToolbarHidden {
-//            navigationController.setToolbarHidden(false, animated: animated)
-//        }
-//    }
-
-}
-
-// MARK: UICollectionViewDelegate
-extension UseCaseListViewController: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Push the detail view when the cell is tapped.
-        guard let itemID = dataSource?.itemIdentifier(for: indexPath),
-              let item = viewModel?.itemsStore?.fetchByID(itemID),
-              let useCase = item.object as? UseCase
-        else {
-            collectionView.deselectItem(at: indexPath, animated: true)
-            return
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let navigationController = navigationController,
+           navigationController.isToolbarHidden {
+            navigationController.setToolbarHidden(false, animated: animated)
         }
+        setToolbarItems([addButton], animated: animated)
+    }
+    
+    // MARK: Button Actions
+    @objc
+    func addUseCase(_ sender: UIBarButtonItem) {
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
         let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-        detailViewController.configure(with: useCase, editAction: { useCase in
-            self.viewModel?.update(useCase) { success in
-                if success, let dataSource = self.dataSource {
-                    var snapshot = dataSource.snapshot()
-                    snapshot.reloadItems([itemID])
-                    dataSource.apply(snapshot)
-                }
+        viewModel.add() { useCase in
+            DispatchQueue.main.async {
+                detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
+                    self.viewModel.update(useCase) { success in
+    //                    if success, let dataSource = self.viewModel.dataSource, let itemID = useCase.id {
+    //                        var snapshot = dataSource.snapshot()
+    //                        snapshot.appendItems([itemID], toSection: .list)
+    //                        dataSource.apply(snapshot)
+    //                    }
+                    }
+                })
             }
-        })
-        show(detailViewController, sender: self)
+        }
+        let navigationController = UINavigationController(rootViewController: detailViewController)
+        present(navigationController, animated: true, completion: nil)
     }
+
 }
-
-
-extension UseCaseListViewController: UseCaseInteractionDelegate {
-    func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool) {
-        
-    }
-}
-
 
 extension UseCaseListViewController {
     private func configureNavigationItem() {
@@ -81,10 +74,55 @@ extension UseCaseListViewController {
 //        searchController.obscuresBackgroundDuringPresentation = false
 //        navigationItem.searchController = searchController
     }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        collectionView.isEditing = isEditing
+    }
+    
+}
+
+// MARK: UICollectionViewDelegate
+extension UseCaseListViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let cell = cell as? UseCaseListCell else { fatalError() }
+        cell.delegate = viewModel
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // Push the detail view when the cell is tapped.
+        guard let itemID = viewModel.dataSource?.itemIdentifier(for: indexPath),
+              let item = viewModel.itemsStore?.fetchByID(itemID),
+              let useCase = item.object as? UseCase
+        else {
+            collectionView.deselectItem(at: indexPath, animated: true)
+            return
+        }
+        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
+        let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+        detailViewController.configure(with: useCase, editAction: { useCase in
+            self.viewModel.update(useCase) { success in
+                if success, let dataSource = self.viewModel.dataSource {
+//                    var snapshot = dataSource.snapshot()
+//                    snapshot.reloadItems([itemID])
+//                    dataSource.apply(snapshot)
+                }
+            }
+        })
+        show(detailViewController, sender: self)
+    }
 }
 
 
 
+
+
+
+
+
+
+// MARK: - OldUseCaseListViewController
 class OldUseCaseListViewController: UITableViewController {
 
     @IBOutlet var filterSegmentedControl: UISegmentedControl!
@@ -225,9 +263,9 @@ extension OldUseCaseListViewController {
 extension OldUseCaseListViewController: UINavigationControllerDelegate {
     //TODO: replace this with UseCaseInteractionDelegate methods
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
-        if let mainMenuViewController = viewController as? MainMenuViewController {
-            mainMenuViewController.configure(with: dataSource?.useCase(with: currentUseCaseID))
-        }
+//        if let mainMenuViewController = viewController as? MainMenuViewController {
+//            mainMenuViewController.configure(with: dataSource?.useCase(with: currentUseCaseID))
+//        }
     }
 }
 

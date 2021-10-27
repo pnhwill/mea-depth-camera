@@ -9,7 +9,8 @@ import UIKit
 import CoreData
 
 class UseCaseListViewModel: NSObject, ListViewModel {
-    
+
+    typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<ListSection.ID, ListItem.ID>
     typealias ListCell = UseCaseListCell
     typealias HeaderCell = UseCaseListCell
     
@@ -31,6 +32,10 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         }
     }
     
+    var dataSource: ListDiffableDataSource?
+    
+    var filter: UseCaseListViewModel.Filter = .all
+    
     var sectionsStore: AnyModelStore<ListSection>? {
         guard let items = useCases?.compactMap({ ListItem(object: $0)?.id }) else { return nil }
         return AnyModelStore([ListSection(id: .list, items: items)])
@@ -50,6 +55,10 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     private var useCases: [UseCase]? {
         return dataProvider.fetchedResultsController.fetchedObjects
     }
+
+    private var filteredUseCases: [UseCase]? {
+        return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
+    }
     
     func update(_ useCase: UseCase, completion: (Bool) -> Void) {
         if let context = useCase.managedObjectContext {
@@ -61,12 +70,32 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         }
     }
     
-    
+    func add(completion: @escaping (UseCase) -> Void) {
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
+            completion(useCase)
+        }
+    }
 }
 
-// MARK: NSFetchedResultsControllerDelegate
-extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+extension UseCaseListViewModel: UseCaseInteractionDelegate {
+    
+    /**
+     didUpdateUseCase is called as part of UseCaseInteractionDelegate, or whenever a use case update requires a UI update (including main-detail selections).
+     
+     Respond by updating the UI as follows.
+     - add:
+     - delete: reload snapshot and apply to collection view data source
+     - update from detailViewController:
+     - initial load:
+     */
+    func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool = true) {
+        
+    }
+    
+    func delete(_ useCase: UseCase) {
+        dataProvider.delete(useCase) { success in
+            print("use case deleted")
+        }
     }
 }
 
@@ -76,7 +105,12 @@ extension UseCaseListViewModel: UISearchResultsUpdating {
     }
 }
 
-
+extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        print("controller did change object")
+        fetchedResultsController(didChange: anObject, at: indexPath, for: type, newIndexPath: newIndexPath)
+    }
+}
 
 
 class UseCaseListDataSource: NSObject {

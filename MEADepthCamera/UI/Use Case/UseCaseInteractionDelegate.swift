@@ -20,6 +20,15 @@ protocol UseCaseInteractionDelegate: AnyObject {
     func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool)
     
     /**
+     Deletes the use case.
+     
+     When the user deletes a cell, the cell calls this method to notify the delegate (the use case list view controller) to delete the use case.
+     */
+    func delete(_ useCase: UseCase)
+    
+    
+    
+    /**
      Show the detail view.
      
      When the user taps the detail disclosure button on a cell, the cell calls this method to notify the delegate (the list view controller) to present the detail view.
