@@ -44,25 +44,32 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
     // MARK: Button Actions
     @objc
     func addUseCase(_ sender: UIBarButtonItem) {
-        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-        let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-        viewModel.add() { useCase in
-            DispatchQueue.main.async {
-                detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-                    self.viewModel.update(useCase) { success in
-    //                    if success, let dataSource = self.viewModel.dataSource, let itemID = useCase.id {
-    //                        var snapshot = dataSource.snapshot()
-    //                        snapshot.appendItems([itemID], toSection: .list)
-    //                        dataSource.apply(snapshot)
-    //                    }
-                    }
-                })
-            }
+        viewModel.add() { [weak self] useCase in
+            let detailViewController = UseCaseDetailViewController(useCase: useCase, isNew: true)
+            detailViewController.delegate = self?.viewModel
+            self?.show(detailViewController, sender: self)
         }
-        let navigationController = UINavigationController(rootViewController: detailViewController)
-        present(navigationController, animated: true, completion: nil)
+        
+        
+//        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
+//        let detailViewController: OldUseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+//        viewModel.add() { useCase in
+//            DispatchQueue.main.async {
+//                detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
+//                    self.viewModel.update(useCase) { success in
+//                        if success, let dataSource = self.viewModel.dataSource, let itemID = useCase.id {
+//                            var snapshot = dataSource.snapshot()
+//                            snapshot.appendItems([itemID], toSection: .list)
+//                            dataSource.apply(snapshot)
+//                        }
+//                    }
+//                })
+//            }
+//        }
+//        let navigationController = UINavigationController(rootViewController: detailViewController)
+//        present(navigationController, animated: true, completion: nil)
     }
-
+    
 }
 
 extension UseCaseListViewController {
@@ -79,16 +86,15 @@ extension UseCaseListViewController {
         super.setEditing(editing, animated: animated)
         collectionView.isEditing = isEditing
     }
-    
 }
 
 // MARK: UICollectionViewDelegate
 extension UseCaseListViewController: UICollectionViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let cell = cell as? UseCaseListCell else { fatalError() }
-        cell.delegate = viewModel
-    }
+//    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+//        guard let cell = cell as? UseCaseListCell else { fatalError() }
+//        cell.delegate = viewModel
+//    }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Push the detail view when the cell is tapped.
@@ -99,21 +105,22 @@ extension UseCaseListViewController: UICollectionViewDelegate {
             collectionView.deselectItem(at: indexPath, animated: true)
             return
         }
-        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-        let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-        detailViewController.configure(with: useCase, editAction: { useCase in
-            self.viewModel.update(useCase) { success in
-                if success, let dataSource = self.viewModel.dataSource {
+//        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
+//        let detailViewController: OldUseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+//        detailViewController.configure(with: useCase, editAction: { useCase in
+//            self.viewModel.update(useCase) { success in
+//                if success, let dataSource = self.viewModel.dataSource {
 //                    var snapshot = dataSource.snapshot()
 //                    snapshot.reloadItems([itemID])
 //                    dataSource.apply(snapshot)
-                }
-            }
-        })
+//                }
+//            }
+//        })
+        let detailViewController = UseCaseDetailViewController(useCase: useCase)
+        detailViewController.delegate = viewModel
         show(detailViewController, sender: self)
     }
 }
-
 
 
 
@@ -206,7 +213,7 @@ class OldUseCaseListViewController: UITableViewController {
 
     private func addUseCase() {
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-        let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+        let detailViewController: OldUseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
         dataSource?.add() { useCase in
             detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
                 self.dataSource?.update(useCase) { success in
@@ -228,7 +235,7 @@ extension OldUseCaseListViewController {
     override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
         // Push the detail view when the info button is pressed.
         let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-        let detailViewController: UseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
+        let detailViewController: OldUseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
 
         let rowIndex = indexPath.row
         guard let useCase = dataSource?.useCase(at: rowIndex) else {

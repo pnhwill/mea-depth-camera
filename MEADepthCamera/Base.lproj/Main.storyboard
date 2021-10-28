@@ -184,10 +184,10 @@
             </objects>
             <point key="canvasLocation" x="-22" y="-9"/>
         </scene>
-        <!--Use Case Detail View Controller-->
+        <!--Old Use Case Detail View Controller-->
         <scene sceneID="r8a-xk-G51">
             <objects>
-                <tableViewController storyboardIdentifier="UseCaseDetailViewController" id="qMB-TZ-QPO" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="UseCaseDetailViewController" id="qMB-TZ-QPO" customClass="OldUseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="VFd-32-UFH">
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

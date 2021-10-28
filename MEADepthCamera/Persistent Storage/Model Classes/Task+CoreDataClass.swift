@@ -34,11 +34,9 @@ public class Task: NSManagedObject {
     
 }
 
-//extension Task: ModelObject {
-//    static func generateListContentConfiguration() -> ListContentConfiguration {
-//        return ListContentConfiguration(titleText: "", bodyText: [], buttonConfigurations: [])
-//    }
-//}
+extension Task: ModelObject {
+
+}
 
 // MARK: Text Formatters
 extension Task {

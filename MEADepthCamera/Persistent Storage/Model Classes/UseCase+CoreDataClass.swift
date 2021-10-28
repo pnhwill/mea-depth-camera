@@ -12,7 +12,6 @@ import UIKit
 
 @objc(UseCase)
 public class UseCase: NSManagedObject {
-
     
     func recordingsCount(for task: Task) -> Int {
         let recordings = recordings as! Set<Recording>
@@ -21,11 +20,7 @@ public class UseCase: NSManagedObject {
 }
 
 extension UseCase: ModelObject {
-//    func listContentConfiguration() -> ListContentConfiguration {
-//        let titleContent = UIListContentConfiguration.subtitleCell()
-//        let bodyContent = [[UIListContentConfiguration.subtitleCell()]]
-//        return ListContentConfiguration(titleConfiguration: titleContent, bodyConfigurations: bodyContent, buttonConfigurations: nil)
-//    }
+    
 }
 
 // MARK: Text Formatters

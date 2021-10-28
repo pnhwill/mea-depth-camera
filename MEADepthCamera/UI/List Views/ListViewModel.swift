@@ -13,63 +13,43 @@ protocol ListViewModel {
     associatedtype ListCell: ItemListCell
     associatedtype HeaderCell: ItemListCell
     
-    var dataSource: UICollectionViewDiffableDataSource<ListSection.ID, ListItem.ID>? { get set }
-    var sectionsStore: AnyModelStore<ListSection>? { get }
-    var itemsStore: AnyModelStore<ListItem>? { get }
+    typealias Item = ListItem
+    typealias Section = ListSection
     
+    var dataSource: UICollectionViewDiffableDataSource<Section.ID, Item.ID>? { get set }
+    var sectionsStore: AnyModelStore<Section>? { get }
+    var itemsStore: AnyModelStore<Item>? { get }
+    
+    func configure(_ listCell: ListCell)
     func applyInitialSnapshots()
-}
-
-// MARK: ListSection
-struct ListSection: Identifiable {
-    enum Identifier: Int, CaseIterable {
-        case header
-        case list
-    }
-    
-    var id: Identifier
-    var items: [ListItem.ID]?
-}
-
-// MARK: ListItem
-/// A generic model of an item contained in a list cell, providing value semantics and erasing the underlying type of the stored object.
-struct ListItem: Identifiable, Hashable {
-    var id: UUID
-    var object: ModelObject
-    
-    init?(object: ModelObject) {
-        guard let id = object.id else { return nil }
-        self.object = object
-        self.id = id
-    }
-    
-    static func == (lhs: ListItem, rhs: ListItem) -> Bool {
-        return lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
 }
 
 // MARK: applyInitialSnapshots()
 extension ListViewModel {
     func applyInitialSnapshots() {
         // Set the order for our sections
-        let sections = ListSection.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<ListSection.ID, ListItem.ID>()
+        let sections = Section.ID.allCases
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
         snapshot.appendSections(sections)
         dataSource?.apply(snapshot, animatingDifferences: false)
         
         // Set section snapshots for each section
         for sectionID in sections {
             guard let items = sectionsStore?.fetchByID(sectionID)?.items else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem.ID>()
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
             sectionSnapshot.append(items)
             dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
         }
     }
+    
+    func applySnapshotFromListStore() {
+        guard let items = sectionsStore?.fetchByID(.list)?.items else { return }
+        var snapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+        snapshot.append(items)
+        dataSource?.apply(snapshot, to: .list)
+    }
 }
+
 
 // MARK: fetchedResultsController(didChange:at:for:newIndexPath:)
 extension ListViewModel {

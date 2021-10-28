@@ -6,7 +6,7 @@
 //
 /*
 Abstract:
-The generic model store for UICollectionView-based view controllers.
+The generic model store for Identifiable models.
 */
 
 import Foundation
@@ -22,11 +22,15 @@ class AnyModelStore<Model: Identifiable>: ModelStore {
     private var models = [Model.ID: Model]()
     
     init(_ models: [Model]) {
-        self.models = models.groupingByUniqueID()
+        update(with: models)
     }
     
     func fetchByID(_ id: Model.ID) -> Model? {
         return self.models[id]
+    }
+    
+    func update(with models: [Model]) {
+        self.models = models.groupingByUniqueID()
     }
 }
 

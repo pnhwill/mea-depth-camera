@@ -118,6 +118,7 @@ extension ListViewController {
         return UICollectionView.CellRegistration<ViewModel.ListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.viewModel.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
+            self.viewModel.configure(cell)
         }
     }
     

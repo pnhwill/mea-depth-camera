@@ -13,7 +13,7 @@ class UseCaseListCell: ItemListCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configureAccessories()
+//        configureAccessories()
     }
     
     required init?(coder: NSCoder) {
@@ -36,16 +36,16 @@ class UseCaseListCell: ItemListCell {
         contentConfiguration = content
     }
     
-    private func configureAccessories() {
-        let disclosure = UICellAccessory.disclosureIndicator()
-        let delete = UICellAccessory.delete() { self.deleteAction() }
-        accessories = [delete, disclosure]
-    }
+//    private func configureAccessories() {
+//        let disclosure = UICellAccessory.disclosureIndicator()
+//        let delete = UICellAccessory.delete() { self.deleteAction() }
+//        accessories = [delete, disclosure]
+//    }
     
-    private func deleteAction() {
-        guard let useCase = configurationState.item?.object as? UseCase else { fatalError() }
-        delegate?.delete(useCase)
-    }
+//    private func deleteAction() {
+//        guard let useCase = configurationState.item?.object as? UseCase else { fatalError() }
+//        delegate?.delete(useCase)
+//    }
 }
 
 

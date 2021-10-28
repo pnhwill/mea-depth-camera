@@ -9,7 +9,7 @@ import CoreData
 
 /// Properties and methods for classes that create and delete objects in the Core Data model.
 protocol DataProvider: AnyObject {
-    associatedtype Object: NSManagedObject
+    associatedtype Object: NSManagedObject & ModelObject
     typealias AddAction = (Object) -> Void
     typealias DeleteAction = (Bool) -> Void
     

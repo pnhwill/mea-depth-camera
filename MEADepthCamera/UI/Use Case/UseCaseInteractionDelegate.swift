@@ -17,14 +17,14 @@ protocol UseCaseInteractionDelegate: AnyObject {
      
      When deleting a use case, pass nil for use case.
      */
-    func didUpdateUseCase(_ useCase: UseCase?, shouldReloadRow: Bool)
+    func didUpdateUseCase(_ useCase: UseCase)
     
     /**
      Deletes the use case.
      
      When the user deletes a cell, the cell calls this method to notify the delegate (the use case list view controller) to delete the use case.
      */
-    func delete(_ useCase: UseCase)
+//    func delete(_ useCase: UseCase)
     
     
     
