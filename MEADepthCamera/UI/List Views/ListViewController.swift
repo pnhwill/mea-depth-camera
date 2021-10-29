@@ -7,9 +7,155 @@
 
 import UIKit
 import CoreData
+import Combine
 
 /// Base class for UIViewControllers that list object data from the Core Data model and present a detail view for selected cells.
-class ListViewController<ViewModel: ListViewModel>: UIViewController {
+class ListViewController: UICollectionViewController {
+    
+    typealias Item = ListItem
+    typealias Section = ListSection
+    typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
+    
+    var viewModel: ListViewModel!
+    var dataSource: ListDiffableDataSource?
+    
+    private var allItemsSubscriber: AnyCancellable?
+    
+    init() {
+        super.init(collectionViewLayout: Self.createLayout())
+//        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureCollectionView()
+        configureDataSource()
+        loadData()
+        
+        allItemsSubscriber = viewModel.itemsStore?.$allModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshListData()
+            }
+    }
+}
+
+extension ListViewController {
+    private func configureCollectionView() {
+//        let layout = createLayout()
+//        collectionView.collectionViewLayout = layout
+        
+    }
+    
+    private static func createLayout() -> UICollectionViewLayout {
+        let sectionProvider = {
+            (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            guard let sectionID = Section.ID(rawValue: sectionIndex) else { return nil }
+            let section: NSCollectionLayoutSection
+            switch sectionID {
+            case .header:
+                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                      heightDimension: .fractionalHeight(1.0))
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                       heightDimension: .fractionalHeight(1.0))
+                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
+                                                               subitems: [item])
+//                group.interItemSpacing = .flexible(10)
+                section = NSCollectionLayoutSection(group: group)
+//                section.interGroupSpacing = 10
+                section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
+            case .list:
+                let configuration = UICollectionLayoutListConfiguration(appearance: .sidebarPlain)
+                section = NSCollectionLayoutSection.list(using: configuration,
+                                                         layoutEnvironment: layoutEnvironment)
+            }
+            return section
+        }
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+//        configuration.interSectionSpacing = 20
+        return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider,
+                                                   configuration: configuration)
+    }
+    private func configureDataSource() {
+        let headerCellRegistration = createHeaderCellRegistration()
+        let listCellRegistration = createListCellRegistration()
+        
+        dataSource = ListDiffableDataSource(collectionView: collectionView) {
+            (collectionView, indexPath, itemID) -> UICollectionViewCell? in
+            guard let sectionID = Section.ID(rawValue: indexPath.section) else { return nil }
+            
+            switch sectionID {
+            case .header:
+                return collectionView.dequeueConfiguredReusableCell(using: headerCellRegistration, for: indexPath, item: itemID)
+            case .list:
+                return collectionView.dequeueConfiguredReusableCell(using: listCellRegistration, for: indexPath, item: itemID)
+            }
+        }
+    }
+    
+    private func createListCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, Item.ID> {
+        return UICollectionView.CellRegistration<ListTextCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+            guard let self = self, let item = self.viewModel.itemsStore?.fetchByID(itemID) else { return }
+            cell.updateWithItem(item)
+            cell.delegate = self.viewModel
+        }
+    }
+    
+    private func createHeaderCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, Item.ID> {
+        return UICollectionView.CellRegistration<ListTextCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+            guard let self = self, let item = self.viewModel.itemsStore?.fetchByID(itemID) else { return }
+            cell.updateWithItem(item)
+        }
+    }
+}
+
+extension ListViewController {
+    func loadData() {
+        // Set the order for our sections
+        let sections = Section.ID.allCases
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
+        snapshot.appendSections(sections)
+        dataSource?.apply(snapshot, animatingDifferences: false)
+        
+        // Set section snapshots for each section
+        for sectionID in sections {
+            guard let items = viewModel.sectionsStore?.fetchByID(sectionID)?.items else { continue }
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+            sectionSnapshot.append(items)
+            dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
+        }
+    }
+    
+    func refreshListData() {
+        guard let items = viewModel.sectionsStore?.fetchByID(.list)?.items else { return }
+        var snapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+        snapshot.append(items)
+        dataSource?.apply(snapshot, to: .list)
+    }
+    
+    func itemDidChange(_ itemID: Item.ID) {
+        guard let dataSource = dataSource, dataSource.indexPath(for: itemID) != nil else { return }
+        var snapshot = dataSource.snapshot()
+        snapshot.reconfigureItems([itemID])
+        dataSource.apply(snapshot)
+    }
+}
+
+
+
+
+
+
+
+
+
+/// Base class for UIViewControllers that list object data from the Core Data model and present a detail view for selected cells.
+class OldListViewController<ViewModel: OldListViewModel>: UIViewController {
     
     typealias Item = ListItem
     typealias Section = ListSection
@@ -53,7 +199,7 @@ class ListViewController<ViewModel: ListViewModel>: UIViewController {
     }
 }
 
-extension ListViewController {
+extension OldListViewController {
     private func configureHierarchy() {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]

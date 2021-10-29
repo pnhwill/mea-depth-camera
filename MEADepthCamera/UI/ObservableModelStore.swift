@@ -23,12 +23,8 @@ class ObservableModelStore<Model: Identifiable>: ModelStore, ObservableObject {
         allModels = newModels.groupingByUniqueID()
     }
     
-    func add(newModels: [Model]) {
+    func merge(newModels: [Model]) {
         allModels.merge(newModels.groupingByUniqueID()) { (_, new) in new }
-    }
-    
-    func delete(_ models: [Model]) {
-        models.forEach { allModels.removeValue(forKey: $0.id) }
     }
     
     func deleteByID(_ id: Model.ID) {

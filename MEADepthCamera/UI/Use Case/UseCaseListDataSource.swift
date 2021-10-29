@@ -15,7 +15,7 @@ class UseCaseListDataSource: NSObject {
 
     var navigationTitle: String = "Use Case List"
 
-    var filter: UseCaseListViewModel.Filter = .all
+    var filter: OldUseCaseListViewModel.Filter = .all
 
     var filteredUseCases: [UseCase]? {
         return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
@@ -148,7 +148,7 @@ extension UseCase {
         return dateFormatter
     }()
 
-    func dateTimeText(for filter: UseCaseListViewModel.Filter) -> String? {
+    func dateTimeText(for filter: OldUseCaseListViewModel.Filter) -> String? {
         guard let date = date else { return nil }
         let isInToday = Locale.current.calendar.isDateInToday(date)
         switch filter {

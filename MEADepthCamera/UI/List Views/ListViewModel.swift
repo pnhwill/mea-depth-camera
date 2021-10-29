@@ -8,8 +8,26 @@
 import UIKit
 import CoreData
 
+protocol ListViewModel: ListTextCellDelegate {
+    
+    typealias Item = ListItem
+    typealias Section = ListSection
+    
+    var sectionsStore: ObservableModelStore<Section>? { get }
+    var itemsStore: ObservableModelStore<Item>? { get }
+    
+}
+
+
+
+
+
+
+
+
+
 // MARK: ListViewModel
-protocol ListViewModel {
+protocol OldListViewModel {
     associatedtype ListCell: ItemListCell
     associatedtype HeaderCell: ItemListCell
     
@@ -25,7 +43,7 @@ protocol ListViewModel {
 }
 
 // MARK: applyInitialSnapshots()
-extension ListViewModel {
+extension OldListViewModel {
     func applyInitialSnapshots() {
         // Set the order for our sections
         let sections = Section.ID.allCases
@@ -52,7 +70,7 @@ extension ListViewModel {
 
 
 // MARK: fetchedResultsController(didChange:at:for:newIndexPath:)
-extension ListViewModel {
+extension OldListViewModel {
     func fetchedResultsController(didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         print("\(#function) called from ListViewModel implementation")
         guard let item = anObject as? ModelObject,

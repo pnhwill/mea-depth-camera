@@ -7,7 +7,7 @@
 
 import UIKit
 
-class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
+class UseCaseListViewController: ListViewController {
     
     static let mainStoryboardName = "Main"
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
@@ -16,8 +16,94 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
         return UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(UseCaseListViewController.addUseCase(_:)))
     }
     
+    override init() {
+        super.init()
+        viewModel = UseCaseListViewModel()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        viewModel = UseCaseListViewModel()
+    }
+    
+    // MARK: Life Cycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureNavigationItem()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let navigationController = navigationController,
+           navigationController.isToolbarHidden {
+            navigationController.setToolbarHidden(false, animated: animated)
+        }
+        setToolbarItems([addButton], animated: animated)
+    }
+    
+    // MARK: Button Actions
+    
+    @objc
+    func addUseCase(_ sender: UIBarButtonItem) {
+        
+    }
+}
+
+extension UseCaseListViewController {
+    private func configureNavigationItem() {
+        navigationItem.setRightBarButton(editButtonItem, animated: false)
+        // Search bar controller
+//        let searchController = UISearchController(searchResultsController: nil)
+//        searchController.searchResultsUpdater = viewModel
+//        searchController.obscuresBackgroundDuringPresentation = false
+//        navigationItem.searchController = searchController
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        collectionView.isEditing = isEditing
+    }
+}
+
+// MARK: UICollectionViewDelegate
+extension UseCaseListViewController {
+    
+}
+
+// MARK: UseCaseInteractionDelegate
+extension UseCaseListViewController: UseCaseInteractionDelegate {
+    /**
+     didUpdateUseCase is called as part of UseCaseInteractionDelegate, or whenever a use case update requires a UI update (including main-detail selections).
+     
+     Respond by updating the UI as follows.
+     - add:
+     - delete: reload snapshot and apply to collection view data source
+     - update from detailViewController:
+     - initial load:
+     */
+    func didUpdateUseCase(_ useCase: UseCase) {
+        guard let itemID = useCase.id else { fatalError() }
+        // TODO: reconfigure
+    }
+}
+
+
+
+
+
+
+class SecondUseCaseListViewController: OldListViewController<OldUseCaseListViewModel> {
+    
+    static let mainStoryboardName = "Main"
+    static let detailViewControllerIdentifier = "UseCaseDetailViewController"
+    
+    var addButton: UIBarButtonItem {
+        return UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(SecondUseCaseListViewController.addUseCase(_:)))
+    }
+    
     init() {
-        super.init(viewModel: UseCaseListViewModel())
+        super.init(viewModel: OldUseCaseListViewModel())
     }
     
     required init?(coder: NSCoder) {
@@ -72,7 +158,7 @@ class UseCaseListViewController: ListViewController<UseCaseListViewModel> {
     
 }
 
-extension UseCaseListViewController {
+extension SecondUseCaseListViewController {
     private func configureNavigationItem() {
         navigationItem.setRightBarButton(editButtonItem, animated: false)
         // Search bar controller
@@ -89,7 +175,7 @@ extension UseCaseListViewController {
 }
 
 // MARK: UICollectionViewDelegate
-extension UseCaseListViewController: UICollectionViewDelegate {
+extension SecondUseCaseListViewController: UICollectionViewDelegate {
     
 //    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 //        guard let cell = cell as? UseCaseListCell else { fatalError() }
@@ -139,8 +225,8 @@ class OldUseCaseListViewController: UITableViewController {
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
 
     private var dataSource: UseCaseListDataSource?
-    private var filter: UseCaseListViewModel.Filter {
-        return UseCaseListViewModel.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
+    private var filter: OldUseCaseListViewModel.Filter {
+        return OldUseCaseListViewModel.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
     }
 
     //weak var delegate: UseCaseInteractionDelegate?

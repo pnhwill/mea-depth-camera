@@ -10,6 +10,152 @@ import CoreData
 import Combine
 
 class UseCaseListViewModel: NSObject, ListViewModel {
+    
+    enum Filter: Int {
+        case today
+        case past
+        case all
+
+        func shouldInclude(date: Date) -> Bool {
+            let isInToday = Locale.current.calendar.isDateInToday(date)
+            switch self {
+            case .today:
+                return isInToday
+            case .past:
+                return (date < Date()) && !isInToday
+            case .all:
+                return true
+            }
+        }
+    }
+    
+    var filter: UseCaseListViewModel.Filter = .all {
+        didSet {
+            reloadListSectionStore()
+        }
+    }
+    
+    lazy var sectionsStore: ObservableModelStore<ListSection>? = {
+        guard let items = filteredUseCases?.compactMap({ ListItem(object: $0)?.id }) else { return nil }
+        return ObservableModelStore([ListSection(id: .list, items: items)])
+    }()
+    
+    lazy var itemsStore: ObservableModelStore<ListItem>? = {
+        guard let items = filteredUseCases?.compactMap({ ListItem(object: $0) }) else { return nil }
+        return ObservableModelStore(items)
+    }()
+    
+    private lazy var dataProvider: UseCaseProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = UseCaseProvider(with: container, fetchedResultsControllerDelegate: self)
+        return provider
+    }()
+    
+    private var useCases: [UseCase]? {
+        return dataProvider.fetchedResultsController.fetchedObjects
+    }
+
+    private var filteredUseCases: [UseCase]? {
+        return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
+    }
+    
+    func add(completion: @escaping (UseCase) -> Void) {
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
+            completion(useCase)
+        }
+    }
+}
+
+extension UseCaseListViewModel {
+    
+    private func reloadListSectionStore() {
+        guard let itemIDs = filteredUseCases?.compactMap({ $0.id }) else { return }
+        sectionsStore?.merge(newModels: [ListSection(id: .list, items: itemIDs)])
+    }
+
+    private func reloadItemStore() {
+        guard let items = filteredUseCases?.compactMap({ ListItem(object: $0) }) else { return }
+        reloadListSectionStore()
+        itemsStore?.reload(with: items)
+    }
+    
+    private func addToStores(_ useCase: UseCase) {
+        guard let item = ListItem(object: useCase) else { return }
+        reloadListSectionStore()
+        itemsStore?.merge(newModels: [item])
+    }
+    
+    private func deleteFromStores(_ itemID: UUID) {
+        reloadListSectionStore()
+        itemsStore?.deleteByID(itemID)
+    }
+    
+}
+
+// MARK: ListTextCellDelegate
+extension UseCaseListViewModel: ListTextCellDelegate {
+    
+    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
+        guard let useCase = item.object as? UseCase else { fatalError() }
+        guard let titleText = useCase.title,
+              let experimentText = useCase.experimentTitle,
+              let dateText = useCase.dateTimeText(for: .all),
+              let subjectID = useCase.subjectID
+        else { return nil }
+        let subjectIDText = "Subject ID: " + subjectID
+        let completedTasksText = "X out of X tasks completed"
+        let bodyText = [subjectIDText, dateText, completedTasksText]
+        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
+        return content
+    }
+    
+    func delete(objectFor item: ListItem) {
+        guard let useCase = item.object as? UseCase else { fatalError() }
+        dataProvider.delete(useCase) { [weak self] success in
+            if success {
+                self?.deleteFromStores(item.id)
+            }
+        }
+    }
+}
+
+// MARK: NSFetchedResultsControllerDelegate
+extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+//        print("controller did change object")
+//        fetchedResultsController(didChange: anObject, at: indexPath, for: type, newIndexPath: newIndexPath)
+//        print(#function)
+    }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+//        updateStores()
+//        applySnapshotFromListStore()
+//        print(#function)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OldUseCaseListViewModel: NSObject, OldListViewModel {
 
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<ListSection.ID, ListItem.ID>
     typealias ListCell = ListTextCell
@@ -35,7 +181,7 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     
     var dataSource: ListDiffableDataSource?
     
-    var filter: UseCaseListViewModel.Filter = .all
+    var filter: OldUseCaseListViewModel.Filter = .all
     
     lazy var sectionsStore: ObservableModelStore<ListSection>? = {
         guard let items = filteredUseCases?.compactMap({ ListItem(object: $0)?.id }) else { return nil }
@@ -90,12 +236,11 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     }
 }
 
-extension UseCaseListViewModel {
+extension OldUseCaseListViewModel {
     
     private func reloadSectionStore() {
         guard let itemIDs = filteredUseCases?.compactMap({ $0.id }) else { return }
         sectionsStore?.reload(with: [ListSection(id: .list, items: itemIDs)])
-
     }
 
     private func reloadItemStore() {
@@ -105,7 +250,7 @@ extension UseCaseListViewModel {
 
     private func mergeIntoItemStore(_ useCase: UseCase) {
         guard let item = ListItem(object: useCase) else { return }
-        itemsStore?.add(newModels: [item])
+        itemsStore?.merge(newModels: [item])
     }
     
     private func deleteFromItemStore(_ useCase: UseCase) {
@@ -116,7 +261,7 @@ extension UseCaseListViewModel {
 }
 
 // MARK: ListTextCellDelegate
-extension UseCaseListViewModel: ListTextCellDelegate {
+extension OldUseCaseListViewModel: ListTextCellDelegate {
     
     func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
         guard let useCase = item.object as? UseCase else { fatalError() }
@@ -146,7 +291,7 @@ extension UseCaseListViewModel: ListTextCellDelegate {
 }
 
 // MARK: UseCaseInteractionDelegate
-extension UseCaseListViewModel: UseCaseInteractionDelegate {
+extension OldUseCaseListViewModel: UseCaseInteractionDelegate {
     /**
      didUpdateUseCase is called as part of UseCaseInteractionDelegate, or whenever a use case update requires a UI update (including main-detail selections).
      
@@ -167,13 +312,13 @@ extension UseCaseListViewModel: UseCaseInteractionDelegate {
 }
 
 // MARK: UISearchResultsUpdating
-extension UseCaseListViewModel: UISearchResultsUpdating {
+extension OldUseCaseListViewModel: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
     }
 }
 
 // MARK: NSFetchedResultsControllerDelegate
-extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
+extension OldUseCaseListViewModel: NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
 //        print("controller did change object")
         fetchedResultsController(didChange: anObject, at: indexPath, for: type, newIndexPath: newIndexPath)
