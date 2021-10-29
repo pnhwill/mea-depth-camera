@@ -61,7 +61,18 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     
     func add(completion: @escaping (UseCase) -> Void) {
         dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
+            self.addToStores(useCase)
             completion(useCase)
+        }
+    }
+    
+    func delete(_ useCase: UseCase, completion: @escaping (Bool) -> Void) {
+        guard let id = useCase.id else { return }
+        dataProvider.delete(useCase) { [weak self] success in
+            if success {
+                self?.deleteFromStores(id)
+            }
+            completion(success)
         }
     }
 }
@@ -92,32 +103,7 @@ extension UseCaseListViewModel {
     
 }
 
-// MARK: ListTextCellDelegate
-extension UseCaseListViewModel: ListTextCellDelegate {
-    
-    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
-        guard let useCase = item.object as? UseCase else { fatalError() }
-        guard let titleText = useCase.title,
-              let experimentText = useCase.experimentTitle,
-              let dateText = useCase.dateTimeText(for: .all),
-              let subjectID = useCase.subjectID
-        else { return nil }
-        let subjectIDText = "Subject ID: " + subjectID
-        let completedTasksText = "X out of X tasks completed"
-        let bodyText = [subjectIDText, dateText, completedTasksText]
-        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
-        return content
-    }
-    
-    func delete(objectFor item: ListItem) {
-        guard let useCase = item.object as? UseCase else { fatalError() }
-        dataProvider.delete(useCase) { [weak self] success in
-            if success {
-                self?.deleteFromStores(item.id)
-            }
-        }
-    }
-}
+
 
 // MARK: NSFetchedResultsControllerDelegate
 extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
@@ -133,7 +119,27 @@ extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
     }
 }
 
+// MARK: UISearchResultsUpdating
+extension UseCaseListViewModel: UISearchResultsUpdating {
 
+    func updateSearchResults(for searchController: UISearchController) {
+        let predicate: NSPredicate
+        if let userInput = searchController.searchBar.text, !userInput.isEmpty {
+            predicate = NSPredicate(format: "(title CONTAINS[cd] %@) OR (subjectID CONTAINS[cd] %@) OR (experimentTitle CONTAINS[cd] %@)", userInput, userInput, userInput)
+        } else {
+            predicate = NSPredicate(value: true)
+        }
+
+        dataProvider.fetchedResultsController.fetchRequest.predicate = predicate
+        do {
+            try dataProvider.fetchedResultsController.performFetch()
+        } catch {
+            fatalError("###\(#function): Failed to performFetch: \(error)")
+        }
+
+        reloadItemStore()
+    }
+}
 
 
 

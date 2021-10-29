@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-protocol ListViewModel: ListTextCellDelegate {
+protocol ListViewModel {
     
     typealias Item = ListItem
     typealias Section = ListSection

@@ -92,9 +92,9 @@ class TextCellContentView: UIView, UIContentView {
         titleContent.axesPreservingSuperviewLayoutMargins = []
         titleContent.directionalLayoutMargins.bottom = titleContent.textToSecondaryTextVerticalPadding
         titleView.configuration = titleContent
-        NSLayoutConstraint.activate([
-            titleView.heightAnchor.constraint(equalToConstant: titleView.intrinsicContentSize.height)
-        ])
+//        NSLayoutConstraint.activate([
+//            titleView.heightAnchor.constraint(equalToConstant: titleView.intrinsicContentSize.height)
+//        ])
         
         let listConfiguration = configuration.listContentConfiguration
         var rowLabels: [UILabel] = []

@@ -9,16 +9,12 @@ import UIKit
 
 class UseCaseListViewController: ListViewController {
     
-    static let mainStoryboardName = "Main"
-    static let detailViewControllerIdentifier = "UseCaseDetailViewController"
-    
-    var addButton: UIBarButtonItem {
-        return UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(UseCaseListViewController.addUseCase(_:)))
+    private var useCaseListViewModel: UseCaseListViewModel? {
+        viewModel as? UseCaseListViewModel
     }
     
-    override init() {
-        super.init()
-        viewModel = UseCaseListViewModel()
+    private var useCaseSplitViewController: UseCaseSplitViewController? {
+        splitViewController as? UseCaseSplitViewController
     }
     
     required init?(coder: NSCoder) {
@@ -31,44 +27,79 @@ class UseCaseListViewController: ListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationItem()
+        allItemsSubscriber = viewModel.itemsStore?.$allModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshListData()
+                self?.selectItemIfNeeded()
+            }
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if let navigationController = navigationController,
-           navigationController.isToolbarHidden {
-            navigationController.setToolbarHidden(false, animated: animated)
-        }
-        setToolbarItems([addButton], animated: animated)
-    }
-    
-    // MARK: Button Actions
-    
-    @objc
-    func addUseCase(_ sender: UIBarButtonItem) {
-        
-    }
-}
-
-extension UseCaseListViewController {
-    private func configureNavigationItem() {
-        navigationItem.setRightBarButton(editButtonItem, animated: false)
-        // Search bar controller
-//        let searchController = UISearchController(searchResultsController: nil)
-//        searchController.searchResultsUpdater = viewModel
-//        searchController.obscuresBackgroundDuringPresentation = false
-//        navigationItem.searchController = searchController
+    /**
+     Clear the tableView selection when splitViewController is collapsed.
+     */
+    override func viewWillAppear(_ animated: Bool) {
+        clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
+        super.viewWillAppear(animated)
+        selectItemIfNeeded()
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         collectionView.isEditing = isEditing
     }
+    
+    // MARK: Button Actions
+    
+    @IBAction func addButtonTapped(_ sender: UIBarButtonItem) {
+        addUseCase()
+    }
+}
+
+extension UseCaseListViewController {
+    private func configureNavigationItem() {
+        navigationItem.setRightBarButton(editButtonItem, animated: false)
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = viewModel as? UISearchResultsUpdating
+        searchController.obscuresBackgroundDuringPresentation = false
+        navigationItem.searchController = searchController
+    }
+    
+    private func selectItemIfNeeded() {
+        var indexPath: IndexPath?
+        if let selectedItemID = useCaseSplitViewController?.selectedItemID {
+            indexPath = dataSource?.indexPath(for: selectedItemID)
+        } else {
+            if !splitViewController!.isCollapsed {
+                indexPath = IndexPath(item: 0, section: ListSection.Identifier.list.rawValue)
+            }
+        }
+        if let indexPath = indexPath {
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
+        } else {
+            addUseCase()
+        }
+    }
+    
+    private func addUseCase() {
+        useCaseListViewModel?.add { [weak self] useCase in
+            self?.useCaseSplitViewController?.configureDetail(with: useCase, isNew: true)
+        }
+    }
 }
 
 // MARK: UICollectionViewDelegate
 extension UseCaseListViewController {
-    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // Push the detail view when the cell is tapped.
+        if let itemID = dataSource?.itemIdentifier(for: indexPath),
+           let item = viewModel.itemsStore?.fetchByID(itemID),
+           let useCase = item.object as? UseCase {
+            useCaseSplitViewController?.configureDetail(with: useCase)
+        } else {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
+    }
 }
 
 // MARK: UseCaseInteractionDelegate
@@ -84,11 +115,36 @@ extension UseCaseListViewController: UseCaseInteractionDelegate {
      */
     func didUpdateUseCase(_ useCase: UseCase) {
         guard let itemID = useCase.id else { fatalError() }
-        // TODO: reconfigure
+        itemDidChange(itemID)
     }
 }
 
-
+// MARK: ListTextCellDelegate
+extension UseCaseListViewController: ListTextCellDelegate {
+    
+    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
+        guard let useCase = item.object as? UseCase else { fatalError() }
+        let titleText = useCase.title ?? ""
+        let experimentText = useCase.experimentTitle
+        let dateText = useCase.dateTimeText(for: .all) ?? ""
+        let subjectID = useCase.subjectID ?? ""
+        let subjectIDText = "Subject ID: " + subjectID
+        let completedTasksText = "X out of X tasks completed"
+        let bodyText = [subjectIDText, dateText, completedTasksText]
+        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
+        return content
+    }
+    
+    func delete(objectFor item: ListItem) {
+        guard let useCase = item.object as? UseCase else { fatalError() }
+        useCaseListViewModel?.delete(useCase) { [weak self] success in
+            if success {
+                self?.useCaseSplitViewController?.selectedItemID = nil
+                self?.selectItemIfNeeded()
+            }
+        }
+    }
+}
 
 
 
@@ -131,9 +187,9 @@ class SecondUseCaseListViewController: OldListViewController<OldUseCaseListViewM
     @objc
     func addUseCase(_ sender: UIBarButtonItem) {
         viewModel.add() { [weak self] useCase in
-            let detailViewController = UseCaseDetailViewController(useCase: useCase, isNew: true)
-            detailViewController.delegate = self?.viewModel
-            self?.show(detailViewController, sender: self)
+//            let detailViewController = UseCaseDetailViewController(useCase: useCase, isNew: true)
+//            detailViewController.delegate = self?.viewModel
+//            self?.show(detailViewController, sender: self)
         }
         
         
@@ -202,9 +258,9 @@ extension SecondUseCaseListViewController: UICollectionViewDelegate {
 //                }
 //            }
 //        })
-        let detailViewController = UseCaseDetailViewController(useCase: useCase)
-        detailViewController.delegate = viewModel
-        show(detailViewController, sender: self)
+//        let detailViewController = UseCaseDetailViewController(useCase: useCase)
+//        detailViewController.delegate = viewModel
+//        show(detailViewController, sender: self)
     }
 }
 
@@ -225,8 +281,8 @@ class OldUseCaseListViewController: UITableViewController {
     static let detailViewControllerIdentifier = "UseCaseDetailViewController"
 
     private var dataSource: UseCaseListDataSource?
-    private var filter: OldUseCaseListViewModel.Filter {
-        return OldUseCaseListViewModel.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
+    private var filter: UseCaseListViewModel.Filter {
+        return UseCaseListViewModel.Filter(rawValue: filterSegmentedControl.selectedSegmentIndex) ?? .today
     }
 
     //weak var delegate: UseCaseInteractionDelegate?

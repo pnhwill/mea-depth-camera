@@ -16,14 +16,14 @@ class DetailViewController: UIViewController, UICollectionViewDelegate {
     var viewModel: DetailViewModel?
     var collectionView: UICollectionView!
     
-    init(viewModel: DetailViewModel?) {
-        self.viewModel = viewModel
-        super.init(nibName: nil, bundle: .main)
-    }
+//    init(viewModel: DetailViewModel?) {
+//        self.viewModel = viewModel
+//        super.init(nibName: nil, bundle: .main)
+//    }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+//    required init?(coder: NSCoder) {
+//        super.init(coder: coder)
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

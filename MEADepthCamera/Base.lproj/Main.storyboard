@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ora-DF-xJ9">
-    <device id="retina6_0" orientation="portrait" appearance="dark"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="iie-qW-Cqf">
+    <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="dark"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -14,21 +14,21 @@
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="CameraViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BrA-k0-goQ" customClass="PreviewMetalView" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="44" width="390" height="717"/>
+                                <rect key="frame" x="0.0" y="24" width="834" height="1100"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <label hidden="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TrueDepth Camera Unavailable" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2hN-4O-nJT">
-                                <rect key="frame" x="34.666666666666657" y="388" width="321" height="29"/>
+                                <rect key="frame" x="256.5" y="559.5" width="321" height="29"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <color key="textColor" systemColor="systemYellowColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fWx-1M-8GV">
-                                <rect key="frame" x="122.66666666666669" y="382" width="145" height="41"/>
+                                <rect key="frame" x="344.5" y="553.5" width="145" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="Tap to resume">
                                     <color key="titleColor" systemColor="systemYellowColor"/>
@@ -38,7 +38,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cK1-YN-reQ">
-                                <rect key="frame" x="165" y="662" width="60" height="58.666666666666629"/>
+                                <rect key="frame" x="387" y="1024.5" width="60" height="59"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="DuG-0a-dXR"/>
                                     <constraint firstAttribute="width" constant="60" id="fLV-fd-BLt"/>
@@ -51,10 +51,10 @@
                                 </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" image="kuang" translatesAutoresizingMaskIntoConstraints="NO" id="6nD-kv-GLw">
-                                <rect key="frame" x="0.0" y="-193" width="390" height="1191"/>
+                                <rect key="frame" x="0.0" y="-21.5" width="834" height="1191"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="xmark.square" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="FGY-Eh-8ox">
-                                <rect key="frame" x="295" y="667.66666666666663" width="50" height="47"/>
+                                <rect key="frame" x="517" y="1030" width="50" height="47.5"/>
                                 <color key="tintColor" systemColor="systemRedColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="50" id="546-8N-03r"/>
@@ -107,54 +107,50 @@
             <point key="canvasLocation" x="2145" y="430"/>
         </scene>
         <!--Navigation Controller-->
-        <scene sceneID="NyR-TQ-UCc">
+        <scene sceneID="S46-A3-hhh">
             <objects>
-                <navigationController toolbarHidden="NO" id="ora-DF-xJ9" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="4L3-eO-Vfa">
-                        <rect key="frame" x="0.0" y="44" width="390" height="44"/>
+                <navigationController id="iie-qW-Cqf" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="mfa-f4-7XS">
+                        <rect key="frame" x="0.0" y="24" width="834" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
-                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="dx1-no-MnB">
-                        <rect key="frame" x="0.0" y="761" width="390" height="49"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </toolbar>
                     <connections>
-                        <segue destination="A6m-RR-31J" kind="relationship" relationship="rootViewController" id="dea-gI-zHB"/>
+                        <segue destination="A6m-RR-31J" kind="relationship" relationship="rootViewController" id="n0F-53-Os5"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="cSv-oH-UhG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="N2d-kx-mYE" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1072" y="-9"/>
+            <point key="canvasLocation" x="-4191" y="-26"/>
         </scene>
         <!--Main Menu-->
         <scene sceneID="QZN-RH-IPq">
             <objects>
                 <viewController id="A6m-RR-31J" customClass="MainMenuViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Wh0-cP-6xn">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="SVL-W4-3tA">
-                                <rect key="frame" x="0.0" y="88" width="390" height="673"/>
+                                <rect key="frame" x="0.0" y="74" width="834" height="1100"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MEA Depth Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="87G-3W-bDT">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="332.66666666666669"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="834" height="546"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PlJ-n2-oaw" userLabel="List Button Container View">
-                                        <rect key="frame" x="0.0" y="340.66666666666674" width="390" height="332.33333333333326"/>
+                                        <rect key="frame" x="0.0" y="554" width="834" height="546"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP1-pS-WxO">
-                                                <rect key="frame" x="112" y="144.66666666666669" width="166" height="42.666666666666657"/>
+                                                <rect key="frame" x="333.5" y="247.5" width="167.5" height="51"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Use Case List"/>
-                                                <buttonConfiguration key="configuration" style="gray" title="Use Case List">
-                                                    <fontDescription key="titleFontDescription" type="system" pointSize="24"/>
+                                                <buttonConfiguration key="configuration" style="gray" title="Use Cases">
+                                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle0"/>
                                                 </buttonConfiguration>
                                                 <connections>
-                                                    <action selector="showList:" destination="A6m-RR-31J" eventType="touchUpInside" id="pwG-0o-iSh"/>
+                                                    <segue destination="WCo-sJ-PXm" kind="show" id="0nK-mh-QAT"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -175,32 +171,124 @@
                             <constraint firstItem="SVL-W4-3tA" firstAttribute="leading" secondItem="Atc-ih-wkx" secondAttribute="leading" id="mYr-OF-EVP"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Main Menu" id="7PU-7A-QQD"/>
+                    <navigationItem key="navigationItem" title="Main Menu" largeTitleDisplayMode="always" id="7PU-7A-QQD"/>
                     <connections>
                         <outlet property="useCaseListButton" destination="bP1-pS-WxO" id="sNr-6q-hWt"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9qw-r2-GTA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="-9"/>
+            <point key="canvasLocation" x="-3401" y="-26"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="IIf-5b-VPa">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2b0-oX-dGK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <navigationController modalPresentationStyle="overFullScreen" navigationBarHidden="YES" id="WCo-sJ-PXm" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="8p7-oU-MW8"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="N4s-0F-mmK">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="VeI-dc-cuF" kind="relationship" relationship="rootViewController" id="4zm-yR-hSd"/>
+                    </connections>
+                </navigationController>
+            </objects>
+            <point key="canvasLocation" x="-2618" y="-26"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="20c-lb-Jkj">
+            <objects>
+                <navigationController toolbarHidden="NO" id="uZV-zr-fZX" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="cGh-hk-Paf">
+                        <rect key="frame" x="0.0" y="24" width="834" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Tpl-da-773">
+                        <rect key="frame" x="0.0" y="1129" width="834" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
+                    <connections>
+                        <segue destination="dCt-yh-LjF" kind="relationship" relationship="rootViewController" id="kE1-q6-PnO"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="RdX-Wx-cTh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-962" y="-330"/>
+        </scene>
+        <!--Use Cases-->
+        <scene sceneID="7Lu-7I-vMH">
+            <objects>
+                <collectionViewController id="dCt-yh-LjF" customClass="UseCaseListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="slk-iK-S5e">
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="1NY-fB-zmf">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="dCt-yh-LjF" id="Bbj-ZK-TUA"/>
+                            <outlet property="delegate" destination="dCt-yh-LjF" id="51K-Cq-EXh"/>
+                        </connections>
+                    </collectionView>
+                    <toolbarItems>
+                        <barButtonItem systemItem="add" id="5Mj-UI-DRr">
+                            <connections>
+                                <action selector="addUseCase:" destination="dCt-yh-LjF" id="63H-jR-CeX"/>
+                            </connections>
+                        </barButtonItem>
+                    </toolbarItems>
+                    <navigationItem key="navigationItem" title="Use Cases" largeTitleDisplayMode="always" id="Gls-Fx-5vb">
+                        <barButtonItem key="leftBarButtonItem" title="Main Menu" id="ENN-sU-vaI">
+                            <connections>
+                                <segue destination="qyg-4i-CHZ" kind="unwind" unwindAction="unwindFromListWithUnwindSegue:" id="yuT-zy-eLZ"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="x9f-K1-wfz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <exit id="qyg-4i-CHZ" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="-28" y="-328"/>
+        </scene>
+        <!--Use Case Split View Controller-->
+        <scene sceneID="HIT-lO-4Oh">
+            <objects>
+                <splitViewController allowDoubleColumnStyle="YES" preferredDisplayMode="beside" behavior="tile" presentsWithGesture="NO" id="VeI-dc-cuF" customClass="UseCaseSplitViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="XDF-9L-uZ3"/>
+                    <connections>
+                        <segue destination="uZV-zr-fZX" kind="relationship" relationship="masterViewController" id="AJD-hB-Iu7"/>
+                        <segue destination="uzu-Nu-Ybk" kind="relationship" relationship="detailViewController" id="5E0-uE-zm8"/>
+                        <segue destination="uZV-zr-fZX" kind="relationship" relationship="compactViewController" id="fCJ-DS-2Af"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fK2-sL-LXK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1869" y="-26"/>
         </scene>
         <!--Old Use Case Detail View Controller-->
         <scene sceneID="r8a-xk-G51">
             <objects>
                 <tableViewController storyboardIdentifier="UseCaseDetailViewController" id="qMB-TZ-QPO" customClass="OldUseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="VFd-32-UFH">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="UseCaseDetailCell" textLabel="eOO-Uo-khT" style="IBUITableViewCellStyleDefault" id="GLe-YY-DRW">
-                                <rect key="frame" x="20" y="49" width="350" height="43.666667938232422"/>
+                                <rect key="frame" x="20" y="49.5" width="794" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GLe-YY-DRW" id="U4k-1X-FX5">
-                                    <rect key="frame" x="0.0" y="0.0" width="350" height="43.666667938232422"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="794" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="eOO-Uo-khT">
-                                            <rect key="frame" x="20" y="0.0" width="310" height="43.666667938232422"/>
+                                            <rect key="frame" x="16" y="0.0" width="762" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="0.0"/>
                                             <nil key="textColor"/>
@@ -210,14 +298,14 @@
                                 </tableViewCellContentView>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditTitleCell" id="ROo-Tg-lnJ" customClass="EditTitleCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="92.666667938232422" width="350" height="44.333332061767578"/>
+                                <rect key="frame" x="20" y="93" width="794" height="44.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ROo-Tg-lnJ" id="9aO-t8-Bg9">
-                                    <rect key="frame" x="0.0" y="0.0" width="350" height="44.333332061767578"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="794" height="44.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Title Text Field" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="6m9-sR-gaD">
-                                            <rect key="frame" x="20" y="0.0" width="310" height="44.333333333333336"/>
+                                            <rect key="frame" x="20" y="0.0" width="754" height="44.5"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="k7p-jr-E0T"/>
                                             </constraints>
@@ -237,14 +325,14 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditExperimentCell" id="IAe-Dn-Tm1" customClass="EditExperimentCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="137" width="350" height="136.33332824707031"/>
+                                <rect key="frame" x="20" y="137.5" width="794" height="136.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="IAe-Dn-Tm1" id="VB3-yd-XsQ">
-                                    <rect key="frame" x="0.0" y="0.0" width="350" height="136.33332824707031"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="794" height="136.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cu2-O2-aku">
-                                            <rect key="frame" x="0.0" y="-40" width="350" height="216.33333333333334"/>
+                                            <rect key="frame" x="0.0" y="-40" width="794" height="216.5"/>
                                         </pickerView>
                                     </subviews>
                                     <constraints>
@@ -259,14 +347,14 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditSubjectIDCell" id="1En-hu-nXa" customClass="EditSubjectIDCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="273.33332824707031" width="350" height="44.333332061767578"/>
+                                <rect key="frame" x="20" y="274" width="794" height="44.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1En-hu-nXa" id="da2-1m-u2a">
-                                    <rect key="frame" x="0.0" y="0.0" width="350" height="44.333332061767578"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="794" height="44.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Subject ID Text Field" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="GxA-L1-j5Y">
-                                            <rect key="frame" x="20" y="0.0" width="310" height="44.333333333333336"/>
+                                            <rect key="frame" x="20" y="0.0" width="754" height="44.5"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="pZe-AC-Zjq"/>
                                             </constraints>
@@ -286,14 +374,14 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditNotesCell" id="3pQ-4b-sF8" customClass="EditNotesCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="317.66666030883789" width="350" height="216.33332824707031"/>
+                                <rect key="frame" x="20" y="318.5" width="794" height="216.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="3pQ-4b-sF8" id="cqJ-a3-NMw">
-                                    <rect key="frame" x="0.0" y="0.0" width="350" height="216.33332824707031"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="794" height="216.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Notes Text View" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="rwb-2t-LZN">
-                                            <rect key="frame" x="20" y="11" width="310" height="194.33333333333334"/>
+                                            <rect key="frame" x="16" y="11" width="762" height="194.5"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="194" id="Afg-Mv-m0q"/>
                                             </constraints>
@@ -330,15 +418,15 @@
             <objects>
                 <tableViewController id="Z7g-vw-i9h" customClass="TaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="2ls-Ny-z9I">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="yfz-p3-DdZ" userLabel="Use Case Header View" customClass="UseCaseSummaryView" customModule="MEADepthCamera" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="390" height="488"/>
+                            <rect key="frame" x="0.0" y="0.0" width="834" height="1188"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Zf-6t-dt9">
-                                    <rect key="frame" x="20.000000000000004" y="20" width="46.333333333333343" height="30"/>
+                                    <rect key="frame" x="20" y="20" width="46.5" height="30"/>
                                     <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -366,29 +454,29 @@
                         </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TaskListCell" id="xIt-f8-TOj" customClass="TaskListCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="532.66666603088379" width="390" height="122.33333587646484"/>
+                                <rect key="frame" x="0.0" y="1232.5" width="834" height="122.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xIt-f8-TOj" id="RkN-ch-tG5">
-                                    <rect key="frame" x="0.0" y="0.0" width="390" height="122.33333587646484"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="834" height="122.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bVd-ds-Q63">
-                                            <rect key="frame" x="20.000000000000004" y="20" width="39.333333333333343" height="17"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Name" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bVd-ds-Q63">
+                                            <rect key="frame" x="20" y="20" width="39.5" height="17"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="# Recordings" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y4b-2t-JOq" userLabel="Recordings Count Label">
-                                            <rect key="frame" x="20" y="45" width="80" height="15.666666666666664"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="# Recordings" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y4b-2t-JOq" userLabel="Recordings Count Label">
+                                            <rect key="frame" x="20" y="45" width="80" height="16"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <stackView opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="nEt-nn-IJ3">
-                                            <rect key="frame" x="269" y="20" width="101" height="82.333333333333329"/>
+                                        <stackView opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" ambiguous="YES" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="nEt-nn-IJ3">
+                                            <rect key="frame" x="713" y="20" width="101" height="82.5"/>
                                             <subviews>
-                                                <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KVg-Xt-Fg6">
-                                                    <rect key="frame" x="0.0" y="0.0" width="101" height="37.333333333333336"/>
+                                                <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KVg-Xt-Fg6">
+                                                    <rect key="frame" x="0.0" y="0.0" width="101" height="37.5"/>
                                                     <color key="backgroundColor" systemColor="tertiarySystemFillColor"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                     <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
@@ -397,8 +485,8 @@
                                                         <segue destination="BYZ-38-t0r" kind="show" identifier="ShowCameraSegue" id="kVr-eN-JSX"/>
                                                     </connections>
                                                 </button>
-                                                <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jEx-Rc-rtq">
-                                                    <rect key="frame" x="0.0" y="45.333333333333329" width="101" height="37"/>
+                                                <button opaque="NO" contentMode="scaleToFill" horizontalCompressionResistancePriority="751" verticalCompressionResistancePriority="751" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jEx-Rc-rtq">
+                                                    <rect key="frame" x="0.0" y="45.5" width="101" height="37"/>
                                                     <color key="backgroundColor" systemColor="tertiarySystemFillColor"/>
                                                     <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                                     <inset key="contentEdgeInsets" minX="10" minY="10" maxX="10" maxY="10"/>
@@ -456,15 +544,15 @@
             <objects>
                 <tableViewController storyboardIdentifier="RecordingListViewController" id="3zb-Uo-vhB" customClass="RecordingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="J99-GO-jst">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="BeD-Sn-hNW" userLabel="Use Case Header View" customClass="UseCaseSummaryView" customModule="MEADepthCamera" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="0.0" width="390" height="488"/>
+                            <rect key="frame" x="0.0" y="0.0" width="834" height="1188"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8j4-57-1nk">
-                                    <rect key="frame" x="19.999999999999996" y="20" width="46.666666666666657" height="30"/>
+                                    <rect key="frame" x="20" y="20" width="46.5" height="30"/>
                                     <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -492,14 +580,14 @@
                         </view>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="TaskNameCell" textLabel="n7h-zP-WLe" style="IBUITableViewCellStyleDefault" id="JwJ-yd-ePr">
-                                <rect key="frame" x="0.0" y="532.66666603088379" width="390" height="43.666667938232422"/>
+                                <rect key="frame" x="0.0" y="1232.5" width="834" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="JwJ-yd-ePr" id="CM3-s3-KHw">
-                                    <rect key="frame" x="0.0" y="0.0" width="390" height="43.666667938232422"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="834" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Task Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="n7h-zP-WLe">
-                                            <rect key="frame" x="20" y="0.0" width="350" height="43.666667938232422"/>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" text="Task Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="n7h-zP-WLe">
+                                            <rect key="frame" x="8" y="0.0" width="818" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                             <nil key="textColor"/>
@@ -509,26 +597,26 @@
                                 </tableViewCellContentView>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="RecordingListCell" id="ODm-Vw-NxS" customClass="RecordingListCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="576.33333396911621" width="390" height="104.66666412353516"/>
+                                <rect key="frame" x="0.0" y="1276" width="834" height="105.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ODm-Vw-NxS" id="Al4-2K-Opc">
-                                    <rect key="frame" x="0.0" y="0.0" width="390" height="104.66666412353516"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="834" height="105.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Folder Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="601-cm-1Zn">
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Folder Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="601-cm-1Zn">
                                             <rect key="frame" x="20" y="20" width="83" height="17"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Duration" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n3c-hw-L8g">
-                                            <rect key="frame" x="20" y="45" width="52" height="15.666666666666664"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Duration" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="n3c-hw-L8g">
+                                            <rect key="frame" x="20" y="45" width="52" height="16"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="# Files" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZX6-uT-Bw9">
-                                            <rect key="frame" x="19.999999999999996" y="68.666666666666671" width="39.666666666666657" height="15.666666666666671"/>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="# Files" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZX6-uT-Bw9">
+                                            <rect key="frame" x="20" y="69" width="39.5" height="16"/>
                                             <fontDescription key="fontDescription" style="UICTFontTextStyleCallout"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -574,17 +662,17 @@
             <objects>
                 <viewController id="eiV-6X-ebF" customClass="TaskInstructionsViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JSa-5d-a4u">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Hoc-Ip-BgO">
-                                <rect key="frame" x="0.0" y="44" width="390" height="137.66666666666666"/>
+                                <rect key="frame" x="0.0" y="24" width="834" height="137.5"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g8K-LA-a21" userLabel="Name Label Container View">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="77"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="834" height="77"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Task Name" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7bG-O9-tpX">
-                                                <rect key="frame" x="20" y="20" width="350" height="37"/>
+                                                <rect key="frame" x="20" y="20" width="794" height="37"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -599,10 +687,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ASF-Df-aQv" userLabel="Instructions Label Container View">
-                                        <rect key="frame" x="0.0" y="77" width="390" height="60.666666666666657"/>
+                                        <rect key="frame" x="0.0" y="77" width="834" height="60.5"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Instructions" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7fz-7S-ang">
-                                                <rect key="frame" x="20" y="20" width="350" height="20.666666666666671"/>
+                                                <rect key="frame" x="20" y="20" width="794" height="20.5"/>
                                                 <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
                                                 <nil key="textColor"/>
                                                 <nil key="highlightedColor"/>
@@ -638,7 +726,25 @@
             </objects>
             <point key="canvasLocation" x="2145" y="-1032"/>
         </scene>
+        <!--Use Case Detail View Controller-->
+        <scene sceneID="M5w-7S-7gR">
+            <objects>
+                <viewController id="uzu-Nu-Ybk" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="iNG-8N-oMu">
+                        <rect key="frame" x="0.0" y="0.0" width="513" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="6IT-SB-mjB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tqe-bW-pYg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-965" y="317"/>
+        </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="fCJ-DS-2Af"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="kuang" width="1122" height="1191"/>
         <image name="record.circle.fill" catalog="system" width="128" height="121"/>

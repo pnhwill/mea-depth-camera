@@ -11,24 +11,29 @@ class UseCaseDetailViewController: DetailViewController {
     
     weak var delegate: UseCaseInteractionDelegate?
     
-    private var useCase: UseCase
+    private var useCase: UseCase?
     private var isNew = false
     
-    init(useCase: UseCase, isNew: Bool = false) {
-        self.useCase = useCase
-        self.isNew = isNew
-        super.init(viewModel: nil)
-    }
+//    init(useCase: UseCase, isNew: Bool = false) {
+//        self.useCase = useCase
+//        self.isNew = isNew
+//        super.init(viewModel: nil)
+//    }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+    
+    func configure(with useCase: UseCase, isNew: Bool = false) {
+        self.useCase = useCase
+        setEditing(isNew, animated: false)
     }
     
     // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setEditing(isNew, animated: false)
+//        setEditing(isNew, animated: false)
         navigationItem.setRightBarButton(editButtonItem, animated: false)
     }
     override func viewDidAppear(_ animated: Bool) {
@@ -45,6 +50,7 @@ extension UseCaseDetailViewController {
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
+        guard let useCase = useCase else { fatalError() }
         if editing {
             transitionToEditMode(useCase)
         } else {
@@ -77,7 +83,7 @@ extension UseCaseDetailViewController {
     
     @objc
     func cancelButtonTrigger() {
-        useCase.managedObjectContext?.rollback()
+        useCase?.managedObjectContext?.rollback()
         setEditing(false, animated: true)
     }
 }

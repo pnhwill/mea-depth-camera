@@ -34,3 +34,45 @@ extension UseCase {
         }
     }
 }
+
+// MARK: Date/Time Formatters
+extension UseCase {
+
+    static let timeFormatter: DateFormatter = {
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
+        return timeFormatter
+    }()
+
+    static let pastDateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        return dateFormatter
+    }()
+
+    static let todayDateFormatter: DateFormatter = {
+        let format = NSLocalizedString("'Today at '%@", comment: "format string for dates occurring today")
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = String(format: format, "hh:mm a")
+        return dateFormatter
+    }()
+
+    func dateTimeText(for filter: UseCaseListViewModel.Filter) -> String? {
+        guard let date = date else { return nil }
+        let isInToday = Locale.current.calendar.isDateInToday(date)
+        switch filter {
+        case .today:
+            return Self.timeFormatter.string(from: date)
+        case .past:
+            return Self.pastDateFormatter.string(from: date)
+        case .all:
+            if isInToday {
+                return Self.todayDateFormatter.string(from: date)
+            } else {
+                return Self.pastDateFormatter.string(from: date)
+            }
+        }
+    }
+}

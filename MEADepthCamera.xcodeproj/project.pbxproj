@@ -81,6 +81,7 @@
 		B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */; };
 		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
 		B5C89314272B80DD002E2EC1 /* ObservableModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */; };
+		B5C89316272BDDC3002E2EC1 /* UseCaseSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C89315272BDDC2002E2EC1 /* UseCaseSplitViewController.swift */; };
 		B5D209A4271A19EA005CEC9A /* ModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A3271A19EA005CEC9A /* ModelStore.swift */; };
 		B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A6271A2087005CEC9A /* ItemListCell.swift */; };
 		B5D209A9271A295A005CEC9A /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A8271A295A005CEC9A /* ListViewModel.swift */; };
@@ -217,6 +218,7 @@
 		B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPipeline.swift; sourceTree = "<group>"; };
 		B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
 		B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableModelStore.swift; sourceTree = "<group>"; };
+		B5C89315272BDDC2002E2EC1 /* UseCaseSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseSplitViewController.swift; sourceTree = "<group>"; };
 		B5D209A3271A19EA005CEC9A /* ModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStore.swift; sourceTree = "<group>"; };
 		B5D209A6271A2087005CEC9A /* ItemListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemListCell.swift; sourceTree = "<group>"; };
 		B5D209A8271A295A005CEC9A /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
@@ -297,6 +299,7 @@
 		B54215BB26C31E9300A4F984 /* Use Case */ = {
 			isa = PBXGroup;
 			children = (
+				B5C89315272BDDC2002E2EC1 /* UseCaseSplitViewController.swift */,
 				B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */,
 				BE64A209272949A200DA1689 /* UseCaseListViewModel.swift */,
 				B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */,
@@ -788,6 +791,7 @@
 				B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */,
 				B50787D626AF73D60077ACCB /* FaceLandmarksPipeline.swift in Sources */,
 				B54215C826C366C900A4F984 /* UseCaseDetailEditDataSource.swift in Sources */,
+				B5C89316272BDDC3002E2EC1 /* UseCaseSplitViewController.swift in Sources */,
 				B56F1A9426E0813D00A29C42 /* ExperimentProvider.swift in Sources */,
 				B56F1A6626E045AF00A29C42 /* Schema.swift in Sources */,
 				B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */,

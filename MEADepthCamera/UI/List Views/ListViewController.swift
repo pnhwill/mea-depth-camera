@@ -19,36 +19,55 @@ class ListViewController: UICollectionViewController {
     var viewModel: ListViewModel!
     var dataSource: ListDiffableDataSource?
     
-    private var allItemsSubscriber: AnyCancellable?
+    var allItemsSubscriber: AnyCancellable?
     
-    init() {
-        super.init(collectionViewLayout: Self.createLayout())
-//        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
+    // MARK: Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
         configureCollectionView()
         configureDataSource()
         loadData()
-        
-        allItemsSubscriber = viewModel.itemsStore?.$allModels
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.refreshListData()
-            }
     }
 }
 
+// MARK: Update Data
+extension ListViewController {
+    func loadData() {
+        // Set the order for our sections
+        let sections = Section.ID.allCases
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
+        snapshot.appendSections(sections)
+        dataSource?.apply(snapshot, animatingDifferences: false)
+        
+        // Set section snapshots for each section
+        for sectionID in sections {
+            guard let items = viewModel.sectionsStore?.fetchByID(sectionID)?.items else { continue }
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+            sectionSnapshot.append(items)
+            dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
+        }
+    }
+    
+    func refreshListData() {
+        guard let items = viewModel.sectionsStore?.fetchByID(.list)?.items else { return }
+        var snapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+        snapshot.append(items)
+        dataSource?.apply(snapshot, to: .list)
+    }
+    
+    func itemDidChange(_ itemID: Item.ID) {
+        guard let dataSource = dataSource, dataSource.indexPath(for: itemID) != nil else { return }
+        var snapshot = dataSource.snapshot()
+        snapshot.reconfigureItems([itemID])
+        dataSource.apply(snapshot)
+    }
+}
+
+// MARK: Configuration
 extension ListViewController {
     private func configureCollectionView() {
-//        let layout = createLayout()
-//        collectionView.collectionViewLayout = layout
-        
+        let layout = Self.createLayout()
+        collectionView.collectionViewLayout = layout
     }
     
     private static func createLayout() -> UICollectionViewLayout {
@@ -102,7 +121,7 @@ extension ListViewController {
         return UICollectionView.CellRegistration<ListTextCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.viewModel.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
-            cell.delegate = self.viewModel
+            cell.delegate = self as? ListTextCellDelegate
         }
     }
     
@@ -114,37 +133,6 @@ extension ListViewController {
     }
 }
 
-extension ListViewController {
-    func loadData() {
-        // Set the order for our sections
-        let sections = Section.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
-        snapshot.appendSections(sections)
-        dataSource?.apply(snapshot, animatingDifferences: false)
-        
-        // Set section snapshots for each section
-        for sectionID in sections {
-            guard let items = viewModel.sectionsStore?.fetchByID(sectionID)?.items else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
-            sectionSnapshot.append(items)
-            dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
-        }
-    }
-    
-    func refreshListData() {
-        guard let items = viewModel.sectionsStore?.fetchByID(.list)?.items else { return }
-        var snapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
-        snapshot.append(items)
-        dataSource?.apply(snapshot, to: .list)
-    }
-    
-    func itemDidChange(_ itemID: Item.ID) {
-        guard let dataSource = dataSource, dataSource.indexPath(for: itemID) != nil else { return }
-        var snapshot = dataSource.snapshot()
-        snapshot.reconfigureItems([itemID])
-        dataSource.apply(snapshot)
-    }
-}
 
 
 
@@ -154,6 +142,12 @@ extension ListViewController {
 
 
 
+
+
+
+
+
+// MARK: OLD
 /// Base class for UIViewControllers that list object data from the Core Data model and present a detail view for selected cells.
 class OldListViewController<ViewModel: OldListViewModel>: UIViewController {
     
