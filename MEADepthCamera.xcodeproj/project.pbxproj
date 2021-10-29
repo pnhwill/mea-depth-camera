@@ -80,11 +80,7 @@
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
 		B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */; };
 		B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */; };
-		B5C8930A2729EF1A002E2EC1 /* TextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C893092729EF1A002E2EC1 /* TextFieldCell.swift */; };
-		B5C8930C2729F001002E2EC1 /* ListTextCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C8930B2729F001002E2EC1 /* ListTextCell.swift */; };
-		B5C8930E2729F4CB002E2EC1 /* TextInputCellDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C8930D2729F4CB002E2EC1 /* TextInputCellDelegate.swift */; };
-		B5C893102729F5FD002E2EC1 /* TextViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C8930F2729F5FD002E2EC1 /* TextViewCell.swift */; };
-		B5C893122729F6DC002E2EC1 /* PickerViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C893112729F6DC002E2EC1 /* PickerViewCell.swift */; };
+		B5C89314272B80DD002E2EC1 /* ObservableModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */; };
 		B5D209A4271A19EA005CEC9A /* ModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A3271A19EA005CEC9A /* ModelStore.swift */; };
 		B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A6271A2087005CEC9A /* ItemListCell.swift */; };
 		B5D209A9271A295A005CEC9A /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D209A8271A295A005CEC9A /* ListViewModel.swift */; };
@@ -111,6 +107,11 @@
 		B5FB0A5426D5858600F65FA5 /* RecordingDetailEditDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */; };
 		BE64A20A272949A200DA1689 /* UseCaseListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A209272949A200DA1689 /* UseCaseListViewModel.swift */; };
 		BE64A20C27294C9100DA1689 /* ListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A20B27294C9100DA1689 /* ListModel.swift */; };
+		BE64A212272A8C4000DA1689 /* PickerViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A20E272A8C4000DA1689 /* PickerViewCell.swift */; };
+		BE64A213272A8C4000DA1689 /* TextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A20F272A8C4000DA1689 /* TextFieldCell.swift */; };
+		BE64A214272A8C4000DA1689 /* TextViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A210272A8C4000DA1689 /* TextViewCell.swift */; };
+		BE64A215272A8C4000DA1689 /* TextInputCellDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A211272A8C4000DA1689 /* TextInputCellDelegate.swift */; };
+		BE64A217272A8C8700DA1689 /* ListTextCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A216272A8C8700DA1689 /* ListTextCell.swift */; };
 		BEBD1494271972C6007AC466 /* ModelObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBD1493271972C6007AC466 /* ModelObject.swift */; };
 /* End PBXBuildFile section */
 
@@ -215,11 +216,7 @@
 		B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEADepthCamera-Bridging-Header.h"; sourceTree = "<group>"; };
 		B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPipeline.swift; sourceTree = "<group>"; };
 		B5C732B026BDD32F002B01C2 /* VisionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProcessor.swift; sourceTree = "<group>"; };
-		B5C893092729EF1A002E2EC1 /* TextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldCell.swift; sourceTree = "<group>"; };
-		B5C8930B2729F001002E2EC1 /* ListTextCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTextCell.swift; sourceTree = "<group>"; };
-		B5C8930D2729F4CB002E2EC1 /* TextInputCellDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInputCellDelegate.swift; sourceTree = "<group>"; };
-		B5C8930F2729F5FD002E2EC1 /* TextViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewCell.swift; sourceTree = "<group>"; };
-		B5C893112729F6DC002E2EC1 /* PickerViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerViewCell.swift; sourceTree = "<group>"; };
+		B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableModelStore.swift; sourceTree = "<group>"; };
 		B5D209A3271A19EA005CEC9A /* ModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelStore.swift; sourceTree = "<group>"; };
 		B5D209A6271A2087005CEC9A /* ItemListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemListCell.swift; sourceTree = "<group>"; };
 		B5D209A8271A295A005CEC9A /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
@@ -246,6 +243,11 @@
 		B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailEditDataSource.swift; sourceTree = "<group>"; };
 		BE64A209272949A200DA1689 /* UseCaseListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListViewModel.swift; sourceTree = "<group>"; };
 		BE64A20B27294C9100DA1689 /* ListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListModel.swift; sourceTree = "<group>"; };
+		BE64A20E272A8C4000DA1689 /* PickerViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerViewCell.swift; sourceTree = "<group>"; };
+		BE64A20F272A8C4000DA1689 /* TextFieldCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldCell.swift; sourceTree = "<group>"; };
+		BE64A210272A8C4000DA1689 /* TextViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextViewCell.swift; sourceTree = "<group>"; };
+		BE64A211272A8C4000DA1689 /* TextInputCellDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextInputCellDelegate.swift; sourceTree = "<group>"; };
+		BE64A216272A8C8700DA1689 /* ListTextCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListTextCell.swift; sourceTree = "<group>"; };
 		BEBD1493271972C6007AC466 /* ModelObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -299,8 +301,8 @@
 				BE64A209272949A200DA1689 /* UseCaseListViewModel.swift */,
 				B5DF4B8B26C496000045AE43 /* UseCaseListDataSource.swift */,
 				B54215C126C3582C00A4F984 /* UseCaseDetailViewController.swift */,
-				B54215C326C3596F00A4F984 /* UseCaseDetailViewModel.swift */,
 				B54215C726C366C900A4F984 /* UseCaseDetailEditDataSource.swift */,
+				B54215C326C3596F00A4F984 /* UseCaseDetailViewModel.swift */,
 				B56F1A9726E0A29200A29C42 /* UseCaseInteractionDelegate.swift */,
 				B54215BE26C34B2000A4F984 /* Use Case Views */,
 			);
@@ -466,6 +468,7 @@
 			children = (
 				BEBD1493271972C6007AC466 /* ModelObject.swift */,
 				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
+				B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */,
 				B5F447EA26EFF72400528ACA /* List Views */,
 				B591615427279630005604BF /* Detail Views */,
 				B56F1A6126E03F9100A29C42 /* Main Menu */,
@@ -523,7 +526,7 @@
 			children = (
 				B59161552727AA33005604BF /* DetailViewController.swift */,
 				B59161572727AA95005604BF /* DetailViewModel.swift */,
-				B5C893082729EEFD002E2EC1 /* Cells and Views */,
+				BE64A20D272A8C4000DA1689 /* Cells and Views */,
 			);
 			path = "Detail Views";
 			sourceTree = "<group>";
@@ -565,22 +568,11 @@
 			path = "Data Pipelines";
 			sourceTree = "<group>";
 		};
-		B5C893082729EEFD002E2EC1 /* Cells and Views */ = {
-			isa = PBXGroup;
-			children = (
-				B5C893092729EF1A002E2EC1 /* TextFieldCell.swift */,
-				B5C8930F2729F5FD002E2EC1 /* TextViewCell.swift */,
-				B5C8930D2729F4CB002E2EC1 /* TextInputCellDelegate.swift */,
-				B5C893112729F6DC002E2EC1 /* PickerViewCell.swift */,
-			);
-			path = "Cells and Views";
-			sourceTree = "<group>";
-		};
 		B5D209A5271A2057005CEC9A /* Cells and Views */ = {
 			isa = PBXGroup;
 			children = (
+				BE64A216272A8C8700DA1689 /* ListTextCell.swift */,
 				B5D209A6271A2087005CEC9A /* ItemListCell.swift */,
-				B5C8930B2729F001002E2EC1 /* ListTextCell.swift */,
 				B591615227236D67005604BF /* TextCellContentView.swift */,
 				B5916150272362E8005604BF /* LabelListView.swift */,
 				B536DA3C271F781200A9C3BB /* ReadjustingStackView.swift */,
@@ -641,6 +633,17 @@
 				B534ED0E26DDAC2800A138EA /* ProcessingView.swift */,
 			);
 			path = "Recording Views";
+			sourceTree = "<group>";
+		};
+		BE64A20D272A8C4000DA1689 /* Cells and Views */ = {
+			isa = PBXGroup;
+			children = (
+				BE64A20E272A8C4000DA1689 /* PickerViewCell.swift */,
+				BE64A20F272A8C4000DA1689 /* TextFieldCell.swift */,
+				BE64A210272A8C4000DA1689 /* TextViewCell.swift */,
+				BE64A211272A8C4000DA1689 /* TextInputCellDelegate.swift */,
+			);
+			path = "Cells and Views";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -805,13 +808,13 @@
 				B534ED0F26DDAC2800A138EA /* ProcessingView.swift in Sources */,
 				B56F1A9626E0903100A29C42 /* OutputFileProvider.swift in Sources */,
 				B59161562727AA33005604BF /* DetailViewController.swift in Sources */,
+				BE64A217272A8C8700DA1689 /* ListTextCell.swift in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
 				B54215CF26C45A3900A4F984 /* MEADepthCamera.xcdatamodeld in Sources */,
 				B5FB0A4926D44FBB00F65FA5 /* RecordingDetailViewController.swift in Sources */,
 				B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */,
 				B5FB0A4F26D5767500F65FA5 /* RecordingListDataSource.swift in Sources */,
-				B5C8930C2729F001002E2EC1 /* ListTextCell.swift in Sources */,
 				B56F1A8E26E0787800A29C42 /* RecordingProvider.swift in Sources */,
 				B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */,
 				B587706026B4ADAC00E26C7D /* Functions.swift in Sources */,
@@ -822,21 +825,19 @@
 				B536DA3D271F781200A9C3BB /* ReadjustingStackView.swift in Sources */,
 				B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */,
 				B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */,
-				B5C893102729F5FD002E2EC1 /* TextViewCell.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B50944B426E94FEC0020971D /* JSONError.swift in Sources */,
 				B5FB0A4D26D5765000F65FA5 /* RecordingListViewController.swift in Sources */,
+				BE64A214272A8C4000DA1689 /* TextViewCell.swift in Sources */,
 				B56F1A8C26E0786200A29C42 /* UseCaseProvider.swift in Sources */,
 				B56F1A9826E0A29200A29C42 /* UseCaseInteractionDelegate.swift in Sources */,
 				B54215CA26C3670E00A4F984 /* MainMenuDataSource.swift in Sources */,
 				B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */,
 				B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */,
-				B5C893122729F6DC002E2EC1 /* PickerViewCell.swift in Sources */,
 				B591615327236D67005604BF /* TextCellContentView.swift in Sources */,
-				B5C8930A2729EF1A002E2EC1 /* TextFieldCell.swift in Sources */,
+				BE64A213272A8C4000DA1689 /* TextFieldCell.swift in Sources */,
 				B5FB0A4B26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift in Sources */,
 				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,
-				B5C8930E2729F4CB002E2EC1 /* TextInputCellDelegate.swift in Sources */,
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
 				B585A0A726C5CB3A00CA6546 /* EditNotesCell.swift in Sources */,
 				B56F1A9126E07B2F00A29C42 /* Experiment+CoreDataClass.swift in Sources */,
@@ -850,8 +851,10 @@
 				B5D209A4271A19EA005CEC9A /* ModelStore.swift in Sources */,
 				B53CD4B326B38EF3003BBFD9 /* CaptureOutputPipeline.swift in Sources */,
 				B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */,
+				BE64A215272A8C4000DA1689 /* TextInputCellDelegate.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
 				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
+				B5C89314272B80DD002E2EC1 /* ObservableModelStore.swift in Sources */,
 				B5F447F326EFFB7A00528ACA /* TaskListDataSource.swift in Sources */,
 				B587706226B4AEAC00E26C7D /* CommonTypes.swift in Sources */,
 				B5916151272362E8005604BF /* LabelListView.swift in Sources */,
@@ -865,6 +868,7 @@
 				B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */,
 				B54215C426C3596F00A4F984 /* UseCaseDetailViewModel.swift in Sources */,
 				B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */,
+				BE64A212272A8C4000DA1689 /* PickerViewCell.swift in Sources */,
 				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,
 				B54215CC26C36D6B00A4F984 /* UseCaseSummaryView.swift in Sources */,
 				B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */,

@@ -6,7 +6,7 @@
 //
 /*
 Abstract:
-The generic model store for Identifiable models.
+Generic model store for quick lookup of Identifiable models.
 */
 
 import Foundation
@@ -22,15 +22,11 @@ class AnyModelStore<Model: Identifiable>: ModelStore {
     private var models = [Model.ID: Model]()
     
     init(_ models: [Model]) {
-        update(with: models)
+        self.models = models.groupingByUniqueID()
     }
     
     func fetchByID(_ id: Model.ID) -> Model? {
         return self.models[id]
-    }
-    
-    func update(with models: [Model]) {
-        self.models = models.groupingByUniqueID()
     }
 }
 

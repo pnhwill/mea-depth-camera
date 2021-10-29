@@ -7,6 +7,7 @@
 
 import UIKit
 import CoreData
+import Combine
 
 class UseCaseListViewModel: NSObject, ListViewModel {
 
@@ -36,14 +37,14 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     
     var filter: UseCaseListViewModel.Filter = .all
     
-    lazy var sectionsStore: AnyModelStore<ListSection>? = {
+    lazy var sectionsStore: ObservableModelStore<ListSection>? = {
         guard let items = filteredUseCases?.compactMap({ ListItem(object: $0)?.id }) else { return nil }
-        return AnyModelStore([ListSection(id: .list, items: items)])
+        return ObservableModelStore([ListSection(id: .list, items: items)])
     }()
     
-    lazy var itemsStore: AnyModelStore<ListItem>? = {
+    lazy var itemsStore: ObservableModelStore<ListItem>? = {
         guard let items = filteredUseCases?.compactMap({ ListItem(object: $0) }) else { return nil }
-        return AnyModelStore(items)
+        return ObservableModelStore(items)
     }()
     
     private lazy var dataProvider: UseCaseProvider = {
@@ -59,6 +60,14 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     private var filteredUseCases: [UseCase]? {
         return useCases?.filter { filter.shouldInclude(date: $0.date!) }.sorted { $0.date! > $1.date! }
     }
+    
+    private lazy var allItemsSubscriber: AnyCancellable? = {
+        return itemsStore?.$allModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                // TODO: apply changes to snapshot
+            }
+    }()
     
     func configure(_ listCell: ListTextCell) {
         listCell.delegate = self
@@ -79,17 +88,36 @@ class UseCaseListViewModel: NSObject, ListViewModel {
             completion(useCase)
         }
     }
+}
+
+extension UseCaseListViewModel {
     
-    private func updateStores() {
-        guard let items = filteredUseCases?.compactMap({ ListItem(object: $0) }) else { return }
-        let itemIDs = items.map({ $0.id })
-        sectionsStore?.update(with: [ListSection(id: .list, items: itemIDs)])
-        itemsStore?.update(with: items)
+    private func reloadSectionStore() {
+        guard let itemIDs = filteredUseCases?.compactMap({ $0.id }) else { return }
+        sectionsStore?.reload(with: [ListSection(id: .list, items: itemIDs)])
+
     }
+
+    private func reloadItemStore() {
+        guard let items = filteredUseCases?.compactMap({ ListItem(object: $0) }) else { return }
+        itemsStore?.reload(with: items)
+    }
+
+    private func mergeIntoItemStore(_ useCase: UseCase) {
+        guard let item = ListItem(object: useCase) else { return }
+        itemsStore?.add(newModels: [item])
+    }
+    
+    private func deleteFromItemStore(_ useCase: UseCase) {
+        guard let itemID = useCase.id else { return }
+        itemsStore?.deleteByID(itemID)
+    }
+    
 }
 
 // MARK: ListTextCellDelegate
 extension UseCaseListViewModel: ListTextCellDelegate {
+    
     func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
         guard let useCase = item.object as? UseCase else { fatalError() }
         guard let titleText = useCase.title,
@@ -108,9 +136,10 @@ extension UseCaseListViewModel: ListTextCellDelegate {
         guard let useCase = item.object as? UseCase else { fatalError() }
         dataProvider.delete(useCase) { [weak self] success in
             if let dataSource = self?.dataSource {
-                var snapshot = dataSource.snapshot()
-                snapshot.deleteItems([item.id])
-                dataSource.apply(snapshot)
+//                var snapshot = dataSource.snapshot()
+//                snapshot.deleteItems([item.id])
+//                dataSource.apply(snapshot)
+                // TODO: delete from item store
             }
         }
     }

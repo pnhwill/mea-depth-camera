@@ -78,11 +78,7 @@ extension UseCaseDetailViewController {
     @objc
     func cancelButtonTrigger() {
         useCase.managedObjectContext?.rollback()
-        if isNew {
-            dismiss(animated: true, completion: nil)
-        } else {
-            setEditing(false, animated: true)
-        }
+        setEditing(false, animated: true)
     }
 }
 

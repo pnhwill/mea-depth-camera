@@ -17,8 +17,8 @@ protocol ListViewModel {
     typealias Section = ListSection
     
     var dataSource: UICollectionViewDiffableDataSource<Section.ID, Item.ID>? { get set }
-    var sectionsStore: AnyModelStore<Section>? { get }
-    var itemsStore: AnyModelStore<Item>? { get }
+    var sectionsStore: ObservableModelStore<Section>? { get }
+    var itemsStore: ObservableModelStore<Item>? { get }
     
     func configure(_ listCell: ListCell)
     func applyInitialSnapshots()
