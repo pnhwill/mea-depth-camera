@@ -84,6 +84,7 @@ class UseCaseDetailViewModel: DetailViewModel {
         self.useCase = useCase
     }
     
+    // MARK: Configure Collection View
     func createLayout() -> UICollectionViewLayout {
         var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         config.headerMode = .firstItemInSection
@@ -123,6 +124,7 @@ class UseCaseDetailViewModel: DetailViewModel {
     }
 }
 
+// MARK: Cell Registration
 extension UseCaseDetailViewModel {
     private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item> {
         return UICollectionView.CellRegistration<UICollectionViewListCell, Item> { [weak self] (cell, indexPath, item) in

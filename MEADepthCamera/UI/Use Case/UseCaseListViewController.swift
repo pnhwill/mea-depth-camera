@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class UseCaseListViewController: ListViewController {
     
@@ -17,6 +18,8 @@ class UseCaseListViewController: ListViewController {
         self.splitViewController as! UseCaseSplitViewController
     }
     
+    private var useCaseDidChangeSubscriber: Cancellable?
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         viewModel = UseCaseListViewModel()
@@ -26,13 +29,21 @@ class UseCaseListViewController: ListViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        useCaseListViewModel.delegate = self
         configureNavigationItem()
         selectItemIfNeeded()
         listItemsSubscriber = viewModel.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refreshListData()
+                self?.selectItemIfNeeded()
+            }
+        useCaseDidChangeSubscriber = NotificationCenter.default
+            .publisher(for: .useCaseDidChange)
+            .receive(on: RunLoop.main)
+            .map { $0.userInfo?[NotificationKeys.useCaseId] }
+            .sink { [weak self] id in
+                guard let useCaseId = id as? UUID else { return }
+                self?.reconfigureItem(useCaseId)
                 self?.selectItemIfNeeded()
             }
     }
@@ -65,6 +76,7 @@ class UseCaseListViewController: ListViewController {
     }
 }
 
+// MARK: Private Methods
 extension UseCaseListViewController {
     private func configureNavigationItem() {
         navigationItem.setRightBarButton(editButtonItem, animated: false)
@@ -84,9 +96,8 @@ extension UseCaseListViewController {
             // Select and show detail for the first list item, if any.
             let indexPath = IndexPath(item: 0, section: ListSection.Identifier.list.rawValue)
             if let itemID = dataSource?.itemIdentifier(for: indexPath),
-//               let item = viewModel.itemsStore?.fetchByID(itemID),
                let useCase = useCaseListViewModel.useCase(with: itemID) {
-//                collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
+                collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
                 useCaseSplitViewController.showDetail(with: useCase)
             } else {
                 // If list is empty, add a new use case.
@@ -97,20 +108,17 @@ extension UseCaseListViewController {
     
     private func addUseCase() {
         useCaseListViewModel.add { [weak self] useCase in
-//            if let self = self, self.useCaseSplitViewController.isCollapsed {
             self?.useCaseSplitViewController.showDetail(with: useCase, isNew: true)
-//            }
         }
     }
 }
 
 // MARK: UICollectionViewDelegate
 extension UseCaseListViewController {
+    
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(#function)
         // Push the detail view when the cell is tapped.
         if let itemID = dataSource?.itemIdentifier(for: indexPath),
-//           let item = viewModel.itemsStore?.fetchByID(itemID),
            let useCase = useCaseListViewModel.useCase(with: itemID) {
             useCaseSplitViewController.showDetail(with: useCase)
         } else {
@@ -119,46 +127,16 @@ extension UseCaseListViewController {
     }
 }
 
-// MARK: UseCaseInteractionDelegate
-extension UseCaseListViewController: UseCaseInteractionDelegate {
-    /**
-     didUpdateUseCase is called as part of UseCaseInteractionDelegate, or whenever a use case update requires a UI update (including main-detail selections).
-     
-     Respond by updating the UI as follows.
-     - add:
-     - delete: reload snapshot and apply to collection view data source
-     - update from detailViewController:
-     - initial load:
-     */
-    func didUpdateUseCase(_ useCase: UseCase) {
-        guard let id = useCase.id else { fatalError() }
-        reconfigureItem(id)
-    }
-}
-
 // MARK: ListTextCellDelegate
 extension UseCaseListViewController: ListTextCellDelegate {
     
     func delete(objectFor item: ListItem) {
-        guard let useCase = useCaseListViewModel.useCase(with: item.id) else { fatalError() }
-        useCaseListViewModel.delete(useCase) { [weak self] success in
+        useCaseListViewModel.delete(item.id) { [weak self] success in
             if success {
                 self?.refreshListData()
             }
         }
     }
-    
-    //    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
-    //        guard let useCase = item.object as? UseCase else { fatalError() }
-    //        let titleText = useCase.title ?? ""
-    //        let experimentText = useCase.experimentTitle
-    //        let dateText = useCase.dateTimeText(for: .all) ?? ""
-    //        let subjectID = useCase.subjectID ?? ""
-    //        let subjectIDText = "Subject ID: " + subjectID
-    //        let bodyText = [subjectIDText, dateText]
-    //        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
-    //        return content
-    //    }
 }
 
 

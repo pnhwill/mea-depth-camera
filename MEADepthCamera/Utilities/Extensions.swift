@@ -8,6 +8,21 @@
 import AVFoundation
 import UIKit
 
+// MARK: NSNotification.Name
+/*
+ Abstract:
+ An extension that declares app-specific notification names.
+ */
+extension NSNotification.Name {
+    static let useCaseDidChange = Notification.Name("com.mea-lab.MEADepthCamera.useCaseDidChange")
+}
+
+// Custom keys to use with userInfo dictionaries.
+enum NotificationKeys: String {
+    case useCaseId
+}
+
+
 // MARK: UIViewController
 extension UIViewController {
     func alert(title: String, message: String, actions: [UIAlertAction]) {

@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import CoreData
 
 // MARK: ListSection
 struct ListSection: Identifiable {
@@ -20,26 +19,10 @@ struct ListSection: Identifiable {
 }
 
 // MARK: ListItem
-/// A generic model of an item contained in a list cell, providing value semantics and erasing the underlying type of the stored object.
+/// A generic model of an item contained in a list cell with title text, optional subtitle text, and body text with an arbitrary number of lines.
 struct ListItem: Identifiable, Hashable {
     var id: UUID
     var title: String
     var subTitle: String?
     var bodyText: [String]
-//    var object: ModelObject
-    
-//    init?(object: ModelObject) {
-//        guard let id = object.id else { return nil }
-//        self.object = object
-//        self.id = id
-//    }
-    
-//    static func == (lhs: ListItem, rhs: ListItem) -> Bool {
-//        return lhs.id == rhs.id /*&& lhs.object == rhs.object*/
-//    }
-//
-//    func hash(into hasher: inout Hasher) {
-//        hasher.combine(id)
-////        hasher.combine(object)
-//    }
 }

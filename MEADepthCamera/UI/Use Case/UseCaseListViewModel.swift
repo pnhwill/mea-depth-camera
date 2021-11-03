@@ -7,7 +7,6 @@
 
 import UIKit
 import CoreData
-import Combine
 
 class UseCaseListViewModel: NSObject, ListViewModel {
     
@@ -29,14 +28,13 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         }
     }
     
-    weak var delegate: UseCaseInteractionDelegate?
-    
     var filter: UseCaseListViewModel.Filter = .all {
         didSet {
             reloadListStores()
         }
     }
     
+    // MARK: Data Stores
     lazy var sectionsStore: ObservableModelStore<ListSection>? = {
         guard let items = sortedUseCases?.compactMap({ $0.id }) else { return nil }
         return ObservableModelStore([ListSection(id: .list, items: items)])
@@ -58,7 +56,7 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     }
 
     private var filteredUseCases: [UseCase]? {
-        return useCases?.filter { filter.shouldInclude(date: $0.date!) }//.sorted { $0.date! > $1.date! }
+        return useCases?.filter { filter.shouldInclude(date: $0.date!) }
     }
     
     private var sortedUseCases: [UseCase]? {
@@ -73,7 +71,24 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         return useCases?.first(where: { $0.id == id})
     }
     
-    func listItem(useCase: UseCase) -> ListItem? {
+    func add(completion: @escaping (UseCase) -> Void) {
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
+            completion(useCase)
+        }
+    }
+    
+    func delete(_ id: UUID, completion: @escaping (Bool) -> Void) {
+        guard let useCase = useCase(with: id) else { fatalError() }
+        dataProvider.delete(useCase) { success in
+            completion(success)
+        }
+    }
+}
+
+// MARK: Private Methods
+extension UseCaseListViewModel {
+    
+    private func listItem(useCase: UseCase) -> ListItem? {
         guard let id = useCase.id else { return nil }
         let titleText = useCase.title ?? "?"
         let subTitleText = useCase.experimentTitle ?? useCase.experiment?.title ?? "?"
@@ -82,27 +97,6 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         let subjectIDText = "Subject ID: " + subjectID
         let bodyText = [subjectIDText, dateText]
         return ListItem(id: id, title: titleText, subTitle: subTitleText, bodyText: bodyText)
-    }
-    
-    func add(completion: @escaping (UseCase) -> Void) {
-        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false) { useCase in
-            completion(useCase)
-        }
-    }
-    
-    func delete(_ useCase: UseCase, completion: @escaping (Bool) -> Void) {
-        dataProvider.delete(useCase) { success in
-            completion(success)
-        }
-    }
-}
-
-extension UseCaseListViewModel {
-    
-    private func sortUseCases() {
-        let todayFilter = Filter.today
-        
-        
     }
 
     private func reloadListStores() {
@@ -138,28 +132,33 @@ extension UseCaseListViewModel {
 
 // MARK: NSFetchedResultsControllerDelegate
 extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
-    
+    /**
+     controller(:didChange:at:for:newIndexPath:) is called as part of NSFetchedResultsControllerDelegate.
+     
+     Whenever a use case update requires a UI update, respond by updating the UI as follows.
+     - add: make the new item visible and select it.
+     - delete: preserve the current selection if any; otherwise select the first item.
+     - move: reload all items, and send a useCaseDidChange notification to inform other parts of the app about the changes (an update of the object is assumed in this case).
+     - update: reconfigure the item, make it visible, and select it.
+     */
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         guard let useCase = anObject as? UseCase,
               let id = useCase.id
         else { return }
         switch type {
         case .insert:
-            print("INSERT")
             addToListStores(useCase)
         case .delete:
-            print("DELETE")
             deleteFromListStores(id)
         case .move:
-            print("MOVE")
             reloadListStores()
-            delegate?.didUpdateUseCase(useCase)
+            NotificationCenter.default.post(name: .useCaseDidChange, object: self, userInfo: [NotificationKeys.useCaseId: id])
         case .update:
-            print("UPDATE")
             reconfigureItem(useCase)
-            delegate?.didUpdateUseCase(useCase)
+            NotificationCenter.default.post(name: .useCaseDidChange, object: self, userInfo: [NotificationKeys.useCaseId: id])
         @unknown default:
             reloadListStores()
+            NotificationCenter.default.post(name: .useCaseDidChange, object: self, userInfo: [NotificationKeys.useCaseId: id])
         }
     }
 }

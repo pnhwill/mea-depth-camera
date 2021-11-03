@@ -41,22 +41,25 @@ class UseCaseDetailEditModel: NSObject, DetailViewModel {
     
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>?
     
+    private var useCase: UseCase
+    private var isNew: Bool
+    
     private lazy var experimentProvider: ExperimentProvider = {
         let container = AppDelegate.shared.coreDataStack.persistentContainer
         let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
         return provider
     }()
     
-    private var useCase: UseCase
-    
     private var experiments: [Experiment]? {
         return experimentProvider.fetchedResultsController.fetchedObjects
     }
     
-    init(useCase: UseCase) {
+    init(useCase: UseCase, isNew: Bool) {
         self.useCase = useCase
+        self.isNew = isNew
     }
     
+    // MARK: Configure Collection View
     func createLayout() -> UICollectionViewLayout {
         var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         config.headerMode = .firstItemInSection
@@ -109,6 +112,7 @@ class UseCaseDetailEditModel: NSObject, DetailViewModel {
     }
 }
 
+// MARK: Cell Registration
 extension UseCaseDetailEditModel {
     private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item> {
         return UICollectionView.CellRegistration<UICollectionViewListCell, Item> { (cell, indexPath, item) in
@@ -124,7 +128,7 @@ extension UseCaseDetailEditModel {
             cell.configure(with: self.useCase.title, at: indexPath, delegate: self)
             cell.textField.autocapitalizationType = .words
             cell.textField.autocorrectionType = .no
-            cell.textField.clearsOnBeginEditing = true
+            cell.textField.clearsOnBeginEditing = self.isNew
         }
     }
     private func createSubjectIDCellRegistration() -> UICollectionView.CellRegistration<TextFieldCell, Item> {
@@ -188,7 +192,6 @@ extension UseCaseDetailEditModel: UIPickerViewDelegate {
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        print(#function)
         useCase.experiment = experiments?[row]
     }
 }

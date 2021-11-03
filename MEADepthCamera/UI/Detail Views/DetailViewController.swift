@@ -19,6 +19,7 @@ class DetailViewController: UIViewController, UICollectionViewDelegate {
     }
     
     func configureCollectionView() {
+        removeExistingViews()
         configureHierarchy()
         viewModel?.configureDataSource(for: collectionView)
         viewModel?.applyInitialSnapshots()
@@ -32,5 +33,11 @@ extension DetailViewController {
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = .systemGroupedBackground
         view.addSubview(collectionView)
+    }
+    
+    private func removeExistingViews() {
+        for oldCollectionView in view.subviews {
+            oldCollectionView.removeFromSuperview()
+        }
     }
 }

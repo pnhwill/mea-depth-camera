@@ -6,26 +6,17 @@
 //
 
 import UIKit
+import Combine
 
 class UseCaseDetailViewController: DetailViewController {
     
-//    weak var delegate: UseCaseInteractionDelegate?
-    
     private var useCase: UseCase?
     private var isNew = false
-    
-//    init(useCase: UseCase, isNew: Bool = false) {
-//        self.useCase = useCase
-//        self.isNew = isNew
-//        super.init(viewModel: nil)
-//    }
-    
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
+    private var useCaseDidChangeSubscriber: Cancellable?
     
     func configure(with useCase: UseCase, isNew: Bool = false) {
         self.useCase = useCase
+        self.isNew = isNew
         setEditing(isNew, animated: false)
     }
     
@@ -33,8 +24,18 @@ class UseCaseDetailViewController: DetailViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        setEditing(isNew, animated: false)
         navigationItem.setRightBarButton(editButtonItem, animated: false)
+        
+        useCaseDidChangeSubscriber = NotificationCenter.default
+            .publisher(for: .useCaseDidChange)
+            .receive(on: RunLoop.main)
+            .map { $0.userInfo?[NotificationKeys.useCaseId] }
+            .sink { [weak self] id in
+                guard let useCaseId = self?.useCase?.id,
+                      useCaseId == id as? UUID
+                else { return }
+                self?.checkValidUseCase()
+            }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,7 +44,6 @@ class UseCaseDetailViewController: DetailViewController {
             navigationController.setToolbarHidden(true, animated: animated)
         }
     }
-    
 }
 
 // MARK: Editing Mode Transitions
@@ -61,14 +61,14 @@ extension UseCaseDetailViewController {
     }
     
     func transitionToViewMode(_ useCase: UseCase) {
+        // Resign the first responder
+        view.endEditing(true)
+        // Save the use case to persistent storage if needed
         if useCase.hasChanges {
-            // Save the use case to persistent storage and notify the delegate of the update
             let container = AppDelegate.shared.coreDataStack.persistentContainer
             let context = useCase.managedObjectContext
             let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addUseCase : .updateUseCase
             container.saveContext(backgroundContext: context, with: contextSaveInfo)
-//            delegate?.didUpdateUseCase(useCase)
-            print("use case saved in detail VC")
         }
         isNew = false
         viewModel = UseCaseDetailViewModel(useCase: useCase)
@@ -78,39 +78,47 @@ extension UseCaseDetailViewController {
     }
     
     func transitionToEditMode(_ useCase: UseCase) {
-        viewModel = UseCaseDetailEditModel(useCase: useCase)
+        editButtonItem.isEnabled = false
+        viewModel = UseCaseDetailEditModel(useCase: useCase, isNew: isNew)
         navigationItem.title = isNew ? NSLocalizedString("Add Use Case", comment: "add use case nav title") : NSLocalizedString("Edit Use Case", comment: "edit use case nav title")
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTrigger))
     }
     
     @objc
     func cancelButtonTrigger() {
-        let context = useCase?.managedObjectContext
-        context?.rollback()
-        context?.refreshAllObjects()
-        setEditing(false, animated: true)
+        useCase?.managedObjectContext?.rollback()
         if isNew {
-            useCase = nil
-//            delegate?.didUpdateUseCase(nil)
+            navigationController?.popToRootViewController(animated: true)
         } else {
-//            delegate?.didUpdateUseCase(useCase)
+            setEditing(false, animated: true)
+        }
+    }
+    
+    private func checkValidUseCase() {
+        if let title = useCase?.title, let subjectID = useCase?.subjectID {
+            let isValid = !title.isEmpty && !subjectID.isEmpty
+            self.editButtonItem.isEnabled = isValid
         }
     }
 }
 
-//{
-//    "title": "Test",
-//    "tasks": [
-//        {
-//            "name": "RST_REST1"
-//        }
-//    ]
-//},
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+// MARK: OLD
 class OldUseCaseDetailViewController: UITableViewController {
     typealias UseCaseChangeAction = (UseCase) -> Void
     typealias UseCaseChanges = UseCaseDetailEditDataSource.UseCaseChanges
