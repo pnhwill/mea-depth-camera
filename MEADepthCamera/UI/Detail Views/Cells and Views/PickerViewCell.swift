@@ -25,6 +25,7 @@ class PickerViewCell: UICollectionViewListCell {
         pickerView.delegate = delegate
         // Select the first row by default after the delegate is set so that delegate method pickerView(_:didSelectRow:inComponent:) is called.
         pickerView.selectRow(0, inComponent: 0, animated: true)
+        delegate.pickerView?(pickerView, didSelectRow: 0, inComponent: 0)
     }
 }
 

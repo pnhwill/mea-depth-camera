@@ -9,7 +9,7 @@ import UIKit
 
 class UseCaseDetailViewController: DetailViewController {
     
-    weak var delegate: UseCaseInteractionDelegate?
+//    weak var delegate: UseCaseInteractionDelegate?
     
     private var useCase: UseCase?
     private var isNew = false
@@ -36,13 +36,14 @@ class UseCaseDetailViewController: DetailViewController {
 //        setEditing(isNew, animated: false)
         navigationItem.setRightBarButton(editButtonItem, animated: false)
     }
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    
+    override func viewWillAppear(_ animated: Bool) {
         if let navigationController = navigationController,
            !navigationController.isToolbarHidden {
             navigationController.setToolbarHidden(true, animated: animated)
         }
     }
+    
 }
 
 // MARK: Editing Mode Transitions
@@ -66,9 +67,10 @@ extension UseCaseDetailViewController {
             let context = useCase.managedObjectContext
             let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addUseCase : .updateUseCase
             container.saveContext(backgroundContext: context, with: contextSaveInfo)
-            delegate?.didUpdateUseCase(useCase)
+//            delegate?.didUpdateUseCase(useCase)
             print("use case saved in detail VC")
         }
+        isNew = false
         viewModel = UseCaseDetailViewModel(useCase: useCase)
         navigationItem.title = NSLocalizedString("View Use Case", comment: "view use case nav title")
         navigationItem.leftBarButtonItem = nil
@@ -83,12 +85,27 @@ extension UseCaseDetailViewController {
     
     @objc
     func cancelButtonTrigger() {
-        useCase?.managedObjectContext?.rollback()
+        let context = useCase?.managedObjectContext
+        context?.rollback()
+        context?.refreshAllObjects()
         setEditing(false, animated: true)
+        if isNew {
+            useCase = nil
+//            delegate?.didUpdateUseCase(nil)
+        } else {
+//            delegate?.didUpdateUseCase(useCase)
+        }
     }
 }
 
-
+//{
+//    "title": "Test",
+//    "tasks": [
+//        {
+//            "name": "RST_REST1"
+//        }
+//    ]
+//},
 
 
 

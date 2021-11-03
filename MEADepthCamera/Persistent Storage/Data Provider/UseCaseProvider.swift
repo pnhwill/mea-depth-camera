@@ -48,6 +48,7 @@ class UseCaseProvider: FetchingDataProvider {
     func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
         context.perform {
             let useCase = UseCase(context: context)
+            useCase.title = "New Use Case"
             useCase.date = Date()
             useCase.id = UUID()
             if shouldSave {

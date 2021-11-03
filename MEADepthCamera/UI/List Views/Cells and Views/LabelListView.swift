@@ -13,6 +13,7 @@ class LabelListView: UIView {
     var labels: [UILabel] {
         didSet {
             if labels != oldValue {
+                removeExistingViews()
                 setUpLabelsAndConstraints()
             }
         }
@@ -36,6 +37,7 @@ class LabelListView: UIView {
      Set up labels and constraints so that both fonts and spacing automatically adjusts when the content size changes.
      */
     private func setUpLabelsAndConstraints() {
+        
         guard var currentLabel = labels.first else { return }
         addSubview(currentLabel)
         /*
@@ -69,6 +71,12 @@ class LabelListView: UIView {
             currentLabel = label
         }
         layoutMarginsGuide.bottomAnchor.constraint(equalToSystemSpacingBelow: currentLabel.lastBaselineAnchor, multiplier: 1).isActive = true
+    }
+    
+    private func removeExistingViews() {
+        for oldLabel in subviews {
+            oldLabel.removeFromSuperview()
+        }
     }
 }
 

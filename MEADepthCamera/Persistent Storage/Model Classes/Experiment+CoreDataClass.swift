@@ -29,9 +29,8 @@ public class Experiment: NSManagedObject {
     
 }
 
-extension Experiment: ModelObject {
-
-}
+//extension Experiment: ModelObject {
+//}
 
 // MARK: JSON Decoder
 

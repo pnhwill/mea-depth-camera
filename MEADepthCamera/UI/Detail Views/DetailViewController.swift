@@ -10,20 +10,8 @@ import UIKit
 /// Base class for detail UIViewControllers that list editable information from a Core Data model object.
 class DetailViewController: UIViewController, UICollectionViewDelegate {
     
-//    typealias Section = ViewModel.Section
-//    typealias Item = ViewModel.Item
-    
     var viewModel: DetailViewModel?
     var collectionView: UICollectionView!
-    
-//    init(viewModel: DetailViewModel?) {
-//        self.viewModel = viewModel
-//        super.init(nibName: nil, bundle: .main)
-//    }
-    
-//    required init?(coder: NSCoder) {
-//        super.init(coder: coder)
-//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -19,6 +19,5 @@ public class OutputFile: NSManagedObject {
     
 }
 
-extension OutputFile: ModelObject {
-
-}
+//extension OutputFile: ModelObject {
+//}

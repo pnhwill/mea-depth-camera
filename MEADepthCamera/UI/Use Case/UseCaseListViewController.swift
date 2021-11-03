@@ -9,12 +9,12 @@ import UIKit
 
 class UseCaseListViewController: ListViewController {
     
-    private var useCaseListViewModel: UseCaseListViewModel? {
-        viewModel as? UseCaseListViewModel
+    private var useCaseListViewModel: UseCaseListViewModel {
+        self.viewModel as! UseCaseListViewModel
     }
     
-    private var useCaseSplitViewController: UseCaseSplitViewController? {
-        splitViewController as? UseCaseSplitViewController
+    private var useCaseSplitViewController: UseCaseSplitViewController {
+        self.splitViewController as! UseCaseSplitViewController
     }
     
     required init?(coder: NSCoder) {
@@ -26,8 +26,10 @@ class UseCaseListViewController: ListViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        useCaseListViewModel.delegate = self
         configureNavigationItem()
-        allItemsSubscriber = viewModel.itemsStore?.$allModels
+        selectItemIfNeeded()
+        listItemsSubscriber = viewModel.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refreshListData()
@@ -35,18 +37,25 @@ class UseCaseListViewController: ListViewController {
             }
     }
     
-    /**
-     Clear the tableView selection when splitViewController is collapsed.
-     */
     override func viewWillAppear(_ animated: Bool) {
-        clearsSelectionOnViewWillAppear = splitViewController!.isCollapsed
+        // Clear the collectionView selection when splitViewController is collapsed.
+        clearsSelectionOnViewWillAppear = useCaseSplitViewController.isCollapsed
         super.viewWillAppear(animated)
-        selectItemIfNeeded()
+        if useCaseSplitViewController.isCollapsed {
+            useCaseSplitViewController.selectedItemID = nil
+        }
+        if let navigationController = navigationController,
+           navigationController.isToolbarHidden {
+            navigationController.setToolbarHidden(false, animated: animated)
+        }
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         collectionView.isEditing = isEditing
+        if !editing {
+            selectItemIfNeeded()
+        }
     }
     
     // MARK: Button Actions
@@ -66,24 +75,31 @@ extension UseCaseListViewController {
     }
     
     private func selectItemIfNeeded() {
-        var indexPath: IndexPath?
-        if let selectedItemID = useCaseSplitViewController?.selectedItemID {
-            indexPath = dataSource?.indexPath(for: selectedItemID)
-        } else {
-            if !splitViewController!.isCollapsed {
-                indexPath = IndexPath(item: 0, section: ListSection.Identifier.list.rawValue)
-            }
-        }
-        if let indexPath = indexPath {
+        guard !useCaseSplitViewController.isCollapsed else { return }
+        // If something is already selected, re-select the cell in the list.
+        if let selectedItemID = useCaseSplitViewController.selectedItemID,
+           let indexPath = dataSource?.indexPath(for: selectedItemID) {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
         } else {
-            addUseCase()
+            // Select and show detail for the first list item, if any.
+            let indexPath = IndexPath(item: 0, section: ListSection.Identifier.list.rawValue)
+            if let itemID = dataSource?.itemIdentifier(for: indexPath),
+//               let item = viewModel.itemsStore?.fetchByID(itemID),
+               let useCase = useCaseListViewModel.useCase(with: itemID) {
+//                collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
+                useCaseSplitViewController.showDetail(with: useCase)
+            } else {
+                // If list is empty, add a new use case.
+                addUseCase()
+            }
         }
     }
     
     private func addUseCase() {
-        useCaseListViewModel?.add { [weak self] useCase in
-            self?.useCaseSplitViewController?.configureDetail(with: useCase, isNew: true)
+        useCaseListViewModel.add { [weak self] useCase in
+//            if let self = self, self.useCaseSplitViewController.isCollapsed {
+            self?.useCaseSplitViewController.showDetail(with: useCase, isNew: true)
+//            }
         }
     }
 }
@@ -91,11 +107,12 @@ extension UseCaseListViewController {
 // MARK: UICollectionViewDelegate
 extension UseCaseListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(#function)
         // Push the detail view when the cell is tapped.
         if let itemID = dataSource?.itemIdentifier(for: indexPath),
-           let item = viewModel.itemsStore?.fetchByID(itemID),
-           let useCase = item.object as? UseCase {
-            useCaseSplitViewController?.configureDetail(with: useCase)
+//           let item = viewModel.itemsStore?.fetchByID(itemID),
+           let useCase = useCaseListViewModel.useCase(with: itemID) {
+            useCaseSplitViewController.showDetail(with: useCase)
         } else {
             collectionView.deselectItem(at: indexPath, animated: true)
         }
@@ -114,155 +131,40 @@ extension UseCaseListViewController: UseCaseInteractionDelegate {
      - initial load:
      */
     func didUpdateUseCase(_ useCase: UseCase) {
-        guard let itemID = useCase.id else { fatalError() }
-        itemDidChange(itemID)
+        guard let id = useCase.id else { fatalError() }
+        reconfigureItem(id)
     }
 }
 
 // MARK: ListTextCellDelegate
 extension UseCaseListViewController: ListTextCellDelegate {
     
-    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
-        guard let useCase = item.object as? UseCase else { fatalError() }
-        let titleText = useCase.title ?? ""
-        let experimentText = useCase.experimentTitle
-        let dateText = useCase.dateTimeText(for: .all) ?? ""
-        let subjectID = useCase.subjectID ?? ""
-        let subjectIDText = "Subject ID: " + subjectID
-        let completedTasksText = "X out of X tasks completed"
-        let bodyText = [subjectIDText, dateText, completedTasksText]
-        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
-        return content
-    }
-    
     func delete(objectFor item: ListItem) {
-        guard let useCase = item.object as? UseCase else { fatalError() }
-        useCaseListViewModel?.delete(useCase) { [weak self] success in
+        guard let useCase = useCaseListViewModel.useCase(with: item.id) else { fatalError() }
+        useCaseListViewModel.delete(useCase) { [weak self] success in
             if success {
-                self?.useCaseSplitViewController?.selectedItemID = nil
-                self?.selectItemIfNeeded()
+                self?.refreshListData()
             }
         }
     }
+    
+    //    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration? {
+    //        guard let useCase = item.object as? UseCase else { fatalError() }
+    //        let titleText = useCase.title ?? ""
+    //        let experimentText = useCase.experimentTitle
+    //        let dateText = useCase.dateTimeText(for: .all) ?? ""
+    //        let subjectID = useCase.subjectID ?? ""
+    //        let subjectIDText = "Subject ID: " + subjectID
+    //        let bodyText = [subjectIDText, dateText]
+    //        let content = TextCellContentConfiguration(titleText: titleText, subtitleText: experimentText, bodyText: bodyText)
+    //        return content
+    //    }
 }
 
 
 
 
-class SecondUseCaseListViewController: OldListViewController<OldUseCaseListViewModel> {
-    
-    static let mainStoryboardName = "Main"
-    static let detailViewControllerIdentifier = "UseCaseDetailViewController"
-    
-    var addButton: UIBarButtonItem {
-        return UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(SecondUseCaseListViewController.addUseCase(_:)))
-    }
-    
-    init() {
-        super.init(viewModel: OldUseCaseListViewModel())
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: Life Cycle
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        configureNavigationItem()
-        collectionView.delegate = self
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if let navigationController = navigationController,
-           navigationController.isToolbarHidden {
-            navigationController.setToolbarHidden(false, animated: animated)
-        }
-        setToolbarItems([addButton], animated: animated)
-    }
-    
-    // MARK: Button Actions
-    @objc
-    func addUseCase(_ sender: UIBarButtonItem) {
-        viewModel.add() { [weak self] useCase in
-//            let detailViewController = UseCaseDetailViewController(useCase: useCase, isNew: true)
-//            detailViewController.delegate = self?.viewModel
-//            self?.show(detailViewController, sender: self)
-        }
-        
-        
-//        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-//        let detailViewController: OldUseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-//        viewModel.add() { useCase in
-//            DispatchQueue.main.async {
-//                detailViewController.configure(with: useCase, isNew: true, addAction: { useCase in
-//                    self.viewModel.update(useCase) { success in
-//                        if success, let dataSource = self.viewModel.dataSource, let itemID = useCase.id {
-//                            var snapshot = dataSource.snapshot()
-//                            snapshot.appendItems([itemID], toSection: .list)
-//                            dataSource.apply(snapshot)
-//                        }
-//                    }
-//                })
-//            }
-//        }
-//        let navigationController = UINavigationController(rootViewController: detailViewController)
-//        present(navigationController, animated: true, completion: nil)
-    }
-    
-}
 
-extension SecondUseCaseListViewController {
-    private func configureNavigationItem() {
-        navigationItem.setRightBarButton(editButtonItem, animated: false)
-        // Search bar controller
-//        let searchController = UISearchController(searchResultsController: nil)
-//        searchController.searchResultsUpdater = viewModel
-//        searchController.obscuresBackgroundDuringPresentation = false
-//        navigationItem.searchController = searchController
-    }
-    
-    override func setEditing(_ editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        collectionView.isEditing = isEditing
-    }
-}
-
-// MARK: UICollectionViewDelegate
-extension SecondUseCaseListViewController: UICollectionViewDelegate {
-    
-//    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-//        guard let cell = cell as? UseCaseListCell else { fatalError() }
-//        cell.delegate = viewModel
-//    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Push the detail view when the cell is tapped.
-        guard let itemID = viewModel.dataSource?.itemIdentifier(for: indexPath),
-              let item = viewModel.itemsStore?.fetchByID(itemID),
-              let useCase = item.object as? UseCase
-        else {
-            collectionView.deselectItem(at: indexPath, animated: true)
-            return
-        }
-//        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-//        let detailViewController: OldUseCaseDetailViewController = storyboard.instantiateViewController(identifier: Self.detailViewControllerIdentifier)
-//        detailViewController.configure(with: useCase, editAction: { useCase in
-//            self.viewModel.update(useCase) { success in
-//                if success, let dataSource = self.viewModel.dataSource {
-//                    var snapshot = dataSource.snapshot()
-//                    snapshot.reloadItems([itemID])
-//                    dataSource.apply(snapshot)
-//                }
-//            }
-//        })
-//        let detailViewController = UseCaseDetailViewController(useCase: useCase)
-//        detailViewController.delegate = viewModel
-//        show(detailViewController, sender: self)
-    }
-}
 
 
 

@@ -239,7 +239,7 @@
                     <toolbarItems>
                         <barButtonItem systemItem="add" id="5Mj-UI-DRr">
                             <connections>
-                                <action selector="addUseCase:" destination="dCt-yh-LjF" id="63H-jR-CeX"/>
+                                <action selector="addButtonTapped:" destination="dCt-yh-LjF" id="jfx-bn-vdk"/>
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
@@ -731,7 +731,7 @@
             <objects>
                 <viewController id="uzu-Nu-Ybk" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="iNG-8N-oMu">
-                        <rect key="frame" x="0.0" y="0.0" width="513" height="1194"/>
+                        <rect key="frame" x="0.0" y="0.0" width="514" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="6IT-SB-mjB"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>

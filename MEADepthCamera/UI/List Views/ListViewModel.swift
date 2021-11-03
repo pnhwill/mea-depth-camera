@@ -68,7 +68,6 @@ extension OldListViewModel {
     }
 }
 
-
 // MARK: fetchedResultsController(didChange:at:for:newIndexPath:)
 extension OldListViewModel {
     func fetchedResultsController(didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {

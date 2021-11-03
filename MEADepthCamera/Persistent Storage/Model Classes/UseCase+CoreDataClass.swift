@@ -21,6 +21,21 @@ public class UseCase: NSManagedObject {
 
 extension UseCase: ModelObject {
     
+//    var listTitleText: String {
+//        title ?? "?"
+//    }
+//
+//    var listSubtitleText: String? {
+//        experimentTitle ?? "?"
+//    }
+//
+//    func listBodyText(for filter: UseCaseListViewModel.Filter) -> [String] {
+//        let dateText = dateTimeText(for: filter) ?? ""
+//        let subjectID = subjectID ?? ""
+//        let subjectIDText = "Subject ID: " + subjectID
+//        return [subjectIDText, dateText]
+//    }
+    
 }
 
 // MARK: Text Formatters

@@ -19,7 +19,7 @@ class ListViewController: UICollectionViewController {
     var viewModel: ListViewModel!
     var dataSource: ListDiffableDataSource?
     
-    var allItemsSubscriber: AnyCancellable?
+    var listItemsSubscriber: AnyCancellable?
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -55,7 +55,7 @@ extension ListViewController {
         dataSource?.apply(snapshot, to: .list)
     }
     
-    func itemDidChange(_ itemID: Item.ID) {
+    func reconfigureItem(_ itemID: Item.ID) {
         guard let dataSource = dataSource, dataSource.indexPath(for: itemID) != nil else { return }
         var snapshot = dataSource.snapshot()
         snapshot.reconfigureItems([itemID])

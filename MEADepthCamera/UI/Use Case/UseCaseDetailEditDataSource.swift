@@ -123,6 +123,8 @@ extension UseCaseDetailEditModel {
             guard let self = self else { return }
             cell.configure(with: self.useCase.title, at: indexPath, delegate: self)
             cell.textField.autocapitalizationType = .words
+            cell.textField.autocorrectionType = .no
+            cell.textField.clearsOnBeginEditing = true
         }
     }
     private func createSubjectIDCellRegistration() -> UICollectionView.CellRegistration<TextFieldCell, Item> {
@@ -186,6 +188,7 @@ extension UseCaseDetailEditModel: UIPickerViewDelegate {
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        print(#function)
         useCase.experiment = experiments?[row]
     }
 }

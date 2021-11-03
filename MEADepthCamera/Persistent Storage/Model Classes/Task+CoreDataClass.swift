@@ -34,9 +34,8 @@ public class Task: NSManagedObject {
     
 }
 
-extension Task: ModelObject {
-
-}
+//extension Task: ModelObject {
+//}
 
 // MARK: Text Formatters
 extension Task {

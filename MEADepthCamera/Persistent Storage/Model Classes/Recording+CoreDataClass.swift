@@ -32,9 +32,8 @@ public class Recording: NSManagedObject {
     
 }
 
-extension Recording: ModelObject {
-
-}
+//extension Recording: ModelObject {
+//}
 
 // MARK: Text Formatters
 extension Recording {

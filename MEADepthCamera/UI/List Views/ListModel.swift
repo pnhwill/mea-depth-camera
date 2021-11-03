@@ -23,20 +23,23 @@ struct ListSection: Identifiable {
 /// A generic model of an item contained in a list cell, providing value semantics and erasing the underlying type of the stored object.
 struct ListItem: Identifiable, Hashable {
     var id: UUID
-    var object: /*NSManagedObject &*/ ModelObject
+    var title: String
+    var subTitle: String?
+    var bodyText: [String]
+//    var object: ModelObject
     
-    init?(object: /*NSManagedObject &*/ ModelObject) {
-        guard let id = object.id else { return nil }
-        self.object = object
-        self.id = id
-    }
+//    init?(object: ModelObject) {
+//        guard let id = object.id else { return nil }
+//        self.object = object
+//        self.id = id
+//    }
     
-    static func == (lhs: ListItem, rhs: ListItem) -> Bool {
-        return lhs.id == rhs.id /*&& lhs.object == rhs.object*/
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-//        hasher.combine(object)
-    }
+//    static func == (lhs: ListItem, rhs: ListItem) -> Bool {
+//        return lhs.id == rhs.id /*&& lhs.object == rhs.object*/
+//    }
+//
+//    func hash(into hasher: inout Hasher) {
+//        hasher.combine(id)
+////        hasher.combine(object)
+//    }
 }
