@@ -88,7 +88,7 @@ class TextCellContentView: UIView, UIContentView {
         titleContent.text = configuration.titleText
         titleContent.secondaryText = configuration.subtitleText
         titleContent.axesPreservingSuperviewLayoutMargins = []
-        titleContent.directionalLayoutMargins.bottom = titleContent.textToSecondaryTextVerticalPadding
+        titleContent.directionalLayoutMargins.bottom = 0
         titleView.configuration = titleContent
         
         let listConfiguration = configuration.listContentConfiguration
@@ -104,7 +104,8 @@ class TextCellContentView: UIView, UIContentView {
             rowLabels.append(label)
         }
         bodyView.directionalLayoutMargins = listConfiguration.directionalLayoutMargins
-        bodyView.directionalLayoutMargins.top = listConfiguration.textToSecondaryTextVerticalPadding
+        bodyView.directionalLayoutMargins.top = 0
+        bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.bottom
         bodyView.labels = rowLabels
     }
 }

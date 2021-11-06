@@ -104,12 +104,12 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <exit id="2cV-U4-Cah" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2145" y="430"/>
+            <point key="canvasLocation" x="5022" y="302"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Main Menu Navigation Controller-->
         <scene sceneID="S46-A3-hhh">
             <objects>
-                <navigationController id="iie-qW-Cqf" sceneMemberID="viewController">
+                <navigationController title="Main Menu Navigation Controller" id="iie-qW-Cqf" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="mfa-f4-7XS">
                         <rect key="frame" x="0.0" y="24" width="834" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -180,11 +180,10 @@
             </objects>
             <point key="canvasLocation" x="-3401" y="-26"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Use Case Split View Navigation Controller-->
         <scene sceneID="IIf-5b-VPa">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="2b0-oX-dGK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <navigationController modalPresentationStyle="overFullScreen" navigationBarHidden="YES" id="WCo-sJ-PXm" sceneMemberID="viewController">
+                <navigationController title="Use Case Split View Navigation Controller" modalPresentationStyle="fullScreen" navigationBarHidden="YES" id="WCo-sJ-PXm" sceneMemberID="viewController">
                     <navigationItem key="navigationItem" id="8p7-oU-MW8"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="N4s-0F-mmK">
                         <autoresizingMask key="autoresizingMask"/>
@@ -193,13 +192,14 @@
                         <segue destination="VeI-dc-cuF" kind="relationship" relationship="rootViewController" id="4zm-yR-hSd"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2b0-oX-dGK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-2618" y="-26"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Use Case List Navigation Controller-->
         <scene sceneID="20c-lb-Jkj">
             <objects>
-                <navigationController toolbarHidden="NO" id="uZV-zr-fZX" sceneMemberID="viewController">
+                <navigationController title="Use Case List Navigation Controller" toolbarHidden="NO" id="uZV-zr-fZX" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="cGh-hk-Paf">
                         <rect key="frame" x="0.0" y="24" width="834" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -216,7 +216,7 @@
             </objects>
             <point key="canvasLocation" x="-962" y="-330"/>
         </scene>
-        <!--Use Cases-->
+        <!--Use Case List View Controller-->
         <scene sceneID="7Lu-7I-vMH">
             <objects>
                 <collectionViewController id="dCt-yh-LjF" customClass="UseCaseListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
@@ -243,19 +243,116 @@
                             </connections>
                         </barButtonItem>
                     </toolbarItems>
-                    <navigationItem key="navigationItem" title="Use Cases" largeTitleDisplayMode="always" id="Gls-Fx-5vb">
+                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Gls-Fx-5vb">
                         <barButtonItem key="leftBarButtonItem" title="Main Menu" id="ENN-sU-vaI">
                             <connections>
                                 <segue destination="qyg-4i-CHZ" kind="unwind" unwindAction="unwindFromListWithUnwindSegue:" id="yuT-zy-eLZ"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
-                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x9f-K1-wfz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <exit id="qyg-4i-CHZ" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="-28" y="-328"/>
+            <point key="canvasLocation" x="-176" y="-330"/>
+        </scene>
+        <!--Task Split View Navigation Controller-->
+        <scene sceneID="Qt0-TI-4lI">
+            <objects>
+                <navigationController storyboardIdentifier="TaskNavViewController" title="Task Split View Navigation Controller" modalPresentationStyle="fullScreen" navigationBarHidden="YES" id="9ge-eJ-BHX" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="FN5-67-Kw5"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="aZh-TR-goX">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="mqY-7A-H11" kind="relationship" relationship="rootViewController" id="x8Z-nh-MkH"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hIY-s8-FZY" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="527" y="445"/>
+        </scene>
+        <!--Task List Navigation Controller-->
+        <scene sceneID="1gQ-ew-IiY">
+            <objects>
+                <navigationController title="Task List Navigation Controller" id="lLL-mQ-z1S" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="o6e-Cq-eHa">
+                        <rect key="frame" x="0.0" y="24" width="420" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="yBd-9k-eGR" kind="relationship" relationship="rootViewController" id="x0l-Pi-j8z"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iWP-Cz-EBr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2145" y="134"/>
+        </scene>
+        <!--Tasks-->
+        <scene sceneID="OQA-DE-aJu">
+            <objects>
+                <collectionViewController id="yBd-9k-eGR" customClass="TaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="L5Z-l4-DmF">
+                        <rect key="frame" x="0.0" y="0.0" width="420" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UHF-Lj-zWf">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="yBd-9k-eGR" id="UT2-D7-XUj"/>
+                            <outlet property="delegate" destination="yBd-9k-eGR" id="IKO-2j-OzN"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" title="Tasks" largeTitleDisplayMode="always" id="xIY-kB-GfC"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="kK7-mw-S8q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2894" y="134"/>
+        </scene>
+        <!--Task Split View Controller-->
+        <scene sceneID="LhP-WO-NBW">
+            <objects>
+                <splitViewController allowDoubleColumnStyle="YES" preferredDisplayMode="beside" behavior="tile" presentsWithGesture="NO" id="mqY-7A-H11" customClass="TaskSplitViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="ZV6-dO-xIO"/>
+                    <connections>
+                        <segue destination="lLL-mQ-z1S" kind="relationship" relationship="masterViewController" id="Yyx-lW-K6Y"/>
+                        <segue destination="lLL-mQ-z1S" kind="relationship" relationship="compactViewController" id="Yee-se-eg9"/>
+                        <segue destination="BZ3-R2-1cM" kind="relationship" relationship="detailViewController" id="81O-Me-gu7"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="De9-aM-Sa0" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1332" y="445"/>
+        </scene>
+        <!--Task Detail View Controller-->
+        <scene sceneID="YVS-xc-bCK">
+            <objects>
+                <collectionViewController id="BZ3-R2-1cM" customClass="TaskDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="xgg-l6-uhK">
+                        <rect key="frame" x="0.0" y="0.0" width="513.5" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="sKz-0H-gP0">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="BZ3-R2-1cM" id="PTK-1a-1m4"/>
+                            <outlet property="delegate" destination="BZ3-R2-1cM" id="efP-vE-Up2"/>
+                        </connections>
+                    </collectionView>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YYK-5H-xWv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2145" y="917"/>
         </scene>
         <!--Use Case Split View Controller-->
         <scene sceneID="HIT-lO-4Oh">
@@ -264,159 +361,18 @@
                     <navigationItem key="navigationItem" id="XDF-9L-uZ3"/>
                     <connections>
                         <segue destination="uZV-zr-fZX" kind="relationship" relationship="masterViewController" id="AJD-hB-Iu7"/>
-                        <segue destination="uzu-Nu-Ybk" kind="relationship" relationship="detailViewController" id="5E0-uE-zm8"/>
                         <segue destination="uZV-zr-fZX" kind="relationship" relationship="compactViewController" id="fCJ-DS-2Af"/>
+                        <segue destination="TsY-8E-qUn" kind="relationship" relationship="detailViewController" id="Lhw-2W-vua"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fK2-sL-LXK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-1869" y="-26"/>
         </scene>
-        <!--Old Use Case Detail View Controller-->
-        <scene sceneID="r8a-xk-G51">
-            <objects>
-                <tableViewController storyboardIdentifier="UseCaseDetailViewController" id="qMB-TZ-QPO" customClass="OldUseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="VFd-32-UFH">
-                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="UseCaseDetailCell" textLabel="eOO-Uo-khT" style="IBUITableViewCellStyleDefault" id="GLe-YY-DRW">
-                                <rect key="frame" x="20" y="49.5" width="794" height="43.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GLe-YY-DRW" id="U4k-1X-FX5">
-                                    <rect key="frame" x="0.0" y="0.0" width="794" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="eOO-Uo-khT">
-                                            <rect key="frame" x="16" y="0.0" width="762" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="0.0"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditTitleCell" id="ROo-Tg-lnJ" customClass="EditTitleCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="93" width="794" height="44.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ROo-Tg-lnJ" id="9aO-t8-Bg9">
-                                    <rect key="frame" x="0.0" y="0.0" width="794" height="44.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Title Text Field" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="6m9-sR-gaD">
-                                            <rect key="frame" x="20" y="0.0" width="754" height="44.5"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="k7p-jr-E0T"/>
-                                            </constraints>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits" autocapitalizationType="words" keyboardType="alphabet"/>
-                                        </textField>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="6m9-sR-gaD" firstAttribute="top" secondItem="9aO-t8-Bg9" secondAttribute="top" id="CBY-6t-udB"/>
-                                        <constraint firstAttribute="bottom" secondItem="6m9-sR-gaD" secondAttribute="bottom" id="IzQ-S0-KLF"/>
-                                        <constraint firstAttribute="trailing" secondItem="6m9-sR-gaD" secondAttribute="trailing" constant="20" symbolic="YES" id="MaX-y1-t3F"/>
-                                        <constraint firstItem="6m9-sR-gaD" firstAttribute="leading" secondItem="9aO-t8-Bg9" secondAttribute="leading" constant="20" symbolic="YES" id="ncs-Yc-4GY"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="titleTextField" destination="6m9-sR-gaD" id="sFq-qS-p4o"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditExperimentCell" id="IAe-Dn-Tm1" customClass="EditExperimentCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="137.5" width="794" height="136.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="IAe-Dn-Tm1" id="VB3-yd-XsQ">
-                                    <rect key="frame" x="0.0" y="0.0" width="794" height="136.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cu2-O2-aku">
-                                            <rect key="frame" x="0.0" y="-40" width="794" height="216.5"/>
-                                        </pickerView>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="cu2-O2-aku" firstAttribute="leading" secondItem="VB3-yd-XsQ" secondAttribute="leading" id="LdH-mB-uel"/>
-                                        <constraint firstItem="cu2-O2-aku" firstAttribute="top" secondItem="VB3-yd-XsQ" secondAttribute="top" constant="-40" id="bpd-vq-yk7"/>
-                                        <constraint firstAttribute="bottom" secondItem="cu2-O2-aku" secondAttribute="bottom" constant="-40" id="c5O-Ae-dl2"/>
-                                        <constraint firstAttribute="trailing" secondItem="cu2-O2-aku" secondAttribute="trailing" id="fpb-CO-fnL"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="pickerView" destination="cu2-O2-aku" id="UtF-u7-Duj"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditSubjectIDCell" id="1En-hu-nXa" customClass="EditSubjectIDCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="274" width="794" height="44.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1En-hu-nXa" id="da2-1m-u2a">
-                                    <rect key="frame" x="0.0" y="0.0" width="794" height="44.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="Subject ID Text Field" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="GxA-L1-j5Y">
-                                            <rect key="frame" x="20" y="0.0" width="754" height="44.5"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="pZe-AC-Zjq"/>
-                                            </constraints>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="alphabet" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
-                                        </textField>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstAttribute="bottom" secondItem="GxA-L1-j5Y" secondAttribute="bottom" id="Hlt-Je-uVs"/>
-                                        <constraint firstItem="GxA-L1-j5Y" firstAttribute="leading" secondItem="da2-1m-u2a" secondAttribute="leading" constant="20" symbolic="YES" id="Kxl-hK-lBc"/>
-                                        <constraint firstItem="GxA-L1-j5Y" firstAttribute="top" secondItem="da2-1m-u2a" secondAttribute="top" id="TR8-e8-Z0n"/>
-                                        <constraint firstAttribute="trailing" secondItem="GxA-L1-j5Y" secondAttribute="trailing" constant="20" symbolic="YES" id="dP9-dM-Bgr"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="subjectIDTextField" destination="GxA-L1-j5Y" id="QFc-aw-Ege"/>
-                                </connections>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="EditNotesCell" id="3pQ-4b-sF8" customClass="EditNotesCell" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="20" y="318.5" width="794" height="216.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="3pQ-4b-sF8" id="cqJ-a3-NMw">
-                                    <rect key="frame" x="0.0" y="0.0" width="794" height="216.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Notes Text View" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="rwb-2t-LZN">
-                                            <rect key="frame" x="16" y="11" width="762" height="194.5"/>
-                                            <constraints>
-                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="194" id="Afg-Mv-m0q"/>
-                                            </constraints>
-                                            <color key="textColor" systemColor="labelColor"/>
-                                            <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
-                                            <textInputTraits key="textInputTraits" autocapitalizationType="sentences" keyboardType="alphabet"/>
-                                        </textView>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="rwb-2t-LZN" firstAttribute="top" secondItem="cqJ-a3-NMw" secondAttribute="topMargin" id="Gj8-TZ-lyq"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="rwb-2t-LZN" secondAttribute="trailing" id="IrE-js-23B"/>
-                                        <constraint firstItem="rwb-2t-LZN" firstAttribute="leading" secondItem="cqJ-a3-NMw" secondAttribute="leadingMargin" id="L9G-zZ-wfu"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="rwb-2t-LZN" secondAttribute="bottom" id="SKK-2i-9qd"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <connections>
-                                    <outlet property="notesTextView" destination="rwb-2t-LZN" id="w6l-6I-TaN"/>
-                                </connections>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="qMB-TZ-QPO" id="cPW-I0-Rk2"/>
-                            <outlet property="delegate" destination="qMB-TZ-QPO" id="Q8n-7j-SqE"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" id="AEU-Yn-Ald"/>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="25b-Sp-nN6" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1131" y="665"/>
-        </scene>
-        <!--Task List View Controller-->
+        <!--Old Task List View Controller-->
         <scene sceneID="ehe-MH-j3c">
             <objects>
-                <tableViewController id="Z7g-vw-i9h" customClass="TaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController id="Z7g-vw-i9h" customClass="OldTaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelectionDuringEditing="YES" allowsMultipleSelectionDuringEditing="YES" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="2ls-Ny-z9I">
                         <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -537,7 +493,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zhU-Yh-rPx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1131" y="-294"/>
+            <point key="canvasLocation" x="4009" y="-423"/>
         </scene>
         <!--Recording List View Controller-->
         <scene sceneID="YVd-zm-NXq">
@@ -655,7 +611,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Sb4-UY-zKk" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2145" y="-319"/>
+            <point key="canvasLocation" x="5022" y="-447"/>
         </scene>
         <!--Instructions-->
         <scene sceneID="jJv-x7-hHq">
@@ -724,34 +680,42 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iAs-lG-j05" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2145" y="-1032"/>
+            <point key="canvasLocation" x="5022" y="-1160"/>
         </scene>
         <!--Use Case Detail View Controller-->
-        <scene sceneID="M5w-7S-7gR">
+        <scene sceneID="d3i-gR-grA">
             <objects>
-                <viewController id="uzu-Nu-Ybk" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="iNG-8N-oMu">
-                        <rect key="frame" x="0.0" y="0.0" width="514" height="1194"/>
+                <collectionViewController id="TsY-8E-qUn" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="9zJ-fh-oyD">
+                        <rect key="frame" x="0.0" y="0.0" width="513.5" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <viewLayoutGuide key="safeArea" id="6IT-SB-mjB"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="tqe-bW-pYg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="b8H-iL-ZFM">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="TsY-8E-qUn" id="kCo-a0-5SC"/>
+                            <outlet property="delegate" destination="TsY-8E-qUn" id="Ak0-1R-NHq"/>
+                        </connections>
+                    </collectionView>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lGo-6l-Obl" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-965" y="317"/>
+            <point key="canvasLocation" x="-963" y="445"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
+        <segue reference="Yyx-lW-K6Y"/>
         <segue reference="fCJ-DS-2Af"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="kuang" width="1122" height="1191"/>
         <image name="record.circle.fill" catalog="system" width="128" height="121"/>
         <image name="xmark.square" catalog="system" width="128" height="114"/>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

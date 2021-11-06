@@ -14,9 +14,8 @@ class ItemListCell: UICollectionViewListCell {
     private var item: ListItem? = nil
     
     func updateWithItem(_ newItem: ListItem) {
-        if item != newItem {
-            item = newItem
-        }
+        guard item != newItem else { return }
+        item = newItem
         setNeedsUpdateConfiguration()
     }
     

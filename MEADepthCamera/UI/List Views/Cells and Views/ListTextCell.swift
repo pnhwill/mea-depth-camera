@@ -9,8 +9,6 @@ import UIKit
 
 /// The delegate protocol for ListTextCells, to support interaction with the cell's item from within the cell.
 protocol ListTextCellDelegate: AnyObject {
-    /// Asks the delegate for a TextCellContentConfiguration using the cell's item.
-//    func contentConfiguration(for item: ListItem) -> TextCellContentConfiguration?
     /**
      Deletes the ListItem's stored NSManagedObject.
      
@@ -37,9 +35,22 @@ class ListTextCell: ItemListCell {
     // MARK: updateConfiguration(using:)
     override func updateConfiguration(using state: UICellConfigurationState) {
         guard let item = state.item else { return }
-//        let content = delegate?.contentConfiguration(for: item)
-        let content = TextCellContentConfiguration(titleText: item.title, subtitleText: item.subTitle, bodyText: item.bodyText)
+        let content = TextCellContentConfiguration(titleText: item.title, subtitleText: item.subtitle, bodyText: item.bodyText)
         contentConfiguration = content
+//        updateSeparatorConstraint()
+    }
+}
+
+extension ListTextCell {
+    private func configureAccessories() {
+        let disclosure = UICellAccessory.disclosureIndicator()
+        let delete = UICellAccessory.delete() { self.deleteAction() }
+        accessories = [delete, disclosure]
+    }
+    
+    private func deleteAction() {
+        guard let item = configurationState.item else { return }
+        delegate?.delete(objectFor: item)
     }
     
     private func updateSeparatorConstraint() {
@@ -51,16 +62,5 @@ class ListTextCell: ItemListCell {
         let constraint = separatorLayoutGuide.leadingAnchor.constraint(equalTo: textLayoutGuide.leadingAnchor)
         constraint.isActive = true
         separatorConstraint = constraint
-    }
-    
-    private func configureAccessories() {
-        let disclosure = UICellAccessory.disclosureIndicator()
-        let delete = UICellAccessory.delete() { self.deleteAction() }
-        accessories = [delete, disclosure]
-    }
-    
-    private func deleteAction() {
-        guard let item = configurationState.item else { return }
-        delegate?.delete(objectFor: item)
     }
 }

@@ -57,7 +57,7 @@ class UseCaseDetailViewModel: DetailViewModel {
             case .title:
                 return useCase.title
             case .experiment:
-                return useCase.experiment?.title
+                return useCase.experimentTitle ?? useCase.experiment?.title
             case .date:
                 guard let date = useCase.date else { return nil }
                 let timeText = Self.timeFormatter.string(from: date)
@@ -76,6 +76,8 @@ class UseCaseDetailViewModel: DetailViewModel {
         }
     }
     
+    static let sectionFooterElementKind = "StartButtonFooter"
+    
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>?
     
     private var useCase: UseCase
@@ -85,16 +87,29 @@ class UseCaseDetailViewModel: DetailViewModel {
     }
     
     // MARK: Configure Collection View
+    
     func createLayout() -> UICollectionViewLayout {
-        var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-        config.headerMode = .firstItemInSection
-        return UICollectionViewCompositionalLayout.list(using: config)
+        return UICollectionViewCompositionalLayout() { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            guard let sectionID = Section(rawValue: sectionIndex) else { return nil }
+            switch sectionID {
+            case .info:
+                var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+                config.headerMode = .firstItemInSection
+                config.footerMode = .supplementary
+                let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
+                let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(80))
+                let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: footerSize, elementKind: Self.sectionFooterElementKind, alignment: .bottom)
+                section.boundarySupplementaryItems = [sectionFooter]
+                return section
+            }
+        }
     }
     
     func configureDataSource(for collectionView: UICollectionView) {
         
         let headerRegistration = createHeaderRegistration()
         let cellRegistration = createCellRegistration()
+        let footerRegistration = createFooterRegistration()
         
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) {
             (collectionView, indexPath, item) -> UICollectionViewCell? in
@@ -104,6 +119,10 @@ class UseCaseDetailViewModel: DetailViewModel {
             } else {
                 return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
             }
+        }
+        
+        dataSource?.supplementaryViewProvider = { (collectionView, elementKind, indexPath) in
+            return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
         }
     }
     
@@ -142,6 +161,13 @@ extension UseCaseDetailViewModel {
             content.text = item.displayText(for: self.useCase)
             content.image = item.cellImage
             cell.contentConfiguration = content
+        }
+    }
+    
+    private func createFooterRegistration() -> UICollectionView.SupplementaryRegistration<StartButtonSupplementaryView> {
+        return UICollectionView.SupplementaryRegistration<StartButtonSupplementaryView>(elementKind: Self.sectionFooterElementKind) {
+            (supplementaryView, elementKind, indexPath) in
+            return
         }
     }
 }

@@ -28,6 +28,11 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         }
     }
     
+    private struct HeaderItem {
+        static let id = UUID()
+        static let title = "Use Cases"
+    }
+    
     var filter: UseCaseListViewModel.Filter = .all {
         didSet {
             reloadListStores()
@@ -36,12 +41,12 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     
     // MARK: Data Stores
     lazy var sectionsStore: ObservableModelStore<ListSection>? = {
-        guard let items = sortedUseCases?.compactMap({ $0.id }) else { return nil }
+        guard let items = allItemIds else { return nil }
         return ObservableModelStore([ListSection(id: .list, items: items)])
     }()
     
     lazy var itemsStore: ObservableModelStore<ListItem>? = {
-        guard let items = sortedUseCases?.compactMap({ listItem(useCase: $0) }) else { return nil }
+        guard let items = allItems else { return nil }
         return ObservableModelStore(items)
     }()
     
@@ -67,6 +72,16 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         return useCases
     }
     
+    private var allItems: [ListItem]? {
+        guard let listItems = sortedUseCases?.compactMap({ listItem(useCase: $0) }) else { return nil }
+        return [ListItem(id: HeaderItem.id, title: HeaderItem.title)] + listItems
+    }
+    
+    private var allItemIds: [UUID]? {
+        guard let listItemIds = sortedUseCases?.compactMap({ $0.id }) else { return nil }
+        return [HeaderItem.id] + listItemIds
+    }
+    
     func useCase(with id: UUID?) -> UseCase? {
         return useCases?.first(where: { $0.id == id})
     }
@@ -85,7 +100,7 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     }
 }
 
-// MARK: Private Methods
+// MARK: Model Store Configuration
 extension UseCaseListViewModel {
     
     private func listItem(useCase: UseCase) -> ListItem? {
@@ -100,9 +115,7 @@ extension UseCaseListViewModel {
     }
 
     private func reloadListStores() {
-        guard let items = sortedUseCases?.compactMap({ listItem(useCase: $0) }),
-              let itemIDs = sortedUseCases?.compactMap({ $0.id })
-        else { return }
+        guard let items = allItems, let itemIDs = allItemIds else { return }
         sectionsStore?.merge(newModels: [ListSection(id: .list, items: itemIDs)])
         itemsStore?.reload(with: items)
     }

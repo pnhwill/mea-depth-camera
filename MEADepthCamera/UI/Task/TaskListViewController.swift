@@ -7,7 +7,77 @@
 
 import UIKit
 
-class TaskListViewController: UITableViewController {
+class TaskListViewController: ListViewController {
+    
+    private var useCase: UseCase? {
+        didSet {
+            if let useCase = useCase {
+                viewModel = TaskListViewModel(useCase: useCase)
+            }
+        }
+    }
+    
+    private var taskSplitViewController: TaskSplitViewController {
+        self.splitViewController as! TaskSplitViewController
+    }
+    
+    func configure(with useCase: UseCase) {
+        self.useCase = useCase
+    }
+    
+    // MARK: Life Cycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        listItemsSubscriber = viewModel?.sectionsStore?.$allModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshListData()
+                self?.selectItemIfNeeded()
+            }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        // Clear the collectionView selection when splitViewController is collapsed.
+        clearsSelectionOnViewWillAppear = taskSplitViewController.isCollapsed
+        super.viewWillAppear(animated)
+    }
+    
+}
+
+extension TaskListViewController {
+    
+    private func selectItemIfNeeded() {
+        guard !taskSplitViewController.isCollapsed else { return }
+        // If something is already selected, re-select the cell in the list.
+        if let selectedItemID = taskSplitViewController.selectedItemID,
+           let indexPath = dataSource?.indexPath(for: selectedItemID) {
+            collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
+        } else {
+            // Select and show detail for the first list item.
+            let indexPath = IndexPath(item: 1, section: ListSection.Identifier.list.rawValue)
+            if let itemID = dataSource?.itemIdentifier(for: indexPath) {
+                // TODO: select item and show detail
+            }
+        }
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class OldTaskListViewController: UITableViewController {
     
     // MARK: Properties
     
@@ -89,7 +159,7 @@ class TaskListViewController: UITableViewController {
 }
 
 // MARK: RecordingInteractionDelegate
-extension TaskListViewController: RecordingInteractionDelegate {
+extension OldTaskListViewController: RecordingInteractionDelegate {
     /**
      didUpdateRecording is called as part of RecordingInteractionDelegate, or whenever a recording update requires a UI update.
      

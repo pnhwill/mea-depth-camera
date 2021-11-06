@@ -48,6 +48,17 @@ extension Task {
             return String(recordingsCount) + " Recordings"
         }
     }
+    
+    func isComplete(for useCase: UseCase) -> Bool {
+        return useCase.recordingsCount(for: self) > 0
+    }
+    
+//    func listItem(useCase: UseCase) -> ListItem? {
+//        guard let id = id, let titleText = name else { return nil }
+//        let recordingsCountText = recordingsCountText(for: useCase)
+//        let bodyText = [recordingsCountText]
+//        return ListItem(id: id, title: titleText, bodyText: bodyText)
+//    }
 }
 
 // MARK: JSON Decoder

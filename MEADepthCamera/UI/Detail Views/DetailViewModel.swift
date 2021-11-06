@@ -8,15 +8,10 @@
 import UIKit
 
 protocol DetailViewModel {
-//    associatedtype Section: Hashable
-//    associatedtype Item: Hashable
-//
-//    typealias DetailDiffableDataSource = UICollectionViewDiffableDataSource<Section, Item>
-//
-//    var dataSource: DetailDiffableDataSource? { get set }
     
     func createLayout() -> UICollectionViewLayout
     func configureDataSource(for collectionView: UICollectionView)
     func applyInitialSnapshots()
+    
 }
 

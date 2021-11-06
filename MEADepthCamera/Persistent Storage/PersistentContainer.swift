@@ -37,6 +37,10 @@ class PersistentContainer: NSPersistentContainer {
         print("Context saving error: \(error)")
         if let contextualInfo = contextualInfo {
             DispatchQueue.main.async {
+                // TODO: this guard always fails. access window via the uiwindowscene like below
+                //        guard let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { fatalError("no window scene") }
+                //        guard let window = mainWindowScene.windows.first else { fatalError("no window") }
+                //        guard let rootNavController = window.rootViewController as? UINavigationController else { fatalError("no root nav controller") }
                 guard let window = UIApplication.shared.delegate?.window,
                       let viewController = window?.rootViewController else { return }
                 
