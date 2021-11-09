@@ -56,7 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             try await provider.fetchJSONData()
         } catch {
             let error = error as? JSONError ?? .unexpectedError(error: error)
-            fatalError("Failed to fetch experiments: \(error)")
+            fatalError("Failed to fetch experiments with error \(error): \(error.localizedDescription)")
         }
     }
 }

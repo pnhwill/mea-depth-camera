@@ -58,6 +58,7 @@
 		B5796599269DED600070C294 /* MEADepthCameraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796598269DED600070C294 /* MEADepthCameraTests.swift */; };
 		B57965A4269DED600070C294 /* MEADepthCameraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */; };
 		B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57965B526A096B10070C294 /* VideoFileWriter.swift */; };
+		B57B3C0F273B19AE00CCF9A8 /* SessionSetupError.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B3C0E273B19AE00CCF9A8 /* SessionSetupError.swift */; };
 		B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */; };
 		B585A0A226C58A9500CA6546 /* Task+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */; };
 		B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */; };
@@ -192,6 +193,7 @@
 		B57965A3269DED600070C294 /* MEADepthCameraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MEADepthCameraUITests.swift; sourceTree = "<group>"; };
 		B57965A5269DED600070C294 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B57965B526A096B10070C294 /* VideoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFileWriter.swift; sourceTree = "<group>"; };
+		B57B3C0E273B19AE00CCF9A8 /* SessionSetupError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSetupError.swift; sourceTree = "<group>"; };
 		B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Recording+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Recording+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Task+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Task+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OutputFile+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/OutputFile+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
@@ -279,6 +281,7 @@
 			children = (
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
 				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
+				B57B3C0E273B19AE00CCF9A8 /* SessionSetupError.swift */,
 				B5886DFB26AA5FB900EB344C /* Camera Preview Views */,
 			);
 			path = Camera;
@@ -864,6 +867,7 @@
 				B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */,
 				B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */,
 				B54215C226C3582C00A4F984 /* UseCaseDetailViewController.swift in Sources */,
+				B57B3C0F273B19AE00CCF9A8 /* SessionSetupError.swift in Sources */,
 				B54215BA26C316F600A4F984 /* MainMenuViewController.swift in Sources */,
 				BE64A20A272949A200DA1689 /* UseCaseListViewModel.swift in Sources */,
 				B501607F27345670003AB94D /* TaskSplitViewController.swift in Sources */,
