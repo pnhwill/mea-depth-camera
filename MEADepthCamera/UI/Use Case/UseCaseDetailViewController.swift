@@ -139,6 +139,9 @@ extension UseCaseDetailViewController {
         else { return }
         taskSplitVC.configure(with: useCase)
         show(taskNavController, sender: nil)
+//        guard let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { fatalError("no window scene") }
+//        guard let window = mainWindowScene.windows.first else { fatalError("no window") }
+//        window.rootViewController = taskSplitVC
     }
 }
 

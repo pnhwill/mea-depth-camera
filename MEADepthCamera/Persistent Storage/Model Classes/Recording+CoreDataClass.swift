@@ -37,10 +37,16 @@ public class Recording: NSManagedObject {
 
 // MARK: Text Formatters
 extension Recording {
-    func durationText() -> String {
+    
+    var isProcessedText: String {
+        return isProcessed ? "Processed" : "Not Processed"
+    }
+    
+    var durationText: String {
         return String(duration)
     }
-    func filesCountText() -> String {
+    
+    var filesCountText: String {
         switch filesCount {
         case 1:
             return String(filesCount) + " File"

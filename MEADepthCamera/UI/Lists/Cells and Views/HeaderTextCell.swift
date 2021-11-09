@@ -11,12 +11,12 @@ class HeaderTextCell: ItemListCell {
     
     override func updateConfiguration(using state: UICellConfigurationState) {
         guard let item = state.item else { return }
-        var content: UIListContentConfiguration
-        if item.title.isEmpty, let subtitle = item.subtitle {
-            content = .sidebarCell()
-            content.text = subtitle
+        var content: UIListContentConfiguration = self.defaultContentConfiguration()
+        if item.title.isEmpty {
+//            content = .sidebarCell()
+            content.text = item.subtitle
         } else {
-            content = .sidebarHeader()
+//            content = .sidebarHeader()
             content.text = item.title
         }
         contentConfiguration = content

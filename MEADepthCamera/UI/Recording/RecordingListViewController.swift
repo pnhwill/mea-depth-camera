@@ -9,7 +9,7 @@ import UIKit
 
 class RecordingListViewController: UITableViewController {
     
-    @IBOutlet private weak var useCaseView: UseCaseSummaryView!
+//    @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     
     private var dataSource: RecordingListDataSource?
     private var useCase: UseCase?
@@ -49,8 +49,8 @@ class RecordingListViewController: UITableViewController {
     }
     
     private func refreshUseCaseView() {
-        let titleText = [useCase?.experiment?.title, useCase?.title].compactMap { $0 }.joined(separator: ": ")
-        useCaseView.configure(title: titleText, subjectIDText: useCase?.subjectID)
+//        let titleText = [useCase?.experiment?.title, useCase?.title].compactMap { $0 }.joined(separator: ": ")
+//        useCaseView.configure(title: titleText, subjectIDText: useCase?.subjectID)
     }
     
 }

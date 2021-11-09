@@ -53,8 +53,3 @@ extension DataPipeline {
         return fileURL
     }
 }
-
-//protocol TestDataPipeline {
-//    func start()
-//    func stop()
-//}

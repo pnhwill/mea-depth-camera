@@ -42,11 +42,11 @@ class UseCaseDetailViewModel: DetailViewModel {
             case .experiment:
                 return UIImage(systemName: "chart.bar.xaxis")
             case .date:
-                return UIImage(systemName: "calendar.circle")
+                return UIImage(systemName: "calendar")
             case .subjectID:
                 return UIImage(systemName: "person.fill.viewfinder")
             case .completedTasks:
-                return UIImage(systemName: "tray.full")
+                return UIImage(systemName: "checklist")
             case .notes:
                 return UIImage(systemName: "square.and.pencil")
             }
@@ -97,7 +97,7 @@ class UseCaseDetailViewModel: DetailViewModel {
                 config.headerMode = .firstItemInSection
                 config.footerMode = .supplementary
                 let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
-                let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(80))
+                let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
                 let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: footerSize, elementKind: Self.sectionFooterElementKind, alignment: .bottom)
                 section.boundarySupplementaryItems = [sectionFooter]
                 return section

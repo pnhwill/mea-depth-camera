@@ -1,5 +1,5 @@
 //
-//  CaptureOutputPipeline.swift
+//  CapturePipeline.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/29/21.
@@ -9,41 +9,26 @@ import AVFoundation
 import Combine
 import Vision
 
-class CaptureOutputPipeline: NSObject, DataPipeline {
+// MARK: - CapturePipelineDelegate
+protocol CapturePipelineDelegate: AnyObject {
     
-    // Weak reference to camera view controller (parent)
-    private weak var cameraViewController: CameraViewController?
+    func previewPixelBufferReadyForDisplay(_ previewPixelBuffer: CVPixelBuffer)
     
-    // Preview view
-    private weak var previewView: PreviewMetalView?
+    func displayFaceObservations(_ faceObservations: [VNFaceObservation])
     
-    // Data outputs
-    private unowned var videoDataOutput: AVCaptureVideoDataOutput
-    private unowned var depthDataOutput: AVCaptureDepthDataOutput
-    //private unowned var metadataOutput: AVCaptureMetadataOutput
-    private unowned var audioDataOutput: AVCaptureAudioDataOutput
+    func setFaceAlignment(_ isAligned: Bool)
     
-    private(set) var processorSettings: ProcessorSettings!
+    func capturePipelineRecordingDidStop()
+}
+
+// MARK: - CapturePipeline
+class CapturePipeline: NSObject, DataPipeline {
     
-    // Synchronized data capture
-    private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
+    typealias FileWriterSubject = PassthroughSubject<WriteState, Error>
     
-    // Data output synchronizer queue
-    let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
-    
-    // Recording
-    var recordingState = RecordingState.idle
-    
-    // Depth processing
-    let videoDepthConverter = DepthToGrayscaleConverter()
-    
-    // Real time Vision requests
-    private(set) var faceDetectionProcessor: LiveFaceDetectionProcessor?
-    
-    // AV file writing
-    private var videoFileWriter: VideoFileWriter<FileWriterSubject>?
-    private var audioFileWriter: AudioFileWriter<FileWriterSubject>?
-    private var depthMapFileWriter: DepthMapFileWriter<FileWriterSubject>?
+    enum RecordingState {
+        case idle, start, recording, finish
+    }
     
     private struct FileWriterSettings {
         let fileExtensions: [AVFileType: String] = [.mov: "mov", .wav: "wav"]
@@ -58,34 +43,63 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         }
     }
     
+    // Data output synchronizer queue
+    let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
+    // Depth processing
+    let videoDepthConverter = DepthToGrayscaleConverter()
+    
+    private weak var delegate: CapturePipelineDelegate?
+    
+    // Data outputs
+    private unowned var videoDataOutput: AVCaptureVideoDataOutput
+    private unowned var depthDataOutput: AVCaptureDepthDataOutput
+    private unowned var audioDataOutput: AVCaptureAudioDataOutput
+    
+    private(set) var processorSettings: ProcessorSettings!
+    
+    // Synchronized data capture
+    private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
+    
+    // Recording
+    private(set) var recordingState = RecordingState.idle
+    
+    // Real time Vision requests
+    private(set) var faceDetectionProcessor: LiveFaceDetectionProcessor?
+    
+    // AV file writing
+    private var videoFileWriter: VideoFileWriter<FileWriterSubject>?
+    private var audioFileWriter: AudioFileWriter<FileWriterSubject>?
+    private var depthMapFileWriter: DepthMapFileWriter<FileWriterSubject>?
+    
     private var videoFileSettings = FileWriterSettings(fileType: .mov)
     private var audioFileSettings = FileWriterSettings(fileType: .wav)
     private var depthMapFileSettings = FileWriterSettings(fileType: .mov)
     
     // Subjects and subscribers
-    typealias FileWriterSubject = PassthroughSubject<WriteState, Error>
-    var videoWriterSubject: FileWriterSubject?
-    var audioWriterSubject: FileWriterSubject?
-    var depthWriterSubject: FileWriterSubject?
+    private var videoWriterSubject: FileWriterSubject?
+    private var audioWriterSubject: FileWriterSubject?
+    private var depthWriterSubject: FileWriterSubject?
     
-    var fileWritingDone: AnyCancellable?
+    private var fileWritingDone: AnyCancellable?
     
     // Save recordings to persistent storage
     private let savedRecordingsDataSource: SavedRecordingsDataSource
     
-    let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // Use case
     private let useCase: UseCase
     private let task: Task
     
-    init(cameraViewController: CameraViewController,
+    // MARK: INIT
+    init(delegate: CapturePipelineDelegate,
          useCase: UseCase,
          task: Task,
          videoDataOutput: AVCaptureVideoDataOutput,
          depthDataOutput: AVCaptureDepthDataOutput,
          audioDataOutput: AVCaptureAudioDataOutput) {
-        self.cameraViewController = cameraViewController
+        self.delegate = delegate
         self.useCase = useCase
         self.task = task
         self.videoDataOutput = videoDataOutput
@@ -95,7 +109,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     }
     
     // MARK: - Data Pipeline Setup
-    
     
     func configureProcessors(for videoDevice: AVCaptureDevice) {
         
@@ -140,120 +153,6 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType,
                                                                        videoSettings: videoSettingsForDepthMap,
                                                                        transform: videoTransform)
-    }
-    
-    private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
-        guard let connection = output.connection(with: .video) else {
-            print("Could not find the camera video connection")
-            return nil
-        }
-        // We set the desired destination video orientation here. The interface orientation is locked in portrait for this version
-        guard let destinationVideoOrientation = AVCaptureVideoOrientation(interfaceOrientation: .portrait) else {
-            print("Unsupported interface orientation")
-            return nil
-        }
-        
-        // Compute transforms from the front camera's video orientation to the desired orientation
-        let cameraTransform = connection.videoOrientationTransform(relativeTo: destinationVideoOrientation)
-
-        return cameraTransform
-    }
-    
-    // MARK: - Data Processing Methods
-    func processDepth(depthData: AVDepthData, timestamp: CMTime) {
-        
-        // We need to do additional setup upon receiving the first depth frame
-        
-        // Set the camera calibration data in the processor settings
-        if processorSettings.cameraCalibrationData == nil {
-            if let cameraCalibrationData = depthData.cameraCalibrationData {
-                processorSettings.cameraCalibrationData = cameraCalibrationData
-            } else {
-                print("Failed to retrieve camera calibration data")
-            }
-        }
-        
-        // Ensure depth data is of the correct type
-        let depthDataType = kCVPixelFormatType_DepthFloat32
-        var convertedDepth: AVDepthData
-        if depthData.depthDataType != depthDataType {
-            convertedDepth = depthData.converting(toDepthDataType: depthDataType)
-        } else {
-            convertedDepth = depthData
-        }
-        
-        // Prepare the depth to grayscale converter and depth map file configuration
-        if !self.videoDepthConverter.isPrepared {
-            var depthFormatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                         imageBuffer: convertedDepth.depthDataMap,
-                                                         formatDescriptionOut: &depthFormatDescription)
-            if let unwrappedDepthFormatDescription = depthFormatDescription {
-                self.videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
-                
-                // Since the depth map frames are converted from DepthFloat32 to 32BGRA pixel format by the converter,
-                //  we need to set the source video format and source pixel buffer attributes in our file configuration to match.
-                // The output format description is set inside the prepare() method call, so we can safely do this as soon as it returns.
-                if var depthMapFileConfiguration = self.depthMapFileSettings.configuration as? DepthMapFileConfiguration,
-                   let grayscaleFormat = self.videoDepthConverter.outputFormatDescription {
-                    depthMapFileConfiguration.sourceVideoFormat = grayscaleFormat
-                    depthMapFileConfiguration.sourcePixelBufferAttributes = DepthToGrayscaleConverter.createOutputPixelBufferAttributes(from: unwrappedDepthFormatDescription)
-                    let inputDimensions = CMVideoFormatDescriptionGetDimensions(unwrappedDepthFormatDescription)
-                    depthMapFileConfiguration.videoSettings?["AVVideoWidthKey"] = Int(inputDimensions.width)
-                    depthMapFileConfiguration.videoSettings?["AVVideoHeightKey"] = Int(inputDimensions.height)
-                    self.depthMapFileSettings.configuration = depthMapFileConfiguration
-                } else {
-                    print("Failed to set depth map source format in file configuration")
-                }
-            }
-        }
-        
-        if recordingState != .idle {
-            recordingQueue.async {
-                // Convert the depth map to a video format accepted by the AVAssetWriter, then write to file
-                guard let depthPixelBuffer = self.videoDepthConverter.render(pixelBuffer: convertedDepth.depthDataMap) else {
-                    print("Unable to process depth")
-                    return
-                }
-                self.writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
-            }
-        }
-    }
-    
-    func processVideo(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
-        
-        if recordingState != .idle {
-            recordingQueue.async {
-                self.writeOutputToFile(self.videoDataOutput, sampleBuffer: sampleBuffer)
-            }
-        }
-        
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            print("Failed to obtain a CVPixelBuffer for the current output frame.")
-            return
-        }
-        sampleBuffer.propagateAttachments(to: pixelBuffer)
-
-        if recordingState == .idle {
-            if let visionProcessor = self.faceDetectionProcessor {
-                visionProcessor.performVisionRequests(on: pixelBuffer)
-            } else {
-                print("Vision face detection processor not found.")
-            }
-        }
-
-        if let cameraViewController = cameraViewController, cameraViewController.renderingEnabled {
-            cameraViewController.previewView.pixelBuffer = pixelBuffer
-        }
-    }
-    
-    func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
-        
-        if recordingState != .idle {
-            recordingQueue.async {
-                self.writeOutputToFile(self.audioDataOutput, sampleBuffer: sampleBuffer)
-            }
-        }
     }
     
     // MARK: - Data Recording
@@ -334,15 +233,129 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
         recordingState = .finish
         savedRecordingsDataSource.saveRecording(to: useCase, for: task)
     }
+}
+
+// MARK: - Private Methods
+extension CapturePipeline {
+    
+    private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
+        guard let connection = output.connection(with: .video) else {
+            print("Could not find the camera video connection")
+            return nil
+        }
+        // We set the desired destination video orientation here. The interface orientation is locked in portrait for this version
+        guard let destinationVideoOrientation = AVCaptureVideoOrientation(interfaceOrientation: .portrait) else {
+            print("Unsupported interface orientation")
+            return nil
+        }
+        
+        // Compute transforms from the front camera's video orientation to the desired orientation
+        let cameraTransform = connection.videoOrientationTransform(relativeTo: destinationVideoOrientation)
+
+        return cameraTransform
+    }
+    
+    // MARK: - Data Processing
+    private func processDepth(depthData: AVDepthData, timestamp: CMTime) {
+        
+        // We need to do additional setup upon receiving the first depth frame
+        
+        // Set the camera calibration data in the processor settings
+        if processorSettings.cameraCalibrationData == nil {
+            if let cameraCalibrationData = depthData.cameraCalibrationData {
+                processorSettings.cameraCalibrationData = cameraCalibrationData
+            } else {
+                print("Failed to retrieve camera calibration data")
+            }
+        }
+        
+        // Ensure depth data is of the correct type
+        let depthDataType = kCVPixelFormatType_DepthFloat32
+        var convertedDepth: AVDepthData
+        if depthData.depthDataType != depthDataType {
+            convertedDepth = depthData.converting(toDepthDataType: depthDataType)
+        } else {
+            convertedDepth = depthData
+        }
+        
+        // Prepare the depth to grayscale converter and depth map file configuration
+        if !self.videoDepthConverter.isPrepared {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: convertedDepth.depthDataMap,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                self.videoDepthConverter.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 2)
+                
+                // Since the depth map frames are converted from DepthFloat32 to 32BGRA pixel format by the converter,
+                //  we need to set the source video format and source pixel buffer attributes in our file configuration to match.
+                // The output format description is set inside the prepare() method call, so we can safely do this as soon as it returns.
+                if var depthMapFileConfiguration = self.depthMapFileSettings.configuration as? DepthMapFileConfiguration,
+                   let grayscaleFormat = self.videoDepthConverter.outputFormatDescription {
+                    depthMapFileConfiguration.sourceVideoFormat = grayscaleFormat
+                    depthMapFileConfiguration.sourcePixelBufferAttributes = DepthToGrayscaleConverter.createOutputPixelBufferAttributes(from: unwrappedDepthFormatDescription)
+                    let inputDimensions = CMVideoFormatDescriptionGetDimensions(unwrappedDepthFormatDescription)
+                    depthMapFileConfiguration.videoSettings?["AVVideoWidthKey"] = Int(inputDimensions.width)
+                    depthMapFileConfiguration.videoSettings?["AVVideoHeightKey"] = Int(inputDimensions.height)
+                    self.depthMapFileSettings.configuration = depthMapFileConfiguration
+                } else {
+                    print("Failed to set depth map source format in file configuration")
+                }
+            }
+        }
+        
+        if recordingState != .idle {
+            recordingQueue.async {
+                // Convert the depth map to a video format accepted by the AVAssetWriter, then write to file
+                guard let depthPixelBuffer = self.videoDepthConverter.render(pixelBuffer: convertedDepth.depthDataMap) else {
+                    print("Unable to process depth")
+                    return
+                }
+                self.writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
+            }
+        }
+    }
+    
+    private func processVideo(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
+        
+        if recordingState != .idle {
+            recordingQueue.async {
+                self.writeOutputToFile(self.videoDataOutput, sampleBuffer: sampleBuffer)
+            }
+        }
+        
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            print("Failed to obtain a CVPixelBuffer for the current output frame.")
+            return
+        }
+        sampleBuffer.propagateAttachments(to: pixelBuffer)
+
+        if recordingState == .idle {
+            if let visionProcessor = self.faceDetectionProcessor {
+                visionProcessor.performVisionRequests(on: pixelBuffer)
+            } else {
+                print("Vision face detection processor not found.")
+            }
+        }
+        
+        delegate?.previewPixelBufferReadyForDisplay(pixelBuffer)
+    }
+    
+    private func processAudio(sampleBuffer: CMSampleBuffer, timestamp: CMTime) {
+        
+        if recordingState != .idle {
+            recordingQueue.async {
+                self.writeOutputToFile(self.audioDataOutput, sampleBuffer: sampleBuffer)
+            }
+        }
+    }
     
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {
         switch completion {
         case .finished:
             // update ui with success
             print("File writing success")
-            DispatchQueue.main.async {
-                self.cameraViewController?.sessionMode = .record
-            }
+            delegate?.capturePipelineRecordingDidStop()
             break
         case .failure(let error):
             // update ui with failure
@@ -353,10 +366,8 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
     }
     
     // MARK: - File Writing
-    /*
-    private func writeOutputToFile<T>(_ output: AVCaptureOutput, data: T) {
-    }
-    */
+//    private func writeOutputToFile<T>(_ output: AVCaptureOutput, data: T) {}
+    
     private func writeDepthMapToFile(depthMap: CVPixelBuffer, timeStamp: CMTime) {
         guard let depthMapWriter = depthMapFileWriter else {
             print("No depth map file writer found")
@@ -409,15 +420,13 @@ class CaptureOutputPipeline: NSObject, DataPipeline {
             break
         }
     }
-    
 }
 
 // MARK: - AVCaptureDataOutputSynchronizerDelegate
 
-extension CaptureOutputPipeline: AVCaptureDataOutputSynchronizerDelegate {
+extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
     
     func dataOutputSynchronizer(_ synchronizer: AVCaptureDataOutputSynchronizer, didOutput synchronizedDataCollection: AVCaptureSynchronizedDataCollection) {
-        
         //let dataCount = synchronizedDataCollection.count
         //print("\(dataCount) data outputs received")
         
@@ -458,10 +467,10 @@ extension CaptureOutputPipeline: AVCaptureDataOutputSynchronizerDelegate {
 
 // MARK: - VisionFaceDetectionProcessorDelegate Methods
 
-extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
+extension CapturePipeline: LiveFaceDetectionProcessorDelegate {
     
     func displayFrame(_ faceObservations: [VNFaceObservation]) {
-        cameraViewController?.displayFaceObservations(faceObservations)
+        delegate?.displayFaceObservations(faceObservations)
     }
     
     func checkAlignment(of faceObservation: VNFaceObservation) {
@@ -499,6 +508,6 @@ extension CaptureOutputPipeline: LiveFaceDetectionProcessorDelegate {
         
         let isAligned: Bool = centeredCondition && sizeCondition && rotationCondition
         
-        cameraViewController?.isAligned = isAligned
+        delegate?.setFaceAlignment(isAligned)
     }
 }

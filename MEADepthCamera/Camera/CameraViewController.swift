@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  CameraViewController.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/13/21.
@@ -10,6 +10,10 @@ import AVFoundation
 import Vision
 
 class CameraViewController: UIViewController {
+    
+    private enum SessionMode {
+        case record, stop
+    }
     
     // MARK: - Properties
     
@@ -27,7 +31,12 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var doneButton: UIBarButtonItem!
     
     // Post-processing in progress
-    private var spinner: UIActivityIndicatorView!
+    private lazy var spinner: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .systemBlue
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
 
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
@@ -35,17 +44,12 @@ class CameraViewController: UIViewController {
     private var isSessionRunning = false
     
     // Capture data output delegate
-    private var dataOutputPipeline: CaptureOutputPipeline?
-    
-    //var faceLandmarksPipeline: FaceLandmarksPipeline?
+    private var capturePipeline: CapturePipeline?
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     
-    // Layer UI for drawing Vision results
-    var previewLayer: CALayer?
-    
-    var reusableFaceObservationOverlayViews: [FaceObservationOverlayView] {
+    private var reusableFaceObservationOverlayViews: [FaceObservationOverlayView] {
         if let existingViews = previewView.subviews as? [FaceObservationOverlayView] {
             return existingViews
         } else {
@@ -54,33 +58,29 @@ class CameraViewController: UIViewController {
     }
     
     // Use case and task
-    var useCase: UseCase!
-    var task: Task!
+    private var useCase: UseCase!
+    private var task: Task!
     
     // App state
-    var sessionMode: SessionMode = .record {
+    private var sessionMode: SessionMode = .record {
         didSet {
             self.handleSessionModeChange()
         }
     }
-    var renderingEnabled = true
+    private var renderingEnabled = true
     
     // Face guidelines alignment
-    var isAligned: Bool = false {
+    private var isAligned: Bool = false {
         didSet {
             self.updateIndicator()
         }
     }
     
     // Session queue
-    let sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
+    private let sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
-    
-    // Navigation/Storyboard
-    static let unwindFromCameraSegueIdentifier = "UnwindFromCameraSegue"
-    static let mainStoryboardName = "Main"
     
     // MARK: - Navigation
     
@@ -89,22 +89,19 @@ class CameraViewController: UIViewController {
         self.task = task
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        if segue.identifier == Self.unwindFromCameraSegueIdentifier, let destination = segue.destination as? RecordingListViewController {
-//        }
-    }
-    
     // MARK: - View Controller Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationItem.title = task.name
         //print("camera view did load")
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
         //doneButton.isEnabled = false
         
         sessionQueue.async {
-            self.sessionManager = CaptureSessionManager(cameraViewController: self)
+            self.sessionManager = CaptureSessionManager()
         }
         
         /*
@@ -146,28 +143,26 @@ class CameraViewController: UIViewController {
         sessionQueue.async {
             self.sessionManager.configureSession { videoDevice, videoDataOutput, depthDataOutput, audioDataOutput in
                 // Initialize the data output processor
-                self.dataOutputPipeline = CaptureOutputPipeline(cameraViewController: self,
-                                                                useCase: self.useCase,
-                                                                task: self.task,
-                                                                videoDataOutput: videoDataOutput,
-                                                                depthDataOutput: depthDataOutput,
-                                                                audioDataOutput: audioDataOutput)
-                self.dataOutputPipeline?.configureProcessors(for: videoDevice)
+                self.capturePipeline = CapturePipeline(delegate: self,
+                                                       useCase: self.useCase,
+                                                       task: self.task,
+                                                       videoDataOutput: videoDataOutput,
+                                                       depthDataOutput: depthDataOutput,
+                                                       audioDataOutput: audioDataOutput)
+                self.capturePipeline?.configureProcessors(for: videoDevice)
             }
-        }
-        
-        // Configure the progress spinner
-        DispatchQueue.main.async {
-            self.navigationItem.title = self.useCase.title
-            
-            self.spinner = UIActivityIndicatorView(style: .large)
-            self.spinner.color = UIColor.systemBlue
-            self.view.addSubview(self.spinner)
         }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        // Configure the progress spinner
+        if spinner.superview == nil {
+            view.addSubview(spinner)
+            view.bringSubviewToFront(spinner)
+            spinner.center = CGPoint(x: view.frame.size.width / 2, y: view.frame.size.height / 2)
+        }
         
         navigationController?.setToolbarHidden(true, animated: false)
         
@@ -202,7 +197,7 @@ class CameraViewController: UIViewController {
                 
                 self.addObservers()
                 
-                self.dataOutputPipeline?.dataOutputQueue.async {
+                self.capturePipeline?.dataOutputQueue.async {
                     self.renderingEnabled = true
                 }
                 
@@ -241,7 +236,7 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        dataOutputPipeline?.dataOutputQueue.async {
+        capturePipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
         }
         sessionQueue.async {
@@ -262,9 +257,9 @@ class CameraViewController: UIViewController {
     @objc
     func didEnterBackground(notification: NSNotification) {
         // Free up resources.
-        dataOutputPipeline?.dataOutputQueue.async {
+        capturePipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
-            self.dataOutputPipeline?.videoDepthConverter.reset()
+            self.capturePipeline?.videoDepthConverter.reset()
             self.previewView.pixelBuffer = nil
             self.previewView.flushTextureCache()
         }
@@ -272,7 +267,7 @@ class CameraViewController: UIViewController {
     
     @objc
     func willEnterForeground(notification: NSNotification) {
-        dataOutputPipeline?.dataOutputQueue.async {
+        capturePipeline?.dataOutputQueue.async {
             self.renderingEnabled = true
         }
     }
@@ -309,7 +304,7 @@ class CameraViewController: UIViewController {
             guard let isSessionRunning = change.newValue else { return }
             
             DispatchQueue.main.async {
-                self.recordButton.isEnabled = isSessionRunning && self.dataOutputPipeline != nil
+                self.recordButton.isEnabled = isSessionRunning && self.capturePipeline != nil
             }
         }
         keyValueObservations.append(sessionRunningObservation)
@@ -545,18 +540,18 @@ class CameraViewController: UIViewController {
         // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
         recordButton.isEnabled = false
-        dataOutputPipeline?.dataOutputQueue.async {
+        capturePipeline?.dataOutputQueue.async {
             defer {
                 DispatchQueue.main.async {
                     // Enable the Record button to let the user stop or start another recording
                     self.recordButton.isEnabled = true
-                    if let dataProcessor = self.dataOutputPipeline {
-                        self.updateRecordButtonWithRecordingState(dataProcessor.recordingState)
+                    if let capturePipeline = self.capturePipeline {
+                        self.updateRecordButtonWithRecordingState(capturePipeline.recordingState)
                     }
                 }
             }
             
-            switch self.dataOutputPipeline?.recordingState {
+            switch self.capturePipeline?.recordingState {
             case .idle:
                 // Only let recording start if the face is aligned
                 guard self.isAligned else {
@@ -571,13 +566,13 @@ class CameraViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.navigationItem.setHidesBackButton(true, animated: true)
                 }
-                self.dataOutputPipeline?.startRecording()
+                self.capturePipeline?.startRecording()
                 
             case .recording:
                 DispatchQueue.main.async {
                     self.sessionMode = .stop
                 }
-                self.dataOutputPipeline?.stopRecording()
+                self.capturePipeline?.stopRecording()
                 if let currentBackgroundRecordingID = self.backgroundRecordingID {
                     self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
                     if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
@@ -591,7 +586,7 @@ class CameraViewController: UIViewController {
         }
     }
     
-    func updateRecordButtonWithRecordingState(_ recordingState: RecordingState) {
+    private func updateRecordButtonWithRecordingState(_ recordingState: CapturePipeline.RecordingState) {
         var recordButtonImage: UIImage?
         switch recordingState {
         case .idle, .finish:
@@ -602,10 +597,62 @@ class CameraViewController: UIViewController {
         recordButton.setBackgroundImage(recordButtonImage, for: [])
     }
     
-    // MARK: - Face Detection Preview
+    // MARK: - Face Alignment Indicator
+    
+    private func updateIndicator() {
+        guard renderingEnabled else { return }
+        DispatchQueue.main.async {
+            self.indicatorImage.image = self.isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
+            self.indicatorImage.tintColor = self.isAligned ? UIColor.systemGreen : UIColor.systemRed
+        }
+    }
+    
+    // MARK: - Landmarks Post-Processing
+    
+    private func handleSessionModeChange() {
+        switch sessionMode {
+        case .stop:
+            // Switch from live recording mode to post-processing mode
+            capturePipeline?.dataOutputQueue.async {
+                self.renderingEnabled = false
+            }
+            sessionQueue.async {
+                if self.sessionManager.setupResult == .success {
+                    self.sessionManager.session.stopRunning()
+                    self.isSessionRunning = self.sessionManager.session.isRunning
+                }
+            }
+            self.spinner.startAnimating()
+        case .record:
+            // Switch back to live recording mode
+            capturePipeline?.dataOutputQueue.async {
+                self.renderingEnabled = true
+            }
+            sessionQueue.async {
+                if self.sessionManager.setupResult == .success {
+                    self.sessionManager.session.startRunning()
+                    self.isSessionRunning = self.sessionManager.session.isRunning
+                }
+            }
+            self.spinner.stopAnimating()
+            // Enable the navigation bar done button
+            DispatchQueue.main.async {
+                self.doneButton.isEnabled = true
+            }
+        }
+    }
+}
+
+// MARK: - CapturePipelineDelegate
+extension CameraViewController: CapturePipelineDelegate {
+    
+    func previewPixelBufferReadyForDisplay(_ previewPixelBuffer: CVPixelBuffer) {
+        guard renderingEnabled else { return }
+        previewView.pixelBuffer = previewPixelBuffer
+    }
     
     func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        guard let rootView = previewView, renderingEnabled, let settings = dataOutputPipeline?.processorSettings else {
+        guard let rootView = previewView, renderingEnabled, let settings = capturePipeline?.processorSettings else {
             //print("Preview view not found/rendering disabled")
             return
         }
@@ -628,51 +675,13 @@ class CameraViewController: UIViewController {
         }
     }
     
-    // MARK: - Face Alignment Indicator
+    func setFaceAlignment(_ isAligned: Bool) {
+        self.isAligned = isAligned
+    }
     
-    func updateIndicator() {
-        guard renderingEnabled else { return }
+    func capturePipelineRecordingDidStop() {
         DispatchQueue.main.async {
-            self.indicatorImage.image = self.isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
-            self.indicatorImage.tintColor = self.isAligned ? UIColor.systemGreen : UIColor.systemRed
+            self.sessionMode = .record
         }
     }
-    
-    // MARK: - Landmarks Post-Processing
-    
-    func handleSessionModeChange() {
-        switch sessionMode {
-        case .stop:
-            // Switch from live recording mode to post-processing mode
-            dataOutputPipeline?.dataOutputQueue.async {
-                self.renderingEnabled = false
-            }
-            sessionQueue.async {
-                if self.sessionManager.setupResult == .success {
-                    self.sessionManager.session.stopRunning()
-                    self.isSessionRunning = self.sessionManager.session.isRunning
-                }
-            }
-            self.spinner.hidesWhenStopped = true
-            self.spinner.center = CGPoint(x: self.previewView.frame.size.width / 2.0, y: self.previewView.frame.size.height / 2.0)
-            self.spinner.startAnimating()
-        case .record:
-            // Switch back to live recording mode
-            dataOutputPipeline?.dataOutputQueue.async {
-                self.renderingEnabled = true
-            }
-            sessionQueue.async {
-                if self.sessionManager.setupResult == .success {
-                    self.sessionManager.session.startRunning()
-                    self.isSessionRunning = self.sessionManager.session.isRunning
-                }
-            }
-            self.spinner.stopAnimating()
-            // Enable the navigation bar done button
-            DispatchQueue.main.async {
-                self.doneButton.isEnabled = true
-            }
-        }
-    }
-    
 }

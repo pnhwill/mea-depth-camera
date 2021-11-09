@@ -17,14 +17,6 @@ enum OutputType: String, Codable {
     case frameIndex
 }
 
-enum SessionMode {
-    case record, stop
-}
-
-enum RecordingState {
-    case idle, start, recording, finish
-}
-
 enum WriteState {
     case inactive, active
 }

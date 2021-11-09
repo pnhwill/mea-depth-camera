@@ -24,7 +24,7 @@ class RecordingDetailViewDataSource: NSObject {
             case .task:
                 return recording.task?.name
             case .duration:
-                return recording.durationText()
+                return recording.durationText
             case .filesCount:
                 return String(recording.filesCount)
             case .isProcessed:

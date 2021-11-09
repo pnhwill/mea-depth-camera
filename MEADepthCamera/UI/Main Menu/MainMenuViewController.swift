@@ -17,7 +17,6 @@ class MainMenuViewController: UIViewController {
     // MARK: Navigation
     
     @IBAction func unwindFromList(unwindSegue: UIStoryboardSegue) {
-        
     }
     
     // MARK: Life Cycle

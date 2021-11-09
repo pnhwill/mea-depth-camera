@@ -30,11 +30,27 @@ class TaskSplitViewController: UISplitViewController {
         displayModeButtonVisibility = .never
     }
     
-
+    @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
+        
+    }
     
+    func showDetail(with task: Task) {
+        guard let detailNavController = self.viewController(for: .secondary) as? UINavigationController,
+              let detailViewController = detailNavController.topViewController as? TaskDetailViewController,
+              let useCase = useCase,
+              let id = task.id,
+              id != selectedItemID
+        else { return }
+        detailViewController.configure(with: task, useCase: useCase)
+        selectedItemID = id
+        if isCollapsed {
+            showDetailViewController(detailNavController, sender: self)
+        }
+    }
 }
 
 extension TaskSplitViewController {
+    
     private func columnForTaskList() -> UISplitViewController.Column {
         switch traitCollection.horizontalSizeClass {
         case .compact:

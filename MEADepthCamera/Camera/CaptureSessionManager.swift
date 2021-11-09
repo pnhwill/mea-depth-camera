@@ -7,11 +7,27 @@
 
 import AVFoundation
 
+// TODO: add all error types and refactor setup methods to throw
+enum SessionSetupError: Error {
+    case noVideoDevice
+    case noAudioDevice
+    case cannotAddInput
+    case cannotAddOutput
+}
+
+// MARK: CaptureSessionManager
+/// The class that creates and manages the AVCaptureSession.
 class CaptureSessionManager: NSObject {
+    
     typealias SessionSetupCompletedAction = (AVCaptureDevice, AVCaptureVideoDataOutput, AVCaptureDepthDataOutput, AVCaptureAudioDataOutput) -> Void
     
-    // Weak reference to parent
-    private weak var cameraViewController: CameraViewController!
+    enum SessionSetupResult {
+        case success
+        case notAuthorized
+        case configurationFailed
+    }
+    
+    var setupResult: SessionSetupResult = .success
     
     // AVCapture session
     private(set) var session = AVCaptureSession()
@@ -29,19 +45,8 @@ class CaptureSessionManager: NSObject {
     private var depthDimensions: CMVideoDimensions?
     private var videoOrientation: AVCaptureVideoOrientation?
     
-    let discardLateFrames: Bool = false
-    let depthDataFiltering: Bool = false
-    
-    enum SessionSetupResult {
-        case success
-        case notAuthorized
-        case configurationFailed
-    }
-    var setupResult: SessionSetupResult = .success
-    
-    init(cameraViewController: CameraViewController) {
-        self.cameraViewController = cameraViewController
-    }
+    private let discardLateFrames: Bool = false
+    private let depthDataFiltering: Bool = false
     
     // MARK: - Session Configuration
     

@@ -65,6 +65,7 @@ class UseCaseListViewController: ListViewController {
         super.setEditing(editing, animated: animated)
         collectionView.isEditing = isEditing
         if !editing {
+            refreshListData()
             selectItemIfNeeded()
         }
     }

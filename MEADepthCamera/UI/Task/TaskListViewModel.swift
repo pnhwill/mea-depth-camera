@@ -20,7 +20,7 @@ class TaskListViewModel: ListViewModel {
             func displayText(for useCase: UseCase) -> String? {
                 switch self {
                 case .sectionHeader:
-                    return "Use Case"
+                    return "Current Use Case"
                 case .title:
                     return useCase.title
                 case .experiment:
@@ -38,7 +38,6 @@ class TaskListViewModel: ListViewModel {
             return ItemType.allCases.map { _ in UUID() }
         }()
     }
-
     
     private struct TaskHeaders {
         enum HeaderType: Int, CaseIterable {
@@ -59,15 +58,6 @@ class TaskListViewModel: ListViewModel {
                 TaskHeaders.identifiers[self.rawValue]
             }
             
-//            var id: UUID {
-//                switch self {
-//                case .incomplete:
-//                    return TaskHeaders.incompleteID
-//                case .complete:
-//                    return TaskHeaders.completeID
-//                }
-//            }
-            
             func subItems(in allItems: TaskItems) -> [ListItem] {
                 switch self {
                 case .incomplete:
@@ -78,14 +68,22 @@ class TaskListViewModel: ListViewModel {
                     return []
                 }
             }
+            
+            func shouldIncludeHeader(for items: TaskItems) -> Bool {
+                switch self {
+                case .incomplete:
+                    return !items.incompleteTasks.isEmpty
+                case .complete:
+                    return !items.completeTasks.isEmpty
+                default:
+                    return true
+                }
+            }
         }
         
         static let identifiers: [UUID] = {
             return HeaderType.allCases.map { _ in UUID() }
         }()
-        
-//        static let incompleteID = UUID()
-//        static let completeID = UUID()
     }
     
     private struct TaskItems {
@@ -108,10 +106,9 @@ class TaskListViewModel: ListViewModel {
     }
     
     lazy var sectionsStore: ObservableModelStore<Section>? = {
+        guard let taskListSection = taskListSection() else { return nil }
         let headerItemIds = UseCaseHeader.ItemType.allCases.map { $0.id }
         let useCaseHeaderSection = ListSection(id: .header, items: headerItemIds)
-        let listItemsIds = TaskHeaders.HeaderType.allCases.map { $0.id }
-        let taskListSection = ListSection(id: .list, items: listItemsIds)
         return ObservableModelStore([useCaseHeaderSection, taskListSection])
     }()
     lazy var itemsStore: ObservableModelStore<Item>? = {
@@ -128,15 +125,23 @@ class TaskListViewModel: ListViewModel {
     init(useCase: UseCase) {
         self.useCase = useCase
     }
+    
+    func task(with id: UUID) -> Task? {
+        return tasks?.first(where: { $0.id == id})
+    }
 }
 
 // MARK: Model Store Configuration
 extension TaskListViewModel {
     
-    private func reloadItemStore() {
-        guard let taskItems = taskItems() else { return }
+    private func reloadStores() {
+        guard let taskItems = taskItems(), let taskListSection = taskListSection() else { return }
+        let headerItemIds = UseCaseHeader.ItemType.allCases.map { $0.id }
+        let useCaseHeaderSection = ListSection(id: .header, items: headerItemIds)
         let items = useCaseItems() + taskItems
+        let sections = [useCaseHeaderSection, taskListSection]
         itemsStore?.reload(with: items)
+        sectionsStore?.reload(with: sections)
     }
     
     private func taskItems() -> [ListItem]? {
@@ -153,14 +158,10 @@ extension TaskListViewModel {
         return items
     }
     
-//    private func useCaseItem() -> ListItem? {
-//        guard let id = useCase.id else { return nil }
-//        let titleText = useCase.title ?? "?"
-//        let subTitleText = useCase.experimentTitle ?? useCase.experiment?.title ?? "?"
-//        let subjectID = useCase.subjectID ?? "?"
-//        let subjectIDText = "Subject ID: " + subjectID
-//        let completedTasksText = "X out of X tasks completed"
-//        let bodyText = [subjectIDText, completedTasksText]
-//        return ListItem(id: id, title: titleText, subTitle: subTitleText, bodyText: bodyText)
-//    }
+    private func taskListSection() -> ListSection? {
+        guard let allTasks = tasks else { return nil }
+        let taskItems = TaskItems(useCase: useCase, tasks: allTasks)
+        let listItemsIds = TaskHeaders.HeaderType.allCases.filter { $0.shouldIncludeHeader(for: taskItems) }.map { $0.id }
+        return ListSection(id: .list, items: listItemsIds)
+    }
 }

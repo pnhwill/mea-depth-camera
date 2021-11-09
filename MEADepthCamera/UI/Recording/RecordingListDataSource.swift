@@ -102,8 +102,8 @@ extension RecordingListDataSource: UITableViewDataSource {
             }
             if let currentRecording = recording(at: section), let folderText = currentRecording.folderURL?.lastPathComponent {
                 cell.configure(folderName: folderText,
-                               durationText: currentRecording.durationText(),
-                               filesCountText: currentRecording.filesCountText())
+                               durationText: currentRecording.durationText,
+                               filesCountText: currentRecording.filesCountText)
             }
             return cell
         }

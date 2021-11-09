@@ -105,7 +105,7 @@ class TextCellContentView: UIView, UIContentView {
         }
         bodyView.directionalLayoutMargins = listConfiguration.directionalLayoutMargins
         bodyView.directionalLayoutMargins.top = 0
-        bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.bottom
+        bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.top
         bodyView.labels = rowLabels
     }
 }
