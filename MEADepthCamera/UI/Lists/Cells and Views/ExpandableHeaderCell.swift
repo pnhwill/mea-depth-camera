@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ExpandableHeaderCell: ItemListCell {
+class ExpandableHeaderCell: ItemListCell<ListItem> {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -19,8 +19,9 @@ class ExpandableHeaderCell: ItemListCell {
     }
     
     override func updateConfiguration(using state: UICellConfigurationState) {
+        guard let item = state.item as? ListItem else { return }
         var content = defaultListContentConfiguration().updated(for: state)
-        content.text = state.item?.title
+        content.text = item.title
         contentConfiguration = content
     }
 }

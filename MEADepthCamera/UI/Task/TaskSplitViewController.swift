@@ -14,7 +14,7 @@ class TaskSplitViewController: UISplitViewController {
     private var useCase: UseCase? {
         didSet {
             guard let useCase = useCase,
-                  let taskListNavController = viewController(for: columnForTaskList()) as? UINavigationController,
+                  let taskListNavController = viewController(for: columnForTaskList) as? UINavigationController,
                   let taskListVC = taskListNavController.topViewController as? TaskListViewController
             else { return }
             taskListVC.configure(with: useCase)
@@ -31,7 +31,7 @@ class TaskSplitViewController: UISplitViewController {
     }
     
     @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
-        
+        selectedItemID = nil
     }
     
     func showDetail(with task: Task) {
@@ -51,7 +51,7 @@ class TaskSplitViewController: UISplitViewController {
 
 extension TaskSplitViewController {
     
-    private func columnForTaskList() -> UISplitViewController.Column {
+    private var columnForTaskList: UISplitViewController.Column {
         switch traitCollection.horizontalSizeClass {
         case .compact:
             return .compact

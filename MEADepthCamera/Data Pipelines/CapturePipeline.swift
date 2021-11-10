@@ -470,7 +470,7 @@ extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
 extension CapturePipeline: LiveFaceDetectionProcessorDelegate {
     
     func displayFrame(_ faceObservations: [VNFaceObservation]) {
-        delegate?.displayFaceObservations(faceObservations)
+//        delegate?.displayFaceObservations(faceObservations)
     }
     
     func checkAlignment(of faceObservation: VNFaceObservation) {

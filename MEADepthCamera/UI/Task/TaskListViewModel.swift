@@ -5,7 +5,7 @@
 //  Created by Will on 11/4/21.
 //
 
-import Foundation
+import UIKit
 
 class TaskListViewModel: ListViewModel {
     
@@ -15,6 +15,19 @@ class TaskListViewModel: ListViewModel {
             
             var id: UUID {
                 UseCaseHeader.identifiers[self.rawValue]
+            }
+            
+            var cellImage: UIImage? {
+                switch self {
+                case .experiment:
+                    return UIImage(systemName: "chart.bar.xaxis")
+                case .subjectID:
+                    return UIImage(systemName: "person.fill.viewfinder")
+                case .completedTasks:
+                    return UIImage(systemName: "checklist")
+                default:
+                    return nil
+                }
             }
             
             func displayText(for useCase: UseCase) -> String? {
@@ -32,6 +45,7 @@ class TaskListViewModel: ListViewModel {
                     return "X out of X tasks completed"
                 }
             }
+            
         }
         
         static let identifiers: [UUID] = {
@@ -129,12 +143,8 @@ class TaskListViewModel: ListViewModel {
     func task(with id: UUID) -> Task? {
         return tasks?.first(where: { $0.id == id})
     }
-}
-
-// MARK: Model Store Configuration
-extension TaskListViewModel {
     
-    private func reloadStores() {
+    func reloadStores() {
         guard let taskItems = taskItems(), let taskListSection = taskListSection() else { return }
         let headerItemIds = UseCaseHeader.ItemType.allCases.map { $0.id }
         let useCaseHeaderSection = ListSection(id: .header, items: headerItemIds)
@@ -143,6 +153,10 @@ extension TaskListViewModel {
         itemsStore?.reload(with: items)
         sectionsStore?.reload(with: sections)
     }
+}
+
+// MARK: Model Store Configuration
+extension TaskListViewModel {
     
     private func taskItems() -> [ListItem]? {
         guard let allTasks = tasks else { return nil }
@@ -154,8 +168,9 @@ extension TaskListViewModel {
     
     private func useCaseItems() -> [ListItem] {
         let itemTypes = UseCaseHeader.ItemType.allCases
-        let items = itemTypes.map { ListItem(id: $0.id, title: $0.displayText(for: useCase) ?? "?") }
-        return items
+        let headerItems = itemTypes[..<2].map { ListItem(id: $0.id, title: $0.displayText(for: useCase) ?? "?", image: $0.cellImage) }
+        let items = itemTypes[2...].map { ListItem(id: $0.id, title: "", subTitle: $0.displayText(for: useCase) ?? "?", image: $0.cellImage) }
+        return headerItems + items
     }
     
     private func taskListSection() -> ListSection? {

@@ -164,8 +164,8 @@ extension UseCaseDetailViewModel {
         }
     }
     
-    private func createFooterRegistration() -> UICollectionView.SupplementaryRegistration<StartButtonSupplementaryView> {
-        return UICollectionView.SupplementaryRegistration<StartButtonSupplementaryView>(elementKind: Self.sectionFooterElementKind) {
+    private func createFooterRegistration() -> UICollectionView.SupplementaryRegistration<ButtonSupplementaryView> {
+        return UICollectionView.SupplementaryRegistration<ButtonSupplementaryView>(elementKind: Self.sectionFooterElementKind) {
             (supplementaryView, elementKind, indexPath) in
             return
         }

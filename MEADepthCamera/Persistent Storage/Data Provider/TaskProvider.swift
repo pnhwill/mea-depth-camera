@@ -30,7 +30,7 @@ class TaskProvider: FetchingDataProvider {
     
     // MARK: Logging
     
-    let logger = Logger(subsystem: "com.mea-lab.MEADepthCamera", category: "persistence")
+    let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
     
     /**
      A fetched results controller for the Task entity, sorted by the sortKey property.

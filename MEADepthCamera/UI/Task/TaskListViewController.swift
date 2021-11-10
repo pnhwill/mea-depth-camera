@@ -9,6 +9,8 @@ import UIKit
 
 class TaskListViewController: ListViewController {
     
+    private static let showRecordingListSegueIdentifier = "ShowRecordingListSegue"
+    
     private var useCase: UseCase? {
         didSet {
             if let useCase = useCase {
@@ -29,11 +31,19 @@ class TaskListViewController: ListViewController {
         self.useCase = useCase
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == Self.showRecordingListSegueIdentifier,
+           let destination = segue.destination as? UINavigationController,
+           let recordingListViewController = destination.topViewController as? RecordingListViewController {
+            guard let useCase = useCase else { return }
+            recordingListViewController.configure(useCase: useCase)
+        }
+    }
+    
     // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        selectItemIfNeeded()
         listItemsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
@@ -46,8 +56,14 @@ class TaskListViewController: ListViewController {
         // Clear the collectionView selection when splitViewController is collapsed.
         clearsSelectionOnViewWillAppear = taskSplitViewController.isCollapsed
         super.viewWillAppear(animated)
+        taskListViewModel.reloadStores()
     }
     
+    // MARK: Button Actions
+    
+    @IBAction func processButtonTapped(_ sender: UIBarButtonItem) {
+        print(#function)
+    }
 }
 
 extension TaskListViewController {

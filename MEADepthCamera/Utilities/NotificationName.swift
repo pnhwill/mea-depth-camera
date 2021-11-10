@@ -12,7 +12,7 @@
 import Foundation
 
 extension NSNotification.Name {
-    static let useCaseDidChange = Notification.Name("com.mea-lab.MEADepthCamera.useCaseDidChange")
+    static let useCaseDidChange = Notification.Name(Bundle.main.reverseDNS(suffix: "useCaseDidChange"))
 }
 
 // Custom keys to use with userInfo dictionaries.

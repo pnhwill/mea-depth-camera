@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B501607D273357FD003AB94D /* StartButtonSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501607C273357FD003AB94D /* StartButtonSupplementaryView.swift */; };
+		B501607D273357FD003AB94D /* ButtonSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501607C273357FD003AB94D /* ButtonSupplementaryView.swift */; };
 		B501607F27345670003AB94D /* TaskSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B501607E27345670003AB94D /* TaskSplitViewController.swift */; };
 		B50160812734577A003AB94D /* TaskListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50160802734577A003AB94D /* TaskListViewModel.swift */; };
 		B5016083273465F0003AB94D /* TaskDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5016082273465F0003AB94D /* TaskDetailViewController.swift */; };
@@ -62,6 +62,7 @@
 		B57B3C11273B244E00CCF9A8 /* AVFoundation+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B3C10273B244E00CCF9A8 /* AVFoundation+Extensions.swift */; };
 		B57B3C13273B261A00CCF9A8 /* PreviewMetalView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B3C12273B261A00CCF9A8 /* PreviewMetalView+Extensions.swift */; };
 		B57B3C15273B26EA00CCF9A8 /* NotificationName.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B3C14273B26EA00CCF9A8 /* NotificationName.swift */; };
+		B57B3C17273B499200CCF9A8 /* RecordingListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B3C16273B499200CCF9A8 /* RecordingListViewModel.swift */; };
 		B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */; };
 		B585A0A226C58A9500CA6546 /* Task+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */; };
 		B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */; };
@@ -136,7 +137,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B501607C273357FD003AB94D /* StartButtonSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartButtonSupplementaryView.swift; sourceTree = "<group>"; };
+		B501607C273357FD003AB94D /* ButtonSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonSupplementaryView.swift; sourceTree = "<group>"; };
 		B501607E27345670003AB94D /* TaskSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskSplitViewController.swift; sourceTree = "<group>"; };
 		B50160802734577A003AB94D /* TaskListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewModel.swift; sourceTree = "<group>"; };
 		B5016082273465F0003AB94D /* TaskDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskDetailViewController.swift; sourceTree = "<group>"; };
@@ -200,6 +201,7 @@
 		B57B3C10273B244E00CCF9A8 /* AVFoundation+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVFoundation+Extensions.swift"; sourceTree = "<group>"; };
 		B57B3C12273B261A00CCF9A8 /* PreviewMetalView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreviewMetalView+Extensions.swift"; sourceTree = "<group>"; };
 		B57B3C14273B26EA00CCF9A8 /* NotificationName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationName.swift; sourceTree = "<group>"; };
+		B57B3C16273B499200CCF9A8 /* RecordingListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingListViewModel.swift; sourceTree = "<group>"; };
 		B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Recording+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Recording+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Task+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Task+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OutputFile+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/OutputFile+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
@@ -607,6 +609,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FB0A4C26D5765000F65FA5 /* RecordingListViewController.swift */,
+				B57B3C16273B499200CCF9A8 /* RecordingListViewModel.swift */,
 				B5FB0A4E26D5767500F65FA5 /* RecordingListDataSource.swift */,
 				B5FB0A4826D44FBB00F65FA5 /* RecordingDetailViewController.swift */,
 				B5FB0A4A26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift */,
@@ -658,7 +661,7 @@
 				BE64A210272A8C4000DA1689 /* TextViewCell.swift */,
 				BE64A211272A8C4000DA1689 /* TextInputCellDelegate.swift */,
 				B58F4D5F273A08600073B107 /* TitleSupplementaryView.swift */,
-				B501607C273357FD003AB94D /* StartButtonSupplementaryView.swift */,
+				B501607C273357FD003AB94D /* ButtonSupplementaryView.swift */,
 			);
 			path = "Cells and Views";
 			sourceTree = "<group>";
@@ -881,10 +884,11 @@
 				B57B3C0F273B19AE00CCF9A8 /* SessionSetupError.swift in Sources */,
 				B54215BA26C316F600A4F984 /* MainMenuViewController.swift in Sources */,
 				BE64A20A272949A200DA1689 /* UseCaseListViewModel.swift in Sources */,
+				B57B3C17273B499200CCF9A8 /* RecordingListViewModel.swift in Sources */,
 				B501607F27345670003AB94D /* TaskSplitViewController.swift in Sources */,
 				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,
 				B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */,
-				B501607D273357FD003AB94D /* StartButtonSupplementaryView.swift in Sources */,
+				B501607D273357FD003AB94D /* ButtonSupplementaryView.swift in Sources */,
 				B54215C426C3596F00A4F984 /* UseCaseDetailViewModel.swift in Sources */,
 				B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */,
 				BE64A212272A8C4000DA1689 /* PickerViewCell.swift in Sources */,

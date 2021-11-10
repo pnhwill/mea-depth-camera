@@ -111,8 +111,8 @@ extension UseCaseDetailViewController {
 // MARK: UICollectionViewDelegate
 extension UseCaseDetailViewController {
     override func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
-        guard elementKind == UseCaseDetailViewModel.sectionFooterElementKind, let view = view as? StartButtonSupplementaryView else { return }
-        view.setButtonAction(startButtonAction: showTaskList)
+        guard elementKind == UseCaseDetailViewModel.sectionFooterElementKind, let view = view as? ButtonSupplementaryView else { return }
+        view.setButtonAction(buttonAction: showTaskList)
     }
 }
 

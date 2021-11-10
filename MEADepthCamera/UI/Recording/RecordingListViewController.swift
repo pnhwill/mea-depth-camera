@@ -7,7 +7,125 @@
 
 import UIKit
 
-class RecordingListViewController: UITableViewController {
+class RecordingListViewController: UICollectionViewController {
+    
+    typealias Section = RecordingListViewModel.Section
+    typealias Item = RecordingListViewModel.Item
+    
+    private static let sectionHeaderElementKind = "SectionHeaderElementKind"
+    
+    private var useCase: UseCase?
+    private var viewModel: RecordingListViewModel?
+    private var dataSource: UICollectionViewDiffableDataSource<Section.ID, Item.ID>?
+    
+    func configure(useCase: UseCase) {
+        self.useCase = useCase
+        viewModel = RecordingListViewModel(useCase: useCase)
+    }
+    
+    // MARK: Life Cycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureCollectionView()
+        configureDataSource()
+        applyInitialSnapshot()
+    }
+}
+
+// MARK: Collection View Configuration
+extension RecordingListViewController {
+    private func configureCollectionView() {
+        collectionView.collectionViewLayout = createLayout()
+    }
+    
+    // MARK: Layout
+    private func createLayout() -> UICollectionViewLayout {
+        return UICollectionViewCompositionalLayout() { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            var config = UICollectionLayoutListConfiguration(appearance: .plain)
+            config.headerMode = .supplementary
+            let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
+            let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
+            let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: Self.sectionHeaderElementKind, alignment: .top)
+            section.boundarySupplementaryItems = [sectionHeader]
+            return section
+        }
+    }
+    
+    // MARK: Data Source
+    private func configureDataSource() {
+        let headerRegistration = createHeaderRegistration()
+        let cellRegistration = createCellRegistration()
+        
+        dataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>(collectionView: collectionView) {
+            (collectionView, indexPath, itemID) -> UICollectionViewCell? in
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: itemID)
+        }
+        
+        dataSource?.supplementaryViewProvider = { (collectionView, elementKind, indexPath) in
+            return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
+        }
+    }
+    
+    // MARK: Snapshots
+    private func applyInitialSnapshot() {
+        // Set the order for our sections
+        guard let keys = viewModel?.sectionsStore?.allModels.keys else { return }
+        let sections = Array(keys)
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
+        snapshot.appendSections(sections)
+        dataSource?.apply(snapshot, animatingDifferences: false)
+        
+        // Set section snapshots for each section
+        for section in sections {
+            guard let items = viewModel?.sectionsStore?.fetchByID(section)?.recordings else { continue }
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+            sectionSnapshot.append(items)
+            dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: false)
+        }
+    }
+}
+
+// MARK: Cell Registration
+extension RecordingListViewController {
+    
+    private func createHeaderRegistration() -> UICollectionView.SupplementaryRegistration<UICollectionViewListCell> {
+        return UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: Self.sectionHeaderElementKind) {
+            [weak self] (supplementaryView, elementKind, indexPath) in
+            guard let sectionID = self?.dataSource?.snapshot().sectionIdentifiers[indexPath.section],
+                  let section = self?.viewModel?.sectionsStore?.fetchByID(sectionID)
+            else { return }
+            
+            supplementaryView.configurationUpdateHandler = { supplementaryView, state in
+                guard let supplementaryCell = supplementaryView as? UICollectionViewListCell else { return }
+                
+                var contentConfiguration = UIListContentConfiguration.valueCell().updated(for: state)
+                contentConfiguration.text = section.title
+                contentConfiguration.secondaryText = section.processedRecordingsText
+                supplementaryCell.contentConfiguration = contentConfiguration
+            }
+        }
+    }
+    
+    private func createCellRegistration() -> UICollectionView.CellRegistration<RecordingListCell, Item.ID> {
+        return UICollectionView.CellRegistration<RecordingListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+            guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
+            cell.updateWithItem(item)
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+// MARK: - OLD
+class OldRecordingListViewController: UITableViewController {
     
 //    @IBOutlet private weak var useCaseView: UseCaseSummaryView!
     
@@ -24,7 +142,7 @@ class RecordingListViewController: UITableViewController {
             self.handleTrackingStateChange()
         }
     }
-    let visionTrackingQueue = DispatchQueue(label: "vision tracking queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    let visionTrackingQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "visionTrackingQueue"), qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     func configure(useCase: UseCase, task: Task, delegate: RecordingInteractionDelegate) {
         self.useCase = useCase
@@ -56,7 +174,7 @@ class RecordingListViewController: UITableViewController {
 }
 
 // MARK: UITableViewDelegate
-extension RecordingListViewController {
+extension OldRecordingListViewController {
     static let processingHeaderNibName = "ProcessingView"
     static let processingViewIdentifier = "ProcessingHeaderFooterView"
     
@@ -93,7 +211,7 @@ extension RecordingListViewController {
 }
 
 // MARK: Face Landmarks Processing
-extension RecordingListViewController {
+extension OldRecordingListViewController {
     
     private func handleStartStopButton(in section: Int) {
         switch trackingState {
@@ -188,7 +306,7 @@ extension RecordingListViewController {
 }
 
 // MARK: FaceLandmarksPipelineDelegate
-extension RecordingListViewController: FaceLandmarksPipelineDelegate {
+extension OldRecordingListViewController: FaceLandmarksPipelineDelegate {
     func displayFrameCounter(_ frame: Int, totalFrames: Int) {
         switch trackingState {
         case .tracking(let index):

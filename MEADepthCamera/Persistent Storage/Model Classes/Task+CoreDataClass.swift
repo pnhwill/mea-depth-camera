@@ -130,7 +130,7 @@ struct TaskProperties: Decodable {
             + "file name = \(rawFileName?.description ?? "nil"), "
             + "instructions = \(rawInstructions?.description ?? "nil")"
 
-            let logger = Logger(subsystem: "com.mea-lab.MEADepthCamera", category: "parsing")
+            let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.parsing.rawValue)
             logger.debug("Ignored: \(values)")
             throw JSONError.missingData
         }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 // MARK: ListSection
 struct ListSection: Identifiable {
@@ -28,17 +29,20 @@ struct ListItem: Identifiable, Hashable {
     var title: String
     var subtitle: String?
     var bodyText: [String]
+    var image: UIImage?
     var subItems: [ListItem]
     
     init(id: UUID,
          title: String,
          subTitle: String? = nil,
          bodyText: [String] = [],
+         image: UIImage? = nil,
          subItems: [ListItem] = []) {
         self.id = id
         self.title = title
         self.subtitle = subTitle
         self.bodyText = bodyText
+        self.image = image
         self.subItems = subItems
     }
 }

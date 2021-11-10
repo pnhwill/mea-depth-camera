@@ -1,5 +1,5 @@
 //
-//  StartButtonSupplementaryView.swift
+//  ButtonSupplementaryView.swift
 //  MEADepthCamera
 //
 //  Created by Will on 11/3/21.
@@ -7,13 +7,13 @@
 
 import UIKit
 
-class StartButtonSupplementaryView: UICollectionReusableView {
+class ButtonSupplementaryView: UICollectionReusableView {
     
-    typealias StartButtonAction = () -> Void
+    typealias ButtonAction = () -> Void
     
     let button = UIButton(configuration: .filled())
     
-    private var startButtonAction: StartButtonAction?
+    private var buttonAction: ButtonAction?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -25,18 +25,18 @@ class StartButtonSupplementaryView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setButtonAction(startButtonAction: @escaping StartButtonAction) {
-        self.startButtonAction = startButtonAction
+    func setButtonAction(buttonAction: @escaping ButtonAction) {
+        self.buttonAction = buttonAction
     }
     
     @objc
     func startButtonTapped() {
         // Show the task list
-        startButtonAction?()
+        buttonAction?()
     }
 }
 
-extension StartButtonSupplementaryView {
+extension ButtonSupplementaryView {
     private func setUpViews() {
         directionalLayoutMargins = NSDirectionalEdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 0)
         addSubview(button)

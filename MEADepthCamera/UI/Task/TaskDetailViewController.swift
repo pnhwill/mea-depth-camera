@@ -37,6 +37,7 @@ class TaskDetailViewController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = "View Task"
         configureCollectionView()
     }
 }
@@ -149,11 +150,11 @@ extension TaskDetailViewController {
         }
     }
     
-    private func createInfoFooterRegistration() -> UICollectionView.SupplementaryRegistration<StartButtonSupplementaryView> {
-        return UICollectionView.SupplementaryRegistration<StartButtonSupplementaryView>(elementKind: ElementKind.infoSectionFooter) {
+    private func createInfoFooterRegistration() -> UICollectionView.SupplementaryRegistration<ButtonSupplementaryView> {
+        return UICollectionView.SupplementaryRegistration<ButtonSupplementaryView>(elementKind: ElementKind.infoSectionFooter) {
             [weak self] (supplementaryView, elementKind, indexPath) in
             guard let self = self else { return }
-            supplementaryView.setButtonAction(startButtonAction: self.showCamera)
+            supplementaryView.setButtonAction(buttonAction: self.showCamera)
         }
     }
     

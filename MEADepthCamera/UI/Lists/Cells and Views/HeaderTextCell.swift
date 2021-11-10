@@ -7,18 +7,18 @@
 
 import UIKit
 
-class HeaderTextCell: ItemListCell {
+class HeaderTextCell: ItemListCell<ListItem> {
     
     override func updateConfiguration(using state: UICellConfigurationState) {
-        guard let item = state.item else { return }
-        var content: UIListContentConfiguration = self.defaultContentConfiguration()
+        guard let item = state.item as? ListItem else { return }
+        var content: UIListContentConfiguration = self.defaultContentConfiguration().updated(for: state)
         if item.title.isEmpty {
-//            content = .sidebarCell()
             content.text = item.subtitle
         } else {
-//            content = .sidebarHeader()
             content.text = item.title
+            content.textProperties.font = content.textProperties.font.bold
         }
+        content.image = item.image
         contentConfiguration = content
     }
 }

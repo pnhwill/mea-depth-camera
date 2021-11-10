@@ -17,7 +17,7 @@ protocol ListTextCellDelegate: AnyObject {
     func delete(objectFor item: ListItem)
 }
 
-class ListTextCell: ItemListCell {
+class ListTextCell: ItemListCell<ListItem> {
     
     weak var delegate: ListTextCellDelegate?
     
@@ -34,10 +34,10 @@ class ListTextCell: ItemListCell {
     
     // MARK: updateConfiguration(using:)
     override func updateConfiguration(using state: UICellConfigurationState) {
-        guard let item = state.item else { return }
-        let content = TextCellContentConfiguration(titleText: item.title, subtitleText: item.subtitle, bodyText: item.bodyText)
+        guard let item = state.item as? ListItem else { return }
+        let content = TextCellContentConfiguration(titleText: item.title, subtitleText: item.subtitle, bodyText: item.bodyText).updated(for: state)
         contentConfiguration = content
-//        updateSeparatorConstraint()
+        updateSeparatorConstraint()
     }
 }
 
@@ -49,7 +49,7 @@ extension ListTextCell {
     }
     
     private func deleteAction() {
-        guard let item = configurationState.item else { return }
+        guard let item = configurationState.item as? ListItem else { return }
         delegate?.delete(objectFor: item)
     }
     

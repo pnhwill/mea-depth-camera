@@ -90,23 +90,23 @@ extension RecordingListDataSource: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let section = indexPath.section
-        switch section {
-        case 0:
+//        let section = indexPath.section
+//        switch section {
+//        case 0:
             let cell = tableView.dequeueReusableCell(withIdentifier: Self.taskNameCellIdentifier, for: indexPath)
             cell.textLabel?.text = task.name
             return cell
-        default:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.recordingListCellIdentifier, for: indexPath) as? RecordingListCell else {
-                fatalError("###\(#function): Failed to dequeue a RecordingListCell. Check the cell reusable identifier in Main.storyboard.")
-            }
-            if let currentRecording = recording(at: section), let folderText = currentRecording.folderURL?.lastPathComponent {
-                cell.configure(folderName: folderText,
-                               durationText: currentRecording.durationText,
-                               filesCountText: currentRecording.filesCountText)
-            }
-            return cell
-        }
+//        default:
+//            guard let cell = tableView.dequeueReusableCell(withIdentifier: Self.recordingListCellIdentifier, for: indexPath) as? RecordingListCell else {
+//                fatalError("###\(#function): Failed to dequeue a RecordingListCell. Check the cell reusable identifier in Main.storyboard.")
+//            }
+//            if let currentRecording = recording(at: section), let folderText = currentRecording.folderURL?.lastPathComponent {
+//                cell.configure(folderName: folderText,
+//                               durationText: currentRecording.durationText,
+//                               filesCountText: currentRecording.filesCountText)
+//            }
+//            return cell
+//        }
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {

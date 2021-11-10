@@ -100,7 +100,7 @@ struct ExperimentProperties: Decodable {
         guard let title = rawTitle, !rawTasks.isEmpty
         else {
             let values = "title = \(rawTitle?.description ?? "nil")"
-            let logger = Logger(subsystem: "com.mea-lab.MEADepthCamera", category: "parsing")
+            let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.parsing.rawValue)
             logger.debug("Ignored experiment: \(values)")
             throw JSONError.missingData
         }

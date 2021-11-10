@@ -10,6 +10,48 @@
     </dependencies>
     <scenes>
         <!--Navigation Controller-->
+        <scene sceneID="K1J-GU-yo9">
+            <objects>
+                <navigationController id="bxV-eo-Xuc" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="6wN-3B-NDy">
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="56"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="ulQ-Ml-GYW" kind="relationship" relationship="rootViewController" id="lyX-tM-Ugc"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cf1-Oz-gJP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3914" y="145"/>
+        </scene>
+        <!--Recording List View Controller-->
+        <scene sceneID="6W3-jW-ifC">
+            <objects>
+                <collectionViewController id="ulQ-Ml-GYW" customClass="RecordingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="e75-pc-JZE">
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Qrj-zp-bpb">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="ulQ-Ml-GYW" id="UNH-lD-Z1h"/>
+                            <outlet property="delegate" destination="ulQ-Ml-GYW" id="9NM-SH-Igz"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" id="nDd-lx-EQ8"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1x2-lD-UcS" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4667" y="145"/>
+        </scene>
+        <!--Navigation Controller-->
         <scene sceneID="sig-Ve-aPu">
             <objects>
                 <navigationController storyboardIdentifier="CameraNavigationController" modalPresentationStyle="fullScreen" id="BVm-lt-oCP" sceneMemberID="viewController">
@@ -254,11 +296,13 @@
                         </connections>
                     </collectionView>
                     <toolbarItems>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="hvb-lK-YrI"/>
                         <barButtonItem systemItem="add" id="5Mj-UI-DRr">
                             <connections>
                                 <action selector="addButtonTapped:" destination="dCt-yh-LjF" id="jfx-bn-vdk"/>
                             </connections>
                         </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="c6x-bf-bfL"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="Gls-Fx-5vb">
                         <barButtonItem key="leftBarButtonItem" title="Main Menu" id="ENN-sU-vaI">
@@ -267,6 +311,7 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x9f-K1-wfz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <exit id="qyg-4i-CHZ" userLabel="Exit" sceneMemberID="exit"/>
@@ -292,13 +337,13 @@
         <!--Task List Navigation Controller-->
         <scene sceneID="1gQ-ew-IiY">
             <objects>
-                <navigationController title="Task List Navigation Controller" id="lLL-mQ-z1S" sceneMemberID="viewController">
+                <navigationController title="Task List Navigation Controller" toolbarHidden="NO" id="lLL-mQ-z1S" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="o6e-Cq-eHa">
                         <rect key="frame" x="0.0" y="24" width="420" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="C8B-Zp-hvW">
-                        <rect key="frame" x="100" y="0.0" width="0.0" height="0.0"/>
+                        <rect key="frame" x="0.0" y="1129" width="420" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </toolbar>
                     <connections>
@@ -329,6 +374,15 @@
                             <outlet property="delegate" destination="yBd-9k-eGR" id="IKO-2j-OzN"/>
                         </connections>
                     </collectionView>
+                    <toolbarItems>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="EzU-cg-qkT"/>
+                        <barButtonItem title="Process" style="done" id="6Ox-9G-Qeo">
+                            <connections>
+                                <segue destination="bxV-eo-Xuc" kind="presentation" identifier="ShowRecordingListSegue" id="gWn-bI-pkL"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Hqn-7f-iF0"/>
+                    </toolbarItems>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="xIY-kB-GfC">
                         <barButtonItem key="leftBarButtonItem" title="Use Cases" id="aPG-Cl-4QH">
                             <connections>
@@ -336,6 +390,7 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kK7-mw-S8q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <exit id="HXN-dr-8P3" userLabel="Exit" sceneMemberID="exit"/>

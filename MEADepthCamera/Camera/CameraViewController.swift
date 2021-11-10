@@ -206,7 +206,7 @@ class CameraViewController: UIViewController {
                 
             case .notAuthorized:
                 DispatchQueue.main.async {
-                    let message = NSLocalizedString("MEADepthCamera doesn't have permission to use the camera, please change privacy settings",
+                    let message = NSLocalizedString("\(Bundle.main.applicationName) doesn't have permission to use the camera, please change privacy settings",
                                                     comment: "Alert message when the user has denied access to the camera")
                     let actions = [
                     UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"),
