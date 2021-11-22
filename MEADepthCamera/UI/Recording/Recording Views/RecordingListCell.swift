@@ -38,9 +38,9 @@ class RecordingListCell: ItemListCell<RecordingListViewModel.Item> {
         
         // Update some of the constraints for our custom views using the system default metrics from the configurations.
         customViewConstraints?.frameCounterLeading.constant = content.directionalLayoutMargins.trailing
-        customViewConstraints?.frameCounterLeading.constant = content.directionalLayoutMargins.trailing
+//        customViewConstraints?.frameCounterTrailing.constant =
         
-        progressBar.isHidden = item.processedFrames != nil
+        progressBar.isHidden = item.processedFrames == nil
         if let progress = item.progress {
             progressBar.setProgress(progress, animated: true)
         }
@@ -66,15 +66,15 @@ extension RecordingListCell {
         listContentView.setContentCompressionResistancePriority(defaultHorizontalCompressionResistance - 1, for: .horizontal)
         
         let constraints = (frameCounterLeading: frameCounterLabel.leadingAnchor.constraint(greaterThanOrEqualTo: listContentView.trailingAnchor),
-                           frameCounterTrailing: contentView.trailingAnchor.constraint(equalTo: frameCounterLabel.trailingAnchor))
+                           frameCounterTrailing: contentView.layoutMarginsGuide.trailingAnchor.constraint(equalTo: frameCounterLabel.trailingAnchor))
         
         NSLayoutConstraint.activate([
             listContentView.topAnchor.constraint(equalTo: contentView.topAnchor),
             listContentView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             listContentView.bottomAnchor.constraint(equalTo: progressBar.topAnchor),
-            progressBar.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            progressBar.leadingAnchor.constraint(equalTo: listContentView.leadingAnchor),
-            progressBar.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            progressBar.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor),
+            progressBar.leadingAnchor.constraint(equalTo: listContentView.layoutMarginsGuide.leadingAnchor),
+            progressBar.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
             frameCounterLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             constraints.frameCounterLeading,
             constraints.frameCounterTrailing

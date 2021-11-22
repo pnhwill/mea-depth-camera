@@ -13,9 +13,11 @@ import Foundation
 
 extension NSNotification.Name {
     static let useCaseDidChange = Notification.Name(Bundle.main.reverseDNS(suffix: "useCaseDidChange"))
+    static let recordingDidChange = Notification.Name(Bundle.main.reverseDNS(suffix: "recordingDidChange"))
 }
 
 // Custom keys to use with userInfo dictionaries.
 enum NotificationKeys: String {
     case useCaseId
+    case recordingId
 }

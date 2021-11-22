@@ -24,7 +24,6 @@ enum SessionSetupError: Error {
     case videoDeviceConfigurationFailed(Error)
     case noValidVideoFormat
     case noValidDepthFormat
-    
 }
 
 extension SessionSetupError: LocalizedError {

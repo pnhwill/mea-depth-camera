@@ -6,30 +6,120 @@
 //
 
 import UIKit
+import Combine
 
 class RecordingListViewController: UICollectionViewController {
     
     typealias Section = RecordingListViewModel.Section
     typealias Item = RecordingListViewModel.Item
     
+    enum TrackingState {
+        case tracking
+        case stopped
+    }
+    
     private static let sectionHeaderElementKind = "SectionHeaderElementKind"
+    
+    private let visionTrackingQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "visionTrackingQueue"), qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    
+    @IBOutlet private weak var startStopButton: UIBarButtonItem!
     
     private var useCase: UseCase?
     private var viewModel: RecordingListViewModel?
     private var dataSource: UICollectionViewDiffableDataSource<Section.ID, Item.ID>?
+    private var trackingState: TrackingState = .stopped {
+        didSet {
+            self.handleTrackingStateChange()
+        }
+    }
+    private var listItemsSubscriber: AnyCancellable?
+    private var recordingDidChangeSubscriber: Cancellable?
     
     func configure(useCase: UseCase) {
         self.useCase = useCase
-        viewModel = RecordingListViewModel(useCase: useCase)
+        viewModel = RecordingListViewModel(useCase: useCase, processingCompleteAction: { [weak self] in
+            DispatchQueue.main.async {
+                self?.trackingState = .stopped
+            }
+        })
     }
     
     // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.title = "Review Recordings"
         configureCollectionView()
         configureDataSource()
         applyInitialSnapshot()
+        
+        listItemsSubscriber = viewModel?.sectionsStore?.$allModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.refreshListData()
+            }
+        recordingDidChangeSubscriber = NotificationCenter.default
+            .publisher(for: .recordingDidChange)
+            .receive(on: RunLoop.main)
+            .map { $0.userInfo?[NotificationKeys.recordingId] }
+            .sink { [weak self] id in
+                guard let recordingId = id as? UUID else { return }
+                self?.reconfigureItem(recordingId)
+            }
+    }
+    
+    // MARK: Button Actions
+    
+    @IBAction func handleStartStopButton(_ sender: UIBarButtonItem) {
+        // Disable button until it is safe to cancel
+        startStopButton.isEnabled = false
+        switch trackingState {
+        case .tracking:
+            // stop tracking
+            viewModel?.cancelProcessing()
+            trackingState = .stopped
+        case .stopped:
+            // initialize processor and start tracking
+            trackingState = .tracking
+            visionTrackingQueue.async {
+                do {
+                    try self.viewModel?.startProcessing()
+                } catch {
+                    self.handleError(error)
+                }
+            }
+        }
+        startStopButton.isEnabled = true
+    }
+}
+
+// MARK: Face Landmarks Processing
+extension RecordingListViewController {
+    private func handleTrackingStateChange() {
+        switch trackingState {
+        case .tracking:
+            navigationItem.title = "Processing..."
+            startStopButton.title = "Stop Processing"
+            isModalInPresentation = true
+        case .stopped:
+            navigationItem.title = "Review Recordings"
+            startStopButton.title = "Start Processing"
+            isModalInPresentation = false
+        }
+    }
+    
+    private func handleError(_ error: Error) {
+        DispatchQueue.main.async {
+            var messageHeader: String
+            if error is VisionTrackerProcessorError {
+                messageHeader = "Vision Processor Error"
+            } else {
+                messageHeader = "Error"
+            }
+            let message: String = messageHeader + ": " + error.localizedDescription
+            let actions = [UIAlertAction(title: "OK", style: .cancel, handler: nil)]
+            self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
+        }
     }
 }
 
@@ -84,6 +174,30 @@ extension RecordingListViewController {
             dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: false)
         }
     }
+    
+    private func refreshListData() {
+        // Set the order for our sections
+        guard let keys = viewModel?.sectionsStore?.allModels.keys else { return }
+        let sections = Array(keys)
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
+        snapshot.appendSections(sections)
+        dataSource?.apply(snapshot, animatingDifferences: true)
+        
+        // Set section snapshots for each section
+        for section in sections {
+            guard let items = viewModel?.sectionsStore?.fetchByID(section)?.recordings else { continue }
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
+            sectionSnapshot.append(items)
+            dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: true)
+        }
+    }
+    
+    private func reconfigureItem(_ itemID: Item.ID) {
+        guard let dataSource = dataSource, dataSource.indexPath(for: itemID) != nil else { return }
+        var snapshot = dataSource.snapshot()
+        snapshot.reconfigureItems([itemID])
+        dataSource.apply(snapshot)
+    }
 }
 
 // MARK: Cell Registration
@@ -137,7 +251,7 @@ class OldRecordingListViewController: UITableViewController {
     // Post-Processing
     private var recordingsToTrack: [Int: Recording] = [:]
     private var faceLandmarksPipeline: FaceLandmarksPipeline?
-    private var trackingState: TrackingState = .stopped {
+    private var trackingState: OldTrackingState = .stopped {
         didSet {
             self.handleTrackingStateChange()
         }
@@ -252,14 +366,14 @@ extension OldRecordingListViewController {
     }
     
     private func startTracking(_ recording: Recording) {
-        guard let processorSettings = recording.processorSettings else {
+        guard let faceLandmarksPipeline = FaceLandmarksPipeline(recording: recording) else {
             print("Failed to start tracking: processor settings not found")
             return
         }
-        faceLandmarksPipeline = FaceLandmarksPipeline(recording: recording, processorSettings: processorSettings)
-        faceLandmarksPipeline?.delegate = self
+        self.faceLandmarksPipeline = faceLandmarksPipeline
+//        faceLandmarksPipeline.delegate = self
         do {
-            try faceLandmarksPipeline?.startTracking()
+            try faceLandmarksPipeline.startTracking()
         } catch {
             self.handleTrackerError(error)
         }
@@ -306,7 +420,7 @@ extension OldRecordingListViewController {
 }
 
 // MARK: FaceLandmarksPipelineDelegate
-extension OldRecordingListViewController: FaceLandmarksPipelineDelegate {
+extension OldRecordingListViewController {
     func displayFrameCounter(_ frame: Int, totalFrames: Int) {
         switch trackingState {
         case .tracking(let index):

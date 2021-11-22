@@ -1,5 +1,5 @@
 //
-//  PreviewMetalView+Extensions.swift
+//  PreviewMetalViewRotation.swift
 //  MEADepthCamera
 //
 //  Created by Will on 11/9/21.

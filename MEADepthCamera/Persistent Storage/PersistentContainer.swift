@@ -67,6 +67,7 @@ enum ContextSaveContextualInfo: String {
     case deleteUseCase = "deleting a use case"
     case updateUseCase = "saving use case details"
     case addRecording = "adding a recording"
+    case updateRecording = "saving recording details"
     case deleteRecording = "deleting a recording"
     case addOutputFile = "adding an output file"
     case deleteOutputFile = "deleting an output file"

@@ -4,14 +4,11 @@
 //
 //  Created by Will on 8/2/21.
 //
-/*
- Abstract:
- Contains the face tracker post-processing logic using Vision.
- */
 
 import AVFoundation
 import Vision
 
+/// Contains the face tracker post-processing logic using Vision.
 class LandmarksTrackerProcessor: VisionProcessor {
     
     let description: String = "LandmarksTrackerProcessor"
@@ -28,7 +25,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
         self.processorSettings = processorSettings
     }
     
-    // MARK: Vision Requests
+    // MARK: Prepare Vision Request
     
     func prepareVisionRequest() {
         //self.trackingRequests = []
@@ -60,6 +57,8 @@ class LandmarksTrackerProcessor: VisionProcessor {
         
         self.sequenceRequestHandler = VNSequenceRequestHandler()
     }
+    
+    // MARK: Perform Vision Requests
     
     func performVisionRequests(on pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation, completion: @escaping (VNFaceObservation) -> Void) throws {
         

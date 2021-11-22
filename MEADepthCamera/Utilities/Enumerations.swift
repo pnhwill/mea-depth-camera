@@ -31,7 +31,7 @@ enum FileWriteResult {
     case failed(Error?)
 }
 
-enum TrackingState {
+enum OldTrackingState {
     case tracking(Int)
     case stopped
 }
@@ -62,6 +62,7 @@ extension FileWriterError: LocalizedError {
 }
 
 enum VisionTrackerProcessorError: Error {
+    case fileNotFound
     case readerInitializationFailed
     case firstFrameReadFailed
     case faceTrackingFailed
@@ -71,6 +72,8 @@ enum VisionTrackerProcessorError: Error {
 extension VisionTrackerProcessorError: LocalizedError {
     var errorDescription: String? {
         switch self {
+        case .fileNotFound:
+            return "File does not exist at specified URL."
         case .readerInitializationFailed:
             return "Cannot create a Video Reader for selected video."
         case .firstFrameReadFailed:
@@ -78,7 +81,7 @@ extension VisionTrackerProcessorError: LocalizedError {
         case .faceTrackingFailed:
             return "Tracking of detected face failed."
         case .faceRectangleDetectionFailed:
-            return " Face Rectangle Detector failed to detect face rectangle on the first frame of selected video."
+            return "Face Rectangle Detector failed to detect face rectangle on the first frame of selected video."
         }
     }
 }
