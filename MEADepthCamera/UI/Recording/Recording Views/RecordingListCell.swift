@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// An ItemListCell subclass for the post-processing recording list that manages the progress bar/frame counter.
 class RecordingListCell: ItemListCell<RecordingListViewModel.Item> {
     
     private let frameCounterLabel = UILabel()

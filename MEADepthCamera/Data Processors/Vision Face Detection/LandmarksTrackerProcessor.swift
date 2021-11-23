@@ -13,13 +13,13 @@ class LandmarksTrackerProcessor: VisionProcessor {
     
     let description: String = "LandmarksTrackerProcessor"
     
+    private let processorSettings: ProcessorSettings
+    
     // Vision requests
     private var trackingLevel = VNRequestTrackingLevel.accurate
     private var detectionRequests: [VNDetectFaceRectanglesRequest]?
     private var trackingRequests: [VNTrackObjectRequest]?
     private lazy var sequenceRequestHandler = VNSequenceRequestHandler()
-    
-    private let processorSettings: ProcessorSettings
     
     init(processorSettings: ProcessorSettings) {
         self.processorSettings = processorSettings

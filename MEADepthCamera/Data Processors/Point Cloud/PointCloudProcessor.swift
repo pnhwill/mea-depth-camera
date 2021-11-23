@@ -4,11 +4,11 @@
 //
 //  Created by Will on 7/26/21.
 //
-// Point cloud Metal renderer with compute kernel
 
 import AVFoundation
 import Metal
 
+/// Point cloud renderer with Metal compute kernel.
 class PointCloudProcessor {
     
     let description: String = "Point Cloud Processor"

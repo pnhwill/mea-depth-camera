@@ -34,7 +34,7 @@
             <objects>
                 <collectionViewController id="ulQ-Ml-GYW" customClass="RecordingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="e75-pc-JZE">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995"/>
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Qrj-zp-bpb">
@@ -146,14 +146,14 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="FGY-Eh-8ox" secondAttribute="trailing" constant="40" id="5v8-ez-cpJ"/>
                             <constraint firstItem="fWx-1M-8GV" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Doz-gE-rzT"/>
                             <constraint firstItem="FGY-Eh-8ox" firstAttribute="leading" secondItem="cK1-YN-reQ" secondAttribute="trailing" constant="70" id="FJL-Je-D07"/>
-                            <constraint firstItem="6nD-kv-GLw" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="M78-yZ-dHR"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="centerX" secondItem="BrA-k0-goQ" secondAttribute="centerX" id="M78-yZ-dHR"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="cK1-YN-reQ" secondAttribute="bottom" constant="40" id="PIw-UZ-QAw"/>
                             <constraint firstItem="2hN-4O-nJT" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="TXn-BQ-14k"/>
                             <constraint firstItem="2hN-4O-nJT" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="WWR-Sy-HFU"/>
-                            <constraint firstItem="6nD-kv-GLw" firstAttribute="width" secondItem="8bC-Xf-vdC" secondAttribute="width" id="YzN-3U-teb"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="width" secondItem="BrA-k0-goQ" secondAttribute="width" id="YzN-3U-teb"/>
                             <constraint firstItem="FGY-Eh-8ox" firstAttribute="centerY" secondItem="cK1-YN-reQ" secondAttribute="centerY" id="inZ-Ab-dbM"/>
                             <constraint firstItem="fWx-1M-8GV" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="iun-qw-m35"/>
-                            <constraint firstItem="6nD-kv-GLw" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="lGS-mM-2KD"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="centerY" secondItem="BrA-k0-goQ" secondAttribute="centerY" id="lGS-mM-2KD"/>
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="lvY-l5-m1V"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="BrA-k0-goQ" secondAttribute="trailing" id="lxL-MI-rZQ"/>
                             <constraint firstItem="cK1-YN-reQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="nKf-TV-CmL"/>
@@ -434,7 +434,7 @@
             <objects>
                 <collectionViewController id="BZ3-R2-1cM" customClass="TaskDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="xgg-l6-uhK">
-                        <rect key="frame" x="0.0" y="0.0" width="513" height="1194"/>
+                        <rect key="frame" x="0.0" y="0.0" width="513.5" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="sKz-0H-gP0">
@@ -491,7 +491,7 @@
             <objects>
                 <collectionViewController id="TsY-8E-qUn" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="9zJ-fh-oyD">
-                        <rect key="frame" x="0.0" y="0.0" width="513" height="1194"/>
+                        <rect key="frame" x="0.0" y="0.0" width="513.5" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="b8H-iL-ZFM">

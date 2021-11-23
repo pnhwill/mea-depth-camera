@@ -235,6 +235,7 @@ class CaptureSessionManager: NSObject {
         let supportsDepthFormats = device.formats.filter({
             !$0.supportedDepthDataFormats.isEmpty
         })
+//        supportsDepthFormats.forEach { debugPrint($0) }
         
         // Search for highest possible framerate
         for format in supportsDepthFormats {
@@ -252,7 +253,10 @@ class CaptureSessionManager: NSObject {
                 let candidateDimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
                 // Search full color range pixel formats
                 if CMFormatDescriptionGetMediaSubType(formatDescription) == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange {
-                    if (bestFormat == nil) || (candidateDimensions.width > highestResolutionDimensions.width) {
+//                    debugPrint(formatDescription)
+                    if (bestFormat == nil) ||
+                       (candidateDimensions.width > highestResolutionDimensions.width) ||
+                       ((candidateDimensions.width == highestResolutionDimensions.width) && (candidateDimensions.height > highestResolutionDimensions.height)) {
                         bestFormat = format
                         highestResolutionDimensions = candidateDimensions
                     }
@@ -261,6 +265,7 @@ class CaptureSessionManager: NSObject {
         }
         
         if let bestFormat = bestFormat, let bestFrameRateRange = bestFrameRateRange {
+//            [bestFormat, bestFrameRateRange, highestResolutionDimensions].forEach { debugPrint($0) }
             return (bestFormat, bestFrameRateRange, highestResolutionDimensions)
         } else {
             return nil

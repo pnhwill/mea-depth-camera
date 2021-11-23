@@ -18,6 +18,8 @@ protocol CapturePipelineDelegate: AnyObject {
     
     func setFaceAlignment(_ isAligned: Bool)
     
+    func audioSampleBufferReadyForDisplay(_ sampleBuffer: CMSampleBuffer)
+    
     func capturePipelineRecordingDidStop()
 }
 
@@ -44,7 +46,7 @@ class CapturePipeline: NSObject, DataPipeline {
     }
     
     // Data output synchronizer queue
-    let dataOutputQueue = DispatchQueue(label: "synchronized data output queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    let dataOutputQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "captureQueue"), qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
     
     // Depth processing
     let videoDepthConverter = DepthToGrayscaleConverter()
@@ -348,6 +350,8 @@ extension CapturePipeline {
                 self.writeOutputToFile(self.audioDataOutput, sampleBuffer: sampleBuffer)
             }
         }
+        
+        delegate?.audioSampleBufferReadyForDisplay(sampleBuffer)
     }
     
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {

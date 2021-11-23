@@ -8,12 +8,18 @@
 import AVFoundation
 import Vision
 
+// MARK: FaceLandmarksPipelineDelegate
 protocol FaceLandmarksPipelineDelegate: AnyObject {
+    
     func displayFrameCounter(_ frame: Int)
+    
     func didFinishTracking(success: Bool)
 }
 
+// MARK: FaceLandmarksPipeline
 class FaceLandmarksPipeline: DataPipeline {
+    
+    weak var delegate: FaceLandmarksPipelineDelegate?
     
     // Current recording being processed
     private(set) var recording: Recording
@@ -24,14 +30,12 @@ class FaceLandmarksPipeline: DataPipeline {
     private var pointCloudProcessor: PointCloudProcessor
     
     // File Writers
-    private(set) var faceLandmarks2DFileWriter: FaceLandmarksFileWriter
-    private(set) var faceLandmarks3DFileWriter: FaceLandmarksFileWriter
-    private(set) var infoFileWriter: InfoFileWriter
+    private var faceLandmarks2DFileWriter: FaceLandmarksFileWriter
+    private var faceLandmarks3DFileWriter: FaceLandmarksFileWriter
+    private var infoFileWriter: InfoFileWriter
     
     // Pixel buffer pool for concurrent tracking & file writing
-    var depthMapPixelBufferPool: CVPixelBufferPool?
-    
-    weak var delegate: FaceLandmarksPipelineDelegate?
+    private var depthMapPixelBufferPool: CVPixelBufferPool?
     
     // Video readers and assets
     private var videoReader: VideoReader?
@@ -96,8 +100,9 @@ class FaceLandmarksPipeline: DataPipeline {
         try self.performTracking()
     }
     
+    /// Loads the video assets for the inputted recording.
     private func loadAssets(from recording: Recording) -> (AVAsset, AVAsset)? {
-        // Loads the video assets for the inputted recording
+        
         guard let videoFile = recording.files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.video.rawValue }) as? OutputFile,
               let depthFile = recording.files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.depth.rawValue }) as? OutputFile,
               let videoURL = videoFile.fileURL,

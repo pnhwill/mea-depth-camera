@@ -37,6 +37,9 @@ class CameraViewController: UIViewController {
         indicator.hidesWhenStopped = true
         return indicator
     }()
+    
+    /// The audio spectrogram layer.
+    let audioSpectrogram = AudioSpectrogram()
 
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
@@ -77,7 +80,7 @@ class CameraViewController: UIViewController {
     }
     
     // Session queue
-    private let sessionQueue = DispatchQueue(label: "session queue", attributes: [], autoreleaseFrequency: .workItem)
+    private let sessionQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "sessionQueue"), attributes: [], autoreleaseFrequency: .workItem)
     
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
@@ -204,6 +207,10 @@ class CameraViewController: UIViewController {
                 self.sessionManager.session.startRunning()
                 self.isSessionRunning = self.sessionManager.session.isRunning
                 
+                DispatchQueue.main.async {
+                    self.view.layer.addSublayer(self.audioSpectrogram)
+                }
+                
             case .notAuthorized:
                 DispatchQueue.main.async {
                     let message = NSLocalizedString("\(Bundle.main.applicationName) doesn't have permission to use the camera, please change privacy settings",
@@ -235,6 +242,14 @@ class CameraViewController: UIViewController {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        audioSpectrogram.frame.origin = previewView.frame.origin
+        audioSpectrogram.frame.size.width = previewView.frame.width
+        audioSpectrogram.frame.size.height = 100
+        print(audioSpectrogram.contentsGravity.rawValue)
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         capturePipeline?.dataOutputQueue.async {
             self.renderingEnabled = false
@@ -248,11 +263,6 @@ class CameraViewController: UIViewController {
         }
         super.viewWillDisappear(animated)
     }
-    /*
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-    }
-    */
 
     @objc
     func didEnterBackground(notification: NSNotification) {
@@ -677,6 +687,12 @@ extension CameraViewController: CapturePipelineDelegate {
     
     func setFaceAlignment(_ isAligned: Bool) {
         self.isAligned = isAligned
+    }
+    
+    func audioSampleBufferReadyForDisplay(_ sampleBuffer: CMSampleBuffer) {
+        audioSpectrogram.audioQueue.async {
+            self.audioSpectrogram.captureOutput(didOutput: sampleBuffer)
+        }
     }
     
     func capturePipelineRecordingDidStop() {
