@@ -8,6 +8,7 @@
 import UIKit
 import AVFoundation
 import Vision
+import Accelerate
 
 class CameraViewController: UIViewController {
     
@@ -40,6 +41,15 @@ class CameraViewController: UIViewController {
     
     /// The audio spectrogram layer.
     let audioSpectrogram = AudioSpectrogram()
+    
+    /// Audio waveform layer.
+    let audioShapeLayer = CAShapeLayer()
+    
+    /// Audio visualization processing queue.
+    let audioQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "audioQueue"),
+                                   qos: .userInitiated,
+                                   attributes: [],
+                                   autoreleaseFrequency: .workItem)
 
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
@@ -207,8 +217,10 @@ class CameraViewController: UIViewController {
                 self.sessionManager.session.startRunning()
                 self.isSessionRunning = self.sessionManager.session.isRunning
                 
+                // Add audio visualization layers.
                 DispatchQueue.main.async {
                     self.view.layer.addSublayer(self.audioSpectrogram)
+                    self.view.layer.addSublayer(self.audioShapeLayer)
                 }
                 
             case .notAuthorized:
@@ -244,10 +256,13 @@ class CameraViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
+        // Set up audio visualization layer frames.
+        let audioLayerSize = CGSize(width: previewView.frame.width, height: 100)
         audioSpectrogram.frame.origin = previewView.frame.origin
-        audioSpectrogram.frame.size.width = previewView.frame.width
-        audioSpectrogram.frame.size.height = 100
-        print(audioSpectrogram.contentsGravity.rawValue)
+        audioSpectrogram.frame.size = audioLayerSize
+        audioShapeLayer.frame.origin = CGPoint(x: audioSpectrogram.frame.minX, y: audioSpectrogram.frame.maxY)
+        audioShapeLayer.frame.size = audioLayerSize
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -690,14 +705,47 @@ extension CameraViewController: CapturePipelineDelegate {
     }
     
     func audioSampleBufferReadyForDisplay(_ sampleBuffer: CMSampleBuffer) {
-        audioSpectrogram.audioQueue.async {
+        audioQueue.async {
             self.audioSpectrogram.captureOutput(didOutput: sampleBuffer)
+            
+            if var samples = AudioUtilities.getAudioSamples(sampleBuffer) {
+                
+                vDSP.convert(amplitude: samples, toDecibels: &samples, zeroReference: -Float.greatestFiniteMagnitude)
+                
+                self.displayWaveInLayer(self.audioShapeLayer,
+                                        ofColor: .red,
+                                        signal: samples,
+                                        min: -4,
+                                        max: 4,
+                                        hScale: 1)
+            } else {
+                print("Unable to parse the audio resource.")
+            }
         }
     }
     
     func capturePipelineRecordingDidStop() {
         DispatchQueue.main.async {
             self.sessionMode = .record
+        }
+    }
+}
+
+// MARK: Audio Visualization
+extension CameraViewController {
+    private func displayWaveInLayer(_ targetLayer: CAShapeLayer,
+                                    ofColor color: UIColor,
+                                    signal: [Float],
+                                    min: Float?, max: Float?,
+                                    hScale: CGFloat) {
+        DispatchQueue.main.async {
+            GraphUtility.drawGraphInLayer(targetLayer,
+                                          strokeColor: color.cgColor,
+                                          lineWidth: 3,
+                                          values: signal,
+                                          minimum: min,
+                                          maximum: max,
+                                          hScale: hScale)
         }
     }
 }

@@ -37,11 +37,6 @@ public class AudioSpectrogram: CALayer {
     /// Determines the overlap between frames.
     static let hopCount = 512
     
-    let audioQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "audioQueue"),
-                                   qos: .userInitiated,
-                                   attributes: [],
-                                   autoreleaseFrequency: .workItem)
-    
     let forwardDCT = vDSP.DCT(count: sampleCount,
                               transformType: .II)!
     
@@ -55,7 +50,7 @@ public class AudioSpectrogram: CALayer {
     
     /// The highest frequency that the app can represent.
     ///
-    /// The first call of `AudioSpectrogram.captureOutput(_:didOutput:from:)` calculates
+    /// The first call of `AudioSpectrogram.captureOutput(didOutput:)` calculates
     /// this value.
     var nyquistFrequency: Float?
     
@@ -272,8 +267,7 @@ extension AudioSpectrogram {
         }
 
         /// The _Nyquist frequency_ is the highest frequency that a sampled system can properly
-        /// reproduce and is half the sampling rate of such a system. Although  this app doesn't use
-        /// `nyquistFrequency` you may find this code useful to add an overlay to the user interface.
+        /// reproduce and is half the sampling rate of such a system.
         if nyquistFrequency == nil {
             let duration = Float(CMSampleBufferGetDuration(sampleBuffer).value)
             let timescale = Float(CMSampleBufferGetDuration(sampleBuffer).timescale)
