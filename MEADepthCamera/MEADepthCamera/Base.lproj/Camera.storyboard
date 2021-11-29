@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="dark"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="sig-Ve-aPu">
+            <objects>
+                <navigationController storyboardIdentifier="CameraNavigationController" modalPresentationStyle="fullScreen" id="BVm-lt-oCP" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="YBr-RP-ooK">
+                        <rect key="frame" x="0.0" y="24" width="834" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="ydM-2Z-nwB"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6nU-o5-3p9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3914" y="928"/>
+        </scene>
+        <!--Camera View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController storyboardIdentifier="CameraViewController" modalPresentationStyle="fullScreen" id="BYZ-38-t0r" customClass="CameraViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BrA-k0-goQ" customClass="PreviewMetalView" customModule="MEADepthCamera" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="74" width="834" height="1100"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <label hidden="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TrueDepth Camera Unavailable" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2hN-4O-nJT">
+                                <rect key="frame" x="256.5" y="609.5" width="321" height="29"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <color key="textColor" systemColor="systemYellowColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fWx-1M-8GV">
+                                <rect key="frame" x="344.5" y="603.5" width="145" height="41"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <state key="normal" title="Tap to resume">
+                                    <color key="titleColor" systemColor="systemYellowColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="resumeInterruptedSession:" destination="BYZ-38-t0r" eventType="touchUpInside" id="nec-Od-FKv"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cK1-YN-reQ">
+                                <rect key="frame" x="387" y="1074.5" width="60" height="59"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="DuG-0a-dXR"/>
+                                    <constraint firstAttribute="width" constant="60" id="fLV-fd-BLt"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                <color key="tintColor" systemColor="systemRedColor"/>
+                                <state key="normal" backgroundImage="record.circle.fill" catalog="system"/>
+                                <connections>
+                                    <action selector="toggleRecording:" destination="BYZ-38-t0r" eventType="touchUpInside" id="osw-ZL-eb5"/>
+                                </connections>
+                            </button>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" image="kuang" translatesAutoresizingMaskIntoConstraints="NO" id="6nD-kv-GLw">
+                                <rect key="frame" x="83.5" y="74" width="667" height="1100"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="xmark.square" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="FGY-Eh-8ox">
+                                <rect key="frame" x="517" y="1080" width="50" height="47.5"/>
+                                <color key="tintColor" systemColor="systemRedColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="50" id="546-8N-03r"/>
+                                    <constraint firstAttribute="height" constant="50" id="86Z-5n-rVY"/>
+                                </constraints>
+                            </imageView>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kVo-r9-gFf" userLabel="Audio Visualizer Container View">
+                                <rect key="frame" x="0.0" y="74" width="834" height="190"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="190" id="Aih-HR-5Vf"/>
+                                </constraints>
+                                <connections>
+                                    <segue destination="ypE-oR-1Yr" kind="embed" destinationCreationSelector="loadAudioVisualizerVC:" id="VLO-16-ljY"/>
+                                </connections>
+                            </containerView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="BrA-k0-goQ" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="0uL-fu-Tjt"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="BrA-k0-goQ" secondAttribute="bottom" id="32t-N6-N4P"/>
+                            <constraint firstItem="BrA-k0-goQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="4FS-g0-YcH"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="FGY-Eh-8ox" secondAttribute="trailing" constant="40" id="5v8-ez-cpJ"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="height" relation="lessThanOrEqual" secondItem="BrA-k0-goQ" secondAttribute="height" id="9gH-Be-dz7"/>
+                            <constraint firstItem="fWx-1M-8GV" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Doz-gE-rzT"/>
+                            <constraint firstItem="FGY-Eh-8ox" firstAttribute="leading" secondItem="cK1-YN-reQ" secondAttribute="trailing" constant="70" id="FJL-Je-D07"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="centerX" secondItem="BrA-k0-goQ" secondAttribute="centerX" id="M78-yZ-dHR"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="cK1-YN-reQ" secondAttribute="bottom" constant="40" id="PIw-UZ-QAw"/>
+                            <constraint firstItem="2hN-4O-nJT" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="TXn-BQ-14k"/>
+                            <constraint firstItem="2hN-4O-nJT" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="WWR-Sy-HFU"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="width" secondItem="BrA-k0-goQ" secondAttribute="width" multiplier="0.8" id="YzN-3U-teb"/>
+                            <constraint firstItem="kVo-r9-gFf" firstAttribute="width" secondItem="6Tk-OE-BBY" secondAttribute="width" id="hfI-fW-7um"/>
+                            <constraint firstItem="FGY-Eh-8ox" firstAttribute="centerY" secondItem="cK1-YN-reQ" secondAttribute="centerY" id="inZ-Ab-dbM"/>
+                            <constraint firstItem="fWx-1M-8GV" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="iun-qw-m35"/>
+                            <constraint firstItem="6nD-kv-GLw" firstAttribute="centerY" secondItem="BrA-k0-goQ" secondAttribute="centerY" id="lGS-mM-2KD"/>
+                            <constraint firstItem="BrA-k0-goQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="lvY-l5-m1V"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="BrA-k0-goQ" secondAttribute="trailing" id="lxL-MI-rZQ"/>
+                            <constraint firstItem="cK1-YN-reQ" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="nKf-TV-CmL"/>
+                            <constraint firstItem="kVo-r9-gFf" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="tVh-ht-wiT"/>
+                            <constraint firstItem="BrA-k0-goQ" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="vcm-Fq-Tlf"/>
+                            <constraint firstItem="kVo-r9-gFf" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="zqW-LG-y5T"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="Nmy-QZ-inJ">
+                        <barButtonItem key="leftBarButtonItem" title="Tasks" id="mS6-8O-AQS">
+                            <connections>
+                                <segue destination="2cV-U4-Cah" kind="unwind" unwindAction="unwindFromCameraWithUnwindSegue:" id="LfN-as-2QH"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" style="done" systemItem="done" id="44R-A0-nmG"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="cameraUnavailableLabel" destination="2hN-4O-nJT" id="AgO-YF-2pX"/>
+                        <outlet property="doneButton" destination="44R-A0-nmG" id="oX0-A6-Xbi"/>
+                        <outlet property="indicatorImage" destination="FGY-Eh-8ox" id="p3x-7M-oSi"/>
+                        <outlet property="previewView" destination="BrA-k0-goQ" id="HaZ-lt-X2n"/>
+                        <outlet property="recordButton" destination="cK1-YN-reQ" id="VtD-5r-Jn0"/>
+                        <outlet property="resumeButton" destination="fWx-1M-8GV" id="iO2-WW-wfZ"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <exit id="2cV-U4-Cah" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="4667" y="928"/>
+        </scene>
+        <!--Audio Visualizer View Controller-->
+        <scene sceneID="NdJ-3y-pAr">
+            <objects>
+                <viewController id="ypE-oR-1Yr" customClass="AudioVisualizerViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="WxV-fT-LPT">
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="190"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iXS-9c-QIt" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5358" y="713"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="kuang" width="1122" height="1191"/>
+        <image name="record.circle.fill" catalog="system" width="128" height="121"/>
+        <image name="xmark.square" catalog="system" width="128" height="114"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemYellowColor">
+            <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

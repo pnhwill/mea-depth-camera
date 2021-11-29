@@ -249,20 +249,7 @@ extension AudioSpectrogram {
     
     func captureOutput(didOutput sampleBuffer: CMSampleBuffer) {
         
-        var audioBufferList = AudioBufferList()
-        var blockBuffer: CMBlockBuffer?
-  
-        CMSampleBufferGetAudioBufferListWithRetainedBlockBuffer(
-            sampleBuffer,
-            bufferListSizeNeededOut: nil,
-            bufferListOut: &audioBufferList,
-            bufferListSize: MemoryLayout.stride(ofValue: audioBufferList),
-            blockBufferAllocator: nil,
-            blockBufferMemoryAllocator: nil,
-            flags: kCMSampleBufferFlag_AudioBufferList_Assure16ByteAlignment,
-            blockBufferOut: &blockBuffer)
-        
-        guard let data = audioBufferList.mBuffers.mData else {
+        guard let data = AudioUtilities.getAudioData(sampleBuffer) else {
             return
         }
 
@@ -276,12 +263,7 @@ extension AudioSpectrogram {
         }
 
         if self.rawAudioData.count < AudioSpectrogram.sampleCount * 2 {
-            let actualSampleCount = CMSampleBufferGetNumSamples(sampleBuffer)
-            
-            let ptr = data.bindMemory(to: Int16.self, capacity: actualSampleCount)
-            let buf = UnsafeBufferPointer(start: ptr, count: actualSampleCount)
-            
-            rawAudioData.append(contentsOf: Array(buf))
+            rawAudioData.append(contentsOf: data)
         }
 
         while self.rawAudioData.count >= AudioSpectrogram.sampleCount {

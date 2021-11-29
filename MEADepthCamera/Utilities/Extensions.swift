@@ -8,6 +8,22 @@
 import AVFoundation
 import UIKit
 
+// MARK: UIView
+extension UIView {
+    func bindEdgesToSuperview() {
+        
+        guard let s = superview else {
+            preconditionFailure("`superview` nil in bindEdgesToSuperview")
+        }
+        
+        translatesAutoresizingMaskIntoConstraints = false
+        leadingAnchor.constraint(equalTo: s.leadingAnchor).isActive = true
+        trailingAnchor.constraint(equalTo: s.trailingAnchor).isActive = true
+        topAnchor.constraint(equalTo: s.topAnchor).isActive = true
+        bottomAnchor.constraint(equalTo: s.bottomAnchor).isActive = true
+    }
+}
+
 // MARK: UIFont
 extension UIFont {
     

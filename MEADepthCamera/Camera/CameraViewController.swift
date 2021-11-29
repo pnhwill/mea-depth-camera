@@ -10,6 +10,7 @@ import AVFoundation
 import Vision
 import Accelerate
 
+/// A view controller that displays the camera preview, manages camera controls, and contains an embedded audio visualizer view controller.
 class CameraViewController: UIViewController {
     
     private enum SessionMode {
@@ -19,7 +20,7 @@ class CameraViewController: UIViewController {
     // MARK: - Properties
     
     // Video preview view
-    @IBOutlet private(set) weak var previewView: PreviewMetalView!
+    @IBOutlet private weak var previewView: PreviewMetalView!
     
     // UI buttons/labels
     @IBOutlet private weak var cameraUnavailableLabel: UILabel!
@@ -39,22 +40,18 @@ class CameraViewController: UIViewController {
         return indicator
     }()
     
-    /// The audio spectrogram layer.
-    let audioSpectrogram = AudioSpectrogram()
-    
-    /// Audio waveform layer.
-    let audioShapeLayer = CAShapeLayer()
-    
-    /// Audio visualization processing queue.
-    let audioQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "audioQueue"),
-                                   qos: .userInitiated,
-                                   attributes: [],
-                                   autoreleaseFrequency: .workItem)
+    private var audioVisualizerViewController: AudioVisualizerViewController?
 
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
-    
     private var isSessionRunning = false
+    private let sessionQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "sessionQueue"), attributes: [], autoreleaseFrequency: .workItem)
+    private var sessionMode: SessionMode = .record {
+        didSet {
+            self.handleSessionModeChange()
+        }
+    }
+    private var renderingEnabled = true
     
     // Capture data output delegate
     private var capturePipeline: CapturePipeline?
@@ -74,14 +71,6 @@ class CameraViewController: UIViewController {
     private var useCase: UseCase!
     private var task: Task!
     
-    // App state
-    private var sessionMode: SessionMode = .record {
-        didSet {
-            self.handleSessionModeChange()
-        }
-    }
-    private var renderingEnabled = true
-    
     // Face guidelines alignment
     private var isAligned: Bool = false {
         didSet {
@@ -89,17 +78,32 @@ class CameraViewController: UIViewController {
         }
     }
     
-    // Session queue
-    private let sessionQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "sessionQueue"), attributes: [], autoreleaseFrequency: .workItem)
-    
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
     
-    // MARK: - Navigation
+    // MARK: Overrides
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        true
+    }
+    // Ensure that the interface stays locked in Portrait.
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        return .portrait
+    }
+    
+    // MARK: - Configuration
     
     func configure(useCase: UseCase, task: Task) {
         self.useCase = useCase
         self.task = task
+    }
+    
+    @IBSegueAction func loadAudioVisualizerVC(_ coder: NSCoder) -> AudioVisualizerViewController? {
+        let audioVisualizerViewController = AudioVisualizerViewController(coder: coder)
+        self.audioVisualizerViewController = audioVisualizerViewController
+        return audioVisualizerViewController
     }
     
     // MARK: - View Controller Life Cycle
@@ -108,7 +112,6 @@ class CameraViewController: UIViewController {
         super.viewDidLoad()
         
         navigationItem.title = task.name
-        //print("camera view did load")
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
         //doneButton.isEnabled = false
@@ -217,12 +220,6 @@ class CameraViewController: UIViewController {
                 self.sessionManager.session.startRunning()
                 self.isSessionRunning = self.sessionManager.session.isRunning
                 
-                // Add audio visualization layers.
-                DispatchQueue.main.async {
-                    self.view.layer.addSublayer(self.audioSpectrogram)
-                    self.view.layer.addSublayer(self.audioShapeLayer)
-                }
-                
             case .notAuthorized:
                 DispatchQueue.main.async {
                     let message = NSLocalizedString("\(Bundle.main.applicationName) doesn't have permission to use the camera, please change privacy settings",
@@ -254,16 +251,9 @@ class CameraViewController: UIViewController {
         }
     }
     
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        // Set up audio visualization layer frames.
-        let audioLayerSize = CGSize(width: previewView.frame.width, height: 100)
-        audioSpectrogram.frame.origin = previewView.frame.origin
-        audioSpectrogram.frame.size = audioLayerSize
-        audioShapeLayer.frame.origin = CGPoint(x: audioSpectrogram.frame.minX, y: audioSpectrogram.frame.maxY)
-        audioShapeLayer.frame.size = audioLayerSize
-    }
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//    }
     
     override func viewWillDisappear(_ animated: Bool) {
         capturePipeline?.dataOutputQueue.async {
@@ -305,20 +295,12 @@ class CameraViewController: UIViewController {
         }
     }
     
-    func showThermalState(state: ProcessInfo.ThermalState) {
+    private func showThermalState(state: ProcessInfo.ThermalState) {
         DispatchQueue.main.async {
             let message = NSLocalizedString("Thermal state: \(state.thermalStateString)", comment: "Alert message when thermal state has changed")
             let actions = [UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil)]
             self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
         }
-    }
-    
-    // Ensure that the interface stays locked in Portrait.
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
-    }
-    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
-        return .portrait
     }
     
     // MARK: - KVO and Notifications
@@ -632,7 +614,7 @@ class CameraViewController: UIViewController {
         }
     }
     
-    // MARK: - Landmarks Post-Processing
+    // MARK: - Recording Processing
     
     private func handleSessionModeChange() {
         switch sessionMode {
@@ -705,47 +687,13 @@ extension CameraViewController: CapturePipelineDelegate {
     }
     
     func audioSampleBufferReadyForDisplay(_ sampleBuffer: CMSampleBuffer) {
-        audioQueue.async {
-            self.audioSpectrogram.captureOutput(didOutput: sampleBuffer)
-            
-            if var samples = AudioUtilities.getAudioSamples(sampleBuffer) {
-                
-                vDSP.convert(amplitude: samples, toDecibels: &samples, zeroReference: -Float.greatestFiniteMagnitude)
-                
-                self.displayWaveInLayer(self.audioShapeLayer,
-                                        ofColor: .red,
-                                        signal: samples,
-                                        min: -4,
-                                        max: 4,
-                                        hScale: 1)
-            } else {
-                print("Unable to parse the audio resource.")
-            }
-        }
+        guard renderingEnabled else { return }
+        audioVisualizerViewController?.renderAudio(sampleBuffer)
     }
     
     func capturePipelineRecordingDidStop() {
         DispatchQueue.main.async {
             self.sessionMode = .record
-        }
-    }
-}
-
-// MARK: Audio Visualization
-extension CameraViewController {
-    private func displayWaveInLayer(_ targetLayer: CAShapeLayer,
-                                    ofColor color: UIColor,
-                                    signal: [Float],
-                                    min: Float?, max: Float?,
-                                    hScale: CGFloat) {
-        DispatchQueue.main.async {
-            GraphUtility.drawGraphInLayer(targetLayer,
-                                          strokeColor: color.cgColor,
-                                          lineWidth: 3,
-                                          values: signal,
-                                          minimum: min,
-                                          maximum: max,
-                                          hScale: hScale)
         }
     }
 }

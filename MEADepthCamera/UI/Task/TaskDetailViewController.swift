@@ -17,7 +17,7 @@ class TaskDetailViewController: UICollectionViewController {
         static let infoSectionFooter = "StartButtonFooter"
     }
     
-    private static let mainStoryboardName = "Main"
+    private static let cameraStoryboardName = "Camera"
     private static let cameraNavControllerIdentifier = "CameraNavigationController"
     
     private var viewModel: TaskDetailViewModel?
@@ -45,7 +45,7 @@ class TaskDetailViewController: UICollectionViewController {
 extension TaskDetailViewController {
     private func showCamera() {
         guard let useCase = useCase, let task = task else { return }
-        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
+        let storyboard = UIStoryboard(name: Self.cameraStoryboardName, bundle: nil)
         guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: Self.cameraNavControllerIdentifier) as? UINavigationController,
               let cameraViewController = cameraNavController.topViewController as? CameraViewController
         else { return }

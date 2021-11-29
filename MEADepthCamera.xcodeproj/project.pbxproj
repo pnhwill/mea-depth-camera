@@ -83,6 +83,8 @@
 		B59161562727AA33005604BF /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161552727AA33005604BF /* DetailViewController.swift */; };
 		B59161582727AA95005604BF /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161572727AA95005604BF /* DetailViewModel.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
+		B5AA51932754434A000256E3 /* AudioVisualizerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AA51922754434A000256E3 /* AudioVisualizerViewController.swift */; };
+		B5AA5196275458E5000256E3 /* Camera.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5AA5194275458E5000256E3 /* Camera.storyboard */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
 		B5ABE85C26AA04B8003D2AFD /* ImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */; };
 		B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */; };
@@ -222,6 +224,8 @@
 		B59161552727AA33005604BF /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		B59161572727AA95005604BF /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
+		B5AA51922754434A000256E3 /* AudioVisualizerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioVisualizerViewController.swift; sourceTree = "<group>"; };
+		B5AA5195275458E5000256E3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = MEADepthCamera/Base.lproj/Camera.storyboard; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
 		B5ABE85B26AA04B8003D2AFD /* ImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageRenderer.swift; sourceTree = "<group>"; };
 		B5ABE86326AA08E0003D2AFD /* DepthToGrayscaleConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthToGrayscaleConverter.swift; sourceTree = "<group>"; };
@@ -342,6 +346,7 @@
 		B545F13E274C81BC009F1A57 /* Audio Visualization */ = {
 			isa = PBXGroup;
 			children = (
+				B5AA51922754434A000256E3 /* AudioVisualizerViewController.swift */,
 				B545F140274C8277009F1A57 /* AudioSpectrogram.swift */,
 				B57CE0672752E2D900BAFAA0 /* GraphUtility.swift */,
 				B57CE0692752E92E00BAFAA0 /* AudioUtilities.swift */,
@@ -428,6 +433,7 @@
 				B5886DF626AA168B00EB344C /* Shaders */,
 				B5D6CAE826D9A3AA002165C6 /* Resources */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
+				B5AA5194275458E5000256E3 /* Camera.storyboard */,
 				B579658A269DED600070C294 /* Assets.xcassets */,
 				B579658C269DED600070C294 /* LaunchScreen.storyboard */,
 				B579658F269DED600070C294 /* Info.plist */,
@@ -779,6 +785,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5D6CAEB26D9A4CC002165C6 /* virtualSLP_tasks.json in Resources */,
+				B5AA5196275458E5000256E3 /* Camera.storyboard in Resources */,
 				B50944B226E94E8D0020971D /* MEADepthCamera_experiments.json in Resources */,
 				B579658E269DED600070C294 /* LaunchScreen.storyboard in Resources */,
 				B579658B269DED600070C294 /* Assets.xcassets in Resources */,
@@ -876,6 +883,7 @@
 				B53CD4B326B38EF3003BBFD9 /* CapturePipeline.swift in Sources */,
 				B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */,
 				BE64A215272A8C4000DA1689 /* TextInputCellDelegate.swift in Sources */,
+				B5AA51932754434A000256E3 /* AudioVisualizerViewController.swift in Sources */,
 				B5016083273465F0003AB94D /* TaskDetailViewController.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
 				B57B3C15273B26EA00CCF9A8 /* NotificationName.swift in Sources */,
@@ -959,6 +967,14 @@
 				B579658D269DED600070C294 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		B5AA5194275458E5000256E3 /* Camera.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B5AA5195275458E5000256E3 /* Base */,
+			);
+			name = Camera.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
