@@ -46,12 +46,13 @@ class AudioVisualizerViewController: UIViewController {
     // MARK: Render Audio
     func renderAudio(_ sampleBuffer: CMSampleBuffer) {
         audioQueue.async {
+            // Spectrogram
             self.audioSpectrogram.captureOutput(didOutput: sampleBuffer)
             
+            // Waveform
             if let data = AudioUtilities.getAudioData(sampleBuffer) {
                 
                 var samples = [Float](repeating: 0, count: data.count)
-                
                 vDSP.convertElements(of: data, to: &samples)
                 
                 self.displayWaveInLayer(self.audioShapeLayer,
