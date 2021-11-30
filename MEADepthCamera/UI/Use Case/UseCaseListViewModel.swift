@@ -126,8 +126,8 @@ extension UseCaseListViewModel {
               var listSection = sectionsStore?.fetchByID(.list)
         else { return }
         listSection.items?.append(id)
-        sectionsStore?.merge(newModels: [listSection])
         itemsStore?.merge(newModels: [item])
+        sectionsStore?.merge(newModels: [listSection])
     }
     
     private func reconfigureItem(_ useCase: UseCase) {

@@ -4,10 +4,6 @@
 //
 //  Created by Will on 7/22/21.
 //
-/*
-Abstract:
-Detect faces from the selfie cam feed in real time.
-*/
 
 import AVFoundation
 import Vision
@@ -17,6 +13,7 @@ protocol LiveFaceDetectionProcessorDelegate: AnyObject {
     func checkAlignment(of faceObservation: VNFaceObservation)
 }
 
+/// Detects faces from the selfie cam feed in real time.
 class LiveFaceDetectionProcessor: VisionProcessor {
     
     let description: String = "LiveFaceDetectionProcessor"

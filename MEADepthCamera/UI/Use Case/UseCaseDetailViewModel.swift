@@ -69,7 +69,7 @@ class UseCaseDetailViewModel: DetailViewModel {
                 guard let subjectID = useCase.subjectID else { return nil }
                 return "Subject ID: " + subjectID
             case .completedTasks:
-                return "X out of X tasks completed"
+                return "\(useCase.completedTasks) out of \(useCase.tasksCount) tasks completed"
             case .notes:
                 return useCase.notes
             }

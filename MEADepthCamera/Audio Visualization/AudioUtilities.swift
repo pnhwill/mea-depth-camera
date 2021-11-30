@@ -8,7 +8,7 @@
 import AVFoundation
 import Accelerate
 
-/// Class containing methods for audio signal processing.
+/// Class containing static methods for audio signal processing.
 class AudioUtilities {
     
     /// Returns an array of 16-bit integer values for the specified audio sample buffer.

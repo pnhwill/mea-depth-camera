@@ -13,6 +13,15 @@ import UIKit
 @objc(UseCase)
 public class UseCase: NSManagedObject {
     
+    var tasksCount: Int {
+        Int(experiment!.tasksCount)
+    }
+    
+    var completedTasks: Int {
+        let tasks = experiment!.tasks as! Set<Task>
+        return tasks.reduce(0) { $0 + ($1.isComplete(for: self) ? 1 : 0) }
+    }
+    
     func recordingsCount(for task: Task) -> Int {
         let recordings = recordings as! Set<Recording>
         return recordings.reduce(0) { $0 + ($1.task == task ? 1 : 0) }

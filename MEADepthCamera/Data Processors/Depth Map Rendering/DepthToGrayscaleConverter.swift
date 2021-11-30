@@ -4,16 +4,13 @@
 //
 //  Created by Will on 7/22/21.
 //
-/*
-Abstract:
-The depth-to-grayscale converter for writing depth values to a video file.
-*/
 
 import CoreMedia
 import CoreVideo
 import Metal
 
-class DepthToGrayscaleConverter: ImageRenderer {
+/// The depth-to-grayscale converter for writing depth values to a video file.
+class DepthToGrayscaleConverter: FilterRenderer {
     
     let description: String = "Depth to Grayscale Converter"
     
@@ -43,7 +40,7 @@ class DepthToGrayscaleConverter: ImageRenderer {
         do {
             computePipelineState = try metalDevice.makeComputePipelineState(function: kernelFunction!)
         } catch {
-            fatalError("Unable to create depth converter pipeline state. (\(error))")
+            fatalError("Unable to create \(description) pipeline state. (\(error))")
         }
     }
     
@@ -111,7 +108,7 @@ class DepthToGrayscaleConverter: ImageRenderer {
         
         var metalTextureCache: CVMetalTextureCache?
         if CVMetalTextureCacheCreate(kCFAllocatorDefault, nil, metalDevice, nil, &metalTextureCache) != kCVReturnSuccess {
-            assertionFailure("Unable to allocate depth converter texture cache")
+            assertionFailure("Unable to allocate \(description) texture cache")
         } else {
             textureCache = metalTextureCache
         }
@@ -142,8 +139,8 @@ class DepthToGrayscaleConverter: ImageRenderer {
         }
         
         guard let outputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: outputPixelBuffer, textureFormat: .bgra8Unorm),
-            let inputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: pixelBuffer, textureFormat: inputTextureFormat) else {
-                return nil
+              let inputTexture = makeTextureFromCVPixelBuffer(pixelBuffer: pixelBuffer, textureFormat: inputTextureFormat) else {
+                  return nil
         }
         
         // Set up command queue, buffer, and encoder

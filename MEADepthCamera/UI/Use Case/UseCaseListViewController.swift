@@ -30,7 +30,7 @@ class UseCaseListViewController: ListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationItem()
-        selectItemIfNeeded()
+//        selectItemIfNeeded()
         listItemsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in

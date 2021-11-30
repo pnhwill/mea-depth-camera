@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19461" systemVersion="20G165" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="19461" systemVersion="21A559" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Experiment" representedClassName="Experiment" syncable="YES" codeGenerationType="category">
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="tasksCount" optional="YES" attributeType="Integer 64" derived="YES" derivationExpression="tasks.@count" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="tasks" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Task" inverseName="experiments" inverseEntity="Task"/>
         <relationship name="useCases" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="UseCase" inverseName="experiment" inverseEntity="UseCase"/>
@@ -62,7 +63,7 @@
         <relationship name="recordings" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Recording" inverseName="useCase" inverseEntity="Recording"/>
     </entity>
     <elements>
-        <element name="Experiment" positionX="-887.7432861328125" positionY="5.99066162109375" width="128" height="89"/>
+        <element name="Experiment" positionX="-887.7432861328125" positionY="5.99066162109375" width="128" height="104"/>
         <element name="OutputFile" positionX="-571.6380615234375" positionY="554.7482299804688" width="128" height="104"/>
         <element name="Recording" positionX="-570.1903076171875" positionY="228.2449951171875" width="128" height="194"/>
         <element name="Task" positionX="-925.098388671875" positionY="211.0825805664063" width="128" height="194"/>
