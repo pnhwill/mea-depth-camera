@@ -36,7 +36,7 @@ protocol FilterRenderer: AnyObject {
 
 extension FilterRenderer {
     
-    func allocateOutputBufferPool(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) -> (outputBufferPool: CVPixelBufferPool?,
+    static func allocateOutputBufferPool(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) -> (outputBufferPool: CVPixelBufferPool?,
                                                                                                                             outputColorSpace: CGColorSpace?,
                                                                                                                             outputFormatDescription: CMFormatDescription?) {
         let inputMediaSubType = CMFormatDescriptionGetMediaSubType(inputFormatDescription)
@@ -105,7 +105,7 @@ extension FilterRenderer {
         return (pixelBufferPool, cgColorSpace, outputFormatDescription)
     }
 
-    private func preallocateBuffers(pool: CVPixelBufferPool, allocationThreshold: Int) {
+    private static func preallocateBuffers(pool: CVPixelBufferPool, allocationThreshold: Int) {
         var pixelBuffers = [CVPixelBuffer]()
         var error: CVReturn = kCVReturnSuccess
         let auxAttributes = [kCVPixelBufferPoolAllocationThresholdKey as String: allocationThreshold] as NSDictionary

@@ -36,7 +36,7 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
     func prepare(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) {
         reset()
         
-        (outputPixelBufferPool, _, outputFormatDescription) = allocateOutputBufferPool(with: inputFormatDescription, outputRetainedBufferCountHint: outputRetainedBufferCountHint)
+        (outputPixelBufferPool, _, outputFormatDescription) = Self.allocateOutputBufferPool(with: inputFormatDescription, outputRetainedBufferCountHint: outputRetainedBufferCountHint)
         if outputPixelBufferPool == nil {
             return
         }

@@ -70,22 +70,6 @@ extension UIViewController {
     }
 }
 
-// MARK: CGPoint
-extension CGPoint {
-    // Method to clamp a CGPoint within a certain bounds
-    mutating func clamp(bounds: CGSize) {
-        self.x = min(bounds.width, max(self.x, 0.0))
-        self.y = min(bounds.height, max(self.y, 0.0))
-    }
-}
-
-// MARK: CGSize
-extension CGSize {
-    func rounded() -> CGSize {
-        return CGSize(width: self.width.rounded(), height: self.height.rounded())
-    }
-}
-
 // MARK: Bundle
 extension Bundle {
     // Use bundle name instead of hard-coding app name in alerts

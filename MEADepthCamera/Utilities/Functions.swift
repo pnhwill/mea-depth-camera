@@ -7,9 +7,7 @@
 
 import CoreMedia
 
-func radiansForDegrees(_ degrees: CGFloat) -> CGFloat {
-    return CGFloat(Double(degrees) * Double.pi / 180.0)
-}
+
 
 
 

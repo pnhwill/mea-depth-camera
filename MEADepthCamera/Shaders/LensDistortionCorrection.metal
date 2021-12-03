@@ -79,6 +79,8 @@ kernel void lensDistortionCorrection(texture2d<float, access::sample> inputTextu
     float2 distortedPoint = as_type<float2>(gid);
     float2 correctedPoint = ::lensDistortionPointForPoint(distortedPoint, lookupTable, lensDistortionParameters.lookupTableCount, lensDistortionParameters.opticalCenter, imageSize);
     
+    // TODO: clamp within bounds of buffer?
+    
     float4 pixelValue = inputTexture.sample(textureSampler, correctedPoint);
     outputTexture.write(pixelValue, gid);
 }

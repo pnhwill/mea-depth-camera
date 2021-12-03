@@ -151,18 +151,18 @@ class FaceLandmarksPipeline: DataPipeline {
         }
         
         // Create pixel buffer pool for depth map rectification
-//        if depthMapPixelBufferPool == nil, let depthImage = nextDepthImage {
-//            var depthFormatDescription: CMFormatDescription?
-//            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-//                                                         imageBuffer: depthImage,
-//                                                         formatDescriptionOut: &depthFormatDescription)
-//            if let unwrappedDepthFormatDescription = depthFormatDescription {
-//                (depthMapPixelBufferPool, _, _) = allocateOutputBufferPool(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
-//            }
-//        }
-//        if depthMapPixelBufferPool == nil {
-//            throw VisionTrackerProcessorError.readerInitializationFailed
-//        }
+        if depthMapPixelBufferPool == nil, let depthImage = nextDepthImage {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: depthImage,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                (depthMapPixelBufferPool, _, _) = LensDistortionCorrectionProcessor.allocateOutputBufferPool(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
+            }
+        }
+        if depthMapPixelBufferPool == nil {
+            throw VisionTrackerProcessorError.readerInitializationFailed
+        }
         
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
             try visionTrackerProcessor.performVisionRequests(on: video, orientation: videoReader.orientation, completion: { faceObservation in
@@ -252,27 +252,27 @@ class FaceLandmarksPipeline: DataPipeline {
             
             if let landmarks = faceObservation.landmarks?.allPoints {
                 
-                if let depthDataMap = depthDataMap {
+                if let depthDataMap = depthDataMap, let correctedDepthMap = rectifyDepthDataMap(depthDataMap: depthDataMap) {
                     
                     let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
                     
-                    if !lensDistortionCorrectionProcessor.isPrepared {
-                        var depthFormatDescription: CMFormatDescription?
-                        CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                                     imageBuffer: depthDataMap,
-                                                                     formatDescriptionOut: &depthFormatDescription)
-                        if let unwrappedDepthFormatDescription = depthFormatDescription {
-                            lensDistortionCorrectionProcessor.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
-                        }
-                    }
-                    
-                    guard let correctedDepthMap = lensDistortionCorrectionProcessor.render(pixelBuffer: depthDataMap) else {
-                        // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given.
-                        print("Metal lens distortion correction processor failed to render depth map. Returning landmarks in RGB image coordinates.")
-                        let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                        landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
-                        return (boundingBox, landmarks2D, nil)
-                    }
+//                    if !lensDistortionCorrectionProcessor.isPrepared {
+//                        var depthFormatDescription: CMFormatDescription?
+//                        CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+//                                                                     imageBuffer: depthDataMap,
+//                                                                     formatDescriptionOut: &depthFormatDescription)
+//                        if let unwrappedDepthFormatDescription = depthFormatDescription {
+//                            lensDistortionCorrectionProcessor.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
+//                        }
+//                    }
+//
+//                    guard let correctedDepthMap = lensDistortionCorrectionProcessor.render(pixelBuffer: depthDataMap) else {
+//                        // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given.
+//                        print("Metal lens distortion correction processor failed to render depth map. Returning landmarks in RGB image coordinates.")
+//                        let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
+//                        landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
+//                        return (boundingBox, landmarks2D, nil)
+//                    }
                     
                     let correctedLandmarks = landmarkPoints.map { rectifyLandmark(landmark: $0) }
                     
