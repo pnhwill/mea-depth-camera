@@ -54,10 +54,10 @@ extension UIFont {
     }
 }
 
-
 // MARK: UIViewController
 extension UIViewController {
     func alert(title: String, message: String, actions: [UIAlertAction]) {
+        
         let alertController = UIAlertController(title: title,
                                                 message: message,
                                                 preferredStyle: .alert)

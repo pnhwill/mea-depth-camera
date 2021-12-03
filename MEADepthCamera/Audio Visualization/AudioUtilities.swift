@@ -11,6 +11,8 @@ import Accelerate
 /// Class containing static methods for audio signal processing.
 class AudioUtilities {
     
+    private static let maxFloat = Float(Int16.max)
+    
     /// Returns an array of 16-bit integer values for the specified audio sample buffer.
     static func getAudioData(_ sampleBuffer: CMSampleBuffer) -> [Int16]? {
         
@@ -37,5 +39,43 @@ class AudioUtilities {
         let buf = UnsafeBufferPointer(start: ptr, count: actualSampleCount)
         
         return Array(buf)
+    }
+    
+    static func peakDecibelLevel(of signal: [Float]) -> Float {
+        
+        let peakAmplitude = vDSP.maximumMagnitude(signal)
+        
+        let peakDecibels = vDSP.amplitudeToDecibels([peakAmplitude], zeroReference: maxFloat)
+        
+        return peakDecibels[0]
+    }
+    
+    static func meanDecibelLevel(of signal: [Float], window: Float, sampleRate: Float) -> [Float] {
+        
+        let totalSampleCount = Float(signal.count)
+        
+        let bufferDuration = totalSampleCount / sampleRate
+        
+        let newWindow = window < bufferDuration ? window : bufferDuration
+        
+        let sampleCount = Int((totalSampleCount * newWindow / bufferDuration).rounded(.up))
+        
+        let windows = signal.chunked(into: sampleCount)
+//        let remainder = windows.popLast()
+        
+        let meanAmplitudes = windows.map { vDSP.meanMagnitude($0) }
+        
+        let meanDecibels = vDSP.amplitudeToDecibels(meanAmplitudes, zeroReference: maxFloat)
+        
+        return meanDecibels
+    }
+    
+}
+
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
     }
 }

@@ -8,6 +8,7 @@
 import Foundation
 
 /// Helper class which can encode/decode any size SIMD matrix type with SIMD3 column vectors.
+///
 /// We use this class to serialize the AVCameraCalibrationData's intrinsicMatrix (matrix_float3x3) and extrinsicMatrix (matrix_float4x3).
 /// The class stores a variable number of columns as type SIMD3<Float> (aka vector_float3) and encodes them as a single byte buffer in memory.
 class CodingMatrixFloat3: NSObject, NSSecureCoding {

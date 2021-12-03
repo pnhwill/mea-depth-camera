@@ -4,16 +4,13 @@
 //
 //  Created by Will on 7/22/21.
 //
-/*
- Abstract:
- Implements the image view responsible for displaying face landmarks results
- coming from processing frames from a live video stream.
- */
 
 import UIKit
 import AVFoundation
 import Vision
 
+/// Implements the image view responsible for displaying face landmarks results
+/// coming from processing frames from a live video stream.
 class FaceObservationOverlayView: UIView {
     
     // Data collection

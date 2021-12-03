@@ -8,7 +8,6 @@
 import UIKit
 import AVFoundation
 import Vision
-import Accelerate
 
 /// A view controller that displays the camera preview, manages camera controls, and contains an embedded audio visualizer view controller.
 class CameraViewController: UIViewController {
@@ -84,13 +83,6 @@ class CameraViewController: UIViewController {
     // MARK: Overrides
     override var prefersHomeIndicatorAutoHidden: Bool {
         true
-    }
-    // Ensure that the interface stays locked in Portrait.
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
-    }
-    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
-        return .portrait
     }
     
     // MARK: - Configuration

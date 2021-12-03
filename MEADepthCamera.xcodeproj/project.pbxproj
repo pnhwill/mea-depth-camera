@@ -103,6 +103,8 @@
 		B5D6CAED26D9AF4C002165C6 /* TaskProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D6CAEC26D9AF4C002165C6 /* TaskProvider.swift */; };
 		B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */; };
 		B5DF4B9126C4ADA60045AE43 /* UseCase+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */; };
+		B5E5E71D275982190074894D /* PortraitLockedNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E5E71C275982190074894D /* PortraitLockedNavigationController.swift */; };
+		B5E5E71F2759CB4A0074894D /* AudioLevelMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E5E71E2759CB490074894D /* AudioLevelMeter.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
 		B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447EB26EFF7A100528ACA /* ListViewController.swift */; };
 		B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */; };
@@ -247,6 +249,8 @@
 		B5D6CAEC26D9AF4C002165C6 /* TaskProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskProvider.swift; sourceTree = "<group>"; };
 		B5DF4B8926C495EB0045AE43 /* UseCaseListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListViewController.swift; sourceTree = "<group>"; };
 		B5DF4B8F26C4ADA60045AE43 /* UseCase+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "UseCase+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/UseCase+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
+		B5E5E71C275982190074894D /* PortraitLockedNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortraitLockedNavigationController.swift; sourceTree = "<group>"; };
+		B5E5E71E2759CB490074894D /* AudioLevelMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioLevelMeter.swift; sourceTree = "<group>"; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
 		B5F447EB26EFF7A100528ACA /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewController.swift; sourceTree = "<group>"; };
@@ -296,6 +300,7 @@
 			isa = PBXGroup;
 			children = (
 				B5796585269DED5F0070C294 /* CameraViewController.swift */,
+				B5E5E71C275982190074894D /* PortraitLockedNavigationController.swift */,
 				B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */,
 				B57B3C0E273B19AE00CCF9A8 /* SessionSetupError.swift */,
 				B57B3C10273B244E00CCF9A8 /* AVFoundation+Extensions.swift */,
@@ -351,6 +356,7 @@
 			isa = PBXGroup;
 			children = (
 				B5AA51922754434A000256E3 /* AudioVisualizerViewController.swift */,
+				B5E5E71E2759CB490074894D /* AudioLevelMeter.swift */,
 				B545F140274C8277009F1A57 /* AudioSpectrogram.swift */,
 				B57CE0672752E2D900BAFAA0 /* GraphUtility.swift */,
 				B57CE0692752E92E00BAFAA0 /* AudioUtilities.swift */,
@@ -839,6 +845,7 @@
 				B53E75F02755C0470084A532 /* LensDistortionCorrectionProcessor.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
 				B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */,
+				B5E5E71F2759CB4A0074894D /* AudioLevelMeter.swift in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
 				BEBD1494271972C6007AC466 /* ModelObject.swift in Sources */,
 				B50160892735E7E4003AB94D /* HeaderTextCell.swift in Sources */,
@@ -874,6 +881,7 @@
 				B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */,
 				B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */,
 				B591615327236D67005604BF /* TextCellContentView.swift in Sources */,
+				B5E5E71D275982190074894D /* PortraitLockedNavigationController.swift in Sources */,
 				BE64A213272A8C4000DA1689 /* TextFieldCell.swift in Sources */,
 				B5FB0A4B26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift in Sources */,
 				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,

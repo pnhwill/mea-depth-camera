@@ -18,6 +18,8 @@ class AudioVisualizerViewController: UIViewController {
     /// Audio waveform layer.
     let audioShapeLayer = CAShapeLayer()
     
+    var audioLevelMeter = AudioLevelMeter()
+    
     /// Audio visualization processing queue.
     let audioQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "audioQueue"),
                                    qos: .userInitiated,
@@ -35,6 +37,14 @@ class AudioVisualizerViewController: UIViewController {
         view.layer.addSublayer(audioShapeLayer)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let levelMeterFrame = CGRect(origin: view.bounds.origin, size: CGSize(width: 100, height: view.bounds.height))
+        audioLevelMeter = AudioLevelMeter(frame: levelMeterFrame)
+        view.addSubview(audioLevelMeter)
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
@@ -49,7 +59,7 @@ class AudioVisualizerViewController: UIViewController {
             // Spectrogram
             self.audioSpectrogram.captureOutput(didOutput: sampleBuffer)
             
-            // Waveform
+            // Waveform and Level
             if let data = AudioUtilities.getAudioData(sampleBuffer) {
                 
                 var samples = [Float](repeating: 0, count: data.count)
@@ -61,6 +71,13 @@ class AudioVisualizerViewController: UIViewController {
                                         min: Float(Int16.min),
                                         max: Float(Int16.max),
                                         hScale: 1)
+                
+                let peakLevel = AudioUtilities.peakDecibelLevel(of: samples)
+                let timescale = Float(CMSampleBufferGetDuration(sampleBuffer).timescale)
+                let meanLevels = AudioUtilities.meanDecibelLevel(of: samples, window: 1.0, sampleRate: timescale)
+                
+                self.audioLevelMeter.refresh(peakDecibels: peakLevel, meanDecibels: meanLevels[0])
+                
             } else {
                 print("Unable to parse the audio resource.")
             }

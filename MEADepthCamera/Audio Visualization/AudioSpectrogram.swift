@@ -244,7 +244,7 @@ extension AudioSpectrogram {
     }
 }
 
-// MARK: AVFoundation Support
+// MARK: CoreMedia Support
 extension AudioSpectrogram {
     
     func captureOutput(didOutput sampleBuffer: CMSampleBuffer) {

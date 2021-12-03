@@ -8,10 +8,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Navigation Controller-->
+        <!--Portrait Locked Navigation Controller-->
         <scene sceneID="sig-Ve-aPu">
             <objects>
-                <navigationController storyboardIdentifier="CameraNavigationController" modalPresentationStyle="fullScreen" id="BVm-lt-oCP" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="CameraNavigationController" modalPresentationStyle="fullScreen" id="BVm-lt-oCP" customClass="PortraitLockedNavigationController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="YBr-RP-ooK">
                         <rect key="frame" x="0.0" y="24" width="834" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -22,7 +22,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6nU-o5-3p9" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3914" y="928"/>
+            <point key="canvasLocation" x="-358" y="996"/>
         </scene>
         <!--Camera View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -133,7 +133,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <exit id="2cV-U4-Cah" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="4667" y="928"/>
+            <point key="canvasLocation" x="396" y="996"/>
         </scene>
         <!--Audio Visualizer View Controller-->
         <scene sceneID="NdJ-3y-pAr">
@@ -142,12 +142,13 @@
                     <view key="view" contentMode="scaleToFill" id="WxV-fT-LPT">
                         <rect key="frame" x="0.0" y="0.0" width="834" height="190"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="dpq-ut-d2b"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iXS-9c-QIt" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5358" y="713"/>
+            <point key="canvasLocation" x="1086" y="781"/>
         </scene>
     </scenes>
     <resources>
