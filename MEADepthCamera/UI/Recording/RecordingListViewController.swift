@@ -20,7 +20,10 @@ class RecordingListViewController: UICollectionViewController {
     
     private static let sectionHeaderElementKind = "SectionHeaderElementKind"
     
-    private let visionTrackingQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "visionTrackingQueue"), qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private let visionTrackingQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "visionTrackingQueue"),
+                                                    qos: .userInitiated,
+                                                    attributes: [],
+                                                    autoreleaseFrequency: .workItem)
     
     @IBOutlet private weak var startStopButton: UIBarButtonItem!
     
@@ -51,12 +54,12 @@ class RecordingListViewController: UICollectionViewController {
         navigationItem.title = "Review Recordings"
         configureCollectionView()
         configureDataSource()
-        applyInitialSnapshot()
+        refreshListData(isInitialSnapshot: true)
         
         listItemsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.refreshListData()
+                self?.refreshListData(isInitialSnapshot: false)
             }
         recordingDidChangeSubscriber = NotificationCenter.default
             .publisher(for: .recordingDidChange)
@@ -158,37 +161,23 @@ extension RecordingListViewController {
     }
     
     // MARK: Snapshots
-    private func applyInitialSnapshot() {
+    private func refreshListData(isInitialSnapshot: Bool) {
         // Set the order for our sections
         guard let keys = viewModel?.sectionsStore?.allModels.keys else { return }
         let sections = Array(keys)
         var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
         snapshot.appendSections(sections)
-        dataSource?.apply(snapshot, animatingDifferences: false)
-        
-        // Set section snapshots for each section
-        for section in sections {
-            guard let items = viewModel?.sectionsStore?.fetchByID(section)?.recordings else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
-            sectionSnapshot.append(items)
-            dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: false)
+        if !isInitialSnapshot {
+            snapshot.reloadSections(sections)
         }
-    }
-    
-    private func refreshListData() {
-        // Set the order for our sections
-        guard let keys = viewModel?.sectionsStore?.allModels.keys else { return }
-        let sections = Array(keys)
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()
-        snapshot.appendSections(sections)
-        dataSource?.apply(snapshot, animatingDifferences: true)
+        dataSource?.apply(snapshot, animatingDifferences: !isInitialSnapshot)
         
         // Set section snapshots for each section
         for section in sections {
             guard let items = viewModel?.sectionsStore?.fetchByID(section)?.recordings else { continue }
             var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Item.ID>()
             sectionSnapshot.append(items)
-            dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: true)
+            dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: !isInitialSnapshot)
         }
     }
     

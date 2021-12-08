@@ -8,8 +8,16 @@
 import AVFoundation
 import Combine
 
-// This implements a protocol for all file writers
+enum WriteState {
+    case inactive, active
+}
 
+enum FileWriteResult {
+    case success
+    case failed(Error?)
+}
+
+/// This implements a protocol for all file writers.
 protocol FileWriter: AnyObject {
     /*
     associatedtype OutputSettings: FileConfiguration
@@ -34,7 +42,9 @@ protocol CSVFileWriter: FileWriter {
     
 }
 
-// Abstract superclass for all video/audio/depth data file writers
+// MARK: MediaFileWriter
+
+/// Abstract superclass for all video/audio/depth data file writers.
 class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S.Failure == Error {
     
     // MARK: Properties
@@ -57,11 +67,7 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
         self.subject = subject
     }
     
-//    deinit {
-//        print("deinitializing \(description)")
-//    }
-    
-    // MARK: Lifecycle Methods
+    // MARK: Start/Finish Methods
     
     func start(at startTime: CMTime) {
         writeState = .active
@@ -81,8 +87,9 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
         subject.send(writeState)
     }
     
-    // Call this when done transferring audio and video data.
-    // Here you evaluate the final status of the AVAssetWriter.
+    /// Call this when done transferring audio and video data.
+    ///
+    /// Here you evaluate the final status of the AVAssetWriter.
     func finish(completion: Subscribers.Completion<Error>) {
         switch completion {
         case .failure:

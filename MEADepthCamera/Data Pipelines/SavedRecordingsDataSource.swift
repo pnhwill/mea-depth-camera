@@ -4,23 +4,29 @@
 //
 //  Created by Will on 8/3/21.
 //
-/*
- Abstract:
- Data source implementing the storage abstraction to keep face capture recording sessions for the data pipelines
- */
 
-import Foundation
 import CoreData
 
+/// Data source implementing the storage abstraction to keep face capture recording sessions for the data pipelines.
 class SavedRecordingsDataSource {
+    
+    struct SavedFile {
+        let outputType: OutputType
+        let lastPathComponent: String
+    }
+
+    struct SavedRecording {
+        let name: String
+        let folderURL: URL
+        let duration: Double?
+        var savedFiles: [SavedFile]
+    }
     
     let baseURL: URL
     let fileManager = FileManager.default
     var savedRecording: SavedRecording?
     
     var processorSettings: ProcessorSettings?
-    
-    // Core Data providers
     
     lazy var recordingProvider: RecordingProvider = {
         let container = AppDelegate.shared.coreDataStack.persistentContainer
@@ -43,25 +49,9 @@ class SavedRecordingsDataSource {
     
     func addRecording(_ folderURL: URL, outputFiles: [OutputType: URL], processorSettings: ProcessorSettings) {
         let folderName = folderURL.lastPathComponent
-        print(folderName)
-        var savedFiles = [SavedFile]()
-        for file in outputFiles {
-            let outputType = file.key
-            let fileName = file.value.lastPathComponent
-            let newFile = SavedFile(outputType: outputType, lastPathComponent: fileName)
-            savedFiles.append(newFile)
-        }
-        savedRecording = SavedRecording(name: folderName, folderURL: folderURL, duration: nil, task: nil, savedFiles: savedFiles)
+        let savedFiles = addFiles(outputFiles)
+        savedRecording = SavedRecording(name: folderName, folderURL: folderURL, duration: nil, savedFiles: savedFiles)
         self.processorSettings = processorSettings
-    }
-    
-    func addFiles(to savedRecording: inout SavedRecording, newFiles: [OutputType: URL]) {
-        for file in newFiles {
-            let outputType = file.key
-            let fileName = file.value.lastPathComponent
-            let newFile = SavedFile(outputType: outputType, lastPathComponent: fileName)
-            savedRecording.savedFiles.append(newFile)
-        }
     }
     
     func saveRecording(to useCase: UseCase, for task: Task) {
@@ -87,7 +77,18 @@ class SavedRecordingsDataSource {
         })
     }
     
-    func saveFile(_ file: SavedFile, to recording: Recording) -> OutputFile? {
+    private func addFiles(_ newFiles: [OutputType: URL]) -> [SavedFile] {
+        var savedFiles = [SavedFile]()
+        for file in newFiles {
+            let outputType = file.key
+            let fileName = file.value.lastPathComponent
+            let newFile = SavedFile(outputType: outputType, lastPathComponent: fileName)
+            savedFiles.append(newFile)
+        }
+        return savedFiles
+    }
+    
+    private func saveFile(_ file: SavedFile, to recording: Recording) -> OutputFile? {
         // Saves an output file to the persistent storage
         guard let context = recording.managedObjectContext else { return nil }
         var outputFile: OutputFile?
@@ -98,29 +99,6 @@ class SavedRecordingsDataSource {
             newFile.recording = recording
             outputFile = newFile
         })
-        print(outputFile!.fileName!)
         return outputFile
     }
-    
-//    func removeSavedRecording(at index: Int) throws {
-//        let savedRecording = savedRecordings[index]
-//        try fileManager.removeItem(at: savedRecording.folderURL)
-//        savedRecordings.remove(at: index)
-//    }
-//
-//    func removeAllSavedRecordings() {
-//        guard let folders = try? fileManager.contentsOfDirectory(at: baseURL, includingPropertiesForKeys: nil) else {
-//            return
-//        }
-//        for folder in folders {
-//            try? fileManager.removeItem(at: folder)
-//        }
-//        savedRecordings.removeAll()
-//    }
-//
-//    func readRecordings() {
-//
-//    }
-    
-    
 }

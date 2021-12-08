@@ -4,13 +4,10 @@
 //
 //  Created by Will on 9/1/21.
 //
-/*
-Abstract:
-A class to wrap everything related to creating and deleting recordings.
-*/
 
 import CoreData
 
+/// A class to wrap everything related to creating and deleting recordings.
 class RecordingProvider: DataProvider {
     
     typealias Object = Recording

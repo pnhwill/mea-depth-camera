@@ -4,14 +4,11 @@
 //
 //  Created by Will on 8/27/21.
 //
-/*
-Abstract:
-A class to wrap everything related to fetching, creating, and deleting tasks, and to fetch data from the JSON file and save it to the Core Data store.
-*/
 
 import CoreData
 import OSLog
 
+/// A class to wrap everything related to fetching, creating, and deleting tasks, and to fetch data from the JSON file and save it to the Core Data store.
 class TaskProvider: FetchingDataProvider {
     typealias Object = Task
     
@@ -32,9 +29,7 @@ class TaskProvider: FetchingDataProvider {
     
     let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
     
-    /**
-     A fetched results controller for the Task entity, sorted by the sortKey property.
-     */
+    /// A fetched results controller for the Task entity, sorted by the sortKey property.
     private(set) lazy var fetchedResultsController: NSFetchedResultsController<Task> = {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: sortAscending)]

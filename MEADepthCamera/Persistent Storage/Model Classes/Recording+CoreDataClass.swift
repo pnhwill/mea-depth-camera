@@ -6,8 +6,8 @@
 //
 //
 
-import Foundation
 import CoreData
+import AVFoundation
 
 @objc(Recording)
 public class Recording: NSManagedObject {
@@ -32,6 +32,27 @@ public class Recording: NSManagedObject {
             newFile.recording = self
             self.addToFiles(newFile)
         }
+    }
+    
+    /// Loads the video assets for the recording.
+    func loadAssets() -> (AVAsset, AVAsset)? {
+        guard let videoFile = files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.video.rawValue }) as? OutputFile,
+              let depthFile = files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.depth.rawValue }) as? OutputFile,
+              let videoURL = videoFile.fileURL,
+              let depthURL = depthFile.fileURL else {
+            print("Failed to access saved files")
+            return nil
+        }
+        
+        if FileManager.default.fileExists(atPath: videoURL.path) {
+            totalFrames = Int64(getNumberOfFrames(videoURL))
+        } else {
+            print("File does not exist at specified URL: \(videoURL.path)")
+            return nil
+        }
+        let videoAsset = AVAsset(url: videoURL)
+        let depthAsset = AVAsset(url: depthURL)
+        return (videoAsset, depthAsset)
     }
     
 }

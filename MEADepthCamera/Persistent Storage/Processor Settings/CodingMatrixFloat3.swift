@@ -41,7 +41,6 @@ class CodingMatrixFloat3: NSObject, NSSecureCoding {
             bytePointer.withMemoryRebound(to: Float3.self, capacity: numColumns) { pointer in
                 let bufferPointer = UnsafeBufferPointer<Float3>(start: pointer, count: numColumns)
                 self.columns = Array<Float3>(bufferPointer)
-                //print("Finished decoding matrix float3")
             }
         }
     }
@@ -52,7 +51,6 @@ class CodingMatrixFloat3: NSObject, NSSecureCoding {
         columns.withUnsafeBufferPointer { bufferPointer in
             bufferPointer.baseAddress?.withMemoryRebound(to: UInt8.self, capacity: numBytes) { pointer in
                 coder.encodeBytes(pointer, length: numBytes, forKey: CodingKeys.columns.rawValue)
-                print("Finished encoding matrix float3")
             }
         }
     }

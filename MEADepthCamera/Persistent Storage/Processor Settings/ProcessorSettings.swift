@@ -7,16 +7,17 @@
 
 import AVFoundation
 
+/// Encapsulation of capture information used by the video processing pipelines, which is stored in each recording.
 public class ProcessorSettings: NSObject {
     
-    // The number of landmarks depends on the Vision request revision
+    // The number of landmarks depends on the Vision request revision.
     var numLandmarks: Int = 76
-    // These sizes represent the final output resolutions in portrait orientation
+    // These sizes represent the final output resolutions in portrait orientation.
     var videoResolution: CGSize
     var depthResolution: CGSize
-    // The video/depth frames are delivered in landscapeLeft orientation, so we need to know how to rotate their dimensions
+    // The video/depth frames are delivered in landscapeLeft orientation, so we need to know how to rotate their dimensions.
     var videoOrientation: AVCaptureVideoOrientation
-    // We have to wait until we receive the first depth frame to set the camera calibration data
+    // We have to wait until we receive the first depth frame to set the camera calibration data.
     var cameraCalibrationData: AVCameraCalibrationData?
     var decodedCameraCalibrationData: CodingCameraCalibrationData?
     
@@ -27,7 +28,7 @@ public class ProcessorSettings: NSObject {
         super.init()
     }
     
-    // Required initializer for NSSecureCoding
+    // Required initializer for NSSecureCoding.
     public required init?(coder: NSCoder) {
         let numLandmarks = coder.decodeInteger(forKey: CodingKeys.numLandmarks.rawValue)
         let videoResolution = coder.decodeCGSize(forKey: CodingKeys.videoResolution.rawValue)
@@ -49,7 +50,7 @@ public class ProcessorSettings: NSObject {
 // MARK: Convenience Getter Methods
 extension ProcessorSettings {
     func getTransform() -> CGAffineTransform {
-        // The TrueDepth camera is in the front position
+        // The TrueDepth camera is in the front position.
         let angleOffset = CGFloat(videoOrientation.angleOffsetFromPortraitOrientation(at: .front))
         let transform = CGAffineTransform(rotationAngle: angleOffset)
         return transform

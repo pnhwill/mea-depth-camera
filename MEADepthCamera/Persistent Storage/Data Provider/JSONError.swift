@@ -4,14 +4,10 @@
 //
 //  Created by Will on 9/8/21.
 //
-/*
-Abstract:
-An enumeration of JSON-loaded (experiment & task) fetch and consumption errors.
-*/
 
 import Foundation
 
-// MARK: JSON Error
+/// An enumeration of JSON-loaded (experiment & task) fetch and consumption errors.
 enum JSONError: Error {
     case wrongDataFormat(error: Error)
     case missingData

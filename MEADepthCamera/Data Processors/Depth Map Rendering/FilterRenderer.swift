@@ -34,9 +34,10 @@ protocol FilterRenderer: AnyObject {
     func render(pixelBuffer: CVPixelBuffer) -> CVPixelBuffer?
 }
 
+// MARK: PixelBufferPool Allocation
 extension FilterRenderer {
     
-    static func allocateOutputBufferPool(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) -> (outputBufferPool: CVPixelBufferPool?,
+    func allocateOutputBufferPool(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) -> (outputBufferPool: CVPixelBufferPool?,
                                                                                                                             outputColorSpace: CGColorSpace?,
                                                                                                                             outputFormatDescription: CMFormatDescription?) {
         let inputMediaSubType = CMFormatDescriptionGetMediaSubType(inputFormatDescription)
@@ -105,7 +106,7 @@ extension FilterRenderer {
         return (pixelBufferPool, cgColorSpace, outputFormatDescription)
     }
 
-    private static func preallocateBuffers(pool: CVPixelBufferPool, allocationThreshold: Int) {
+    private func preallocateBuffers(pool: CVPixelBufferPool, allocationThreshold: Int) {
         var pixelBuffers = [CVPixelBuffer]()
         var error: CVReturn = kCVReturnSuccess
         let auxAttributes = [kCVPixelBufferPoolAllocationThresholdKey as String: allocationThreshold] as NSDictionary
@@ -119,7 +120,10 @@ extension FilterRenderer {
         }
         pixelBuffers.removeAll()
     }
-    
+}
+
+// MARK: Metal Frame Capture
+extension FilterRenderer {
     /// Debugging function for GPU frame capture.
     ///
     /// Should not be included in release builds.

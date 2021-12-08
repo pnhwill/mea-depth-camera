@@ -4,13 +4,10 @@
 //
 //  Created by Will on 9/1/21.
 //
-/*
-Abstract:
-A class to wrap everything related to fetching, creating, and deleting use cases.
-*/
 
 import CoreData
 
+/// A class to wrap everything related to fetching, creating, and deleting use cases.
 class UseCaseProvider: FetchingDataProvider {
     
     typealias Object = UseCase
@@ -20,9 +17,8 @@ class UseCaseProvider: FetchingDataProvider {
     var sortKey: String = Schema.UseCase.title.rawValue
     var sortAscending: Bool = true
     
-    /**
-     A fetched results controller for the UseCase entity, sorted by the sortKey property.
-     */
+    
+    /// A fetched results controller for the UseCase entity, sorted by the sortKey property.
     private(set) lazy var fetchedResultsController: NSFetchedResultsController<UseCase> = {
         let fetchRequest: NSFetchRequest<UseCase> = UseCase.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: sortAscending)]

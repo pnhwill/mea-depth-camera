@@ -4,13 +4,10 @@
 //
 //  Created by Will on 9/2/21.
 //
-/*
-Abstract:
-A class to wrap everything related to creating, and deleting output files, and saving and deleting file data.
-*/
 
 import CoreData
 
+/// A class to wrap everything related to creating, and deleting output files, and saving and deleting file data.
 class OutputFileProvider: DataProvider {
     
     typealias Object = OutputFile

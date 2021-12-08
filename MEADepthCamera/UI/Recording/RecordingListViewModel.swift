@@ -68,9 +68,9 @@ class RecordingListViewModel: ObservableObject {
     
     private let useCase: UseCase
     
-    private lazy var recordings: [Recording]? = {
+    private var recordings: [Recording]? {
         useCase.recordings?.allObjects as? [Recording]
-    }()
+    }
     
     private var sections: [Section]? {
         guard let recordings = recordings else { return nil }

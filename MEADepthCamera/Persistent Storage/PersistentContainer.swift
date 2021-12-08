@@ -12,9 +12,7 @@ class PersistentContainer: NSPersistentContainer {
     
     // MARK: Core Data Saving support
     
-    /**
-     Save a context, or handle the save error (for example, when there data inconsistency or low memory).
-     */
+    /// Save a context, or handle the save error (for example, when there data inconsistency or low memory).
     func saveContext(backgroundContext: NSManagedObjectContext? = nil, with contextualInfo: ContextSaveContextualInfo? = nil) {
         let context = backgroundContext ?? viewContext
         guard context.hasChanges else { return }
@@ -30,9 +28,7 @@ class PersistentContainer: NSPersistentContainer {
 //        return context
 //    }
     
-    /**
-     Handles save error by presenting an alert.
-     */
+    /// Handles save error by presenting an alert.
     private func handleSavingError(_ error: Error, contextualInfo: ContextSaveContextualInfo?) {
         print("Context saving error: \(error)")
         if let contextualInfo = contextualInfo {
@@ -59,9 +55,7 @@ class PersistentContainer: NSPersistentContainer {
     }
 }
 
-/**
- Contextual information for handling Core Data context save errors.
- */
+/// Contextual information for handling Core Data context save errors.
 enum ContextSaveContextualInfo: String {
     case addUseCase = "adding a use case"
     case deleteUseCase = "deleting a use case"

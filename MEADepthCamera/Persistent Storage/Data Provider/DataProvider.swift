@@ -21,7 +21,7 @@ protocol DataProvider: AnyObject {
 }
 
 
-/// Additional properties for DataProviders which perform Core Data fetch requests to retrieve their associated objects
+/// Additional properties for DataProviders which perform Core Data fetch requests to retrieve their associated objects.
 protocol FetchingDataProvider: DataProvider {
     var sortKey: String { get set }
     var sortAscending: Bool { get set }

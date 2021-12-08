@@ -36,7 +36,7 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
     func prepare(with inputFormatDescription: CMFormatDescription, outputRetainedBufferCountHint: Int) {
         reset()
         
-        (outputPixelBufferPool, _, outputFormatDescription) = Self.allocateOutputBufferPool(with: inputFormatDescription, outputRetainedBufferCountHint: outputRetainedBufferCountHint)
+        (outputPixelBufferPool, _, outputFormatDescription) = allocateOutputBufferPool(with: inputFormatDescription, outputRetainedBufferCountHint: outputRetainedBufferCountHint)
         if outputPixelBufferPool == nil {
             return
         }
@@ -59,6 +59,7 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
         isPrepared = true
     }
     
+    // MARK: Reset
     func reset() {
         outputPixelBufferPool = nil
         outputFormatDescription = nil
@@ -136,7 +137,7 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
     }
 }
 
-// MARK: Private Methods
+// MARK: Metal Setup
 extension LensDistortionCorrectionProcessor {
     
     private func loadMetal() {

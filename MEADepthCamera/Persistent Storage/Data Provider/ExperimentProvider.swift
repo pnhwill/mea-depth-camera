@@ -4,14 +4,11 @@
 //
 //  Created by Will on 9/1/21.
 //
-/*
-Abstract:
-A class to wrap everything related to fetching, creating, and deleting experiments, and to fetch data from the JSON file and save it to the Core Data store.
-*/
 
 import CoreData
 import OSLog
 
+/// A class to wrap everything related to fetching, creating, and deleting experiments, and to fetch data from the JSON file and save it to the Core Data store.
 class ExperimentProvider: FetchingDataProvider {
     
     typealias Object = Experiment
@@ -31,9 +28,8 @@ class ExperimentProvider: FetchingDataProvider {
     
     let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
     
-    /**
-     A fetched results controller for the Experiment entity, sorted by the sortKey property.
-     */
+    
+    /// A fetched results controller for the Experiment entity, sorted by the sortKey property.
     private(set) lazy var fetchedResultsController: NSFetchedResultsController<Experiment> = {
         let fetchRequest: NSFetchRequest<Experiment> = Experiment.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: sortAscending)]

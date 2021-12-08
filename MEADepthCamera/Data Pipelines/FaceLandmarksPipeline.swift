@@ -35,9 +35,6 @@ class FaceLandmarksPipeline: DataPipeline {
     private var faceLandmarks3DFileWriter: FaceLandmarksFileWriter
     private var infoFileWriter: InfoFileWriter
     
-    // Pixel buffer pool for concurrent tracking & file writing
-    private var depthMapPixelBufferPool: CVPixelBufferPool?
-    
     // Video readers and assets
     private var videoReader: VideoReader?
     private var depthReader: VideoReader?
@@ -65,7 +62,7 @@ class FaceLandmarksPipeline: DataPipeline {
     
     func startTracking() throws {
         // Load RGB and depth map video files from saved URLs
-        guard let (videoAsset, depthAsset) = self.loadAssets(from: recording),
+        guard let (videoAsset, depthAsset) = recording.loadAssets(),
               let saveFolder = recording.folderURL
         else {
             throw VisionTrackerProcessorError.fileNotFound
@@ -74,17 +71,10 @@ class FaceLandmarksPipeline: DataPipeline {
         self.depthAsset = depthAsset
         
         // Create the landmarks csv files and save in recordings data source
-        
-        guard let landmarks2DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks2D.rawValue, fileType: "csv") else {
-            print("Failed to create landmarks2D file")
-            return
-        }
-        guard let landmarks3DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks3D.rawValue, fileType: "csv") else {
-            print("Failed to create landmarks2D file")
-            return
-        }
-        guard let infoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.info.rawValue, fileType: "csv") else {
-            print("Failed to create landmarks2D file")
+        guard let landmarks2DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks2D.rawValue, fileType: "csv"),
+              let landmarks3DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks3D.rawValue, fileType: "csv"),
+              let infoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.info.rawValue, fileType: "csv") else {
+            print("Failed to create csv files for data output.")
             return
         }
         self.recording.addFiles(newFiles: [OutputType.landmarks2D: landmarks2DURL,
@@ -100,28 +90,6 @@ class FaceLandmarksPipeline: DataPipeline {
         
         // Try to perform the video tracking
         try self.performTracking()
-    }
-    
-    /// Loads the video assets for the inputted recording.
-    private func loadAssets(from recording: Recording) -> (AVAsset, AVAsset)? {
-        
-        guard let videoFile = recording.files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.video.rawValue }) as? OutputFile,
-              let depthFile = recording.files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.depth.rawValue }) as? OutputFile,
-              let videoURL = videoFile.fileURL,
-              let depthURL = depthFile.fileURL else {
-            print("Failed to access saved files")
-            return nil
-        }
-        
-        if FileManager.default.fileExists(atPath: videoURL.path) {
-            recording.totalFrames = Int64(getNumberOfFrames(videoURL))
-        } else {
-            print("File does not exist at specified URL: \(videoURL.path)")
-            return nil
-        }
-        let videoAsset = AVAsset(url: videoURL)
-        let depthAsset = AVAsset(url: depthURL)
-        return (videoAsset, depthAsset)
     }
     
     // MARK: Read Video and Perform Tracking
@@ -148,20 +116,6 @@ class FaceLandmarksPipeline: DataPipeline {
         var nextDepthImage: CVPixelBuffer?
         if let depthFrame = nextDepthFrame {
             nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
-        }
-        
-        // Create pixel buffer pool for depth map rectification
-        if depthMapPixelBufferPool == nil, let depthImage = nextDepthImage {
-            var depthFormatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                         imageBuffer: depthImage,
-                                                         formatDescriptionOut: &depthFormatDescription)
-            if let unwrappedDepthFormatDescription = depthFormatDescription {
-                (depthMapPixelBufferPool, _, _) = LensDistortionCorrectionProcessor.allocateOutputBufferPool(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
-            }
-        }
-        if depthMapPixelBufferPool == nil {
-            throw VisionTrackerProcessorError.readerInitializationFailed
         }
         
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
@@ -314,6 +268,7 @@ class FaceLandmarksPipeline: DataPipeline {
 // MARK: Lens Distortion Correction
 extension FaceLandmarksPipeline {
     
+    /// Rectify the depth data map from lens-distorted to rectilinear coordinate space.
     private func rectifyDepthMapGPU(depthDataMap: CVPixelBuffer) -> CVPixelBuffer? {
         if !lensDistortionCorrectionProcessor.isPrepared {
             var depthFormatDescription: CMFormatDescription?
@@ -348,73 +303,4 @@ extension FaceLandmarksPipeline {
         
         return outputPoint
     }
-    
-    /// Rectify the depth data map from lens-distorted to rectilinear coordinate space.
-    private func rectifyDepthDataMap(depthDataMap: CVPixelBuffer) -> CVPixelBuffer? {
-        
-        // Get camera instrinsics
-        guard let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
-              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
-            print("FaceLandmarksPipeline.rectifyDepthDataMap: Could not find camera calibration data")
-            return nil
-        }
-        let referenceDimensions: CGSize = cameraCalibrationData.intrinsicMatrixReferenceDimensions
-        let opticalCenter: CGPoint = cameraCalibrationData.lensDistortionCenter
-        
-        let ratio: Float = Float(referenceDimensions.width) / Float(CVPixelBufferGetWidth(depthDataMap))
-        let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
-        
-        // Get depth stream resolutions and pixel format
-        let depthMapWidth = CVPixelBufferGetWidth(depthDataMap)
-        let depthMapHeight = CVPixelBufferGetHeight(depthDataMap)
-        let depthMapSize = CGSize(width: depthMapWidth, height: depthMapHeight)
-        
-        var newPixelBuffer: CVPixelBuffer?
-        CVPixelBufferPoolCreatePixelBuffer(kCFAllocatorDefault, depthMapPixelBufferPool!, &newPixelBuffer)
-        guard let outputBuffer = newPixelBuffer else {
-            print("Allocation failure: Could not get pixel buffer from pool)")
-            return nil
-        }
-        
-        CVPixelBufferLockBaseAddress(depthDataMap, .readOnly)
-        CVPixelBufferLockBaseAddress(outputBuffer, CVPixelBufferLockFlags(rawValue: 0))
-        
-        let inputBytesPerRow = CVPixelBufferGetBytesPerRow(depthDataMap)
-        guard let inputBaseAddress = CVPixelBufferGetBaseAddress(depthDataMap) else {
-            print("input pointer failed")
-            return nil
-        }
-        let outputBytesPerRow = CVPixelBufferGetBytesPerRow(outputBuffer)
-        guard let outputBaseAddress = CVPixelBufferGetBaseAddress(outputBuffer) else {
-            print("output pointer failed")
-            return nil
-        }
-        
-        // Loop over all output pixels
-        for y in 0..<depthMapHeight {
-            // Create pointer to output buffer
-            let outputRowData = outputBaseAddress + y * outputBytesPerRow
-            let outputData = UnsafeMutableBufferPointer(start: outputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
-            
-            for x in 0..<depthMapWidth {
-                // For each output pixel, do inverse distortion transformation and clamp the points within the bounds of the buffer
-                let distortedPoint = CGPoint(x: x, y: y)
-                var correctedPoint = lensDistortionPointForPoint(distortedPoint, lookupTable, scaledOpticalCenter, depthMapSize)
-                correctedPoint.clamp(bounds: depthMapSize)
-                
-                // Create pointer to input buffer
-                let inputRowData = inputBaseAddress + Int(correctedPoint.y) * inputBytesPerRow
-                let inputData = UnsafeBufferPointer(start: inputRowData.assumingMemoryBound(to: Float32.self), count: depthMapWidth)
-                
-                // Sample pixel value from input buffer and pull into output buffer
-                let pixelValue = inputData[Int(correctedPoint.x)]
-                outputData[x] = pixelValue
-            }
-        }
-        CVPixelBufferUnlockBaseAddress(depthDataMap, .readOnly)
-        CVPixelBufferUnlockBaseAddress(outputBuffer, CVPixelBufferLockFlags(rawValue: 0))
-        
-        return outputBuffer
-    }
-    
 }

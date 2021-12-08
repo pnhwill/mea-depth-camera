@@ -4,20 +4,12 @@
 //
 //  Created by Will on 9/1/21.
 //
-/*
-Abstract:
-A class to set up the Core Data stack, observe Core Data notifications, process persistent history, and deduplicate.
-*/
 
 import Foundation
 import CoreData
 import OSLog
 
-// MARK: Core Data Stack
-
-/**
- Core Data stack setup including history processing.
- */
+/// Sets up the Core Data stack, observes Core Data notifications, processed persistent history, and deduplicates.
 class CoreDataStack {
     
     let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)

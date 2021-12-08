@@ -4,13 +4,10 @@
 //
 //  Created by Will on 9/13/21.
 //
-/*
-Abstract:
-A tranformer class that transforms NSData to ProcessorSettings and vice versa.
-*/
 
 import Foundation
 
+/// A tranformer class that transforms NSData to ProcessorSettings and vice versa.
 class ProcessorSettingsToDataTransformer: NSSecureUnarchiveFromDataTransformer {
     
     override class func allowsReverseTransformation() -> Bool {

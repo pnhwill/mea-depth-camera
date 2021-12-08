@@ -8,7 +8,7 @@
 import AVFoundation
 import Combine
 
-// Helper object that uses AVAssetWriter to record the video and audio output streams to a file
+/// Helper object that uses AVAssetWriter to record the video and audio output streams to a file.
 class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == WriteState, S.Failure == Error {
     
     // MARK: Properties

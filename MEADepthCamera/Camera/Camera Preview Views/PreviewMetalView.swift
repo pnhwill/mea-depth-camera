@@ -4,15 +4,12 @@
 //
 //  Created by Will on 7/28/21.
 //
-/*
-Abstract:
-The Metal preview view.
-*/
 
 import CoreMedia
 import Metal
 import MetalKit
 
+/// The Metal preview view.
 class PreviewMetalView: MTKView {
     
     enum Rotation: Int {

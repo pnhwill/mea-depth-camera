@@ -5,10 +5,10 @@
 //  Created by William Harrington on 10/27/21.
 //
 
-import Foundation
 import UIKit
 
 // MARK: ListSection
+/// Generic model of a list section for either a header or the main list of items, containing an array of the item identifiers for that section.
 struct ListSection: Identifiable {
     enum Identifier: Int, CaseIterable {
         case header
