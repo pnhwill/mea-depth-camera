@@ -119,4 +119,20 @@ extension FilterRenderer {
         }
         pixelBuffers.removeAll()
     }
+    
+    /// Debugging function for GPU frame capture.
+    ///
+    /// Should not be included in release builds.
+    func triggerProgrammaticCapture(with device: MTLDevice) {
+        let captureManager = MTLCaptureManager.shared()
+        let captureDescriptor = MTLCaptureDescriptor()
+        captureDescriptor.captureObject = device
+        do {
+            try captureManager.startCapture(with: captureDescriptor)
+        }
+        catch
+        {
+            fatalError("error when trying to capture: \(error)")
+        }
+    }
 }

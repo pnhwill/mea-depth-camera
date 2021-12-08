@@ -28,10 +28,6 @@ public class UseCase: NSManagedObject {
     }
 }
 
-extension UseCase: ModelObject {
-    
-}
-
 // MARK: Text Formatters
 extension UseCase {
     func recordingsCountText() -> String {

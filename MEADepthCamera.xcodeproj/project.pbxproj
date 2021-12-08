@@ -125,7 +125,6 @@
 		BE64A214272A8C4000DA1689 /* TextViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A210272A8C4000DA1689 /* TextViewCell.swift */; };
 		BE64A215272A8C4000DA1689 /* TextInputCellDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A211272A8C4000DA1689 /* TextInputCellDelegate.swift */; };
 		BE64A217272A8C8700DA1689 /* ListTextCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A216272A8C8700DA1689 /* ListTextCell.swift */; };
-		BEBD1494271972C6007AC466 /* ModelObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBD1493271972C6007AC466 /* ModelObject.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -274,7 +273,6 @@
 		BE64A210272A8C4000DA1689 /* TextViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextViewCell.swift; sourceTree = "<group>"; };
 		BE64A211272A8C4000DA1689 /* TextInputCellDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextInputCellDelegate.swift; sourceTree = "<group>"; };
 		BE64A216272A8C8700DA1689 /* ListTextCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListTextCell.swift; sourceTree = "<group>"; };
-		BEBD1493271972C6007AC466 /* ModelObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -453,8 +451,8 @@
 				B5D6CAE826D9A3AA002165C6 /* Resources */,
 				B5796587269DED5F0070C294 /* Main.storyboard */,
 				B5AA5194275458E5000256E3 /* Camera.storyboard */,
-				B579658A269DED600070C294 /* Assets.xcassets */,
 				B579658C269DED600070C294 /* LaunchScreen.storyboard */,
+				B579658A269DED600070C294 /* Assets.xcassets */,
 				B579658F269DED600070C294 /* Info.plist */,
 				B5ABE86526AA09D0003D2AFD /* MEADepthCamera-Bridging-Header.h */,
 			);
@@ -504,7 +502,6 @@
 		B57FBD3A26F2816E00ACC129 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				BEBD1493271972C6007AC466 /* ModelObject.swift */,
 				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
 				B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */,
 				B58F4D61273A51AE0073B107 /* Views */,
@@ -857,7 +854,6 @@
 				B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */,
 				B5E5E71F2759CB4A0074894D /* AudioLevelMeter.swift in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
-				BEBD1494271972C6007AC466 /* ModelObject.swift in Sources */,
 				B50160892735E7E4003AB94D /* HeaderTextCell.swift in Sources */,
 				B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */,
 				B56F1A6426E0430600A29C42 /* CoreDataStack.swift in Sources */,
@@ -1066,6 +1062,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1120,6 +1117,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

@@ -252,27 +252,9 @@ class FaceLandmarksPipeline: DataPipeline {
             
             if let landmarks = faceObservation.landmarks?.allPoints {
                 
-                if let depthDataMap = depthDataMap, let correctedDepthMap = rectifyDepthDataMap(depthDataMap: depthDataMap) {
+                if let depthDataMap = depthDataMap, let correctedDepthMap = rectifyDepthMapGPU(depthDataMap: depthDataMap) {
                     
                     let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
-                    
-//                    if !lensDistortionCorrectionProcessor.isPrepared {
-//                        var depthFormatDescription: CMFormatDescription?
-//                        CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-//                                                                     imageBuffer: depthDataMap,
-//                                                                     formatDescriptionOut: &depthFormatDescription)
-//                        if let unwrappedDepthFormatDescription = depthFormatDescription {
-//                            lensDistortionCorrectionProcessor.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
-//                        }
-//                    }
-//
-//                    guard let correctedDepthMap = lensDistortionCorrectionProcessor.render(pixelBuffer: depthDataMap) else {
-//                        // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given.
-//                        print("Metal lens distortion correction processor failed to render depth map. Returning landmarks in RGB image coordinates.")
-//                        let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-//                        landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
-//                        return (boundingBox, landmarks2D, nil)
-//                    }
                     
                     let correctedLandmarks = landmarkPoints.map { rectifyLandmark(landmark: $0) }
                     
@@ -315,6 +297,38 @@ class FaceLandmarksPipeline: DataPipeline {
             return (boundingBox, landmarks2D, nil)
         }
         return (boundingBox, landmarks2D, landmarks3D)
+    }
+    
+    /// Write face observation results to file if collecting data.
+    func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {
+        
+        // Perform data collection in background queue so that it does not hold up the UI.
+        let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)
+        faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
+        if let landmarks3D = landmarks3D {
+            faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
+        }
+    }
+}
+
+// MARK: Lens Distortion Correction
+extension FaceLandmarksPipeline {
+    
+    private func rectifyDepthMapGPU(depthDataMap: CVPixelBuffer) -> CVPixelBuffer? {
+        if !lensDistortionCorrectionProcessor.isPrepared {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
+                                                         imageBuffer: depthDataMap,
+                                                         formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                lensDistortionCorrectionProcessor.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
+            }
+        }
+        let correctedDepthMap = lensDistortionCorrectionProcessor.render(pixelBuffer: depthDataMap)
+        if correctedDepthMap == nil {
+            print("Metal lens distortion correction processor failed to render depth map. Returning landmarks in RGB image coordinates.")
+        }
+        return correctedDepthMap
     }
     
     private func rectifyLandmark(landmark: CGPoint) -> CGPoint? {
@@ -403,14 +417,4 @@ class FaceLandmarksPipeline: DataPipeline {
         return outputBuffer
     }
     
-    /// Write face observation results to file if collecting data.
-    func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {
-        
-        // Perform data collection in background queue so that it does not hold up the UI.
-        let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)
-        faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
-        if let landmarks3D = landmarks3D {
-            faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
-        }
-    }
 }

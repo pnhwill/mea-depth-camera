@@ -9,12 +9,30 @@
 using namespace metal;
 
 // Include header shared between this Metal shader code and Swift code executing Metal API commands.
-#include "ShaderTypes.h"
+#import "ShaderTypes.h"
 
-constexpr sampler textureSampler (coord::pixel, mag_filter::linear, min_filter::linear);
+constexpr sampler textureSampler (coord::pixel, address::clamp_to_edge, filter::nearest);
 
-float2 lensDistortionPointForPoint(float2 point, constant float *lookupTableValues, unsigned long lookupTableCount, float2 opticalCenter, float2 imageSize)
+// Compute kernel for lens distortion correction.
+kernel void lensDistortionCorrection(texture2d<float, access::sample> inputTexture [[ texture(TextureIndexInput) ]],
+                                     texture2d<float, access::write> outputTexture [[ texture(TextureIndexOutput) ]],
+                                     constant float *lookupTableValues             [[ buffer(BufferIndexLookupTableValues) ]],
+                                     constant ulong &lookupTableCount              [[ buffer(BufferIndexLookupTableCount) ]],
+                                     constant float2 &opticalCenter                [[ buffer(BufferIndexOpticalCenter) ]],
+                                     uint2 gid [[thread_position_in_grid]])
 {
+    
+    float2 imageSize = float2(inputTexture.get_width(), inputTexture.get_height());
+    float2 point = float2(gid);
+    
+    // Check if the pixel is within the bounds of the output texture
+    if ((point.x >= imageSize.x) || (point.y >= imageSize.y))
+    {
+        return;
+    }
+    
+    // lensDistortionPointForPoint()
+    
     // The lookup table holds the relative radial magnification for n linearly spaced radii.
     // The first position corresponds to radius = 0
     // The last position corresponds to the largest radius found in the image.
@@ -33,9 +51,7 @@ float2 lensDistortionPointForPoint(float2 point, constant float *lookupTableValu
  
     // Look up the relative radial magnification to apply in the provided lookup table
     float magnification;
-//    constant float *lookupTableValues = lookupTable.values;
-//    unsigned long lookupTableCount = lookupTable.count;
- 
+    
     if ( r_point < r_max ) {
         // Linear interpolation
         float val   = r_point * ( lookupTableCount - 1 ) / r_max;
@@ -54,33 +70,11 @@ float2 lensDistortionPointForPoint(float2 point, constant float *lookupTableValu
     // Apply radial magnification
     float new_v_point_x = v_point_x + magnification * v_point_x;
     float new_v_point_y = v_point_y + magnification * v_point_y;
- 
-    // Construct output
-    return float2( opticalCenter.x + new_v_point_x, opticalCenter.y + new_v_point_y );
-}
-
-// Compute kernel for lens distortion correction.
-kernel void lensDistortionCorrection(texture2d<float, access::sample> inputTexture               [[ texture(0) ]],
-                                     texture2d<float, access::write> outputTexture               [[ texture(1) ]],
-                                     constant LensDistortionParameters& lensDistortionParameters [[ buffer(BufferIndexLensDistortionParameters) ]],
-                                     constant float *lookupTable                                 [[ buffer(BufferIndexLookupTable) ]],
-                                     uint2 gid [[thread_position_in_grid]])
-{
     
-    float2 imageSize = float2(inputTexture.get_width(), inputTexture.get_height());
+    float2 correctedPoint = float2( opticalCenter.x + new_v_point_x, opticalCenter.y + new_v_point_y );
     
-    // Check if the pixel is within the bounds of the output texture
-    if((gid.x >= imageSize.x) || (gid.y >= imageSize.y))
-    {
-        // Return early if the pixel is out of bounds
-        return;
-    }
-    
-    float2 distortedPoint = as_type<float2>(gid);
-    float2 correctedPoint = ::lensDistortionPointForPoint(distortedPoint, lookupTable, lensDistortionParameters.lookupTableCount, lensDistortionParameters.opticalCenter, imageSize);
-    
-    // TODO: clamp within bounds of buffer?
-    
+    // We don't need to manually clamp the point to within the buffer's bounds since the sampler is set to clamp_to_edge.
     float4 pixelValue = inputTexture.sample(textureSampler, correctedPoint);
+    
     outputTexture.write(pixelValue, gid);
 }

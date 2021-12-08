@@ -18,6 +18,3 @@ public class OutputFile: NSManagedObject {
     }
     
 }
-
-//extension OutputFile: ModelObject {
-//}

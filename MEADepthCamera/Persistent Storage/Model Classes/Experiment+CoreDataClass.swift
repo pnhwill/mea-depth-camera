@@ -29,9 +29,6 @@ public class Experiment: NSManagedObject {
     
 }
 
-//extension Experiment: ModelObject {
-//}
-
 // MARK: JSON Decoder
 
 /// A struct for decoding JSON with the following structure:

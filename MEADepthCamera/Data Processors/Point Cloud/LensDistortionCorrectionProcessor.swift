@@ -86,6 +86,9 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
                   return nil
         }
         
+//        triggerProgrammaticCapture(with: self.metalDevice)
+//        defer { MTLCaptureManager.shared().stopCapture() }
+        
         // Set up command queue, buffer, and encoder.
         guard let commandQueue = commandQueue,
             let commandBuffer = commandQueue.makeCommandBuffer(),
@@ -97,27 +100,24 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
         
         // Get camera calibration data
         guard let cameraCalibrationData = (settings.decodedCameraCalibrationData ?? settings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
-              var lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
+              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
             print("\(description): Could not find camera calibration data")
             return nil
         }
+        var lookupTableCount = UInt(lookupTable.count / MemoryLayout<Float>.stride)
         
-        let opticalCenter = vector_float2(Float(cameraCalibrationData.lensDistortionCenter.x), Float(cameraCalibrationData.lensDistortionCenter.y))
-        let lookupTableCount = UInt(lookupTable.count / MemoryLayout<Float32>.size)
-        
-        var lensDistortionParameters = LensDistortionParameters(opticalCenter: opticalCenter, lookupTableCount: lookupTableCount)
-//        var lookupTablePointer = UnsafeBufferPointer<Float32>(_empty: ())
-//        lookupTable.withUnsafeBytes { bytes in
-//            lookupTablePointer = UnsafeBufferPointer<Float32>(start: bytes.baseAddress?.assumingMemoryBound(to: Float32.self), count: Int(lookupTableCount))
-//        }
+        var opticalCenter = vector_float2(Float(cameraCalibrationData.lensDistortionCenter.x), Float(cameraCalibrationData.lensDistortionCenter.y))
         
         // Set arguments to shader.
         commandEncoder.label = description
         commandEncoder.setComputePipelineState(computePipelineState!)
         commandEncoder.setTexture(inputTexture, index: Int(TextureIndexInput.rawValue))
         commandEncoder.setTexture(outputTexture, index: Int(TextureIndexOutput.rawValue))
-        commandEncoder.setBytes(&lensDistortionParameters, length: MemoryLayout.size(ofValue: lensDistortionParameters), index: Int(BufferIndexLensDistortionParameters.rawValue))
-        commandEncoder.setBytes(&lookupTable, length: MemoryLayout.size(ofValue: lookupTable), index: Int(BufferIndexLookupTable.rawValue))
+        lookupTable.withUnsafeBytes { lookupTablePointer in
+            commandEncoder.setBytes(lookupTablePointer.baseAddress!, length: lookupTable.count, index: Int(BufferIndexLookupTableValues.rawValue))
+        }
+        commandEncoder.setBytes(&lookupTableCount, length: MemoryLayout<UInt>.size, index: Int(BufferIndexLookupTableCount.rawValue))
+        commandEncoder.setBytes(&opticalCenter, length: MemoryLayout<vector_float2>.size, index: Int(BufferIndexOpticalCenter.rawValue))
         
         // Set up the thread groups.
         let width = computePipelineState!.threadExecutionWidth
@@ -139,11 +139,9 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
 // MARK: Private Methods
 extension LensDistortionCorrectionProcessor {
     
-    private static let computeFunctionName = "lensDistortionCorrection"
-    
     private func loadMetal() {
         let defaultLibrary = metalDevice.makeDefaultLibrary()!
-        let kernelFunction = defaultLibrary.makeFunction(name: Self.computeFunctionName)
+        let kernelFunction = defaultLibrary.makeFunction(name: "lensDistortionCorrection")
         do {
             computePipelineState = try metalDevice.makeComputePipelineState(function: kernelFunction!)
         } catch {
@@ -159,7 +157,7 @@ extension LensDistortionCorrectionProcessor {
         var cvTextureOut: CVMetalTexture?
         CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, textureCache, pixelBuffer, nil, textureFormat, width, height, 0, &cvTextureOut)
         guard let cvTexture = cvTextureOut, let texture = CVMetalTextureGetTexture(cvTexture) else {
-            print("Depth converter failed to create preview texture")
+            print("\(description) failed to create preview texture")
             
             CVMetalTextureCacheFlush(textureCache, 0)
             

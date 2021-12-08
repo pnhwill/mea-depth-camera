@@ -4,14 +4,10 @@
 //
 //  Created by Will on 8/2/21.
 //
-/*
-Abstract:
-Contains the video reader implementation using AVCapture.
-*/
 
-import Foundation
 import AVFoundation
 
+/// Contains the video reader implementation using AVCapture.
 class VideoReader {
     static private let millisecondsInSecond: Float32 = 1000.0
     

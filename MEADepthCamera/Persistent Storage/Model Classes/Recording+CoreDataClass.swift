@@ -15,6 +15,10 @@ public class Recording: NSManagedObject {
     public override func awakeFromFetch() {
         super.awakeFromFetch()
         //folderURL = useCase?.folderURL?.appendingPathComponent(name!)
+        guard let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            fatalError("Unable to locate Documents directory.")
+        }
+        folderURL = docsURL.appendingPathComponent(name!)
     }
     
     func addFiles(newFiles: [OutputType: URL]) {
@@ -31,9 +35,6 @@ public class Recording: NSManagedObject {
     }
     
 }
-
-//extension Recording: ModelObject {
-//}
 
 // MARK: Text Formatters
 extension Recording {

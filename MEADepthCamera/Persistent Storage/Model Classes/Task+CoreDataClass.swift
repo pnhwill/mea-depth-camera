@@ -34,9 +34,6 @@ public class Task: NSManagedObject {
     
 }
 
-//extension Task: ModelObject {
-//}
-
 // MARK: Text Formatters
 extension Task {
     func recordingsCountText(for useCase: UseCase) -> String {
