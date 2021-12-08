@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// Main UIView subclass for the audio level meter that contains and updates LevelMeterBar subviews for the peak and mean audio decibel levels.
 class AudioLevelMeter: UIView {
     
     private let minDecibels: Float = -80.0
@@ -27,6 +28,8 @@ class AudioLevelMeter: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: Update Display
+    
     func refresh(peakDecibels: Float, meanDecibels: Float) {
         let peakLevel = clampAndNormalize(peakDecibels)
         let meanLevel = clampAndNormalize(meanDecibels)

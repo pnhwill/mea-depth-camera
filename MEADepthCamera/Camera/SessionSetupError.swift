@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Custom error type for CaptureSessionManager configuration errors.
 enum SessionSetupError: Error {
     case noVideoDevice
     case noAudioDevice

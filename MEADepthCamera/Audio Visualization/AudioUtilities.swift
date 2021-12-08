@@ -11,7 +11,9 @@ import Accelerate
 /// Class containing static methods for audio signal processing.
 class AudioUtilities {
     
-    private static let maxFloat = Float(Int16.max)
+    static let maxFloat = Float(Int16.max)
+    
+    // MARK: Extract Audio Data
     
     /// Returns an array of 16-bit integer values for the specified audio sample buffer.
     static func getAudioData(_ sampleBuffer: CMSampleBuffer) -> [Int16]? {
@@ -40,6 +42,8 @@ class AudioUtilities {
         
         return Array(buf)
     }
+    
+    // MARK: Audio dB Level
     
     static func peakDecibelLevel(of signal: [Float]) -> Float {
         
@@ -72,10 +76,4 @@ class AudioUtilities {
     
 }
 
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
-        }
-    }
-}
+

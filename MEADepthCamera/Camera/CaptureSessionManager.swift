@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-/// The class that creates and manages the AVCaptureSession.
+/// Helper class that creates and manages the AVCaptureSession.
 class CaptureSessionManager: NSObject {
     
     typealias SessionSetupCompletedAction = (AVCaptureDevice, AVCaptureVideoDataOutput, AVCaptureDepthDataOutput, AVCaptureAudioDataOutput) -> Void
@@ -28,8 +28,8 @@ class CaptureSessionManager: NSObject {
     // Data outputs
     private(set) var videoDataOutput = AVCaptureVideoDataOutput()
     private(set) var depthDataOutput = AVCaptureDepthDataOutput()
-    //private(set) var metadataOutput = AVCaptureMetadataOutput()
     private(set) var audioDataOutput = AVCaptureAudioDataOutput()
+    //private(set) var metadataOutput = AVCaptureMetadataOutput()
     
     // Video output resolution and orientation for processor settings
     private var videoDimensions: CMVideoDimensions?
@@ -71,7 +71,7 @@ class CaptureSessionManager: NSObject {
         completion(videoDevice, videoDataOutput, depthDataOutput, audioDataOutput)
     }
     
-    // MARK: - Capture Device Configuration
+    // MARK: - Capture Devices
     
     private func configureFrontCamera() throws {
         // Configure front TrueDepth camera as an AVCaptureDevice
@@ -114,7 +114,7 @@ class CaptureSessionManager: NSObject {
         }
     }
     
-    // MARK: - Data Output Configuration
+    // MARK: - Data Outputs
     
     private func configureVideoDataOutput() throws {
         // Add a video data output
@@ -167,7 +167,7 @@ class CaptureSessionManager: NSObject {
         }
     }
     
-    // MARK: - Device Format Configuration
+    // MARK: - Video Format
     
     private func configureDeviceFormat() throws {
         // Search for best video format that supports depth (prioritize highest framerate, then choose highest resolution)

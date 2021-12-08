@@ -4,13 +4,10 @@
 //
 //  Created by Will on 10/15/21.
 //
-/*
-Abstract:
-Generic model store for quick lookup of Identifiable models.
-*/
 
 import Foundation
 
+/// Generic model store for quick lookup of Identifiable models.
 protocol ModelStore {
     associatedtype Model: Identifiable
     

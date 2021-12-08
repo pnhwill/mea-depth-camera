@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// Subview for the audio level meter that draws a filled rectangle proportional to the current audio level every time the level is set.
 class LevelMeterBar: UIView {
     
     var fillColor: UIColor
@@ -29,6 +30,7 @@ class LevelMeterBar: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: Draw
     override func draw(_ rect: CGRect) {
         guard let context = UIGraphicsGetCurrentContext() else {
             return

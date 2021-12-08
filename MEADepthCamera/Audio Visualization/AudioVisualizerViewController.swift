@@ -9,7 +9,7 @@ import UIKit
 import CoreMedia
 import Accelerate
 
-/// A view controller that displays two real-time audio signal visualizations.
+/// A view controller that displays three real-time audio signal visualizations.
 class AudioVisualizerViewController: UIViewController {
     
     /// The audio spectrogram layer.
@@ -18,6 +18,7 @@ class AudioVisualizerViewController: UIViewController {
     /// Audio waveform layer.
     let audioShapeLayer = CAShapeLayer()
     
+    /// Audio level meter view.
     var audioLevelMeter = AudioLevelMeter()
     
     /// Audio visualization processing queue.
@@ -68,8 +69,8 @@ class AudioVisualizerViewController: UIViewController {
                 self.displayWaveInLayer(self.audioShapeLayer,
                                         ofColor: .red,
                                         signal: samples,
-                                        min: Float(Int16.min),
-                                        max: Float(Int16.max),
+                                        min: AudioUtilities.maxFloat,
+                                        max: AudioUtilities.maxFloat,
                                         hScale: 1)
                 
                 let peakLevel = AudioUtilities.peakDecibelLevel(of: samples)

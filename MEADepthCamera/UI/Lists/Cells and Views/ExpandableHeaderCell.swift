@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// ItemListCell subclass for expandable outline headers.
 class ExpandableHeaderCell: ItemListCell<ListItem> {
     
     override init(frame: CGRect) {

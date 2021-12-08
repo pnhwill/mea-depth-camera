@@ -8,6 +8,15 @@
 import AVFoundation
 import UIKit
 
+// MARK: Array
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
+    }
+}
+
 // MARK: UIView
 extension UIView {
     func bindEdgesToSuperview() {
@@ -88,31 +97,6 @@ extension Bundle {
             reverseDNS += ".\(suffix)"
         }
         return reverseDNS
-    }
-}
-
-// MARK: VisionFaceDetectionProcessor
-extension LiveFaceDetectionProcessor {
-    // Helper Methods for Handling Device Orientation & EXIF
-    func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
-        
-        switch deviceOrientation {
-        case .portraitUpsideDown:
-            return .rightMirrored
-            
-        case .landscapeLeft:
-            return .downMirrored
-            
-        case .landscapeRight:
-            return .upMirrored
-            
-        default:
-            return .leftMirrored
-        }
-    }
-    
-    func exifOrientationForCurrentDeviceOrientation() -> CGImagePropertyOrientation {
-        return exifOrientationForDeviceOrientation(UIDevice.current.orientation)
     }
 }
 

@@ -8,6 +8,7 @@
 import UIKit
 import CoreData
 
+/// Protocol for ListViewController view models.
 protocol ListViewModel {
     
     typealias Item = ListItem

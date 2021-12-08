@@ -7,12 +7,11 @@
 
 import UIKit
 
-/// UINavigationController subclass that stays locked in portrait orientation.
+/// UINavigationController subclass that ensures the interface stays locked in portrait orietentation.
 ///
 /// We use this as a container for the CameraViewController, since it inherits its orientation from its parent.
 class PortraitLockedNavigationController: UINavigationController {
     
-    // Ensure that the interface stays locked in Portrait.
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
     }

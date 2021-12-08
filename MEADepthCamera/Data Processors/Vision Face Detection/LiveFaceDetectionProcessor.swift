@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Vision
+import UIKit
 
 protocol LiveFaceDetectionProcessorDelegate: AnyObject {
     func displayFrame(_ faceObservations: [VNFaceObservation])
@@ -47,5 +48,29 @@ class LiveFaceDetectionProcessor: VisionProcessor {
             print("Vision error: \(error.localizedDescription)")
         }
     }
+}
+
+// MARK: Image Orientation
+extension LiveFaceDetectionProcessor {
+    // Helper Methods for Handling Device Orientation & EXIF
+    func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
+        
+        switch deviceOrientation {
+        case .portraitUpsideDown:
+            return .rightMirrored
+            
+        case .landscapeLeft:
+            return .downMirrored
+            
+        case .landscapeRight:
+            return .upMirrored
+            
+        default:
+            return .leftMirrored
+        }
+    }
     
+    func exifOrientationForCurrentDeviceOrientation() -> CGImagePropertyOrientation {
+        return exifOrientationForDeviceOrientation(UIDevice.current.orientation)
+    }
 }
