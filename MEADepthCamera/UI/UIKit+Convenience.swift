@@ -1,0 +1,72 @@
+//
+//  UIKit+Convenience.swift
+//  MEADepthCamera
+//
+//  Created by Will on 12/8/21.
+//
+
+import UIKit
+
+// MARK: UIViewController
+extension UIViewController {
+    func alert(title: String, message: String, actions: [UIAlertAction]) {
+        
+        let alertController = UIAlertController(title: title,
+                                                message: message,
+                                                preferredStyle: .alert)
+        
+        actions.forEach {
+            alertController.addAction($0)
+        }
+        
+        self.present(alertController, animated: true, completion: nil)
+    }
+}
+
+// MARK: UIView
+extension UIView {
+    func bindEdgesToSuperview() {
+        
+        guard let s = superview else {
+            preconditionFailure("`superview` nil in bindEdgesToSuperview")
+        }
+        
+        translatesAutoresizingMaskIntoConstraints = false
+        leadingAnchor.constraint(equalTo: s.leadingAnchor).isActive = true
+        trailingAnchor.constraint(equalTo: s.trailingAnchor).isActive = true
+        topAnchor.constraint(equalTo: s.topAnchor).isActive = true
+        bottomAnchor.constraint(equalTo: s.bottomAnchor).isActive = true
+    }
+}
+
+// MARK: UIFont
+extension UIFont {
+    
+    var bold: UIFont {
+        return with(.traitBold)
+    }
+
+    var italic: UIFont {
+        return with(.traitItalic)
+    }
+
+    var boldItalic: UIFont {
+        return with([.traitBold, .traitItalic])
+    }
+    
+    func with(_ traits: UIFontDescriptor.SymbolicTraits...) -> UIFont {
+        guard let descriptor = self.fontDescriptor.withSymbolicTraits(UIFontDescriptor.SymbolicTraits(traits).union(self.fontDescriptor.symbolicTraits)) else {
+            return self
+        }
+        return UIFont(descriptor: descriptor, size: 0)
+    }
+
+    func without(_ traits: UIFontDescriptor.SymbolicTraits...) -> UIFont {
+        guard let descriptor = self.fontDescriptor.withSymbolicTraits(self.fontDescriptor.symbolicTraits.subtracting(UIFontDescriptor.SymbolicTraits(traits))) else {
+            return self
+        }
+        return UIFont(descriptor: descriptor, size: 0)
+    }
+}
+
+

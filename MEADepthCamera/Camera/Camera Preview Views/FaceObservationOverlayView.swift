@@ -13,7 +13,6 @@ import Vision
 /// coming from processing frames from a live video stream.
 class FaceObservationOverlayView: UIView {
     
-    // Data collection
     private var processorSettings: ProcessorSettings?
     
     // Layer UI for drawing Vision results
@@ -170,7 +169,7 @@ class FaceObservationOverlayView: UIView {
         }
         
         // Scale and mirror the image to ensure upright presentation.
-        let affineTransform = CGAffineTransform(rotationAngle: radiansForDegrees(rotation))
+        let affineTransform = CGAffineTransform(rotationAngle: degreesToRadians(rotation))
             .scaledBy(x: scaleX, y: -scaleY)
         overlayLayer.setAffineTransform(affineTransform)
 

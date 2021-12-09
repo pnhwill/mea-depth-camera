@@ -10,8 +10,9 @@ import Vision
 import UIKit
 
 protocol LiveFaceDetectionProcessorDelegate: AnyObject {
-    func displayFrame(_ faceObservations: [VNFaceObservation])
-    func checkAlignment(of faceObservation: VNFaceObservation)
+    
+    func faceObservationDetected(_ faceObservation: VNFaceObservation)
+    
 }
 
 /// Detects faces from the selfie cam feed in real time.
@@ -41,9 +42,8 @@ class LiveFaceDetectionProcessor: VisionProcessor {
             }
             if let face = faceObservations.first {
                 // Get face rectangles request containing roll & yaw for alignment checking
-                self.delegate?.checkAlignment(of: face)
+                self.delegate?.faceObservationDetected(face)
             }
-            self.delegate?.displayFrame(faceObservations)
         } catch {
             print("Vision error: \(error.localizedDescription)")
         }

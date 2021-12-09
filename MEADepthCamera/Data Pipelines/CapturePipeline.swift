@@ -14,8 +14,6 @@ protocol CapturePipelineDelegate: AnyObject {
     
     func previewPixelBufferReadyForDisplay(_ previewPixelBuffer: CVPixelBuffer)
     
-    func displayFaceObservations(_ faceObservations: [VNFaceObservation])
-    
     func setFaceAlignment(_ isAligned: Bool)
     
     func audioSampleBufferReadyForDisplay(_ sampleBuffer: CMSampleBuffer)
@@ -46,7 +44,9 @@ class CapturePipeline: NSObject, DataPipeline {
     }
     
     // Data output synchronizer queue
-    let dataOutputQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "captureQueue"), qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    let dataOutputQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "captureQueue"),
+                                        qos: .userInitiated,
+                                        autoreleaseFrequency: .workItem)
     
     // Depth processing
     let videoDepthConverter = DepthToGrayscaleConverter()
@@ -473,45 +473,8 @@ extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
 
 extension CapturePipeline: LiveFaceDetectionProcessorDelegate {
     
-    func displayFrame(_ faceObservations: [VNFaceObservation]) {
-//        delegate?.displayFaceObservations(faceObservations)
-    }
-    
-    func checkAlignment(of faceObservation: VNFaceObservation) {
-        let faceBounds = faceObservation.boundingBox
-        //print("x: \(faceBounds.midX)")
-        //print("y: \(faceBounds.midY)")
-        //print("size: \(faceBounds.size)")
-        
-        // Check if face is centered on the screen
-        let centerPoint = CGPoint(x: 0.5, y: 0.43)
-        let centerErrorMargin: CGFloat = 0.1
-        let xError = (faceBounds.midX - centerPoint.x).magnitude
-        let yError = (faceBounds.midY - centerPoint.y).magnitude
-        let centeredCondition = xError <= centerErrorMargin && yError <= centerErrorMargin
-        //print("x error: \(xError) y error: \(yError)")
-        
-        // Check if face is correct size on screen
-        let size = CGSize(width: 0.45, height: 0.25)
-        let sizeErrorMargin: CGFloat = 0.15
-        let widthError = (faceBounds.width - size.width).magnitude
-        let heightError = (faceBounds.height - size.height).magnitude
-        let sizeCondition = widthError <= sizeErrorMargin && heightError <= sizeErrorMargin
-        //print("width error: \(widthError) height error: \(heightError)")
-        
-        // Get face rotation
-        // If the roll and/or yaw is not found, it will default to 0.0 so that the rotation condition is true (i.e. it doesn't check the rotation)
-        let faceRoll = CGFloat(truncating: faceObservation.roll ?? 0.0)
-        let faceYaw = CGFloat(truncating: faceObservation.yaw ?? 0.0)
-        //print("roll: \(faceRoll) yaw: \(faceYaw)")
-        
-        // Check if face is facing screen
-        let rotation: CGFloat = 10
-        let rotationErrorMargin = radiansForDegrees(rotation)
-        let rotationCondition = faceRoll.magnitude <= rotationErrorMargin && faceYaw.magnitude <= rotationErrorMargin
-        
-        let isAligned: Bool = centeredCondition && sizeCondition && rotationCondition
-        
-        delegate?.setFaceAlignment(isAligned)
+    func faceObservationDetected(_ faceObservation: VNFaceObservation) {
+        let faceAlignment = FaceAlignment(faceObservation: faceObservation)
+        delegate?.setFaceAlignment(faceAlignment.isAligned)
     }
 }

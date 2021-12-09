@@ -57,8 +57,8 @@ extension ProcessorSettings {
     }
     
     func getPortraitResolutions() -> (CGSize, CGSize) {
-        let portraitVideoResolution = CGRect(x: 0, y: 0, width: CGFloat(videoResolution.width), height: CGFloat(videoResolution.height)).applying(getTransform()).standardized.size.rounded()
-        let portraitDepthResolution = CGRect(x: 0, y: 0, width: CGFloat(depthResolution.width), height: CGFloat(depthResolution.height)).applying(getTransform()).standardized.size.rounded()
+        let portraitVideoResolution = CGRect(x: 0, y: 0, width: CGFloat(videoResolution.width), height: CGFloat(videoResolution.height)).applying(getTransform()).standardized.size.rounded
+        let portraitDepthResolution = CGRect(x: 0, y: 0, width: CGFloat(depthResolution.width), height: CGFloat(depthResolution.height)).applying(getTransform()).standardized.size.rounded
         return (portraitVideoResolution, portraitDepthResolution)
     }
 }

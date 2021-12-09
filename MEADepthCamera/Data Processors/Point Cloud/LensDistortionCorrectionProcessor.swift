@@ -8,7 +8,7 @@
 import CoreMedia
 import Metal
 
-/// Image processor that performs lens distortion correction.
+/// Image processor that performs lens distortion correction using a Metal GPU shader.
 class LensDistortionCorrectionProcessor: FilterRenderer {
     
     let description: String = "Lens Distortion Correction Processor"

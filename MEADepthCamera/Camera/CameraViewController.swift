@@ -12,10 +12,6 @@ import Vision
 /// A view controller that displays the camera preview, manages camera controls, and contains an embedded audio visualizer view controller.
 class CameraViewController: UIViewController {
     
-    private enum SessionMode {
-        case record, stop
-    }
-    
     // MARK: - Properties
     
     // Video preview view
@@ -26,7 +22,7 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var resumeButton: UIButton!
     @IBOutlet private weak var recordButton: UIButton!
     
-    @IBOutlet private weak var indicatorImage: UIImageView!
+    @IBOutlet private weak var faceGuideView: FaceGuideView!
     
     // Navigation bar button
     @IBOutlet private weak var doneButton: UIBarButtonItem!
@@ -44,12 +40,9 @@ class CameraViewController: UIViewController {
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
     private var isSessionRunning = false
-    private let sessionQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "sessionQueue"), attributes: [], autoreleaseFrequency: .workItem)
-    private var sessionMode: SessionMode = .record {
-        didSet {
-            self.handleSessionModeChange()
-        }
-    }
+    private let sessionQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "sessionQueue"),
+                                             autoreleaseFrequency: .workItem)
+    
     private var renderingEnabled = true
     
     // Capture data output delegate
@@ -57,14 +50,6 @@ class CameraViewController: UIViewController {
     
     // Movie recording
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
-    
-    private var reusableFaceObservationOverlayViews: [FaceObservationOverlayView] {
-        if let existingViews = previewView.subviews as? [FaceObservationOverlayView] {
-            return existingViews
-        } else {
-            return [FaceObservationOverlayView]()
-        }
-    }
     
     // Use case and task
     private var useCase: UseCase!
@@ -242,10 +227,6 @@ class CameraViewController: UIViewController {
             }
         }
     }
-    
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//    }
     
     override func viewWillDisappear(_ animated: Bool) {
         capturePipeline?.dataOutputQueue.async {
@@ -532,9 +513,6 @@ class CameraViewController: UIViewController {
     // MARK: - Toggle Recording
     
     @IBAction private func toggleRecording(_ sender: UIButton) {
-        guard sessionMode == .record else {
-            return
-        }
         
         // Don't let the user spam the button
         // Disable the Record button until recording starts or finishes.
@@ -547,16 +525,14 @@ class CameraViewController: UIViewController {
                     if let capturePipeline = self.capturePipeline {
                         self.updateRecordButtonWithRecordingState(capturePipeline.recordingState)
                     }
+                    self.updateIndicator()
                 }
             }
             
             switch self.capturePipeline?.recordingState {
             case .idle:
                 // Only let recording start if the face is aligned
-                guard self.isAligned else {
-                    print("Face is not aligned")
-                    return
-                }
+                guard self.isAligned else { return }
                 // Start background task so that recording can always finish in the background
                 if UIDevice.current.isMultitaskingSupported {
                     self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
@@ -568,9 +544,6 @@ class CameraViewController: UIViewController {
                 self.capturePipeline?.startRecording()
                 
             case .recording:
-                DispatchQueue.main.async {
-                    self.sessionMode = .stop
-                }
                 self.capturePipeline?.stopRecording()
                 if let currentBackgroundRecordingID = self.backgroundRecordingID {
                     self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
@@ -601,42 +574,11 @@ class CameraViewController: UIViewController {
     private func updateIndicator() {
         guard renderingEnabled else { return }
         DispatchQueue.main.async {
-            self.indicatorImage.image = self.isAligned ? UIImage(systemName: "checkmark.square.fill") : UIImage(systemName: "xmark.square")
-            self.indicatorImage.tintColor = self.isAligned ? UIColor.systemGreen : UIColor.systemRed
-        }
-    }
-    
-    // MARK: - Recording Processing
-    
-    private func handleSessionModeChange() {
-        switch sessionMode {
-        case .stop:
-            // Switch from live recording mode to post-processing mode
-            capturePipeline?.dataOutputQueue.async {
-                self.renderingEnabled = false
-            }
-            sessionQueue.async {
-                if self.sessionManager.setupResult == .success {
-                    self.sessionManager.session.stopRunning()
-                    self.isSessionRunning = self.sessionManager.session.isRunning
-                }
-            }
-            self.spinner.startAnimating()
-        case .record:
-            // Switch back to live recording mode
-            capturePipeline?.dataOutputQueue.async {
-                self.renderingEnabled = true
-            }
-            sessionQueue.async {
-                if self.sessionManager.setupResult == .success {
-                    self.sessionManager.session.startRunning()
-                    self.isSessionRunning = self.sessionManager.session.isRunning
-                }
-            }
-            self.spinner.stopAnimating()
-            // Enable the navigation bar done button
-            DispatchQueue.main.async {
-                self.doneButton.isEnabled = true
+            switch self.capturePipeline?.recordingState {
+            case .recording, .start:
+                self.faceGuideView.outlineColor = .white
+            default:
+                self.faceGuideView.outlineColor = self.isAligned ? .green : .red
             }
         }
     }
@@ -650,30 +592,6 @@ extension CameraViewController: CapturePipelineDelegate {
         previewView.pixelBuffer = previewPixelBuffer
     }
     
-    func displayFaceObservations(_ faceObservations: [VNFaceObservation]) {
-        guard let rootView = previewView, renderingEnabled, let settings = capturePipeline?.processorSettings else {
-            //print("Preview view not found/rendering disabled")
-            return
-        }
-        // Perform all UI updates (drawing) on the main queue, not the background queue from which this is called.
-        DispatchQueue.main.async {
-            var reusableViews = self.reusableFaceObservationOverlayViews
-            for observation in faceObservations {
-                // Reuse existing observation view if there is one.
-                if let existingView = reusableViews.popLast() {
-                    existingView.faceObservation = observation
-                } else {
-                    let newView = FaceObservationOverlayView(faceObservation: observation, settings: settings)
-                    rootView.addSubview(newView)
-                }
-            }
-            // Remove previously existing views that were not reused.
-            for view in reusableViews {
-                view.removeFromSuperview()
-            }
-        }
-    }
-    
     func setFaceAlignment(_ isAligned: Bool) {
         self.isAligned = isAligned
     }
@@ -684,8 +602,6 @@ extension CameraViewController: CapturePipelineDelegate {
     }
     
     func capturePipelineRecordingDidStop() {
-        DispatchQueue.main.async {
-            self.sessionMode = .record
-        }
+        
     }
 }

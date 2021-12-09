@@ -39,6 +39,8 @@
 		B55429B1276067E2000D3620 /* Camera.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B55429AF276067E2000D3620 /* Camera.storyboard */; };
 		B56BF7682717402D003622F1 /* CodingCameraCalibrationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */; };
 		B56BF76A27174089003622F1 /* CodingMatrixFloat3.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */; };
+		B56ED3D6276193E7002FB747 /* FaceAlignment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56ED3D5276193E7002FB747 /* FaceAlignment.swift */; };
+		B56ED3D82761BF84002FB747 /* UIKit+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56ED3D72761BF84002FB747 /* UIKit+Convenience.swift */; };
 		B56F1A6426E0430600A29C42 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A6326E0430600A29C42 /* CoreDataStack.swift */; };
 		B56F1A6626E045AF00A29C42 /* Schema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A6526E045AF00A29C42 /* Schema.swift */; };
 		B56F1A8A26E06B2300A29C42 /* DataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56F1A8926E06B2300A29C42 /* DataProvider.swift */; };
@@ -68,6 +70,7 @@
 		B57B3C17273B499200CCF9A8 /* RecordingListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57B3C16273B499200CCF9A8 /* RecordingListViewModel.swift */; };
 		B57CE0682752E2D900BAFAA0 /* GraphUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57CE0672752E2D900BAFAA0 /* GraphUtility.swift */; };
 		B57CE06A2752E92E00BAFAA0 /* AudioUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57CE0692752E92E00BAFAA0 /* AudioUtilities.swift */; };
+		B58122B52761D2BF00055C04 /* FaceGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58122B42761D2BF00055C04 /* FaceGuideView.swift */; };
 		B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */; };
 		B585A0A226C58A9500CA6546 /* Task+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */; };
 		B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */; };
@@ -176,6 +179,8 @@
 		B55429B0276067E2000D3620 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Camera.storyboard; sourceTree = "<group>"; };
 		B56BF7672717402D003622F1 /* CodingCameraCalibrationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingCameraCalibrationData.swift; sourceTree = "<group>"; };
 		B56BF76927174089003622F1 /* CodingMatrixFloat3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingMatrixFloat3.swift; sourceTree = "<group>"; };
+		B56ED3D5276193E7002FB747 /* FaceAlignment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceAlignment.swift; sourceTree = "<group>"; };
+		B56ED3D72761BF84002FB747 /* UIKit+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIKit+Convenience.swift"; sourceTree = "<group>"; };
 		B56F1A6326E0430600A29C42 /* CoreDataStack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		B56F1A6526E045AF00A29C42 /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
 		B56F1A8926E06B2300A29C42 /* DataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataProvider.swift; sourceTree = "<group>"; };
@@ -212,6 +217,7 @@
 		B57B3C16273B499200CCF9A8 /* RecordingListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingListViewModel.swift; sourceTree = "<group>"; };
 		B57CE0672752E2D900BAFAA0 /* GraphUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphUtility.swift; sourceTree = "<group>"; };
 		B57CE0692752E92E00BAFAA0 /* AudioUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioUtilities.swift; sourceTree = "<group>"; };
+		B58122B42761D2BF00055C04 /* FaceGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceGuideView.swift; sourceTree = "<group>"; };
 		B585A09A26C58A9500CA6546 /* Recording+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Recording+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Recording+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09C26C58A9500CA6546 /* Task+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "Task+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/Task+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
 		B585A09E26C58A9500CA6546 /* OutputFile+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "OutputFile+CoreDataClass.swift"; path = "MEADepthCamera/Persistent Storage/Model Classes/OutputFile+CoreDataClass.swift"; sourceTree = SOURCE_ROOT; };
@@ -482,6 +488,7 @@
 			children = (
 				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
 				B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */,
+				B56ED3D72761BF84002FB747 /* UIKit+Convenience.swift */,
 				B58F4D61273A51AE0073B107 /* Views */,
 				B5F447EA26EFF72400528ACA /* Lists */,
 				B591615427279630005604BF /* Details */,
@@ -533,6 +540,7 @@
 				B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */,
 				B5D4E3FB26B2192000CB1241 /* PreviewMetalView.swift */,
 				B545F13B274AF87F009F1A57 /* PreviewMetalViewRotation.swift */,
+				B58122B42761D2BF00055C04 /* FaceGuideView.swift */,
 			);
 			path = "Camera Preview Views";
 			sourceTree = "<group>";
@@ -584,6 +592,7 @@
 			isa = PBXGroup;
 			children = (
 				B53CD4B226B38EF3003BBFD9 /* CapturePipeline.swift */,
+				B56ED3D5276193E7002FB747 /* FaceAlignment.swift */,
 				B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */,
 				B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */,
 				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
@@ -849,6 +858,7 @@
 				B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */,
 				B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */,
 				B58F4D60273A08600073B107 /* TitleSupplementaryView.swift in Sources */,
+				B56ED3D82761BF84002FB747 /* UIKit+Convenience.swift in Sources */,
 				B536DA3D271F781200A9C3BB /* ReadjustingStackView.swift in Sources */,
 				B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */,
 				B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */,
@@ -895,12 +905,14 @@
 				BE64A20A272949A200DA1689 /* UseCaseListViewModel.swift in Sources */,
 				B545F13C274AF87F009F1A57 /* PreviewMetalViewRotation.swift in Sources */,
 				B57B3C17273B499200CCF9A8 /* RecordingListViewModel.swift in Sources */,
+				B56ED3D6276193E7002FB747 /* FaceAlignment.swift in Sources */,
 				B501607F27345670003AB94D /* TaskSplitViewController.swift in Sources */,
 				B5ABE86426AA08E0003D2AFD /* DepthToGrayscaleConverter.swift in Sources */,
 				B585A0A026C58A9500CA6546 /* Recording+CoreDataClass.swift in Sources */,
 				B501607D273357FD003AB94D /* ButtonSupplementaryView.swift in Sources */,
 				B54215C426C3596F00A4F984 /* UseCaseDetailViewModel.swift in Sources */,
 				B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */,
+				B58122B52761D2BF00055C04 /* FaceGuideView.swift in Sources */,
 				BE64A212272A8C4000DA1689 /* PickerViewCell.swift in Sources */,
 				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,
 				B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */,
