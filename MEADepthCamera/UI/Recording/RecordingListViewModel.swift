@@ -11,6 +11,7 @@ class RecordingListViewModel: ObservableObject {
     
     typealias ProcessingCompleteAction = () -> Void
     
+    // MARK: Section
     struct Section: Identifiable {
         let title: String
         let id: UUID
@@ -32,6 +33,7 @@ class RecordingListViewModel: ObservableObject {
         }
     }
     
+    // MARK: Item
     struct Item: Identifiable, Hashable {
         let name: String
         let id: UUID
@@ -57,6 +59,7 @@ class RecordingListViewModel: ObservableObject {
         }
     }
     
+    // MARK: Model Stores
     lazy var sectionsStore: ObservableModelStore<Section>? = {
         guard let sections = sections else { return nil }
         return ObservableModelStore(sections)
@@ -112,14 +115,12 @@ class RecordingListViewModel: ObservableObject {
 
 // MARK: Model Store Configuration
 extension RecordingListViewModel {
-    
     /// Call each time a recording finishes being processed.
     private func reloadStores() {
         guard let sections = sections, let items = items else { return }
         sectionsStore?.merge(newModels: sections)
         itemsStore?.merge(newModels: items)
     }
-    
     /// Call each time a new frame is processed.
     private func reconfigureItem(recording: Recording, processedFrames: Int) {
         let item = Item(recording, processedFrames: processedFrames)

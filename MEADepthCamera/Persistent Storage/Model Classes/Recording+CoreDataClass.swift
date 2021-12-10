@@ -35,7 +35,9 @@ public class Recording: NSManagedObject {
     }
     
     /// Loads the video assets for the recording.
-    func loadAssets() -> (AVAsset, AVAsset)? {
+    ///
+    /// Calling this method sets the `totalFrames` property for this recording.
+    func loadAssets() -> (video: AVAsset, depth: AVAsset)? {
         guard let videoFile = files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.video.rawValue }) as? OutputFile,
               let depthFile = files?.first(where: { ($0 as? OutputFile)?.outputType == OutputType.depth.rawValue }) as? OutputFile,
               let videoURL = videoFile.fileURL,
@@ -54,7 +56,6 @@ public class Recording: NSManagedObject {
         let depthAsset = AVAsset(url: depthURL)
         return (videoAsset, depthAsset)
     }
-    
 }
 
 // MARK: Text Formatters

@@ -120,8 +120,8 @@ extension RecordingListViewController {
                 messageHeader = "Error"
             }
             let message: String = messageHeader + ": " + error.localizedDescription
-            let actions = [UIAlertAction(title: "OK", style: .cancel, handler: nil)]
-            self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
+            let alertController = Alert.displayError(message: message, completion: nil)
+            self.alert(alertController: alertController)
         }
     }
 }

@@ -10,6 +10,7 @@ import UIKit
 /// Container view for a UIImageView that displays the face alignment guide and updates the color of the guide when needed.
 class FaceGuideView: UIView {
     
+    /// Enumeration for the three possible states of the face guide image which we use to update the image.
     enum OutlineColor {
         case red, green, white
         
@@ -40,6 +41,9 @@ class FaceGuideView: UIView {
         }
     }
     
+    /// The current outline color of the face guide image.
+    ///
+    /// Setting this property automatically updates the image view using the new value.
     var outlineColor: OutlineColor = .white {
         didSet {
             updateImageView()

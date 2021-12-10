@@ -44,24 +44,28 @@ class FaceLandmarksPipeline: DataPipeline {
     private var cancelRequested = false
     
     init?(recording: Recording) {
-        guard let processorSettings = recording.processorSettings else {
-            print("Failed to start tracking: processor settings not found")
+        guard let processorSettings = recording.processorSettings,
+              let infoFileWriter = InfoFileWriter(recording: recording),
+              let faceLandmarks2DFileWriter = FaceLandmarksFileWriter(recording: recording, outputType: .landmarks2D),
+              let faceLandmarks3DFileWriter = FaceLandmarksFileWriter(recording: recording, outputType: .landmarks3D)
+        else {
+            print("Failed to initialize FaceLandmarksPipeline: recording is missing data.")
             return nil
         }
         self.processorSettings = processorSettings
         self.recording = recording
         self.visionTrackerProcessor = LandmarksTrackerProcessor(processorSettings: processorSettings)
         self.pointCloudProcessor = PointCloudProcessor(settings: processorSettings)
-        self.faceLandmarks2DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
-        self.faceLandmarks3DFileWriter = FaceLandmarksFileWriter(numLandmarks: processorSettings.numLandmarks)
-        self.infoFileWriter = InfoFileWriter(recording: recording, processorSettings: processorSettings)
+        self.infoFileWriter = infoFileWriter
+        self.faceLandmarks2DFileWriter = faceLandmarks2DFileWriter
+        self.faceLandmarks3DFileWriter = faceLandmarks3DFileWriter
         self.lensDistortionCorrectionProcessor = LensDistortionCorrectionProcessor(settings: processorSettings)
     }
     
     // MARK: - Pipeline Setup
     
     func startTracking() throws {
-        // Load RGB and depth map video files from saved URLs
+        // Load RGB and depth map video files from saved URLs.
         guard let (videoAsset, depthAsset) = recording.loadAssets(),
               let saveFolder = recording.folderURL
         else {
@@ -70,30 +74,24 @@ class FaceLandmarksPipeline: DataPipeline {
         self.videoAsset = videoAsset
         self.depthAsset = depthAsset
         
-        // Create the landmarks csv files and save in recordings data source
-        guard let landmarks2DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks2D.rawValue, fileType: "csv"),
-              let landmarks3DURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.landmarks3D.rawValue, fileType: "csv"),
-              let infoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.info.rawValue, fileType: "csv") else {
-            print("Failed to create csv files for data output.")
-            return
-        }
-        self.recording.addFiles(newFiles: [OutputType.landmarks2D: landmarks2DURL,
-                                           OutputType.landmarks3D: landmarks3DURL,
-                                           OutputType.info: infoURL])
+        self.recording.addFiles(newFiles: [.landmarks2D: faceLandmarks2DFileWriter.fileURL,
+                                           .landmarks3D: faceLandmarks3DFileWriter.fileURL,
+                                           .info: infoFileWriter.fileURL])
         
+        // Write the recording information to file now that totalFrames has been computed.
+        // (somewhat abusing the fact that the recording's folder is named using the start time of the recording).
+        infoFileWriter.writeInfoRow(startTime: saveFolder.lastPathComponent, totalFrames: Int(recording.totalFrames))
         
-        // Prepare the landmarks file writers
-        self.faceLandmarks2DFileWriter.prepare(saveURL: landmarks2DURL)
-        self.faceLandmarks3DFileWriter.prepare(saveURL: landmarks3DURL)
-        self.infoFileWriter.prepare(saveURL: infoURL)
-        self.infoFileWriter.createInfoRow(startTime: saveFolder.lastPathComponent, totalFrames: Int(recording.totalFrames))
-        
-        // Try to perform the video tracking
+        // Try to perform the video tracking.
         try self.performTracking()
     }
     
+    func cancelTracking() {
+        cancelRequested = true
+    }
+    
     // MARK: Read Video and Perform Tracking
-    func performTracking() throws {
+    private func performTracking() throws {
         guard let videoAsset = videoAsset, let depthAsset = depthAsset,
               let videoReader = VideoReader(videoAsset: videoAsset, videoDataType: .video),
               let depthReader = VideoReader(videoAsset: depthAsset, videoDataType: .depth) else {
@@ -121,7 +119,7 @@ class FaceLandmarksPipeline: DataPipeline {
         func trackAndRecord(video: CVPixelBuffer, depth: CVPixelBuffer?, _ frame: Int, _ timeStamp: Float64) throws {
             try visionTrackerProcessor.performVisionRequests(on: video, orientation: videoReader.orientation, completion: { faceObservation in
                 self.recordLandmarks(of: faceObservation, with: depth, frame: frame, timeStamp: timeStamp)
-                // Display the frame counter in the UI on the main thread
+                // Display the frame counter in the UI on the main thread.
                 DispatchQueue.main.async {
                     self.delegate?.displayFrameCounter(frame)
                 }
@@ -182,10 +180,6 @@ class FaceLandmarksPipeline: DataPipeline {
         delegate?.didFinishTracking(success: !cancelRequested)
     }
     
-    func cancelTracking() {
-        cancelRequested = true
-    }
-    
     // MARK: - Landmarks Depth Processing
     
     /// Combines a face observation and depth data to produce a bounding box and face landmarks in 3D space.
@@ -193,7 +187,7 @@ class FaceLandmarksPipeline: DataPipeline {
     /// If no depth is provided, it returns the 2D landmarks in image coordinates.
     /// If no landmarks are provided, it returns just the bounding box.
     /// If no face observation is provided, it returns all zeros.
-    func processFace(_ faceObservation: VNFaceObservation?, with depthDataMap: CVPixelBuffer?) -> (CGRect, [vector_float3], [vector_float3]?) {
+    private func processFace(_ faceObservation: VNFaceObservation?, with depthDataMap: CVPixelBuffer?) -> (CGRect, [vector_float3], [vector_float3]?) {
         
         // In case the face is lost in the middle of collecting data, this prevents empty or nil-valued cells in the file so it can still be parsed later.
         var boundingBox = CGRect.zero
@@ -254,7 +248,7 @@ class FaceLandmarksPipeline: DataPipeline {
     }
     
     /// Write face observation results to file if collecting data.
-    func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {
+    private func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {
         
         // Perform data collection in background queue so that it does not hold up the UI.
         let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)

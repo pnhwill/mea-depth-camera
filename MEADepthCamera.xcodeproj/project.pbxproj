@@ -22,7 +22,7 @@
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
 		B53CD4B326B38EF3003BBFD9 /* CapturePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B226B38EF3003BBFD9 /* CapturePipeline.swift */; };
-		B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */; };
+		B53CD4B526B39F6E003BBFD9 /* OutputType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B426B39F6E003BBFD9 /* OutputType.swift */; };
 		B53CD4B726B3A8E9003BBFD9 /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */; };
 		B53E75F02755C0470084A532 /* LensDistortionCorrectionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53E75EF2755C0470084A532 /* LensDistortionCorrectionProcessor.swift */; };
 		B53E75F22755CFC00084A532 /* LensDistortionCorrection.metal in Sources */ = {isa = PBXBuildFile; fileRef = B53E75F12755CFC00084A532 /* LensDistortionCorrection.metal */; };
@@ -77,9 +77,11 @@
 		B5886DF826AA16C900EB344C /* DepthToGrayscale.metal in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */; };
 		B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */; };
 		B5886DFD26AA61E100EB344C /* LiveFaceDetectionProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886DFC26AA61E100EB344C /* LiveFaceDetectionProcessor.swift */; };
-		B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0026AA7F8500EB344C /* Extensions.swift */; };
+		B5886E0126AA7F8500EB344C /* Foundation+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0026AA7F8500EB344C /* Foundation+Extensions.swift */; };
 		B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0226AB249A00EB344C /* FileConfigurations.swift */; };
 		B5886E0526AB2CEE00EB344C /* FileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5886E0426AB2CEE00EB344C /* FileWriter.swift */; };
+		B58E87C727630FD4005B38E6 /* CSVFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58E87C627630FD4005B38E6 /* CSVFileWriter.swift */; };
+		B58E87CA27631386005B38E6 /* MediaFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58E87C927631386005B38E6 /* MediaFileWriter.swift */; };
 		B58F4D5E2739DF6B0073B107 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58F4D5D2739DF6A0073B107 /* BackButton.swift */; };
 		B58F4D60273A08600073B107 /* TitleSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58F4D5F273A08600073B107 /* TitleSupplementaryView.swift */; };
 		B5916151272362E8005604BF /* LabelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5916150272362E8005604BF /* LabelListView.swift */; };
@@ -109,6 +111,8 @@
 		B5E5E721275AB8A80074894D /* LevelMeterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E5E720275AB8A80074894D /* LevelMeterBar.swift */; };
 		B5E5E723275AB8D40074894D /* MathUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E5E722275AB8D40074894D /* MathUtilities.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
+		B5F0E6B02762AFE800FFF2FF /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F0E6AF2762AFE800FFF2FF /* Alert.swift */; };
+		B5F0E6B22762F40E00FFF2FF /* LoggerCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */; };
 		B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447EB26EFF7A100528ACA /* ListViewController.swift */; };
 		B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */; };
 		B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F426F0047800528ACA /* ProcessorSettings.swift */; };
@@ -162,7 +166,7 @@
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
 		B53CD4B126B35869003BBFD9 /* lensDistortionPointForPoint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lensDistortionPointForPoint.h; sourceTree = "<group>"; };
 		B53CD4B226B38EF3003BBFD9 /* CapturePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapturePipeline.swift; sourceTree = "<group>"; };
-		B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enumerations.swift; sourceTree = "<group>"; };
+		B53CD4B426B39F6E003BBFD9 /* OutputType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputType.swift; sourceTree = "<group>"; };
 		B53CD4B626B3A8E9003BBFD9 /* CaptureSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSessionManager.swift; sourceTree = "<group>"; };
 		B53E75EF2755C0470084A532 /* LensDistortionCorrectionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LensDistortionCorrectionProcessor.swift; sourceTree = "<group>"; };
 		B53E75F12755CFC00084A532 /* LensDistortionCorrection.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = LensDistortionCorrection.metal; sourceTree = "<group>"; };
@@ -224,9 +228,11 @@
 		B5886DF726AA16C900EB344C /* DepthToGrayscale.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = DepthToGrayscale.metal; sourceTree = "<group>"; };
 		B5886DF926AA3A4F00EB344C /* FaceObservationOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceObservationOverlayView.swift; sourceTree = "<group>"; };
 		B5886DFC26AA61E100EB344C /* LiveFaceDetectionProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveFaceDetectionProcessor.swift; sourceTree = "<group>"; };
-		B5886E0026AA7F8500EB344C /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		B5886E0026AA7F8500EB344C /* Foundation+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Foundation+Extensions.swift"; sourceTree = "<group>"; };
 		B5886E0226AB249A00EB344C /* FileConfigurations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileConfigurations.swift; sourceTree = "<group>"; };
 		B5886E0426AB2CEE00EB344C /* FileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWriter.swift; sourceTree = "<group>"; };
+		B58E87C627630FD4005B38E6 /* CSVFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVFileWriter.swift; sourceTree = "<group>"; };
+		B58E87C927631386005B38E6 /* MediaFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaFileWriter.swift; sourceTree = "<group>"; };
 		B58F4D5D2739DF6A0073B107 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
 		B58F4D5F273A08600073B107 /* TitleSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleSupplementaryView.swift; sourceTree = "<group>"; };
 		B5916150272362E8005604BF /* LabelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelListView.swift; sourceTree = "<group>"; };
@@ -257,6 +263,8 @@
 		B5E5E720275AB8A80074894D /* LevelMeterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelMeterBar.swift; sourceTree = "<group>"; };
 		B5E5E722275AB8D40074894D /* MathUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathUtilities.swift; sourceTree = "<group>"; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
+		B5F0E6AF2762AFE800FFF2FF /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
+		B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerCategory.swift; sourceTree = "<group>"; };
 		B5F447EB26EFF7A100528ACA /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewController.swift; sourceTree = "<group>"; };
 		B5F447F426F0047800528ACA /* ProcessorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessorSettings.swift; sourceTree = "<group>"; };
@@ -489,6 +497,7 @@
 				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
 				B5C89313272B80DD002E2EC1 /* ObservableModelStore.swift */,
 				B56ED3D72761BF84002FB747 /* UIKit+Convenience.swift */,
+				B5F0E6AF2762AFE800FFF2FF /* Alert.swift */,
 				B58F4D61273A51AE0073B107 /* Views */,
 				B5F447EA26EFF72400528ACA /* Lists */,
 				B591615427279630005604BF /* Details */,
@@ -515,9 +524,9 @@
 			isa = PBXGroup;
 			children = (
 				B5E5E722275AB8D40074894D /* MathUtilities.swift */,
-				B53CD4B426B39F6E003BBFD9 /* Enumerations.swift */,
-				B5886E0026AA7F8500EB344C /* Extensions.swift */,
+				B5886E0026AA7F8500EB344C /* Foundation+Extensions.swift */,
 				B57B3C14273B26EA00CCF9A8 /* NotificationName.swift */,
+				B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -545,6 +554,27 @@
 			path = "Camera Preview Views";
 			sourceTree = "<group>";
 		};
+		B58E87C527630FB9005B38E6 /* CSV Files */ = {
+			isa = PBXGroup;
+			children = (
+				B58E87C627630FD4005B38E6 /* CSVFileWriter.swift */,
+				B5235ECB26C207CB0042106C /* InfoFileWriter.swift */,
+				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
+			);
+			path = "CSV Files";
+			sourceTree = "<group>";
+		};
+		B58E87C827631375005B38E6 /* AV Media Files */ = {
+			isa = PBXGroup;
+			children = (
+				B58E87C927631386005B38E6 /* MediaFileWriter.swift */,
+				B57965B526A096B10070C294 /* VideoFileWriter.swift */,
+				B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */,
+				B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */,
+			);
+			path = "AV Media Files";
+			sourceTree = "<group>";
+		};
 		B58F4D61273A51AE0073B107 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -567,11 +597,9 @@
 			isa = PBXGroup;
 			children = (
 				B5886E0426AB2CEE00EB344C /* FileWriter.swift */,
-				B57965B526A096B10070C294 /* VideoFileWriter.swift */,
-				B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */,
-				B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */,
-				B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */,
-				B5235ECB26C207CB0042106C /* InfoFileWriter.swift */,
+				B53CD4B426B39F6E003BBFD9 /* OutputType.swift */,
+				B58E87C827631375005B38E6 /* AV Media Files */,
+				B58E87C527630FB9005B38E6 /* CSV Files */,
 				B5886E0226AB249A00EB344C /* FileConfigurations.swift */,
 				B575414026B8E08D004ED4E4 /* VideoReader.swift */,
 				B55429AD27605D74000D3620 /* FileWriterError.swift */,
@@ -860,7 +888,7 @@
 				B58F4D60273A08600073B107 /* TitleSupplementaryView.swift in Sources */,
 				B56ED3D82761BF84002FB747 /* UIKit+Convenience.swift in Sources */,
 				B536DA3D271F781200A9C3BB /* ReadjustingStackView.swift in Sources */,
-				B53CD4B526B39F6E003BBFD9 /* Enumerations.swift in Sources */,
+				B53CD4B526B39F6E003BBFD9 /* OutputType.swift in Sources */,
 				B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B50944B426E94FEC0020971D /* JSONError.swift in Sources */,
@@ -889,11 +917,13 @@
 				B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */,
 				BE64A215272A8C4000DA1689 /* TextInputCellDelegate.swift in Sources */,
 				B5AA51932754434A000256E3 /* AudioVisualizerViewController.swift in Sources */,
+				B58E87CA27631386005B38E6 /* MediaFileWriter.swift in Sources */,
+				B58E87C727630FD4005B38E6 /* CSVFileWriter.swift in Sources */,
 				B5016083273465F0003AB94D /* TaskDetailViewController.swift in Sources */,
 				B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */,
 				B57B3C15273B26EA00CCF9A8 /* NotificationName.swift in Sources */,
 				B53E75F22755CFC00084A532 /* LensDistortionCorrection.metal in Sources */,
-				B5886E0126AA7F8500EB344C /* Extensions.swift in Sources */,
+				B5886E0126AA7F8500EB344C /* Foundation+Extensions.swift in Sources */,
 				B58F4D5E2739DF6B0073B107 /* BackButton.swift in Sources */,
 				B5C89314272B80DD002E2EC1 /* ObservableModelStore.swift in Sources */,
 				B5916151272362E8005604BF /* LabelListView.swift in Sources */,
@@ -912,6 +942,7 @@
 				B501607D273357FD003AB94D /* ButtonSupplementaryView.swift in Sources */,
 				B54215C426C3596F00A4F984 /* UseCaseDetailViewModel.swift in Sources */,
 				B585A0A426C58A9500CA6546 /* OutputFile+CoreDataClass.swift in Sources */,
+				B5F0E6B02762AFE800FFF2FF /* Alert.swift in Sources */,
 				B58122B52761D2BF00055C04 /* FaceGuideView.swift in Sources */,
 				BE64A212272A8C4000DA1689 /* PickerViewCell.swift in Sources */,
 				B5886DFA26AA3A4F00EB344C /* FaceObservationOverlayView.swift in Sources */,
@@ -924,6 +955,7 @@
 				B57B3C11273B244E00CCF9A8 /* AVCapture+Utilities.swift in Sources */,
 				B542161026C45F7300A4F984 /* PersistentContainer.swift in Sources */,
 				B50160872735A4F9003AB94D /* ExpandableHeaderCell.swift in Sources */,
+				B5F0E6B22762F40E00FFF2FF /* LoggerCategory.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 				B55429AE27605D74000D3620 /* FileWriterError.swift in Sources */,
 			);

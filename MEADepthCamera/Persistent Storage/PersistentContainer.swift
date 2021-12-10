@@ -23,37 +23,26 @@ class PersistentContainer: NSPersistentContainer {
         }
     }
     
-//    func backgroundContext() -> NSManagedObjectContext {
-//        let context = newBackgroundContext()
-//        return context
-//    }
-    
     /// Handles save error by presenting an alert.
     private func handleSavingError(_ error: Error, contextualInfo: ContextSaveContextualInfo?) {
         print("Context saving error: \(error)")
         if let contextualInfo = contextualInfo {
             DispatchQueue.main.async {
-                // TODO: this guard always fails. access window via the uiwindowscene like below
-                //        guard let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { fatalError("no window scene") }
-                //        guard let window = mainWindowScene.windows.first else { fatalError("no window") }
-                //        guard let rootNavController = window.rootViewController as? UINavigationController else { fatalError("no root nav controller") }
-                guard let window = UIApplication.shared.delegate?.window,
-                      let viewController = window?.rootViewController else { return }
+                guard let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      let window = mainWindowScene.windows.first,
+                      let viewController = window.rootViewController else { return }
                 
-                let message = "Failed to save the context when \(contextualInfo.rawValue)."
+                let message = "Core Data Saving Error: Failed to save the context when \(contextualInfo.rawValue)."
                 
-                // Append message to existing alert if present
-                if let currentAlert = viewController.presentedViewController as? UIAlertController {
-                    currentAlert.message = (currentAlert.message ?? "") + "\n\n\(message)"
-                    return
-                }
+                let alertController = Alert.displayError(message: message, completion: nil)
                 
-                // Otherwise present a new alert
-                viewController.alert(title: "Core Data Saving Error", message: message, actions: [UIAlertAction(title: "OK", style: .default)])
+                viewController.alert(alertController: alertController)
             }
         }
     }
 }
+
+// MARK: ContextSaveContextualInfo
 
 /// Contextual information for handling Core Data context save errors.
 enum ContextSaveContextualInfo: String {

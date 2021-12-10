@@ -5,44 +5,33 @@
 //  Created by Will on 7/22/21.
 //
 
-import AVFoundation
 import Vision
 import UIKit
-
-protocol LiveFaceDetectionProcessorDelegate: AnyObject {
-    
-    func faceObservationDetected(_ faceObservation: VNFaceObservation)
-    
-}
 
 /// Detects faces from the selfie cam feed in real time.
 class LiveFaceDetectionProcessor: VisionProcessor {
     
     let description: String = "LiveFaceDetectionProcessor"
     
-    weak var delegate: LiveFaceDetectionProcessorDelegate?
-    
     // MARK: Performing Vision Requests
     
-    func performVisionRequests(on pixelBuffer: CVPixelBuffer) {
-        // Create Vision request options dictionary containing the camera instrinsic matrix
+    func performVisionRequests(on pixelBuffer: CVPixelBuffer, completion: (VNFaceObservation) -> Void) {
+        // Create Vision request options dictionary containing the camera instrinsic matrix.
         var requestOptions = [VNImageOption: Any]()
         if let cameraIntrinsicData = CMGetAttachment(pixelBuffer, key: kCMSampleBufferAttachmentKey_CameraIntrinsicMatrix, attachmentModeOut: nil) {
             requestOptions = [.cameraIntrinsics: cameraIntrinsicData]
         }
-        // Get current device orientation for request handler
+        // Get current device orientation for request handler.
         let exifOrientation = self.exifOrientationForCurrentDeviceOrientation()
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: exifOrientation, options: requestOptions)
-        // Create face rectangles and tell handler to perform the request
+        // Create face rectangles and tell handler to perform the request.
         let faceDetectionRequest = VNDetectFaceRectanglesRequest()
         do {
             try handler.perform([faceDetectionRequest])
-            guard let faceObservations = faceDetectionRequest.results else {
-                return
-            }
-            if let face = faceObservations.first {
-                // Get face rectangles request containing roll & yaw for alignment checking
-                self.delegate?.faceObservationDetected(face)
+            // Get face rectangles request containing facial orientation for alignment checking.
+            if let faceObservations = faceDetectionRequest.results,
+               let face = faceObservations.first {
+                completion(face)
             }
         } catch {
             print("Vision error: \(error.localizedDescription)")
@@ -52,19 +41,15 @@ class LiveFaceDetectionProcessor: VisionProcessor {
 
 // MARK: Image Orientation
 extension LiveFaceDetectionProcessor {
-    // Helper Methods for Handling Device Orientation & EXIF
+    // Helper Methods for Handling Device Orientation & EXIF.
     func exifOrientationForDeviceOrientation(_ deviceOrientation: UIDeviceOrientation) -> CGImagePropertyOrientation {
-        
         switch deviceOrientation {
         case .portraitUpsideDown:
             return .rightMirrored
-            
         case .landscapeLeft:
             return .downMirrored
-            
         case .landscapeRight:
             return .upMirrored
-            
         default:
             return .leftMirrored
         }

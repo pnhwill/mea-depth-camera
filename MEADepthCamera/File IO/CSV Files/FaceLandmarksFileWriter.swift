@@ -8,50 +8,37 @@
 import AVFoundation
 import Vision
 
+/// Writes face landmark position data from a recording to a CSV file.
 class FaceLandmarksFileWriter: CSVFileWriter {
     
-    private var numLandmarks: Int
+    let outputType: OutputType
     
-    private var saveURL: URL?
+    let fileURL: URL
     
-    init(numLandmarks: Int) {
-        self.numLandmarks = numLandmarks
-    }
-    
-    // MARK: Setup
-    
-    func prepare(saveURL: URL) {
-        // Create and write column labels
-        createLabels(fileURL: saveURL)
-        self.saveURL = saveURL
-    }
-    
-    func reset() {
-        saveURL = nil
-    }
-    
-    private func createLabels(fileURL: URL) {
-        // Create string with appropriate column labels
+    /// String containing appropriate column labels for the CSV file, with commas as a delimiter.
+    private var columnLabels: String {
         var columnLabels = "Frame,Timestamp(s),BBox_x,BBox_y,BBox_width,BBox_height,"
         for i in 0..<numLandmarks {
             columnLabels.append("landmark_\(i)_x,landmark_\(i)_y,landmark_\(i)_z,")
         }
         columnLabels.append("\n")
-        // Write columns labels to first row in file
-        do {
-            try columnLabels.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
-        } catch {
-            print("Failed to write to file: \(error)")
-        }
+        return columnLabels
+    }
+    
+    private let numLandmarks: Int
+    
+    init?(recording: Recording, outputType: OutputType) {
+        guard let numLandmarks = recording.processorSettings?.numLandmarks,
+              let folderURL = recording.folderURL else { return nil }
+        self.numLandmarks = numLandmarks
+        self.outputType = outputType
+        self.fileURL = Self.createFileURL(in: folderURL, outputType: outputType)
+        writeColumnLabels(columnLabels)
     }
     
     // MARK: Write Row Data
     
     func writeRowData(frame: Int, timeStamp: Float64, boundingBox: CGRect, landmarks: [vector_float3]) {
-        guard let path = saveURL else {
-            print("No save path found")
-            return
-        }
         
         let formattedTimeStamp = String(format: "%.5f", timeStamp)
         
@@ -75,7 +62,7 @@ class FaceLandmarksFileWriter: CSVFileWriter {
             return
         }
         // Write data to file
-        if let fileHandle = try? FileHandle(forWritingTo: path) {
+        if let fileHandle = try? FileHandle(forWritingTo: fileURL) {
             defer {
                 fileHandle.closeFile()
             }
@@ -85,5 +72,4 @@ class FaceLandmarksFileWriter: CSVFileWriter {
             print("Failed to write data to file.")
         }
     }
-    
 }

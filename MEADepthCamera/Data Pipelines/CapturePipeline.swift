@@ -14,9 +14,9 @@ protocol CapturePipelineDelegate: AnyObject {
     
     func previewPixelBufferReadyForDisplay(_ previewPixelBuffer: CVPixelBuffer)
     
-    func setFaceAlignment(_ isAligned: Bool)
-    
     func audioSampleBufferReadyForDisplay(_ sampleBuffer: CMSampleBuffer)
+    
+    func setFaceAlignment(_ isAligned: Bool)
     
     func capturePipelineRecordingDidStop()
 }
@@ -130,7 +130,6 @@ class CapturePipeline: NSObject, DataPipeline {
         self.processorSettings = ProcessorSettings(videoDimensions: videoDimensions, depthDimensions: depthDimensions, videoOrientation: videoOrientation)
         
         self.faceDetectionProcessor = LiveFaceDetectionProcessor()
-        self.faceDetectionProcessor?.delegate = self
         
         // Initialize video file writer configuration
         let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
@@ -334,7 +333,10 @@ extension CapturePipeline {
 
         if recordingState == .idle {
             if let visionProcessor = self.faceDetectionProcessor {
-                visionProcessor.performVisionRequests(on: pixelBuffer)
+                visionProcessor.performVisionRequests(on: pixelBuffer) { faceObservation in
+                    let faceAlignment = FaceAlignment(faceObservation: faceObservation)
+                    delegate?.setFaceAlignment(faceAlignment.isAligned)
+                }
             } else {
                 print("Vision face detection processor not found.")
             }
@@ -392,12 +394,8 @@ extension CapturePipeline {
     }
     
     private func writeOutputToFile(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
-        guard let videoWriter = videoFileWriter else {
-            print("No video file writer found")
-            return
-        }
-        guard let audioWriter = audioFileWriter else {
-            print("No audio file writer found")
+        guard let videoWriter = videoFileWriter, let audioWriter = audioFileWriter else {
+            print("No video and/or audio file writer found.")
             return
         }
         
@@ -466,15 +464,5 @@ extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
                 print("audio frame dropped for reason: \(syncedAudioData.droppedReason.rawValue)")
             }
         }
-    }
-}
-
-// MARK: - VisionFaceDetectionProcessorDelegate Methods
-
-extension CapturePipeline: LiveFaceDetectionProcessorDelegate {
-    
-    func faceObservationDetected(_ faceObservation: VNFaceObservation) {
-        let faceAlignment = FaceAlignment(faceObservation: faceObservation)
-        delegate?.setFaceAlignment(faceAlignment.isAligned)
     }
 }

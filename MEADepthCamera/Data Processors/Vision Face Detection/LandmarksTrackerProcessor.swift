@@ -16,7 +16,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
     private let processorSettings: ProcessorSettings
     
     // Vision requests
-    private var trackingLevel = VNRequestTrackingLevel.accurate
+//    private var trackingLevel = VNRequestTrackingLevel.accurate
     private var detectionRequests: [VNDetectFaceRectanglesRequest]?
     private var trackingRequests: [VNTrackObjectRequest]?
     private lazy var sequenceRequestHandler = VNSequenceRequestHandler()
@@ -42,7 +42,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
                 return
             }
             DispatchQueue.main.async {
-                // Add the observations to the tracking list
+                // Add the observations to the tracking list.
                 for observation in results {
                     let faceTrackingRequest = VNTrackObjectRequest(detectedObjectObservation: observation)
                     
@@ -72,7 +72,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
         }
         
         guard let requests = self.trackingRequests, !requests.isEmpty else {
-            // No tracking object detected, so perform initial detection
+            // No tracking object detected, so perform initial detection.
             let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer,
                                                             orientation: orientation,
                                                             options: requestHandlerOptions)

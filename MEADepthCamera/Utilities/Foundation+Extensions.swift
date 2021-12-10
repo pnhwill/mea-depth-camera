@@ -1,5 +1,5 @@
 //
-//  Extensions.swift
+//  Foundation+Extensions.swift
 //  MEADepthCamera
 //
 //  Created by Will on 7/23/21.
@@ -9,14 +9,14 @@ import Foundation
 
 // MARK: Bundle
 extension Bundle {
-    // Use bundle name instead of hard-coding app name in alerts
+    /// Use bundle name instead of hard-coding app name in alerts.
     var applicationName: String {
         if let name = object(forInfoDictionaryKey: "CFBundleDisplayName") as? String {
             return name
         } else if let name = object(forInfoDictionaryKey: "CFBundleName") as? String {
             return name
         }
-        return "-"
+        return "MEADepthCamera"
     }
     
     func reverseDNS(suffix: String? = nil) -> String {

@@ -19,7 +19,16 @@ extension UIViewController {
             alertController.addAction($0)
         }
         
-        self.present(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func alert(alertController: UIAlertController) {
+        // Append message to existing alert if present
+        if let currentAlert = presentedViewController as? UIAlertController {
+            currentAlert.message = (currentAlert.message ?? "") + "\n\n\(alertController.message ?? "")"
+            return
+        }
+        present(alertController, animated: true, completion: nil)
     }
 }
 
