@@ -19,7 +19,7 @@ extension Bundle {
         return "MEADepthCamera"
     }
     
-    func reverseDNS(suffix: String? = nil) -> String {
+    func reverseDNS(_ suffix: String? = nil) -> String {
         var reverseDNS = Bundle.main.bundleIdentifier ?? "com.mea-lab.MEADepthCamera"
         if let suffix = suffix {
             reverseDNS += ".\(suffix)"

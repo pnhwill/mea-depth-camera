@@ -9,28 +9,33 @@ import AVFoundation
 import Combine
 
 /// Helper object that uses AVAssetWriter to record the audio output streams to a file.
-class AudioFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == WriteState, S.Failure == Error {
+class AudioFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
     
     // MARK: Properties
     
-    private let audioQueue = DispatchQueue(label: "audio write to audio file", qos: .utility, autoreleaseFrequency: .workItem)
+    private let audioQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("\(typeName).audioQueue"),
+        qos: .utility,
+        autoreleaseFrequency: .workItem)
     
     private let audioWriterInput: AVAssetWriterInput
     
     // Publishers and subject
     private let audioDone = PassthroughSubject<Void, Error>()
     
-    init(outputURL: URL, configuration: AudioFileConfiguration, subject: S) throws {
-        audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
+    init(folderURL: URL, configuration: AudioFileConfiguration, subject: CapturePipeline.FileWriterSubject) throws {
+        audioWriterInput = AVAssetWriterInput(
+            mediaType: .audio,
+            outputSettings: configuration.audioSettings)
         
-        try super.init(name: "AudioFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)
+        try super.init(outputType: .audio, folderURL: folderURL, configuration: configuration, subject: subject)
         
         audioWriterInput.expectsMediaDataInRealTime = true
         
         if assetWriter.canAdd(audioWriterInput) {
             assetWriter.add(audioWriterInput)
         } else {
-            print("\(self.description): no audio input added to the audio asset writer")
+            print("\(typeName): no audio input added to the audio asset writer")
         }
         
         // The audio track and video track are transfered to the writer in parallel.
@@ -49,12 +54,12 @@ class AudioFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Write
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("\(self.description): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    print("\(self.typeName): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.audioDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("\(self.description): Audio writer input not ready for more media data. Sample dropped without writing to audio file")
+                print("\(self.typeName): Audio writer input not ready for more media data. Sample dropped without writing to audio file")
             }
         }
     }

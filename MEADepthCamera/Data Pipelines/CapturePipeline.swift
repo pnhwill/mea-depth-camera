@@ -22,7 +22,7 @@ protocol CapturePipelineDelegate: AnyObject {
 }
 
 // MARK: - CapturePipeline
-class CapturePipeline: NSObject, DataPipeline {
+class CapturePipeline: NSObject {
     
     typealias FileWriterSubject = PassthroughSubject<WriteState, Error>
     
@@ -44,9 +44,10 @@ class CapturePipeline: NSObject, DataPipeline {
     }
     
     // Data output synchronizer queue
-    let dataOutputQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "captureQueue"),
-                                        qos: .userInitiated,
-                                        autoreleaseFrequency: .workItem)
+    let dataOutputQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("captureQueue"),
+        qos: .userInitiated,
+        autoreleaseFrequency: .workItem)
     
     // Depth processing
     let videoDepthConverter = DepthToGrayscaleConverter()
@@ -70,9 +71,9 @@ class CapturePipeline: NSObject, DataPipeline {
     private(set) var faceDetectionProcessor: LiveFaceDetectionProcessor?
     
     // AV file writing
-    private var videoFileWriter: VideoFileWriter<FileWriterSubject>?
-    private var audioFileWriter: AudioFileWriter<FileWriterSubject>?
-    private var depthMapFileWriter: DepthMapFileWriter<FileWriterSubject>?
+    private var videoFileWriter: VideoFileWriter?
+    private var audioFileWriter: AudioFileWriter?
+    private var depthMapFileWriter: DepthMapFileWriter?
     
     private var videoFileSettings = FileWriterSettings(fileType: .mov)
     private var audioFileSettings = FileWriterSettings(fileType: .wav)
@@ -86,28 +87,31 @@ class CapturePipeline: NSObject, DataPipeline {
     private var fileWritingDone: AnyCancellable?
     
     // Save recordings to persistent storage
-    private let savedRecordingsDataSource: SavedRecordingsDataSource
+    private let captureRecordingDataSource: CaptureRecordingDataSource
     
-    private let recordingQueue = DispatchQueue(label: "recording queue", qos: .userInitiated, attributes: [], autoreleaseFrequency: .workItem)
+    private let recordingQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("recordingQueue"),
+        qos: .userInitiated,
+        autoreleaseFrequency: .workItem)
     
-    // Use case
     private let useCase: UseCase
     private let task: Task
     
     // MARK: INIT
-    init(delegate: CapturePipelineDelegate,
-         useCase: UseCase,
-         task: Task,
-         videoDataOutput: AVCaptureVideoDataOutput,
-         depthDataOutput: AVCaptureDepthDataOutput,
-         audioDataOutput: AVCaptureAudioDataOutput) {
+    init?(delegate: CapturePipelineDelegate,
+          useCase: UseCase,
+          task: Task,
+          videoDataOutput: AVCaptureVideoDataOutput,
+          depthDataOutput: AVCaptureDepthDataOutput,
+          audioDataOutput: AVCaptureAudioDataOutput) {
+        guard let captureRecordingDataSource = CaptureRecordingDataSource() else { return nil }
         self.delegate = delegate
         self.useCase = useCase
         self.task = task
         self.videoDataOutput = videoDataOutput
         self.depthDataOutput = depthDataOutput
         self.audioDataOutput = audioDataOutput
-        self.savedRecordingsDataSource = SavedRecordingsDataSource()
+        self.captureRecordingDataSource = captureRecordingDataSource
     }
     
     // MARK: - Data Pipeline Setup
@@ -138,22 +142,25 @@ class CapturePipeline: NSObject, DataPipeline {
             print("Could not create video transform")
             return
         }
-        videoFileSettings.configuration = VideoFileConfiguration(fileType: videoFileSettings.fileType,
-                                                                 videoSettings: videoSettingsForVideo,
-                                                                 audioSettings: audioSettingsForVideo,
-                                                                 transform: videoTransform,
-                                                                 videoFormat: videoFormatDescription)
+        videoFileSettings.configuration = VideoFileConfiguration(
+            fileType: videoFileSettings.fileType,
+            videoSettings: videoSettingsForVideo,
+            audioSettings: audioSettingsForVideo,
+            transform: videoTransform,
+            videoFormat: videoFormatDescription)
         
         // Initialize audio file writer configuration
         let audioSettingsForAudio = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: audioFileSettings.fileType)
-        audioFileSettings.configuration = AudioFileConfiguration(fileType: audioFileSettings.fileType,
-                                                                 audioSettings: audioSettingsForAudio)
+        audioFileSettings.configuration = AudioFileConfiguration(
+            fileType: audioFileSettings.fileType,
+            audioSettings: audioSettingsForAudio)
         
         // Initialize depth map file writer configuration
         let videoSettingsForDepthMap = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: depthMapFileSettings.fileType)
-        depthMapFileSettings.configuration = DepthMapFileConfiguration(fileType: depthMapFileSettings.fileType,
-                                                                       videoSettings: videoSettingsForDepthMap,
-                                                                       transform: videoTransform)
+        depthMapFileSettings.configuration = DepthMapFileConfiguration(
+            fileType: depthMapFileSettings.fileType,
+            videoSettings: videoSettingsForDepthMap,
+            transform: videoTransform)
     }
     
     // MARK: - Data Recording
@@ -168,49 +175,45 @@ class CapturePipeline: NSObject, DataPipeline {
         
         recordingQueue.async {
             // Create folder for all data files
-            guard let saveFolder = self.createFolder() else {
+            guard let folderURL = self.captureRecordingDataSource.createFolder() else {
                 print("Failed to create save folder")
                 return
             }
-            guard let audioURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.audio.rawValue, fileType: self.audioFileSettings.fileExtension) else {
-                print("Failed to create audio file")
-                return
-            }
-            guard let videoURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.video.rawValue, fileType: self.videoFileSettings.fileExtension) else {
-                print("Failed to create video file")
-                return
-            }
-            guard let depthMapURL = self.createFileURL(in: saveFolder, nameLabel: OutputType.depth.rawValue, fileType: self.depthMapFileSettings.fileExtension) else {
-                print("Failed to create depth map file")
-                return
-            }
-            
-            guard let videoConfiguration = self.videoFileSettings.configuration,
-                  let audioConfiguration = self.audioFileSettings.configuration,
-                  let depthMapConfiguration = self.depthMapFileSettings.configuration else {
+            guard let videoConfiguration = self.videoFileSettings.configuration as? VideoFileConfiguration,
+                  let audioConfiguration = self.audioFileSettings.configuration as? AudioFileConfiguration,
+                  let depthMapConfiguration = self.depthMapFileSettings.configuration as? DepthMapFileConfiguration
+            else {
                 print("AV file configurations not found")
                 return
             }
-
-            let fileDictionary = [OutputType.audio: audioURL, OutputType.video: videoURL, OutputType.depth: depthMapURL]
-            self.savedRecordingsDataSource.addRecording(saveFolder, outputFiles: fileDictionary, processorSettings: self.processorSettings)
             
             do {
-                self.videoFileWriter = try VideoFileWriter(outputURL: videoURL, configuration: videoConfiguration as! VideoFileConfiguration, subject: self.videoWriterSubject!)
+                let videoFileWriter = try VideoFileWriter(
+                    folderURL: folderURL,
+                    configuration: videoConfiguration,
+                    subject: self.videoWriterSubject!)
+                let audioFileWriter = try AudioFileWriter(
+                    folderURL: folderURL,
+                    configuration: audioConfiguration,
+                    subject: self.audioWriterSubject!)
+                let depthMapFileWriter = try DepthMapFileWriter(
+                    folderURL: folderURL,
+                    configuration: depthMapConfiguration,
+                    subject: self.depthWriterSubject!)
+                
+                let fileDictionary: [OutputType: URL] = [
+                    .audio: audioFileWriter.fileURL,
+                    .video: videoFileWriter.fileURL,
+                    .depth: depthMapFileWriter.fileURL,
+                ]
+                self.captureRecordingDataSource.addRecording(folderURL, outputFiles: fileDictionary, processorSettings: self.processorSettings)
+                
+                self.videoFileWriter = videoFileWriter
+                self.audioFileWriter = audioFileWriter
+                self.depthMapFileWriter = depthMapFileWriter
             } catch {
-                print("Error creating video file writer: \(error)")
+                print("Error creating file writer: \(error)")
             }
-            do {
-                self.audioFileWriter = try AudioFileWriter(outputURL: audioURL, configuration: audioConfiguration as! AudioFileConfiguration, subject: self.audioWriterSubject!)
-            } catch {
-                print("Error creating audio file writer: \(error)")
-            }
-            do {
-                self.depthMapFileWriter = try DepthMapFileWriter(outputURL: depthMapURL, configuration: depthMapConfiguration as! DepthMapFileConfiguration, subject: self.depthWriterSubject!)
-            } catch {
-                print("Error creating depth map file writer: \(error)")
-            }
-
         }
         
         // Set up subscriber do receive file writer statuses
@@ -232,7 +235,7 @@ class CapturePipeline: NSObject, DataPipeline {
         audioFileWriter = nil
         depthMapFileWriter = nil
         recordingState = .finish
-        savedRecordingsDataSource.saveRecording(to: useCase, for: task)
+        captureRecordingDataSource.saveRecording(to: useCase, for: task)
     }
 }
 

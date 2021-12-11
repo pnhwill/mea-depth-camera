@@ -22,11 +22,8 @@ enum FileWriteResult {
 /// Abstract superclass for all video/audio/depth data file writers.
 class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S.Failure == Error {
     
-    let outputType: OutputType = .video
-    
-    // MARK: Properties
-    
-    let description: String
+    let outputType: OutputType
+    let fileURL: URL
     
     // Asset Writer
     let assetWriter: AVAssetWriter
@@ -38,9 +35,11 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
     // File writer state
     var writeState = WriteState.inactive
     
-    init(name: String, outputURL: URL, configuration: FileConfiguration, subject: S) throws {
-        self.assetWriter = try AVAssetWriter(url: outputURL, fileType: configuration.outputFileType)
-        self.description = name
+    init(outputType: OutputType, folderURL: URL, configuration: FileConfiguration, subject: S) throws {
+        let fileURL = Self.createFileURL(in: folderURL, outputType: outputType)
+        self.outputType = outputType
+        self.fileURL = fileURL
+        self.assetWriter = try AVAssetWriter(url: fileURL, fileType: configuration.outputFileType)
         self.subject = subject
     }
     
@@ -49,7 +48,7 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
     func start(at startTime: CMTime) {
         writeState = .active
         guard assetWriter.startWriting() else {
-            print("\(description): Failed to start writing to file")
+            print("\(typeName): Failed to start writing to file.")
             switch self.assetWriter.status {
             case .failed:
                 subject.send(completion: .failure(self.assetWriter.error!))

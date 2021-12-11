@@ -9,11 +9,14 @@ import AVFoundation
 import Combine
 
 /// Helper object that uses AVAssetWriter to record the depth map output streams to a file.
-class DepthMapFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == WriteState, S.Failure == Error {
+class DepthMapFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
     
     // MARK: Properties
     
-    private let videoQueue = DispatchQueue(label: "depth map write to video file", qos: .utility, autoreleaseFrequency: .workItem)
+    private let videoQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("\(typeName).videoQueue"),
+        qos: .utility,
+        autoreleaseFrequency: .workItem)
     
     private let videoWriterInput: AVAssetWriterInput
     private let pixelBufferAdaptor: AVAssetWriterInputPixelBufferAdaptor
@@ -21,11 +24,16 @@ class DepthMapFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Wr
     // Publishers and subject
     private let videoDone = PassthroughSubject<Void, Error>()
     
-    required init(outputURL: URL, configuration: DepthMapFileConfiguration, subject: S) throws {
-        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings, sourceFormatHint: configuration.sourceVideoFormat)
-        pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: videoWriterInput, sourcePixelBufferAttributes: configuration.sourcePixelBufferAttributes)
+    required init(folderURL: URL, configuration: DepthMapFileConfiguration, subject: CapturePipeline.FileWriterSubject) throws {
+        videoWriterInput = AVAssetWriterInput(
+            mediaType: .video,
+            outputSettings: configuration.videoSettings,
+            sourceFormatHint: configuration.sourceVideoFormat)
+        pixelBufferAdaptor = AVAssetWriterInputPixelBufferAdaptor(
+            assetWriterInput: videoWriterInput,
+            sourcePixelBufferAttributes: configuration.sourcePixelBufferAttributes)
         
-        try super.init(name: "DepthMapFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)
+        try super.init(outputType: .depth, folderURL: folderURL, configuration: configuration, subject: subject)
         
         videoWriterInput.expectsMediaDataInRealTime = true
         
@@ -35,7 +43,7 @@ class DepthMapFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Wr
         if assetWriter.canAdd(videoWriterInput) {
             assetWriter.add(videoWriterInput)
         } else {
-            print("\(self.description): no video input added to the video asset writer")
+            print("\(typeName): no video input added to the video asset writer")
         }
         
         // The audio track and video track are transfered to the writer in parallel.
@@ -54,12 +62,12 @@ class DepthMapFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Wr
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: timeStamp) else {
-                    print("\(self.description): Error appending pixel buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    print("\(self.typeName): Error appending pixel buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.videoDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("\(self.description): Video writer input not ready for more media data. Sample dropped without writing to video file")
+                print("\(self.typeName): Video writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }

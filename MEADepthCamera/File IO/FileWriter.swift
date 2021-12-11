@@ -8,10 +8,13 @@
 import Foundation
 
 /// Protocol for all file writer types.
-protocol FileWriter: AnyObject {
+protocol FileWriter: AnyObject, NameDescribable {
     
-    /// The type of output file that this file writer creates and writes data to.
+    /// The output type of the file being written to.
     var outputType: OutputType { get }
+    
+    /// The URL that the file is written to.
+    var fileURL: URL { get }
     
 }
 

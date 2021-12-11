@@ -246,12 +246,9 @@ class FaceObservationOverlayView: UIView {
         let faceRectanglePath = CGMutablePath()
         let faceLandmarksPath = CGMutablePath()
         
-        //for faceObservation in faceObservations {
         self.addIndicators(to: faceRectanglePath,
                            faceLandmarksPath: faceLandmarksPath,
                            for: faceObservation)
-            
-        //}
         
         faceRectangleShapeLayer.path = faceRectanglePath
         faceLandmarksShapeLayer.path = faceLandmarksPath

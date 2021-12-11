@@ -21,7 +21,7 @@ public class Recording: NSManagedObject {
         folderURL = docsURL.appendingPathComponent(name!)
     }
     
-    func addFiles(newFiles: [OutputType: URL]) {
+    func addFiles(_ newFiles: [OutputType: URL]) {
         guard let context = managedObjectContext else { return }
         for file in newFiles {
             let newFile = OutputFile(context: context)

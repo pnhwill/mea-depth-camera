@@ -40,8 +40,9 @@ class CameraViewController: UIViewController {
     // AVCapture session
     @objc private var sessionManager: CaptureSessionManager!
     private var isSessionRunning = false
-    private let sessionQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "sessionQueue"),
-                                             autoreleaseFrequency: .workItem)
+    private let sessionQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("sessionQueue"),
+        autoreleaseFrequency: .workItem)
     
     private var renderingEnabled = true
     
@@ -136,12 +137,14 @@ class CameraViewController: UIViewController {
         sessionQueue.async {
             self.sessionManager.configureSession { videoDevice, videoDataOutput, depthDataOutput, audioDataOutput in
                 // Initialize the data output processor
-                self.capturePipeline = CapturePipeline(delegate: self,
-                                                       useCase: self.useCase,
-                                                       task: self.task,
-                                                       videoDataOutput: videoDataOutput,
-                                                       depthDataOutput: depthDataOutput,
-                                                       audioDataOutput: audioDataOutput)
+                self.capturePipeline = CapturePipeline(
+                    delegate: self,
+                    useCase: self.useCase,
+                    task: self.task,
+                    videoDataOutput: videoDataOutput,
+                    depthDataOutput: depthDataOutput,
+                    audioDataOutput: audioDataOutput
+                )
                 self.capturePipeline?.configureProcessors(for: videoDevice)
             }
         }

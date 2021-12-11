@@ -10,8 +10,6 @@ import Foundation
 /// Protocol for file writers that write comma-delimited `String` data to a CSV file.
 protocol CSVFileWriter: FileWriter {
     
-    var fileURL: URL { get }
-    
 }
 
 extension CSVFileWriter {

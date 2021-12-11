@@ -22,10 +22,10 @@ class AudioVisualizerViewController: UIViewController {
     var audioLevelMeter = AudioLevelMeter()
     
     /// Audio visualization processing queue.
-    let audioQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "audioQueue"),
-                                   qos: .userInitiated,
-                                   attributes: [],
-                                   autoreleaseFrequency: .workItem)
+    let audioQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("audioQueue"),
+        qos: .userInitiated,
+        autoreleaseFrequency: .workItem)
     
     // MARK: VC Life Cycle
     

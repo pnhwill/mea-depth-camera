@@ -36,7 +36,7 @@ extension UICellConfigurationState {
 
 // Declare a custom key for a custom `item` property.
 extension UIConfigurationStateCustomKey {
-    static let item = UIConfigurationStateCustomKey(Bundle.main.reverseDNS(suffix: "ItemListCell.item"))
+    static let item = UIConfigurationStateCustomKey(Bundle.main.reverseDNS("ItemListCell.item"))
 }
 
 

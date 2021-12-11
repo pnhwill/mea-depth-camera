@@ -52,7 +52,7 @@
 		B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */ = {isa = PBXBuildFile; fileRef = B56F2EA626AB654B00998C27 /* PointCloud.metal */; };
 		B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */; };
 		B575414126B8E08D004ED4E4 /* VideoReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414026B8E08D004ED4E4 /* VideoReader.swift */; };
-		B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */; };
+		B575414326B8F9A0004ED4E4 /* CaptureRecordingDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B575414226B8F9A0004ED4E4 /* CaptureRecordingDataSource.swift */; };
 		B575414526BA10C7004ED4E4 /* getNumberOfFrames.m in Sources */ = {isa = PBXBuildFile; fileRef = B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */; };
 		B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796581269DED5F0070C294 /* AppDelegate.swift */; };
 		B5796584269DED5F0070C294 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5796583269DED5F0070C294 /* SceneDelegate.swift */; };
@@ -88,6 +88,7 @@
 		B591615327236D67005604BF /* TextCellContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B591615227236D67005604BF /* TextCellContentView.swift */; };
 		B59161562727AA33005604BF /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161552727AA33005604BF /* DetailViewController.swift */; };
 		B59161582727AA95005604BF /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161572727AA95005604BF /* DetailViewModel.swift */; };
+		B59970852764293D00574607 /* NameDescribable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59970842764293D00574607 /* NameDescribable.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
 		B5AA51932754434A000256E3 /* AudioVisualizerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AA51922754434A000256E3 /* AudioVisualizerViewController.swift */; };
 		B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */; };
@@ -196,7 +197,7 @@
 		B56F2EA626AB654B00998C27 /* PointCloud.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = PointCloud.metal; sourceTree = "<group>"; };
 		B575413E26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarksTrackerProcessor.swift; sourceTree = "<group>"; };
 		B575414026B8E08D004ED4E4 /* VideoReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoReader.swift; sourceTree = "<group>"; };
-		B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedRecordingsDataSource.swift; sourceTree = "<group>"; };
+		B575414226B8F9A0004ED4E4 /* CaptureRecordingDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureRecordingDataSource.swift; sourceTree = "<group>"; };
 		B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = getNumberOfFrames.m; sourceTree = "<group>"; };
 		B575414626BA10DA004ED4E4 /* getNumberOfFrames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = getNumberOfFrames.h; sourceTree = "<group>"; };
 		B579657E269DED5F0070C294 /* MEADepthCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MEADepthCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -239,6 +240,7 @@
 		B591615227236D67005604BF /* TextCellContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCellContentView.swift; sourceTree = "<group>"; };
 		B59161552727AA33005604BF /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		B59161572727AA95005604BF /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
+		B59970842764293D00574607 /* NameDescribable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameDescribable.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
 		B5AA51922754434A000256E3 /* AudioVisualizerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioVisualizerViewController.swift; sourceTree = "<group>"; };
 		B5ABE85726A9CAA7003D2AFD /* DepthMapFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthMapFileWriter.swift; sourceTree = "<group>"; };
@@ -527,6 +529,7 @@
 				B5886E0026AA7F8500EB344C /* Foundation+Extensions.swift */,
 				B57B3C14273B26EA00CCF9A8 /* NotificationName.swift */,
 				B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */,
+				B59970842764293D00574607 /* NameDescribable.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -623,7 +626,7 @@
 				B56ED3D5276193E7002FB747 /* FaceAlignment.swift */,
 				B50787D526AF73D60077ACCB /* FaceLandmarksPipeline.swift */,
 				B5C732AE26BDCE66002B01C2 /* DataPipeline.swift */,
-				B575414226B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift */,
+				B575414226B8F9A0004ED4E4 /* CaptureRecordingDataSource.swift */,
 				B575414426BA10C7004ED4E4 /* getNumberOfFrames.m */,
 				B575414626BA10DA004ED4E4 /* getNumberOfFrames.h */,
 			);
@@ -866,6 +869,7 @@
 				B5C732AF26BDCE66002B01C2 /* DataPipeline.swift in Sources */,
 				B5E5E71F2759CB4A0074894D /* AudioLevelMeter.swift in Sources */,
 				B5D4E3FA26B2183C00CB1241 /* PassThrough.metal in Sources */,
+				B59970852764293D00574607 /* NameDescribable.swift in Sources */,
 				B50160892735E7E4003AB94D /* HeaderTextCell.swift in Sources */,
 				B5DF4B8A26C495EB0045AE43 /* UseCaseListViewController.swift in Sources */,
 				B56F1A6426E0430600A29C42 /* CoreDataStack.swift in Sources */,
@@ -903,7 +907,7 @@
 				B5E5E71D275982190074894D /* PortraitLockedNavigationController.swift in Sources */,
 				BE64A213272A8C4000DA1689 /* TextFieldCell.swift in Sources */,
 				B5FB0A4B26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift in Sources */,
-				B575414326B8F9A0004ED4E4 /* SavedRecordingsDataSource.swift in Sources */,
+				B575414326B8F9A0004ED4E4 /* CaptureRecordingDataSource.swift in Sources */,
 				B5ABE85826A9CAA7003D2AFD /* DepthMapFileWriter.swift in Sources */,
 				B56F1A9126E07B2F00A29C42 /* Experiment+CoreDataClass.swift in Sources */,
 				B5ABE85C26AA04B8003D2AFD /* FilterRenderer.swift in Sources */,

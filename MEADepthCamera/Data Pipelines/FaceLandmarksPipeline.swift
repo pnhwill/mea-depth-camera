@@ -8,7 +8,7 @@
 import AVFoundation
 import Vision
 
-// MARK: FaceLandmarksPipelineDelegate
+// MARK: - FaceLandmarksPipelineDelegate
 protocol FaceLandmarksPipelineDelegate: AnyObject {
     
     func displayFrameCounter(_ frame: Int)
@@ -16,8 +16,8 @@ protocol FaceLandmarksPipelineDelegate: AnyObject {
     func didFinishTracking(success: Bool)
 }
 
-// MARK: FaceLandmarksPipeline
-class FaceLandmarksPipeline: DataPipeline {
+// MARK: - FaceLandmarksPipeline
+class FaceLandmarksPipeline {
     
     weak var delegate: FaceLandmarksPipelineDelegate?
     
@@ -74,9 +74,11 @@ class FaceLandmarksPipeline: DataPipeline {
         self.videoAsset = videoAsset
         self.depthAsset = depthAsset
         
-        self.recording.addFiles(newFiles: [.landmarks2D: faceLandmarks2DFileWriter.fileURL,
-                                           .landmarks3D: faceLandmarks3DFileWriter.fileURL,
-                                           .info: infoFileWriter.fileURL])
+        recording.addFiles([
+            .landmarks2D: faceLandmarks2DFileWriter.fileURL,
+            .landmarks3D: faceLandmarks3DFileWriter.fileURL,
+            .info: infoFileWriter.fileURL
+        ])
         
         // Write the recording information to file now that totalFrames has been computed.
         // (somewhat abusing the fact that the recording's folder is named using the start time of the recording).
@@ -127,7 +129,7 @@ class FaceLandmarksPipeline: DataPipeline {
         }
         
         while true {
-            guard cancelRequested == false, let videoFrame = videoReader.nextFrame() else {
+            guard !cancelRequested, let videoFrame = videoReader.nextFrame() else {
                 break
             }
             
@@ -140,7 +142,7 @@ class FaceLandmarksPipeline: DataPipeline {
                 break
             }
             
-            // We may run out of depth frames before video frames, but we don't want to break the loop
+            // We may run out of depth frames before video frames, but we don't want to break the loop.
             if let depthFrame = nextDepthFrame, let depthImage = nextDepthImage {
                 
                 let depthTime = CMTimeGetSeconds(depthFrame.presentationTimeStamp)
@@ -174,7 +176,6 @@ class FaceLandmarksPipeline: DataPipeline {
             if let depthFrame = nextDepthFrame {
                 nextDepthImage = CMSampleBufferGetImageBuffer(depthFrame)
             }
-            
         }
         
         delegate?.didFinishTracking(success: !cancelRequested)
@@ -187,62 +188,52 @@ class FaceLandmarksPipeline: DataPipeline {
     /// If no depth is provided, it returns the 2D landmarks in image coordinates.
     /// If no landmarks are provided, it returns just the bounding box.
     /// If no face observation is provided, it returns all zeros.
-    private func processFace(_ faceObservation: VNFaceObservation?, with depthDataMap: CVPixelBuffer?) -> (CGRect, [vector_float3], [vector_float3]?) {
+    private func processFace(
+        _ faceObservation: VNFaceObservation?,
+        with depthDataMap: CVPixelBuffer?
+    ) -> (
+        boundingBox: CGRect,
+        landmarks2D: [vector_float3],
+        landmarks3D: [vector_float3])
+    {
         
-        // In case the face is lost in the middle of collecting data, this prevents empty or nil-valued cells in the file so it can still be parsed later.
+        // In case the face is lost in the middle of collecting data,
+        // this prevents empty or nil-valued cells in the file so it can still be parsed later.
         var boundingBox = CGRect.zero
-        var landmarks2D = Array(repeating: simd_make_float3(0.0, 0.0, 0.0), count: processorSettings.numLandmarks)
-        var landmarks3D = Array(repeating: simd_make_float3(0.0, 0.0, 0.0), count: processorSettings.numLandmarks)
+        var landmarks2D = Array(repeating: vector_float3(repeating: 0.0), count: processorSettings.numLandmarks)
+        var landmarks3D = Array(repeating: vector_float3(repeating: 0.0), count: processorSettings.numLandmarks)
         
         if let faceObservation = faceObservation {
             // Get face bounding box in RGB image coordinates.
-            boundingBox = VNImageRectForNormalizedRect(faceObservation.boundingBox, Int(processorSettings.videoResolution.width), Int(processorSettings.videoResolution.height))
+            boundingBox = VNImageRectForNormalizedRect(
+                faceObservation.boundingBox,
+                Int(processorSettings.videoResolution.width),
+                Int(processorSettings.videoResolution.height))
             
             if let landmarks = faceObservation.landmarks?.allPoints {
                 
-                if let depthDataMap = depthDataMap, let correctedDepthMap = rectifyDepthMapGPU(depthDataMap: depthDataMap) {
+                // TODO: TEST THIS, may need VNImagePointForFaceLandmarkPoint() instead (compare).
+                let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
+                landmarks2D = landmarkPoints.map { vector_float3(vector_float2($0), 0.0) }
+                
+                let landmarkPointsInDepthImage = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
+                if let depthDataMap = depthDataMap,
+                   let correctedDepthMap = rectifyDepthMapGPU(depthDataMap: depthDataMap),
+                   let correctedLandmarks = rectifyLandmarks(landmarks: landmarkPointsInDepthImage) {
                     
-                    let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
+                    let correctedLandmarkVectors = correctedLandmarks.map { vector_float2($0) }
                     
-                    let correctedLandmarks = landmarkPoints.map { rectifyLandmark(landmark: $0) }
-                    
-                    let landmarkVectors = landmarkPoints.map { simd_float2(Float($0.x), Float($0.y)) }
-                    let correctedLandmarkVectors = correctedLandmarks.map { simd_float2(Float($0!.x), Float($0!.y)) }
-                    
-                    if !pointCloudProcessor.isPrepared {
-                        var depthFormatDescription: CMFormatDescription?
-                        CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                                     imageBuffer: correctedDepthMap,
-                                                                     formatDescriptionOut: &depthFormatDescription)
-                        if let unwrappedDepthFormatDescription = depthFormatDescription {
-                            pointCloudProcessor.prepare(with: unwrappedDepthFormatDescription)
+                    // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given.
+                    if let landmarkPointCloud = computePointCloud(landmarks: correctedLandmarkVectors, depthMap: correctedDepthMap) {
+                        
+                        landmarks3D = landmarkPointCloud
+                        
+                        for index in 0..<landmarks2D.count {
+                            landmarks2D[index].z = landmarkPointCloud[index].z
                         }
                     }
-                    guard let landmarkPointCloud = pointCloudProcessor.render(landmarks: correctedLandmarkVectors, depthFrame: correctedDepthMap) else {
-                        // If any of the landmarks fails to be processed, it discards the rest and returns just as if no depth was given.
-                        print("Metal point cloud processor failed to output landmark position. Returning landmarks in RGB image coordinates.")
-                        let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                        landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
-                        return (boundingBox, landmarks2D, nil)
-                    }
-                    
-                    for (index, _) in landmarks.normalizedPoints.enumerated() {
-                        landmarks2D[index] = simd_make_float3(landmarkVectors[index], landmarkPointCloud[index].z)
-                        landmarks3D[index] = landmarkPointCloud[index]
-                    }
-                } else {
-                    //print("No depth data found. Returning 2D landmarks in RGB image coordinates.")
-                    let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                    landmarks2D = landmarkPoints.map { simd_make_float3(Float($0.x), Float($0.y), 0.0) }
-                    return (boundingBox, landmarks2D, nil)
                 }
-            } else {
-                print("Invalid face detection request: no face landmarks. Returning bounding box only.")
-                return (boundingBox, landmarks2D, nil)
             }
-        } else {
-            print("No face observation found. Inserting zeros for all values.")
-            return (boundingBox, landmarks2D, nil)
         }
         return (boundingBox, landmarks2D, landmarks3D)
     }
@@ -253,38 +244,55 @@ class FaceLandmarksPipeline: DataPipeline {
         // Perform data collection in background queue so that it does not hold up the UI.
         let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)
         faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
-        if let landmarks3D = landmarks3D {
-            faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
-        }
+        faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
     }
 }
 
 // MARK: Lens Distortion Correction
 extension FaceLandmarksPipeline {
     
+    private func computePointCloud(landmarks: [vector_float2], depthMap: CVPixelBuffer) -> [vector_float3]? {
+        if !pointCloudProcessor.isPrepared {
+            var depthFormatDescription: CMFormatDescription?
+            CMVideoFormatDescriptionCreateForImageBuffer(
+                allocator: kCFAllocatorDefault,
+                imageBuffer: depthMap,
+                formatDescriptionOut: &depthFormatDescription)
+            if let unwrappedDepthFormatDescription = depthFormatDescription {
+                pointCloudProcessor.prepare(with: unwrappedDepthFormatDescription)
+            }
+        }
+        let pointCloud = pointCloudProcessor.render(landmarks: landmarks, depthFrame: depthMap)
+        if pointCloud == nil {
+            print("Metal point cloud processor failed to render point cloud.")
+        }
+        return pointCloud
+    }
+    
     /// Rectify the depth data map from lens-distorted to rectilinear coordinate space.
     private func rectifyDepthMapGPU(depthDataMap: CVPixelBuffer) -> CVPixelBuffer? {
         if !lensDistortionCorrectionProcessor.isPrepared {
             var depthFormatDescription: CMFormatDescription?
-            CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault,
-                                                         imageBuffer: depthDataMap,
-                                                         formatDescriptionOut: &depthFormatDescription)
+            CMVideoFormatDescriptionCreateForImageBuffer(
+                allocator: kCFAllocatorDefault,
+                imageBuffer: depthDataMap,
+                formatDescriptionOut: &depthFormatDescription)
             if let unwrappedDepthFormatDescription = depthFormatDescription {
                 lensDistortionCorrectionProcessor.prepare(with: unwrappedDepthFormatDescription, outputRetainedBufferCountHint: 3)
             }
         }
         let correctedDepthMap = lensDistortionCorrectionProcessor.render(pixelBuffer: depthDataMap)
         if correctedDepthMap == nil {
-            print("Metal lens distortion correction processor failed to render depth map. Returning landmarks in RGB image coordinates.")
+            print("Metal lens distortion correction processor failed to render depth map.")
         }
         return correctedDepthMap
     }
     
-    private func rectifyLandmark(landmark: CGPoint) -> CGPoint? {
+    private func rectifyLandmarks(landmarks: [CGPoint]) -> [CGPoint]? {
         // Get camera instrinsics
         guard let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
               let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
-            print("FaceLandmarksPipeline.rectifyLandmark: Could not find camera calibration data")
+            print("FaceLandmarksPipeline.rectifyLandmarks: Could not find camera calibration data")
             return nil
         }
         let referenceDimensions: CGSize = cameraCalibrationData.intrinsicMatrixReferenceDimensions
@@ -293,7 +301,7 @@ extension FaceLandmarksPipeline {
         let ratio: Float = Float(referenceDimensions.width) / Float(processorSettings.depthResolution.width)
         let scaledOpticalCenter = CGPoint(x: opticalCenter.x / CGFloat(ratio), y: opticalCenter.y / CGFloat(ratio))
         
-        let outputPoint = lensDistortionPointForPoint(landmark, lookupTable, scaledOpticalCenter, processorSettings.depthResolution)
+        let outputPoint = landmarks.map { lensDistortionPointForPoint($0, lookupTable, scaledOpticalCenter, processorSettings.depthResolution) }
         
         return outputPoint
     }

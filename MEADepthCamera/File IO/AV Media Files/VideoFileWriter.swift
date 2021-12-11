@@ -9,12 +9,17 @@ import AVFoundation
 import Combine
 
 /// Helper object that uses AVAssetWriter to record the video and audio output streams to a file.
-class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == WriteState, S.Failure == Error {
+class VideoFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
     
     // MARK: Properties
-    
-    private let audioQueue = DispatchQueue(label: "audio write to video file", qos: .utility, autoreleaseFrequency: .workItem)
-    private let videoQueue = DispatchQueue(label: "video write to video file", qos: .utility, autoreleaseFrequency: .workItem)
+    private let audioQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("\(typeName).audioQueue"),
+        qos: .utility,
+        autoreleaseFrequency: .workItem)
+    private let videoQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("\(typeName).videoQueue"),
+        qos: .utility,
+        autoreleaseFrequency: .workItem)
     
     private let audioWriterInput: AVAssetWriterInput
     private let videoWriterInput: AVAssetWriterInput
@@ -23,11 +28,16 @@ class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Write
     private let audioDone = PassthroughSubject<Void, Error>()
     private let videoDone = PassthroughSubject<Void, Error>()
     
-    init(outputURL: URL, configuration: VideoFileConfiguration, subject: S) throws {
-        audioWriterInput = AVAssetWriterInput(mediaType: .audio, outputSettings: configuration.audioSettings)
-        videoWriterInput = AVAssetWriterInput(mediaType: .video, outputSettings: configuration.videoSettings, sourceFormatHint: configuration.sourceVideoFormat)
+    init(folderURL: URL, configuration: VideoFileConfiguration, subject: CapturePipeline.FileWriterSubject) throws {
+        audioWriterInput = AVAssetWriterInput(
+            mediaType: .audio,
+            outputSettings: configuration.audioSettings)
+        videoWriterInput = AVAssetWriterInput(
+            mediaType: .video,
+            outputSettings: configuration.videoSettings,
+            sourceFormatHint: configuration.sourceVideoFormat)
         
-        try super.init(name: "VideoFileWriter", outputURL: outputURL, configuration: configuration, subject: subject)
+        try super.init(outputType: .video, folderURL: folderURL, configuration: configuration, subject: subject)
         
         audioWriterInput.expectsMediaDataInRealTime = true
         videoWriterInput.expectsMediaDataInRealTime = true
@@ -38,12 +48,12 @@ class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Write
         if assetWriter.canAdd(videoWriterInput) {
             assetWriter.add(videoWriterInput)
         } else {
-            print("\(self.description): no video input added to the video asset writer")
+            print("\(typeName): no video input added to the video asset writer")
         }
         if assetWriter.canAdd(audioWriterInput) {
             assetWriter.add(audioWriterInput)
         } else {
-            print("\(self.description): no audio input added to the video asset writer")
+            print("\(typeName): no audio input added to the video asset writer")
         }
         
         // The audio track and video track are transfered to the writer in parallel.
@@ -63,12 +73,12 @@ class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Write
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.videoWriterInput.append(sampleBuffer) else {
-                    print("\(self.description): Error appending sample buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    print("\(self.typeName): Error appending sample buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.videoDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("\(self.description): Video writer input not ready for more media data. Sample dropped without writing to video file")
+                print("\(self.typeName): Video writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }
@@ -80,12 +90,12 @@ class VideoFileWriter<S>: MediaFileWriter<S> where S: Subject, S.Output == Write
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("\(self.description): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    print("\(self.typeName): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.audioDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("\(self.description): Audio writer input not ready for more media data. Sample dropped without writing to video file")
+                print("\(self.typeName): Audio writer input not ready for more media data. Sample dropped without writing to video file")
             }
         }
     }

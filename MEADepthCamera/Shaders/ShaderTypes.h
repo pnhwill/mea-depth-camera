@@ -12,17 +12,17 @@ Header containing types and enum constants shared between Metal shaders and Swif
 #ifndef ShaderTypes_h
 #define ShaderTypes_h
 
-#include <simd/simd.h>
+//#include <simd/simd.h>
 
 // Buffer index values shared between the Metal shader and Swift code ensure the shader buffer
 // inputs match the Metal API buffer set calls.
 typedef enum BufferIndex {
-    BufferIndexLandmarksInput           = 0,
-    BufferIndexCameraIntrinsicsInput    = 1,
-    BufferIndexPointCloudOutput         = 2,
-    BufferIndexLookupTableValues        = 3,
-    BufferIndexLookupTableCount         = 4,
-    BufferIndexOpticalCenter            = 5,
+    BufferIndexLandmarksInput        = 0,
+    BufferIndexCameraIntrinsicsInput = 1,
+    BufferIndexPointCloudOutput      = 2,
+    BufferIndexLookupTableValues     = 3,
+    BufferIndexLookupTableCount      = 4,
+    BufferIndexOpticalCenter         = 5,
 } BufferIndex;
 
 // Texture index values shared between the Metal shader and Swift code ensure the shader buffer

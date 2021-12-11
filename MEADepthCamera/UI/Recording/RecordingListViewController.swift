@@ -20,10 +20,10 @@ class RecordingListViewController: UICollectionViewController {
     
     private static let sectionHeaderElementKind = "SectionHeaderElementKind"
     
-    private let visionTrackingQueue = DispatchQueue(label: Bundle.main.reverseDNS(suffix: "visionTrackingQueue"),
-                                                    qos: .userInitiated,
-                                                    attributes: [],
-                                                    autoreleaseFrequency: .workItem)
+    private let visionTrackingQueue = DispatchQueue(
+        label: Bundle.main.reverseDNS("visionTrackingQueue"),
+        qos: .userInitiated,
+        autoreleaseFrequency: .workItem)
     
     @IBOutlet private weak var startStopButton: UIBarButtonItem!
     
