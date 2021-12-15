@@ -1,5 +1,5 @@
 //
-//  RecordingListCell.swift
+//  ProcessingListCell.swift
 //  MEADepthCamera
 //
 //  Created by Will on 8/24/21.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// An ItemListCell subclass for the post-processing recording list that manages the progress bar/frame counter.
-class RecordingListCell: ItemListCell<RecordingListViewModel.Item> {
+class ProcessingListCell: ItemListCell<ProcessingListViewModel.Item> {
     
     private let frameCounterLabel = UILabel()
     private let progressBar = UIProgressView(progressViewStyle: .default)
@@ -17,7 +17,7 @@ class RecordingListCell: ItemListCell<RecordingListViewModel.Item> {
                                         frameCounterTrailing: NSLayoutConstraint)?
     
     override func updateConfiguration(using state: UICellConfigurationState) {
-        guard let item = state.item as? RecordingListViewModel.Item else { return }
+        guard let item = state.item as? ProcessingListViewModel.Item else { return }
         setUpViewsIfNeeded()
         
         // Configure the list content configuration and apply that to the list content view.
@@ -48,7 +48,7 @@ class RecordingListCell: ItemListCell<RecordingListViewModel.Item> {
     }
 }
 
-extension RecordingListCell {
+extension ProcessingListCell {
     private func defaultListContentConfiguration() -> UIListContentConfiguration { return .subtitleCell() }
     
     private func setUpViewsIfNeeded() {

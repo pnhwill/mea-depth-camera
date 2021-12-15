@@ -10,13 +10,14 @@ import Combine
 
 class UseCaseDetailViewController: UICollectionViewController {
     
-    private static let mainStoryboardName = "Main"
-    private static let taskNavControllerIdentifier = "TaskNavViewController"
-    
     private var viewModel: DetailViewModel?
     private var useCase: UseCase?
     private var isNew = false
     private var useCaseDidChangeSubscriber: Cancellable?
+    
+    private var useCaseSplitViewController: UseCaseSplitViewController {
+        self.splitViewController as! UseCaseSplitViewController
+    }
     
     func configure(with useCase: UseCase, isNew: Bool = false) {
         self.useCase = useCase
@@ -112,7 +113,7 @@ extension UseCaseDetailViewController {
 extension UseCaseDetailViewController {
     override func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
         guard elementKind == UseCaseDetailViewModel.sectionFooterElementKind, let view = view as? ButtonSupplementaryView else { return }
-        view.setButtonAction(buttonAction: showTaskList)
+        view.setButtonAction(buttonAction: startButtonTapped)
     }
 }
 
@@ -130,18 +131,10 @@ extension UseCaseDetailViewController {
         }
     }
     
-    private func showTaskList() {
+    private func startButtonTapped() {
         guard let useCase = useCase else { return }
         // Show the task list split view when start button is tapped
-        let storyboard = UIStoryboard(name: Self.mainStoryboardName, bundle: nil)
-        guard let taskNavController = storyboard.instantiateViewController(withIdentifier: Self.taskNavControllerIdentifier) as? UINavigationController,
-              let taskSplitVC = taskNavController.topViewController as? TaskSplitViewController
-        else { return }
-        taskSplitVC.configure(with: useCase)
-        show(taskNavController, sender: nil)
-//        guard let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { fatalError("no window scene") }
-//        guard let window = mainWindowScene.windows.first else { fatalError("no window") }
-//        window.rootViewController = taskSplitVC
+        useCaseSplitViewController.showTaskList(with: useCase)
     }
 }
 

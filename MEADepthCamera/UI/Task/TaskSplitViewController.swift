@@ -21,6 +21,10 @@ class TaskSplitViewController: UISplitViewController {
         }
     }
     
+    deinit {
+        print("TaskSplitViewController deinitialized.")
+    }
+    
     func configure(with useCase: UseCase) {
         self.useCase = useCase
     }
@@ -35,8 +39,7 @@ class TaskSplitViewController: UISplitViewController {
     }
     
     func showDetail(with task: Task) {
-        guard let detailNavController = self.viewController(for: .secondary) as? UINavigationController,
-              let detailViewController = detailNavController.topViewController as? TaskDetailViewController,
+        guard let detailViewController = self.viewController(for: .secondary) as? TaskDetailViewController,
               let useCase = useCase,
               let id = task.id,
               id != selectedItemID
@@ -44,8 +47,17 @@ class TaskSplitViewController: UISplitViewController {
         detailViewController.configure(with: task, useCase: useCase)
         selectedItemID = id
         if isCollapsed {
-            showDetailViewController(detailNavController, sender: self)
+            showDetailViewController(detailViewController, sender: self)
         }
+    }
+    
+    func showCamera(with useCase: UseCase, task: Task) {
+        let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
+        guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: StoryboardID.cameraNavController) as? UINavigationController,
+              let cameraViewController = cameraNavController.topViewController as? CameraViewController
+        else { return }
+        cameraViewController.configure(useCase: useCase, task: task)
+        show(cameraNavController, sender: nil)
     }
 }
 

@@ -9,7 +9,7 @@ import UIKit
 
 class TaskListViewController: ListViewController {
     
-    private static let showRecordingListSegueIdentifier = "ShowRecordingListSegue"
+    private static let showProcessingListSegueIdentifier = "ShowProcessingListSegue"
     
     private var useCase: UseCase? {
         didSet {
@@ -32,11 +32,11 @@ class TaskListViewController: ListViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showRecordingListSegueIdentifier,
+        if segue.identifier == Self.showProcessingListSegueIdentifier,
            let destination = segue.destination as? UINavigationController,
-           let recordingListViewController = destination.topViewController as? RecordingListViewController {
+           let processingListViewController = destination.topViewController as? ProcessingListViewController {
             guard let useCase = useCase else { return }
-            recordingListViewController.configure(useCase: useCase)
+            processingListViewController.configure(useCase: useCase)
         }
     }
     
@@ -57,6 +57,9 @@ class TaskListViewController: ListViewController {
         // Clear the collectionView selection when splitViewController is collapsed.
         clearsSelectionOnViewWillAppear = taskSplitViewController.isCollapsed
         super.viewWillAppear(animated)
+        if taskSplitViewController.isCollapsed {
+            taskSplitViewController.selectedItemID = nil
+        }
         taskListViewModel.reloadStores()
     }
     

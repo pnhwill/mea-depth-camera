@@ -71,6 +71,10 @@ class CameraViewController: UIViewController {
         true
     }
     
+    deinit {
+        print("CameraViewController deinitialized.")
+    }
+    
     // MARK: - Configuration
     
     func configure(useCase: UseCase, task: Task) {
@@ -162,9 +166,8 @@ class CameraViewController: UIViewController {
         
         navigationController?.setToolbarHidden(true, animated: false)
         
-        let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        let mainWindowScene = view.window?.windowScene
         let interfaceOrientation = mainWindowScene?.interfaceOrientation ?? .portrait
-        //statusBarOrientation = interfaceOrientation
         
         let initialThermalState = ProcessInfo.processInfo.thermalState
         if initialThermalState == .serious || initialThermalState == .critical {

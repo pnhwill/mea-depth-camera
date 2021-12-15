@@ -9,6 +9,40 @@ import UIKit
 
 // MARK: UIViewController
 extension UIViewController {
+    
+    struct StoryboardName {
+        static let main = "Main"
+        static let useCaseList = "UseCaseList"
+        static let taskList = "TaskList"
+        static let camera = "Camera"
+    }
+    
+    struct StoryboardID {
+        static let useCaseSplitVC = "UseCaseSplitVC"
+        static let taskSplitVC = "TaskSplitVC"
+        static let cameraNavController = "CameraNavigationController"
+    }
+    
+    func setRootViewController(_ newRootViewController: UIViewController, animated: Bool) {
+        guard let window = view.window else {
+            assertionFailure("current VC has no window.")
+            return
+        }
+        let transition: UIView.AnimationOptions = .transitionFlipFromRight
+        if animated {
+            UIView.transition(
+                with: window,
+                duration: 0.3,
+                options: transition,
+                animations: {
+                    window.rootViewController = newRootViewController
+                },
+                completion: nil)
+        } else {
+            window.rootViewController = newRootViewController
+        }
+    }
+    
     func alert(title: String, message: String, actions: [UIAlertAction]) {
         
         let alertController = UIAlertController(title: title,

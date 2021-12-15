@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Asynchronously load the stored JSON data into the Core Data store
         _Concurrency.Task {
-            await fetchExperiments()
+            await loadExperiments()
         }
         return true
     }
@@ -48,8 +48,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
+// MARK: Load Experiments from JSON
 extension AppDelegate {
-    private func fetchExperiments() async {
+    private func loadExperiments() async {
         // Core Data provider to load experiments
         let container = coreDataStack.persistentContainer
         let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
@@ -62,3 +63,6 @@ extension AppDelegate {
         }
     }
 }
+
+// MARK: Set Root View Controller
+

@@ -1,5 +1,5 @@
 //
-//  RecordingListViewModel.swift
+//  ProcessingListViewModel.swift
 //  MEADepthCamera
 //
 //  Created by Will on 11/9/21.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class RecordingListViewModel: ObservableObject {
+class ProcessingListViewModel {
     
     typealias ProcessingCompleteAction = () -> Void
     
@@ -114,7 +114,7 @@ class RecordingListViewModel: ObservableObject {
 }
 
 // MARK: Model Store Configuration
-extension RecordingListViewModel {
+extension ProcessingListViewModel {
     /// Call each time a recording finishes being processed.
     private func reloadStores() {
         guard let sections = sections, let items = items else { return }
@@ -129,7 +129,7 @@ extension RecordingListViewModel {
 }
 
 // MARK: Face Landmarks Processing
-extension RecordingListViewModel {
+extension ProcessingListViewModel {
     private func startTracking(_ recording: Recording) throws {
         guard !recording.isProcessed, let faceLandmarksPipeline = FaceLandmarksPipeline(recording: recording) else {
             return
@@ -141,7 +141,7 @@ extension RecordingListViewModel {
 }
 
 // MARK: FaceLandmarksPipelineDelegate
-extension RecordingListViewModel: FaceLandmarksPipelineDelegate {
+extension ProcessingListViewModel: FaceLandmarksPipelineDelegate {
     func displayFrameCounter(_ frame: Int) {
         guard let recording = faceLandmarksPipeline?.recording else { return }
         reconfigureItem(recording: recording, processedFrames: frame)

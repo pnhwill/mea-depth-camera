@@ -1,5 +1,5 @@
 //
-//  RecordingListViewController.swift
+//  ProcessingListViewController.swift
 //  MEADepthCamera
 //
 //  Created by Will on 8/24/21.
@@ -8,10 +8,10 @@
 import UIKit
 import Combine
 
-class RecordingListViewController: UICollectionViewController {
+class ProcessingListViewController: UICollectionViewController {
     
-    typealias Section = RecordingListViewModel.Section
-    typealias Item = RecordingListViewModel.Item
+    typealias Section = ProcessingListViewModel.Section
+    typealias Item = ProcessingListViewModel.Item
     
     enum TrackingState {
         case tracking
@@ -28,7 +28,7 @@ class RecordingListViewController: UICollectionViewController {
     @IBOutlet private weak var startStopButton: UIBarButtonItem!
     
     private var useCase: UseCase?
-    private var viewModel: RecordingListViewModel?
+    private var viewModel: ProcessingListViewModel?
     private var dataSource: UICollectionViewDiffableDataSource<Section.ID, Item.ID>?
     private var trackingState: TrackingState = .stopped {
         didSet {
@@ -40,7 +40,7 @@ class RecordingListViewController: UICollectionViewController {
     
     func configure(useCase: UseCase) {
         self.useCase = useCase
-        viewModel = RecordingListViewModel(useCase: useCase, processingCompleteAction: { [weak self] in
+        viewModel = ProcessingListViewModel(useCase: useCase, processingCompleteAction: { [weak self] in
             DispatchQueue.main.async {
                 self?.trackingState = .stopped
             }
@@ -97,7 +97,7 @@ class RecordingListViewController: UICollectionViewController {
 }
 
 // MARK: Face Landmarks Processing
-extension RecordingListViewController {
+extension ProcessingListViewController {
     private func handleTrackingStateChange() {
         switch trackingState {
         case .tracking:
@@ -127,7 +127,7 @@ extension RecordingListViewController {
 }
 
 // MARK: Collection View Configuration
-extension RecordingListViewController {
+extension ProcessingListViewController {
     private func configureCollectionView() {
         collectionView.collectionViewLayout = createLayout()
     }
@@ -190,7 +190,7 @@ extension RecordingListViewController {
 }
 
 // MARK: Cell Registration
-extension RecordingListViewController {
+extension ProcessingListViewController {
     
     private func createHeaderRegistration() -> UICollectionView.SupplementaryRegistration<UICollectionViewListCell> {
         return UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: Self.sectionHeaderElementKind) {
@@ -210,8 +210,8 @@ extension RecordingListViewController {
         }
     }
     
-    private func createCellRegistration() -> UICollectionView.CellRegistration<RecordingListCell, Item.ID> {
-        return UICollectionView.CellRegistration<RecordingListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createCellRegistration() -> UICollectionView.CellRegistration<ProcessingListCell, Item.ID> {
+        return UICollectionView.CellRegistration<ProcessingListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }

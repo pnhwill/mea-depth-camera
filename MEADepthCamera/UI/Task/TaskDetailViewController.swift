@@ -17,13 +17,14 @@ class TaskDetailViewController: UICollectionViewController {
         static let infoSectionFooter = "StartButtonFooter"
     }
     
-    private static let cameraStoryboardName = "Camera"
-    private static let cameraNavControllerIdentifier = "CameraNavigationController"
-    
     private var viewModel: TaskDetailViewModel?
     private var dataSource: UICollectionViewDiffableDataSource<Section.ID, ListItem.ID>?
     private var useCase: UseCase?
     private var task: Task?
+    
+    private var taskSplitViewController: TaskSplitViewController {
+        self.splitViewController as! TaskSplitViewController
+    }
     
     func configure(with task: Task, useCase: UseCase) {
         self.task = task
@@ -43,14 +44,9 @@ class TaskDetailViewController: UICollectionViewController {
 }
 
 extension TaskDetailViewController {
-    private func showCamera() {
+    private func startButtonTapped() {
         guard let useCase = useCase, let task = task else { return }
-        let storyboard = UIStoryboard(name: Self.cameraStoryboardName, bundle: nil)
-        guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: Self.cameraNavControllerIdentifier) as? UINavigationController,
-              let cameraViewController = cameraNavController.topViewController as? CameraViewController
-        else { return }
-        cameraViewController.configure(useCase: useCase, task: task)
-        show(cameraNavController, sender: nil)
+        taskSplitViewController.showCamera(with: useCase, task: task)
     }
 }
 
@@ -154,7 +150,7 @@ extension TaskDetailViewController {
         return UICollectionView.SupplementaryRegistration<ButtonSupplementaryView>(elementKind: ElementKind.infoSectionFooter) {
             [weak self] (supplementaryView, elementKind, indexPath) in
             guard let self = self else { return }
-            supplementaryView.setButtonAction(buttonAction: self.showCamera)
+            supplementaryView.setButtonAction(buttonAction: self.startButtonTapped)
         }
     }
     
