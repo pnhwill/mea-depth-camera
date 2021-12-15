@@ -216,15 +216,16 @@ class CapturePipeline: NSObject {
             }
         }
         
-        // Set up subscriber do receive file writer statuses
-        self.fileWritingDone = self.videoWriterSubject!.combineLatest(self.depthWriterSubject!, self.audioWriterSubject!)
-        .sink(receiveCompletion: { [weak self] completion in
-            self?.handleRecordingFinish(completion: completion)
-        }, receiveValue: { [weak self] state in
-            if state == (.active, .active, .active) {
-                self?.recordingState = .recording
-            }
-        })
+        // Set up subscriber to receive file writer statuses.
+        self.fileWritingDone = self.videoWriterSubject!
+            .combineLatest(self.depthWriterSubject!, self.audioWriterSubject!)
+            .sink(receiveCompletion: { [weak self] completion in
+                self?.handleRecordingFinish(completion: completion)
+            }, receiveValue: { [weak self] state in
+                if state == (.active, .active, .active) {
+                    self?.recordingState = .recording
+                }
+            })
     }
     
     func stopRecording() {

@@ -44,10 +44,11 @@ class TaskListViewController: ListViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        listItemsSubscriber = viewModel?.sectionsStore?.$allModels
+        sectionsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refreshListData()
+                self?.reloadHeaderData()
                 self?.selectItemIfNeeded()
             }
     }

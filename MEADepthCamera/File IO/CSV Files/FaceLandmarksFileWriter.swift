@@ -11,15 +11,24 @@ import Vision
 /// Writes face landmark position data from a recording to a CSV file.
 class FaceLandmarksFileWriter: CSVFileWriter {
     
+    enum Columns: String, CaseIterable {
+        case frame
+        case timeStamp
+        case boundingBoxOriginX
+        case boundingBoxOriginY
+        case boundingBoxWidth
+        case boundingBoxHeight
+    }
+    
     let outputType: OutputType
     
     let fileURL: URL
     
     /// String containing appropriate column labels for the CSV file, with commas as a delimiter.
     private var columnLabels: String {
-        var columnLabels = "Frame,Timestamp(s),BBox_x,BBox_y,BBox_width,BBox_height,"
+        var columnLabels = Columns.allCases.map { $0.rawValue }.joined(separator: ",")
         for i in 0..<numLandmarks {
-            columnLabels.append("landmark_\(i)_x,landmark_\(i)_y,landmark_\(i)_z,")
+            columnLabels.append(",landmark_\(i)_x,landmark_\(i)_y,landmark_\(i)_z")
         }
         columnLabels.append("\n")
         return columnLabels

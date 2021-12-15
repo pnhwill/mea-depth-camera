@@ -7,32 +7,49 @@
 
 import Foundation
 
-/// Generic model store for quick lookup of Identifiable models.
+// MARK: ModelStore Protocol
+/// Generic model store for quick lookup of `Identifiable` models.
 protocol ModelStore {
     associatedtype Model: Identifiable
-    
+    /// Fetches the stored model by its identifier.
     func fetchByID(_ id: Model.ID) -> Model?
 }
 
+// MARK: AnyModelStore
 class AnyModelStore<Model: Identifiable>: ModelStore {
-    
     private var models = [Model.ID: Model]()
-    
     init(_ models: [Model]) {
         self.models = models.groupingByUniqueID()
     }
-    
     func fetchByID(_ id: Model.ID) -> Model? {
         return self.models[id]
     }
 }
 
-extension Sequence where Element: Identifiable {
-    func groupingByID() -> [Element.ID: [Element]] {
-        return Dictionary(grouping: self, by: { $0.id })
+// MARK: ObservableModelStore
+/// Concrete `ModelStore` class that conforms to `ObservableObject` and has a `@Published` model dictionary property.
+class ObservableModelStore<Model: Identifiable>: ModelStore, ObservableObject {
+
+    /// `@Published` dictionary containing the stored models keyed by their identifiers.
+    @Published private(set) var allModels = [Model.ID: Model]()
+    
+    init(_ models: [Model]) {
+        self.allModels = models.groupingByUniqueID()
     }
     
-    func groupingByUniqueID() -> [Element.ID: Element] {
-        return Dictionary(uniqueKeysWithValues: self.map { ($0.id, $0) })
+    func fetchByID(_ id: Model.ID) -> Model? {
+        return self.allModels[id]
+    }
+    /// Reinitializes the model store with the given models.
+    func reload(with newModels: [Model]) {
+        allModels = newModels.groupingByUniqueID()
+    }
+    /// Merges the given models into the store, replacing models that have duplicate IDs with the new values.
+    func merge(newModels: [Model]) {
+        allModels.merge(newModels.groupingByUniqueID()) { (_, new) in new }
+    }
+    /// Deletes the model with the given ID from the store.
+    func deleteByID(_ id: Model.ID) {
+        allModels.removeValue(forKey: id)
     }
 }

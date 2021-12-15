@@ -7,6 +7,7 @@
 
 import CoreMedia
 import Metal
+import simd
 
 /// Image processor that performs lens distortion correction using a Metal GPU shader.
 class LensDistortionCorrectionProcessor: FilterRenderer {

@@ -31,7 +31,7 @@ class UseCaseListViewController: ListViewController {
         super.viewDidLoad()
         configureNavigationItem()
 //        selectItemIfNeeded()
-        listItemsSubscriber = viewModel?.sectionsStore?.$allModels
+        sectionsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refreshListData()

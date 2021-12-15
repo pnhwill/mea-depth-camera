@@ -10,20 +10,10 @@ import CoreData
 
 class MainMenuViewController: UIViewController {
     
-    @IBOutlet private weak var useCaseListButton: UIButton!
-    
-    private var dataSource: MainMenuDataSource?
-    
-    // MARK: Navigation
-    
-    @IBAction func unwindFromList(unwindSegue: UIStoryboardSegue) {
-    }
-    
-    // MARK: Life Cycle
+    @IBAction func unwindFromList(unwindSegue: UIStoryboardSegue) {}
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationItem.setHidesBackButton(true, animated: false)
     }
-    
 }

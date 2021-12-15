@@ -1,0 +1,18 @@
+[
+	{
+        "author": {
+            "name": "William Harrington",
+            "email": "wharrington2016@my.fit.edu"
+        },
+        "version": {
+            "stage": "Pre-Alpha",
+            "number": "1.9.7",
+            "build": "7",
+            "date": "December 14, 2021"
+        },
+        "source": {
+            "link": "github.com/pnhwill/mea-depth-camera",
+            "license": "MIT License - See LICENSE.txt"
+        },
+	}
+]

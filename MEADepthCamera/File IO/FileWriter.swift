@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: FileWriter
 /// Protocol for all file writer types.
 protocol FileWriter: AnyObject, NameDescribable {
     
@@ -15,7 +16,6 @@ protocol FileWriter: AnyObject, NameDescribable {
     
     /// The URL that the file is written to.
     var fileURL: URL { get }
-    
 }
 
 extension FileWriter {
@@ -27,5 +27,22 @@ extension FileWriter {
         let fileURL = folderURL.appendingPathComponent(fileName).appendingPathExtension(outputType.fileExtension)
         
         return fileURL
+    }
+}
+
+// MARK: CSVFileWriter
+/// Protocol for file writers that write comma-delimited `String` data to a CSV file.
+protocol CSVFileWriter: FileWriter {
+    associatedtype Columns: CaseIterable, RawRepresentable where Columns.RawValue == String
+}
+
+extension CSVFileWriter {
+    /// Writes the columns labels to the first row in the CSV file.
+    func writeColumnLabels(_ columnLabels: String) {
+        do {
+            try columnLabels.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
+        } catch {
+            print("Failed to write to file: \(error)")
+        }
     }
 }

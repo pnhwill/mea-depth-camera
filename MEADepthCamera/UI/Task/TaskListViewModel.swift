@@ -9,6 +9,7 @@ import UIKit
 
 class TaskListViewModel: ListViewModel {
     
+    // MARK: UseCaseHeader
     private struct UseCaseHeader {
         enum ItemType: Int, CaseIterable {
             case sectionHeader, title, experiment, subjectID, completedTasks
@@ -53,6 +54,7 @@ class TaskListViewModel: ListViewModel {
         }()
     }
     
+    // MARK: TaskHeaders
     private struct TaskHeaders {
         enum HeaderType: Int, CaseIterable {
             case sectionHeader, incomplete, complete
@@ -100,6 +102,7 @@ class TaskListViewModel: ListViewModel {
         }()
     }
     
+    // MARK: TaskItems
     private struct TaskItems {
         let incompleteTasks: [ListItem]
         let completeTasks: [ListItem]
@@ -119,6 +122,7 @@ class TaskListViewModel: ListViewModel {
         }
     }
     
+    // MARK: Model Stores
     lazy var sectionsStore: ObservableModelStore<Section>? = {
         guard let taskListSection = taskListSection() else { return nil }
         let headerItemIds = UseCaseHeader.ItemType.allCases.map { $0.id }

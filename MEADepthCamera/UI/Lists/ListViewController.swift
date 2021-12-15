@@ -19,7 +19,10 @@ class ListViewController: UICollectionViewController {
     var viewModel: ListViewModel?
     var dataSource: ListDiffableDataSource?
     
-    var listItemsSubscriber: AnyCancellable?
+    var sectionsSubscriber: AnyCancellable?
+    
+    var headerAppearance: UICollectionLayoutListConfiguration.Appearance { .insetGrouped }
+    var listAppearance: UICollectionLayoutListConfiguration.Appearance { .sidebarPlain }
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -44,6 +47,12 @@ extension ListViewController {
             guard let sectionSnapshot = createSnapshot(for: sectionID) else { continue }
             dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
         }
+    }
+    
+    func reloadHeaderData() {
+        guard var snapshot = dataSource?.snapshot() else { return }
+        snapshot.reloadSections([.header])
+        dataSource?.apply(snapshot, animatingDifferences: true)
     }
     
     func refreshListData() {
@@ -80,34 +89,23 @@ extension ListViewController {
 // MARK: Collection View Configuration
 extension ListViewController {
     private func configureCollectionView() {
-        let layout = Self.createLayout()
+        let layout = createLayout()
         collectionView.collectionViewLayout = layout
     }
     
-    private static func createLayout() -> UICollectionViewLayout {
-        let sectionProvider = {
+    private func createLayout() -> UICollectionViewLayout {
+        let sectionProvider = { [unowned self]
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             guard let sectionID = Section.ID(rawValue: sectionIndex) else { return nil }
             let section: NSCollectionLayoutSection
             switch sectionID {
             case .header:
-//                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-//                                                      heightDimension: .fractionalHeight(1.0))
-//                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-//                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-//                                                       heightDimension: .fractionalHeight(1.0))
-//                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-//                                                               subitems: [item])
-////                group.interItemSpacing = .flexible(10)
-//                section = NSCollectionLayoutSection(group: group)
-////                section.interGroupSpacing = 10
-//                section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
-                var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+                var configuration = UICollectionLayoutListConfiguration(appearance: self.headerAppearance)
                 configuration.headerMode = .firstItemInSection
                 section = NSCollectionLayoutSection.list(using: configuration,
                                                          layoutEnvironment: layoutEnvironment)
             case .list:
-                var configuration = UICollectionLayoutListConfiguration(appearance: .sidebarPlain)
+                var configuration = UICollectionLayoutListConfiguration(appearance: self.listAppearance)
                 configuration.headerMode = .firstItemInSection
                 configuration.headerTopPadding = 0
                 section = NSCollectionLayoutSection.list(using: configuration,
@@ -134,16 +132,16 @@ extension ListViewController {
             if indexPath.item == 0 {
                 return collectionView.dequeueConfiguredReusableCell(using: sectionHeaderCellRegistration, for: indexPath, item: itemID)
             } else {
-                switch sectionID {
-                case .header:
-                    return collectionView.dequeueConfiguredReusableCell(using: headerCellRegistration, for: indexPath, item: itemID)
-                case .list:
-                    guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return nil }
-                    if item.subItems.isEmpty {
+                guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return nil }
+                if item.subItems.isEmpty {
+                    switch sectionID {
+                    case .header:
+                        return collectionView.dequeueConfiguredReusableCell(using: headerCellRegistration, for: indexPath, item: itemID)
+                    case .list:
                         return collectionView.dequeueConfiguredReusableCell(using: listCellRegistration, for: indexPath, item: itemID)
-                    } else {
-                        return collectionView.dequeueConfiguredReusableCell(using: containerCellRegistration, for: indexPath, item: itemID)
                     }
+                } else {
+                    return collectionView.dequeueConfiguredReusableCell(using: containerCellRegistration, for: indexPath, item: itemID)
                 }
             }
         }

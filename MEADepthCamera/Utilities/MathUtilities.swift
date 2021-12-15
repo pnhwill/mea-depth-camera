@@ -33,17 +33,7 @@ extension FloatingPoint {
 
 // MARK: Collections
 
-extension ClosedRange where Bound: AdditiveArithmetic {
-    var diameter: Bound { upperBound - lowerBound }
-}
 
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
-        }
-    }
-}
 
 // MARK: Core Graphics
 

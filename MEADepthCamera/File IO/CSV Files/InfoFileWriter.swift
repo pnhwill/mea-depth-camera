@@ -10,13 +10,25 @@ import Foundation
 /// Writes information about a recording to a CSV file.
 class InfoFileWriter: CSVFileWriter {
     
+    enum Columns: String, CaseIterable {
+        case subjectID = "Subject_ID"
+        case taskName = "Task"
+        case startTime = "Start_Time"
+        case landmarksCount = "Number_of_Landmarks"
+        case videoWidth = "Video_Width"
+        case videoHeight = "Video_Height"
+        case depthMapWidth = "DepthMap_Width"
+        case depthMapHeight = "DepthMap_Height"
+        case totalFrames = "Total_Frames"
+    }
+    
     let outputType: OutputType = .info
     
     let fileURL: URL
     
     /// String containing appropriate column labels for the CSV file, with commas as a delimiter.
     private var columnLabels: String {
-        "Patient_ID,Task,Start_Time,Number_of_Landmarks,Video_Width,Video_Height,DepthMap_Width,DepthMap_Height,Total_Frames,\n"
+        Columns.allCases.map { $0.rawValue }.joined(separator: ",").appending("\n")
     }
     
     private let recording: Recording

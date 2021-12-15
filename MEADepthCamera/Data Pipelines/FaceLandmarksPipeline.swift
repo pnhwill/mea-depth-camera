@@ -194,8 +194,8 @@ class FaceLandmarksPipeline {
     ) -> (
         boundingBox: CGRect,
         landmarks2D: [vector_float3],
-        landmarks3D: [vector_float3])
-    {
+        landmarks3D: [vector_float3]
+    ) {
         
         // In case the face is lost in the middle of collecting data,
         // this prevents empty or nil-valued cells in the file so it can still be parsed later.
@@ -213,10 +213,24 @@ class FaceLandmarksPipeline {
             if let landmarks = faceObservation.landmarks?.allPoints {
                 
                 // TODO: TEST THIS, may need VNImagePointForFaceLandmarkPoint() instead (compare).
-                let landmarkPoints = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
-                landmarks2D = landmarkPoints.map { vector_float3(vector_float2($0), 0.0) }
+//                let landmarkPointsInVideoImage = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
+                let landmarkPointsInVideoImage = landmarks.normalizedPoints.map { landmarkPoint in
+                    VNImagePointForFaceLandmarkPoint(
+                        vector_float2(landmarkPoint),
+                        faceObservation.boundingBox,
+                        Int(processorSettings.videoResolution.width),
+                        Int(processorSettings.videoResolution.height))
+                }
+                landmarks2D = landmarkPointsInVideoImage.map { vector_float3(vector_float2($0), 0.0) }
                 
-                let landmarkPointsInDepthImage = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
+//                let landmarkPointsInDepthImage = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
+                let landmarkPointsInDepthImage = landmarks.normalizedPoints.map { landmarkPoint in
+                    VNImagePointForFaceLandmarkPoint(
+                        vector_float2(landmarkPoint),
+                        faceObservation.boundingBox,
+                        Int(processorSettings.depthResolution.width),
+                        Int(processorSettings.depthResolution.height))
+                }
                 if let depthDataMap = depthDataMap,
                    let correctedDepthMap = rectifyDepthMapGPU(depthDataMap: depthDataMap),
                    let correctedLandmarks = rectifyLandmarks(landmarks: landmarkPointsInDepthImage) {
