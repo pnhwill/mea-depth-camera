@@ -10,17 +10,19 @@ import UIKit
 // MARK: UIViewController
 extension UIViewController {
     
-    struct StoryboardName {
-        static let main = "Main"
-        static let useCaseList = "UseCaseList"
+    enum StoryboardName {
         static let taskList = "TaskList"
         static let camera = "Camera"
     }
     
-    struct StoryboardID {
-        static let useCaseSplitVC = "UseCaseSplitVC"
-        static let taskSplitVC = "TaskSplitVC"
+    enum StoryboardID {
         static let cameraNavController = "CameraNavigationController"
+        static let taskListVC = "TaskListVC"
+        static let taskDetailVC = "TaskDetailVC"
+    }
+    
+    enum SegueID {
+        static let showProcessingListSegueIdentifier = "ShowProcessingListSegue"
     }
     
     func setRootViewController(_ newRootViewController: UIViewController, animated: Bool) {

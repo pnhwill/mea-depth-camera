@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="iie-qW-Cqf">
-    <device id="retina6_0" orientation="portrait" appearance="dark"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="RUF-jk-XQQ">
+    <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="dark"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -14,7 +14,7 @@
             <objects>
                 <collectionViewController id="Kq3-2h-2mw" customClass="AboutViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="rA8-a9-h16">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="790"/>
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Ua0-RM-xGC">
@@ -32,53 +32,57 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dAg-Gt-eaG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2580" y="-26"/>
+            <point key="canvasLocation" x="-1822" y="106"/>
         </scene>
-        <!--Main Menu Navigation Controller-->
-        <scene sceneID="S46-A3-hhh">
+        <!--Navigation Controller-->
+        <scene sceneID="vIH-4Q-Nbk">
             <objects>
-                <navigationController title="Main Menu Navigation Controller" id="iie-qW-Cqf" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="mfa-f4-7XS">
-                        <rect key="frame" x="0.0" y="44" width="390" height="44"/>
+                <navigationController toolbarHidden="NO" id="Q8i-x4-fx3" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="sBo-Dn-xYd">
+                        <rect key="frame" x="0.0" y="24" width="375" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="pZG-O1-dbT">
+                        <rect key="frame" x="0.0" y="1129" width="375" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
-                        <segue destination="A6m-RR-31J" kind="relationship" relationship="rootViewController" id="n0F-53-Os5"/>
+                        <segue destination="6dk-vu-HTx" kind="relationship" relationship="rootViewController" id="t7w-D6-e28"/>
                     </connections>
                 </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="N2d-kx-mYE" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="j9l-zw-zrB" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-4191" y="-26"/>
+            <point key="canvasLocation" x="-3440" y="796"/>
         </scene>
         <!--Main Menu-->
         <scene sceneID="QZN-RH-IPq">
             <objects>
                 <viewController id="A6m-RR-31J" customClass="MainMenuViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Wh0-cP-6xn">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="420" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="SVL-W4-3tA">
-                                <rect key="frame" x="0.0" y="88" width="390" height="722"/>
+                                <rect key="frame" x="0.0" y="74" width="390" height="722"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MEA Depth Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="87G-3W-bDT">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="235.33333333333334"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="390" height="235.5"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PlJ-n2-oaw" userLabel="List Button Container View">
-                                        <rect key="frame" x="0.0" y="243.33333333333331" width="390" height="235.33333333333331"/>
+                                        <rect key="frame" x="0.0" y="243.5" width="390" height="235"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP1-pS-WxO">
-                                                <rect key="frame" x="111.33333333333333" y="92.333333333333371" width="167.33333333333337" height="51"/>
+                                                <rect key="frame" x="111.5" y="92" width="167.5" height="51"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Use Case List"/>
                                                 <buttonConfiguration key="configuration" style="gray" title="Use Cases">
                                                     <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle0"/>
                                                 </buttonConfiguration>
                                                 <connections>
-                                                    <action selector="useCaseListButtonTapped:" destination="A6m-RR-31J" eventType="touchUpInside" id="qUY-vS-tcl"/>
+                                                    <action selector="useCaseListButtonTapped:" destination="A6m-RR-31J" eventType="touchUpInside" id="Lyf-J0-X4E"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -88,11 +92,11 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" id="xep-UG-Q1f" userLabel="About Button Container View">
-                                        <rect key="frame" x="0.0" y="486.66666666666669" width="390" height="235.33333333333331"/>
+                                        <rect key="frame" x="0.0" y="486.5" width="390" height="235.5"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DV8-F1-nPY">
-                                                <rect key="frame" x="142.66666666666666" y="92.333333333333371" width="105" height="51"/>
+                                                <rect key="frame" x="142.5" y="92" width="105" height="51"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Use Case List"/>
                                                 <buttonConfiguration key="configuration" style="gray" title="About">
@@ -115,17 +119,125 @@
                         <viewLayoutGuide key="safeArea" id="Atc-ih-wkx"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="SVL-W4-3tA" firstAttribute="top" secondItem="Atc-ih-wkx" secondAttribute="top" id="Ih6-W2-CRn"/>
-                            <constraint firstItem="Atc-ih-wkx" firstAttribute="trailing" secondItem="SVL-W4-3tA" secondAttribute="trailing" id="JMF-1N-IQK"/>
+                            <constraint firstItem="SVL-W4-3tA" firstAttribute="top" secondItem="Atc-ih-wkx" secondAttribute="top" id="iqv-1u-aWF"/>
                             <constraint firstItem="Atc-ih-wkx" firstAttribute="bottom" secondItem="SVL-W4-3tA" secondAttribute="bottom" id="kSQ-EO-bB7"/>
                             <constraint firstItem="SVL-W4-3tA" firstAttribute="leading" secondItem="Atc-ih-wkx" secondAttribute="leading" id="mYr-OF-EVP"/>
+                            <constraint firstItem="Atc-ih-wkx" firstAttribute="trailing" secondItem="SVL-W4-3tA" secondAttribute="trailing" id="p8c-OP-X5P"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Main Menu" largeTitleDisplayMode="always" id="7PU-7A-QQD"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9qw-r2-GTA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-3401" y="-26"/>
+            <point key="canvasLocation" x="-2643" y="106"/>
+        </scene>
+        <!--Use Case List View Controller-->
+        <scene sceneID="0Mn-9S-9bz">
+            <objects>
+                <collectionViewController id="6dk-vu-HTx" customClass="UseCaseListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="NpE-Xs-FCH">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="GwG-uQ-tY5">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="6dk-vu-HTx" id="AJ4-50-51n"/>
+                            <outlet property="delegate" destination="6dk-vu-HTx" id="FMh-q0-UQ2"/>
+                        </connections>
+                    </collectionView>
+                    <toolbarItems>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="sRD-PP-zco"/>
+                        <barButtonItem systemItem="add" id="cJJ-CJ-U2t">
+                            <connections>
+                                <action selector="addButtonTapped:" destination="6dk-vu-HTx" id="f9I-IS-yUE"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Fny-sN-iAu"/>
+                    </toolbarItems>
+                    <navigationItem key="navigationItem" id="IW8-Tg-PQ2"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="fua-28-8Qh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2643" y="796"/>
+        </scene>
+        <!--Use Case Detail View Controller-->
+        <scene sceneID="srT-Rg-Yoh">
+            <objects>
+                <collectionViewController id="kqc-Wg-YNO" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="coM-bn-zGm">
+                        <rect key="frame" x="0.0" y="0.0" width="458.5" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="KV1-HY-o93">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="kqc-Wg-YNO" id="FRX-pi-kEO"/>
+                            <outlet property="delegate" destination="kqc-Wg-YNO" id="exJ-4Z-HWY"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" id="Xcv-1V-PFu"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="eHn-cx-cVW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2643" y="1540"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Q7m-FB-ZeS">
+            <objects>
+                <navigationController id="6Eg-Bx-Ju3" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="5AK-Mj-zxh">
+                        <rect key="frame" x="0.0" y="24" width="458.5" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="kqc-Wg-YNO" kind="relationship" relationship="rootViewController" id="vmg-DM-0Mj"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="8mt-Ts-kA0" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3440" y="1540"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="WU7-4x-NZJ">
+            <objects>
+                <navigationController id="lxH-Vd-4IZ" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="xD4-Lj-m9F">
+                        <rect key="frame" x="0.0" y="24" width="420" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="A6m-RR-31J" kind="relationship" relationship="rootViewController" id="Y2s-T9-qcA"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AUj-2e-5eb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-3440" y="106"/>
+        </scene>
+        <!--Main Split View Controller-->
+        <scene sceneID="zqH-yJ-rPL">
+            <objects>
+                <splitViewController allowDoubleColumnStyle="YES" preferredDisplayMode="twoDisplace" behavior="displace" presentsWithGesture="NO" id="RUF-jk-XQQ" customClass="MainSplitViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <connections>
+                        <segue destination="lxH-Vd-4IZ" kind="relationship" relationship="masterViewController" id="4Wc-0j-RUv"/>
+                        <segue destination="Q8i-x4-fx3" kind="relationship" relationship="supplementaryViewController" id="Zdc-58-Okv"/>
+                        <segue destination="6Eg-Bx-Ju3" kind="relationship" relationship="detailViewController" id="LrP-V2-cew"/>
+                    </connections>
+                </splitViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cKZ-kw-kUE" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-4516" y="1038"/>
         </scene>
     </scenes>
     <resources>

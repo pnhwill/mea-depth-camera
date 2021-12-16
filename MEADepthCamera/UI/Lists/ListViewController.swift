@@ -36,6 +36,7 @@ class ListViewController: UICollectionViewController {
 // MARK: Update Data
 extension ListViewController {
     func loadData() {
+        guard viewModel != nil else { return }
         // Set the order for our sections
         let sections = Section.ID.allCases
         var snapshot = NSDiffableDataSourceSnapshot<Section.ID, Item.ID>()

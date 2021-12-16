@@ -22,8 +22,17 @@ class TaskDetailViewController: UICollectionViewController {
     private var useCase: UseCase?
     private var task: Task?
     
-    private var taskSplitViewController: TaskSplitViewController {
-        self.splitViewController as! TaskSplitViewController
+    private var mainSplitViewController: MainSplitViewController {
+        self.splitViewController as! MainSplitViewController
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        print("TaskDetailViewController Initialized.")
+    }
+    
+    deinit {
+        print("TaskDetailViewController deinitialized.")
     }
     
     func configure(with task: Task, useCase: UseCase) {
@@ -41,12 +50,16 @@ class TaskDetailViewController: UICollectionViewController {
         navigationItem.title = "View Task"
         configureCollectionView()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        navigationItem.setHidesBackButton(!mainSplitViewController.isCollapsed, animated: false)
+    }
 }
 
 extension TaskDetailViewController {
     private func startButtonTapped() {
-        guard let useCase = useCase, let task = task else { return }
-        taskSplitViewController.showCamera(with: useCase, task: task)
+        guard let task = task, let useCase = useCase else { return }
+        mainSplitViewController.showCamera(task: task, useCase: useCase)
     }
 }
 

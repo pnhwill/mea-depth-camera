@@ -10,7 +10,7 @@ import CoreData
 /// Relevant entities and attributes from the Core Data model.
 ///
 /// Use these to check whether a persistent history change is relevant to the current view.
-struct Schema {
+enum Schema {
     
     enum UseCase: String {
         case title, date

@@ -20,7 +20,6 @@ class TaskProvider: FetchingDataProvider {
     // MARK: Tasks Data
     
     /// Task data provided by Leif Simmatis of the University Health Network (UHN) for the VirtualSLP project. See ACKNOWLEDGMENTS.txt for additional details.
-    static let resourcesDirectory = "Resources"
     static let fileName = "virtualSLP_tasks"
     static let fileExtension = "json"
     let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)

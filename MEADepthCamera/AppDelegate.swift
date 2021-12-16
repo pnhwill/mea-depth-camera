@@ -17,15 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return delegate
     }()
     
-    lazy var coreDataStack: CoreDataStack = { return CoreDataStack() }()
+    lazy var coreDataStack = CoreDataStack()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-        // Asynchronously load the stored JSON data into the Core Data store
-        _Concurrency.Task {
-            await loadExperiments()
-        }
+        coreDataStack.importDataIfNeeded()
         return true
     }
     
@@ -47,22 +44,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 }
-
-// MARK: Load Experiments from JSON
-extension AppDelegate {
-    private func loadExperiments() async {
-        // Core Data provider to load experiments
-        let container = coreDataStack.persistentContainer
-        let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
-        
-        do {
-            try await provider.fetchJSONData()
-        } catch {
-            let error = error as? JSONError ?? .unexpectedError(error: error)
-            fatalError("Failed to fetch experiments with error \(error): \(error.localizedDescription)")
-        }
-    }
-}
-
-// MARK: Set Root View Controller
 

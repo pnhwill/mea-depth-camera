@@ -10,22 +10,17 @@ import CoreData
 
 class MainMenuViewController: UIViewController {
     
+    private var mainSplitViewController: MainSplitViewController? {
+        self.splitViewController as? MainSplitViewController
+    }
+    
     deinit {
         print("MainMenuViewController deinitialized.")
     }
     
     @IBAction func useCaseListButtonTapped(_ sender: UIButton) {
-        let storyboard = UIStoryboard(name: StoryboardName.useCaseList, bundle: nil)
-        guard let useCaseSplitVC = storyboard.instantiateViewController(
-            withIdentifier: StoryboardID.useCaseSplitVC) as? UseCaseSplitViewController
-        else {
-            assertionFailure("failed to instantiate UseCaseSplitVC.")
-            return
-        }
-        setRootViewController(useCaseSplitVC, animated: true)
+        mainSplitViewController?.transitionToUseCaseList()
     }
-    
-    @IBAction func unwindFromList(unwindSegue: UIStoryboardSegue) {}
     
     override func viewDidLoad() {
         super.viewDidLoad()

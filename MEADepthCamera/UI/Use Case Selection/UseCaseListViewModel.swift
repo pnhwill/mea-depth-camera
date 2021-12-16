@@ -93,7 +93,7 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     }
     
     func delete(_ id: UUID, completion: @escaping (Bool) -> Void) {
-        guard let useCase = useCase(with: id) else { fatalError() }
+        guard let useCase = useCase(with: id) else { return }
         dataProvider.delete(useCase) { success in
             completion(success)
         }
@@ -197,4 +197,5 @@ extension UseCaseListViewModel: UISearchResultsUpdating {
         reloadListStores()
     }
 }
+
 

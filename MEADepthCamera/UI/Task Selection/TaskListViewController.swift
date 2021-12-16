@@ -7,9 +7,8 @@
 
 import UIKit
 
+/// ListViewController subclass for the list of tasks associated with a single use case, which the user selects from to begin recording.
 class TaskListViewController: ListViewController {
-    
-    private static let showProcessingListSegueIdentifier = "ShowProcessingListSegue"
     
     private var useCase: UseCase? {
         didSet {
@@ -23,8 +22,12 @@ class TaskListViewController: ListViewController {
         self.viewModel as! TaskListViewModel
     }
     
-    private var taskSplitViewController: TaskSplitViewController {
-        self.splitViewController as! TaskSplitViewController
+    private var mainSplitViewController: MainSplitViewController {
+        self.splitViewController as! MainSplitViewController
+    }
+    
+    deinit {
+        print("TaskListViewController deinitialized.")
     }
     
     func configure(with useCase: UseCase) {
@@ -32,7 +35,7 @@ class TaskListViewController: ListViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Self.showProcessingListSegueIdentifier,
+        if segue.identifier == SegueID.showProcessingListSegueIdentifier,
            let destination = segue.destination as? UINavigationController,
            let processingListViewController = destination.topViewController as? ProcessingListViewController {
             guard let useCase = useCase else { return }
@@ -55,36 +58,32 @@ class TaskListViewController: ListViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         // Clear the collectionView selection when splitViewController is collapsed.
-        clearsSelectionOnViewWillAppear = taskSplitViewController.isCollapsed
-        super.viewWillAppear(animated)
-        if taskSplitViewController.isCollapsed {
-            taskSplitViewController.selectedItemID = nil
+        clearsSelectionOnViewWillAppear = mainSplitViewController.isCollapsed
+        navigationItem.setHidesBackButton(!mainSplitViewController.isCollapsed, animated: false)
+        if mainSplitViewController.isCollapsed {
+            mainSplitViewController.selectedItemID = nil
         }
+        super.viewWillAppear(animated)
         taskListViewModel.reloadStores()
-    }
-    
-    // MARK: Button Actions
-    
-    @IBAction func processButtonTapped(_ sender: UIBarButtonItem) {
-        print(#function)
     }
 }
 
 extension TaskListViewController {
     
     private func selectItemIfNeeded() {
-        guard !taskSplitViewController.isCollapsed else { return }
+        guard !mainSplitViewController.isCollapsed else { return }
         // If something is already selected, re-select the cell in the list.
-        if let selectedItemID = taskSplitViewController.selectedItemID,
+        if let selectedItemID = mainSplitViewController.selectedItemID,
            let indexPath = dataSource?.indexPath(for: selectedItemID) {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
         } else {
             // Select and show detail for the first list item (we have 2 headers, so first item is at index 2).
             let indexPath = IndexPath(item: 2, section: ListSection.Identifier.list.rawValue)
             if let itemID = dataSource?.itemIdentifier(for: indexPath),
-               let task = taskListViewModel.task(with: itemID) {
+               let task = taskListViewModel.task(with: itemID),
+               let useCase = useCase {
                 collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
-                taskSplitViewController.showDetail(with: task)
+                mainSplitViewController.showTaskDetail(task, useCase: useCase)
             }
         }
     }
@@ -96,8 +95,9 @@ extension TaskListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Push the detail view when the cell is tapped.
         if let itemID = dataSource?.itemIdentifier(for: indexPath),
-           let task = taskListViewModel.task(with: itemID) {
-            taskSplitViewController.showDetail(with: task)
+           let task = taskListViewModel.task(with: itemID),
+           let useCase = useCase {
+            mainSplitViewController.showTaskDetail(task, useCase: useCase)
         } else {
             collectionView.deselectItem(at: indexPath, animated: true)
         }

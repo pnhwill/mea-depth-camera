@@ -19,7 +19,6 @@ class ExperimentProvider: FetchingDataProvider {
     var sortAscending: Bool = true
     
     /// Experiment JSON Data
-    static let resourcesDirectory = "Resources"
     static let fileName = "MEADepthCamera_experiments"
     static let fileExtension = "json"
     let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)

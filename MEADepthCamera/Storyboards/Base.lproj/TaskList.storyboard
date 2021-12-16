@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina6_0" orientation="portrait" appearance="dark"/>
+    <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="dark"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -10,20 +10,20 @@
         <!--Navigation Controller-->
         <scene sceneID="K1J-GU-yo9">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="cf1-Oz-gJP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <navigationController toolbarHidden="NO" id="bxV-eo-Xuc" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6wN-3B-NDy">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="56"/>
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="56"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="eCM-EZ-xl1">
-                        <rect key="frame" x="0.0" y="707" width="390" height="49"/>
+                        <rect key="frame" x="0.0" y="945.5" width="704" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </toolbar>
                     <connections>
                         <segue destination="ulQ-Ml-GYW" kind="relationship" relationship="rootViewController" id="lyX-tM-Ugc"/>
                     </connections>
                 </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="cf1-Oz-gJP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3914" y="145"/>
         </scene>
@@ -32,7 +32,7 @@
             <objects>
                 <collectionViewController id="ulQ-Ml-GYW" customClass="ProcessingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="e75-pc-JZE">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="790"/>
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Qrj-zp-bpb">
@@ -57,7 +57,6 @@
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="Xy5-Iz-kLR"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="nDd-lx-EQ8"/>
-                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="startStopButton" destination="t3N-IA-KOk" id="qVn-6g-R7Q"/>
                     </connections>
@@ -66,32 +65,12 @@
             </objects>
             <point key="canvasLocation" x="4667" y="145"/>
         </scene>
-        <!--Task List Navigation Controller-->
-        <scene sceneID="1gQ-ew-IiY">
-            <objects>
-                <navigationController title="Task List Navigation Controller" toolbarHidden="NO" id="lLL-mQ-z1S" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="o6e-Cq-eHa">
-                        <rect key="frame" x="0.0" y="44" width="390" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="C8B-Zp-hvW">
-                        <rect key="frame" x="0.0" y="761" width="390" height="49"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </toolbar>
-                    <connections>
-                        <segue destination="yBd-9k-eGR" kind="relationship" relationship="rootViewController" id="x0l-Pi-j8z"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="iWP-Cz-EBr" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2295" y="145"/>
-        </scene>
         <!--Task List View Controller-->
         <scene sceneID="OQA-DE-aJu">
             <objects>
-                <collectionViewController id="yBd-9k-eGR" customClass="TaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="TaskListVC" id="yBd-9k-eGR" customClass="TaskListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="L5Z-l4-DmF">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="UHF-Lj-zWf">
@@ -115,41 +94,17 @@
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="Hqn-7f-iF0"/>
                     </toolbarItems>
-                    <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="xIY-kB-GfC">
-                        <barButtonItem key="leftBarButtonItem" title="Use Cases" id="aPG-Cl-4QH">
-                            <connections>
-                                <segue destination="HXN-dr-8P3" kind="unwind" unwindAction="unwindFromTasksWithUnwindSegue:" id="tsI-W5-HW0"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
-                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kK7-mw-S8q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-                <exit id="HXN-dr-8P3" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="3044" y="145"/>
-        </scene>
-        <!--Task Split View Controller-->
-        <scene sceneID="LhP-WO-NBW">
-            <objects>
-                <splitViewController storyboardIdentifier="TaskSplitVC" allowDoubleColumnStyle="YES" preferredDisplayMode="beside" behavior="tile" presentsWithGesture="NO" id="mqY-7A-H11" customClass="TaskSplitViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="ZV6-dO-xIO"/>
-                    <connections>
-                        <segue destination="lLL-mQ-z1S" kind="relationship" relationship="masterViewController" id="Yyx-lW-K6Y"/>
-                        <segue destination="lLL-mQ-z1S" kind="relationship" relationship="compactViewController" id="UXG-iX-LQY"/>
-                        <segue destination="BZ3-R2-1cM" kind="relationship" relationship="detailViewController" id="dz3-DD-wuu"/>
-                    </connections>
-                </splitViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="De9-aM-Sa0" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1395" y="460"/>
         </scene>
         <!--Task Detail View Controller-->
         <scene sceneID="YVS-xc-bCK">
             <objects>
-                <collectionViewController id="BZ3-R2-1cM" customClass="TaskDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="TaskDetailVC" id="BZ3-R2-1cM" customClass="TaskDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="xgg-l6-uhK">
-                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="sKz-0H-gP0">
@@ -164,16 +119,12 @@
                             <outlet property="delegate" destination="BZ3-R2-1cM" id="efP-vE-Up2"/>
                         </connections>
                     </collectionView>
-                    <navigationItem key="navigationItem" id="kp4-ZD-aEa"/>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YYK-5H-xWv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2380" y="918"/>
+            <point key="canvasLocation" x="3044" y="910"/>
         </scene>
     </scenes>
-    <inferredMetricsTieBreakers>
-        <segue reference="Yyx-lW-K6Y"/>
-    </inferredMetricsTieBreakers>
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

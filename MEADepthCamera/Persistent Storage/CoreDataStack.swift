@@ -10,24 +10,24 @@ import CoreData
 import OSLog
 
 /// Sets up the Core Data stack, observes Core Data notifications, processed persistent history, and deduplicates.
-class CoreDataStack {
+class CoreDataStack: ObservableObject {
+    
+    @Published private(set) var isLoaded: Bool = false
     
     let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
     
     // MARK: Persistent Container
+    /// The persistent container for the application. This implementation
+    /// creates and returns a container, having loaded the store for the
+    /// application to it. This property is optional since there are legitimate
+    /// error conditions that could cause the creation of the store to fail.
     lazy var persistentContainer: PersistentContainer = {
-        /*
-         The persistent container for the application. This implementation
-         creates and returns a container, having loaded the store for the
-         application to it. This property is optional since there are legitimate
-         error conditions that could cause the creation of the store to fail.
-        */
         
         // Register the transformer at the very beginning.
         // .processorSettingsToDataTransformer is a name defined with an NSValueTransformerName extension.
         ValueTransformer.setValueTransformer(ProcessorSettingsToDataTransformer(), forName: .processorSettingsToDataTransformer)
         
-        let container = PersistentContainer(name: "MEADepthCamera")
+        let container = PersistentContainer(name: Bundle.main.applicationName)
         
         guard let description = container.persistentStoreDescriptions.first else {
             fatalError("Failed to retrieve a persistent store description.")
@@ -68,59 +68,81 @@ class CoreDataStack {
         return container
     }()
     
+    // MARK: Load Experiments from JSON
+    /// Asynchronously load the stored JSON data into the Core Data store.
+    func importDataIfNeeded() {
+        _Concurrency.Task {
+            await loadExperiments()
+            isLoaded = true
+        }
+    }
+    
+    private func loadExperiments() async {
+        // Core Data provider to load experiments
+        let container = persistentContainer
+        let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
+        
+        do {
+            try await provider.fetchJSONData()
+        } catch {
+            let error = error as? JSONError ?? .unexpectedError(error: error)
+            fatalError("Failed to fetch experiments with error \(error): \(error.localizedDescription)")
+        }
+    }
+    
     // MARK: Persistent History Token
     /**
      Track the last history token processed for a store, and write its value to file.
      
      The historyQueue reads the token when executing operations, and updates it after processing is complete.
      */
-    private var lastHistoryToken: NSPersistentHistoryToken? = nil {
-        didSet {
-            guard let token = lastHistoryToken,
-                let data = try? NSKeyedArchiver.archivedData( withRootObject: token, requiringSecureCoding: true) else { return }
-            
-            do {
-                try data.write(to: tokenFile)
-            } catch {
-                print("###\(#function): Failed to write token data. Error = \(error)")
-            }
-        }
-    }
+//    private var lastHistoryToken: NSPersistentHistoryToken? = nil {
+//        didSet {
+//            guard let token = lastHistoryToken,
+//                let data = try? NSKeyedArchiver.archivedData( withRootObject: token, requiringSecureCoding: true) else { return }
+//
+//            do {
+//                try data.write(to: tokenFile)
+//            } catch {
+//                print("###\(#function): Failed to write token data. Error = \(error)")
+//            }
+//        }
+//    }
     
     /**
      The file URL for persisting the persistent history token.
     */
-    private lazy var tokenFile: URL = {
-        let url = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("MEADepthCamera", isDirectory: true)
-        if !FileManager.default.fileExists(atPath: url.path) {
-            do {
-                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-            } catch {
-                print("###\(#function): Failed to create persistent container URL. Error = \(error)")
-            }
-        }
-        return url.appendingPathComponent("token.data", isDirectory: false)
-    }()
+//    private lazy var tokenFile: URL = {
+//        let url = NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("MEADepthCamera", isDirectory: true)
+//        if !FileManager.default.fileExists(atPath: url.path) {
+//            do {
+//                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+//            } catch {
+//                print("###\(#function): Failed to create persistent container URL. Error = \(error)")
+//            }
+//        }
+//        return url.appendingPathComponent("token.data", isDirectory: false)
+//    }()
     
     /**
      An operation queue for handling history processing tasks: watching changes, deduplicating tags, and triggering UI updates if needed.
      */
-    private lazy var historyQueue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
-        return queue
-    }()
+//    private lazy var historyQueue: OperationQueue = {
+//        let queue = OperationQueue()
+//        queue.maxConcurrentOperationCount = 1
+//        return queue
+//    }()
     
     // MARK: INIT
     init() {
         // Load the last token from the token file.
-        if let tokenData = try? Data(contentsOf: tokenFile) {
-            do {
-                lastHistoryToken = try NSKeyedUnarchiver.unarchivedObject(ofClass: NSPersistentHistoryToken.self, from: tokenData)
-            } catch {
-                print("###\(#function): Failed to unarchive NSPersistentHistoryToken. Error = \(error)")
-            }
-        }
+//        if let tokenData = try? Data(contentsOf: tokenFile) {
+//            do {
+//                lastHistoryToken = try NSKeyedUnarchiver.unarchivedObject(ofClass: NSPersistentHistoryToken.self, from: tokenData)
+//            } catch {
+//                print("###\(#function): Failed to unarchive NSPersistentHistoryToken. Error = \(error)")
+//            }
+//        }
     }
 }
 

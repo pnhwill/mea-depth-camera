@@ -15,8 +15,12 @@ class UseCaseDetailViewController: UICollectionViewController {
     private var isNew = false
     private var useCaseDidChangeSubscriber: Cancellable?
     
-    private var useCaseSplitViewController: UseCaseSplitViewController {
-        self.splitViewController as! UseCaseSplitViewController
+    private var mainSplitViewController: MainSplitViewController {
+        self.splitViewController as! MainSplitViewController
+    }
+    
+    deinit {
+        print("UseCaseDetailViewController deinitialized.")
     }
     
     func configure(with useCase: UseCase, isNew: Bool = false) {
@@ -44,10 +48,10 @@ class UseCaseDetailViewController: UICollectionViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        if let navigationController = navigationController,
-           !navigationController.isToolbarHidden {
-            navigationController.setToolbarHidden(true, animated: animated)
-        }
+//        if let navigationController = navigationController,
+//           !navigationController.isToolbarHidden {
+//            navigationController.setToolbarHidden(true, animated: animated)
+//        }
     }
 }
 
@@ -124,8 +128,7 @@ extension UseCaseDetailViewController {
     func cancelButtonTrigger() {
         useCase?.managedObjectContext?.rollback()
         if isNew {
-            // TODO: only call this if necessary
-            navigationController?.popToRootViewController(animated: true)
+            mainSplitViewController.transitionToUseCaseList()
         } else {
             setEditing(false, animated: true)
         }
@@ -134,7 +137,7 @@ extension UseCaseDetailViewController {
     private func startButtonTapped() {
         guard let useCase = useCase else { return }
         // Show the task list split view when start button is tapped
-        useCaseSplitViewController.showTaskList(with: useCase)
+        mainSplitViewController.transitionToTaskList(with: useCase)
     }
 }
 
