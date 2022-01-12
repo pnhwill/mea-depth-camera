@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// A ListViewModel for the TaskListViewController.
 class TaskListViewModel: ListViewModel {
     
     // MARK: UseCaseHeader

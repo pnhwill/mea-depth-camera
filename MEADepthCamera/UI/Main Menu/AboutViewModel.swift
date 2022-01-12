@@ -13,7 +13,7 @@ class AboutViewModel: ListViewModel {
     // MARK: AboutInfo Model
     /// The data model for the app's "About" information.
     private struct AboutInfo: Codable, OutlineItemArrayConvertible {
-        /// Model for AboutInfo's three info categories.
+        /// AboutInfo's three different categories.
         enum Item: String, CaseIterable, DictionaryIdentifiable {
             case author = "Author"
             case version = "Version"

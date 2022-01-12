@@ -8,6 +8,7 @@
 import UIKit
 import Combine
 
+/// A detail view controller for both viewing and editing a single Use Case.
 class UseCaseDetailViewController: UICollectionViewController {
     
     private var viewModel: DetailViewModel?

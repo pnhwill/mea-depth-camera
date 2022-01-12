@@ -24,7 +24,7 @@ extension JSONError: LocalizedError {
         case .wrongDataFormat(let error):
             return NSLocalizedString("Could not digest the fetched data. \(error.localizedDescription)", comment: "")
         case .missingData:
-            return NSLocalizedString("Found and will discard an object missing a valid attricute.", comment: "")
+            return NSLocalizedString("Found and will discard an object missing a valid attribute.", comment: "")
         case .creationError:
             return NSLocalizedString("Failed to create a new object.", comment: "")
         case .batchInsertError:

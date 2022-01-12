@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Vision
+import OSLog
 
 /// Contains the face tracker post-processing logic using Vision.
 class LandmarksTrackerProcessor: VisionProcessor {
@@ -21,6 +22,8 @@ class LandmarksTrackerProcessor: VisionProcessor {
     private var trackingRequests: [VNTrackObjectRequest]?
     private lazy var sequenceRequestHandler = VNSequenceRequestHandler()
     
+    private let logger = Logger.Category.vision.logger
+    
     init(processorSettings: ProcessorSettings) {
         self.processorSettings = processorSettings
     }
@@ -34,7 +37,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
         let faceDetectionRequest = VNDetectFaceRectanglesRequest(completionHandler: { (request, error) in
             
             if error != nil {
-                print("\(self.description): FaceDetection error: \(String(describing: error)).")
+                self.logger.error("\(self.description) - FaceDetection error: \(String(describing: error)).")
             }
             
             guard let faceDetectionRequest = request as? VNDetectFaceRectanglesRequest,
@@ -68,7 +71,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
             let cameraIntrinsics = cameraCalibrationData.intrinsicMatrix
             requestHandlerOptions[VNImageOption.cameraIntrinsics] = cameraIntrinsics as AnyObject
         } else {
-            print("\(description): Camera intrinsic data not found.")
+            logger.info("\(self.description) - Camera intrinsic data not found.")
         }
         
         guard let requests = self.trackingRequests, !requests.isEmpty else {
@@ -83,8 +86,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
                 }
                 try imageRequestHandler.perform(detectRequests)
             } catch let error as NSError {
-                NSLog("Failed to perform FaceRectangleRequest: %@", error)
-                print("\(description): Failed to perform FaceRectangleRequest: \(error.localizedDescription)")
+                logger.error("\(self.description) - Failed to perform FaceRectangleRequest: \(error) - \(error.localizedDescription)")
                 throw VisionTrackerProcessorError.faceRectangleDetectionFailed
             }
             return
@@ -95,8 +97,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
                                                     on: pixelBuffer,
                                                     orientation: orientation)
         } catch let error as NSError {
-            NSLog("Failed to perform SequenceRequest: %@", error)
-            print("\(description): Failed to perform SequenceRequest: \(error.localizedDescription)")
+            logger.error("\(self.description) - Failed to perform SequenceRequest: \(error) - \(error.localizedDescription)")
             throw VisionTrackerProcessorError.faceTrackingFailed
         }
         
@@ -138,7 +139,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
             let faceLandmarksRequest = VNDetectFaceLandmarksRequest(completionHandler: { (request, error) in
                 
                 if error != nil {
-                    print("\(self.description): FaceLandmarks error: \(String(describing: error)).")
+                    self.logger.error("\(self.description) - FaceLandmarks error: \(String(describing: error)).")
                 }
                 
                 guard let landmarksRequest = request as? VNDetectFaceLandmarksRequest,
@@ -147,10 +148,10 @@ class LandmarksTrackerProcessor: VisionProcessor {
                 }
                 
                 if let face = results.first {
-                    // Send face observation to caller for data collection
+                    // Send face observation to caller for data collection.
                     completion(face)
                 } else {
-                    print("\(self.description): No face observation returned from landmarks request.")
+                    self.logger.notice("\(self.description) - No face observation returned from landmarks request.")
                 }
             })
             
@@ -175,8 +176,7 @@ class LandmarksTrackerProcessor: VisionProcessor {
             do {
                 try imageRequestHandler.perform(faceLandmarkRequests)
             } catch let error as NSError {
-                NSLog("Failed to perform FaceRectanglesRequest: %@", error)
-                print("\(description): Failed to perform FaceRectanglesRequest: \(error.localizedDescription)")
+                logger.error("\(self.description) - Failed to perform FaceRectanglesRequest: \(error) - \(error.localizedDescription)")
                 throw VisionTrackerProcessorError.faceTrackingFailed
             }
         }

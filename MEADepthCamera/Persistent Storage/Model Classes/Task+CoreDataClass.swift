@@ -82,12 +82,10 @@ struct TasksJSON: Decodable {
     }
 }
 
-
 // MARK: Task Properties
+
+/// A struct encapsulating the properties of a Task's JSON representation.
 struct TaskProperties: Decodable {
-    /// A struct encapsulating the properties of a Task's JSON representation.
-    
-    // Codable
     
     private enum CodingKeys: String, CodingKey {
         case modality = "Modality"
@@ -101,6 +99,8 @@ struct TaskProperties: Decodable {
     let name: String // "Big smile"
     let instructions: String // "Smile big. Repeat 3 times."
     let id: UUID
+    
+    private let logger = Logger.Category.json.logger
     
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -119,9 +119,7 @@ struct TaskProperties: Decodable {
             + "modality = \(rawModality?.description ?? "nil"), "
             + "file name = \(rawFileName?.description ?? "nil"), "
             + "instructions = \(rawInstructions?.description ?? "nil")"
-
-            let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.parsing.rawValue)
-            logger.debug("Ignored: \(values)")
+            logger.error("Ignored task with missing data: \(values)")
             throw JSONError.missingData
         }
         
@@ -132,7 +130,7 @@ struct TaskProperties: Decodable {
         self.id = UUID()
     }
     
-    // The keys must have the same name as the attributes of the Task entity.
+    /// The keys must have the same name as the attributes of the Task entity.
     var dictionaryValue: [String: Any] {
         [
             "modality": modality,
@@ -142,7 +140,4 @@ struct TaskProperties: Decodable {
             "id": id
         ]
     }
-    
 }
-
-

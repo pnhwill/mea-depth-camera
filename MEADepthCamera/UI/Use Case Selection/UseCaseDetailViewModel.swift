@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// The view model for UseCaseDetailViewController when it is in view mode.
 class UseCaseDetailViewModel: DetailViewModel {
     
     enum Section: Int, CaseIterable {

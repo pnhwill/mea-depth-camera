@@ -23,11 +23,6 @@ class ExperimentProvider: FetchingDataProvider {
     static let fileExtension = "json"
     let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)
     
-    // Logging
-    
-    let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
-    
-    
     /// A fetched results controller for the Experiment entity, sorted by the sortKey property.
     private(set) lazy var fetchedResultsController: NSFetchedResultsController<Experiment> = {
         let fetchRequest: NSFetchRequest<Experiment> = Experiment.fetchRequest()
@@ -45,6 +40,8 @@ class ExperimentProvider: FetchingDataProvider {
         }
         return controller
     }()
+    
+    private let logger = Logger.Category.persistence.logger
     
     init(with persistentContainer: PersistentContainer, fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?) {
         self.persistentContainer = persistentContainer
@@ -94,7 +91,7 @@ extension ExperimentProvider {
     /// Fetches the experiments list from the JSON file, and imports it into Core Data.
     func fetchJSONData() async throws {
         guard let url = url, let data = try? Data(contentsOf: url) else {
-            logger.debug("Failed to receive valid directory and/or data.")
+            logger.error("Failed to receive valid directory and/or Experiment data.")
             throw JSONError.missingData
         }
 
@@ -104,12 +101,12 @@ extension ExperimentProvider {
             jsonDecoder.dateDecodingStrategy = .secondsSince1970
             let experimentJSON = try jsonDecoder.decode(ExperimentsJSON.self, from: data)
             let experimentPropertiesList = experimentJSON.propertiesList
-            logger.debug("Received \(experimentPropertiesList.count) records.")
+            logger.info("Received \(experimentPropertiesList.count) Experiment records.")
 
             // Import the ExperimentsJSON into Core Data.
-            logger.debug("Start importing data to the store...")
+            logger.info("Start importing Experiment data to the store...")
             try await importExperiments(from: experimentPropertiesList)
-            logger.debug("Finished importing data.")
+            logger.info("Finished importing Experiment data.")
         } catch {
             throw JSONError.wrongDataFormat(error: error)
         }
@@ -133,7 +130,7 @@ extension ExperimentProvider {
                let experimentIDs = batchInsertResult.result as? [NSManagedObjectID] {
                 return experimentIDs
             }
-            self.logger.debug("Failed to execute batch insert request.")
+            self.logger.error("Failed to execute Experiment batch insert request.")
             throw JSONError.batchInsertError
         }
         
@@ -143,7 +140,7 @@ extension ExperimentProvider {
             throw error as? JSONError ?? .unexpectedError(error: error)
         }
         
-        self.logger.debug("Successfully inserted data.")
+        self.logger.info("Successfully inserted Experiment data.")
     }
     
     private func newBatchInsertRequest(with propertyList: [ExperimentProperties]) -> NSBatchInsertRequest {

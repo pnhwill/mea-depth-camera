@@ -24,10 +24,6 @@ class TaskProvider: FetchingDataProvider {
     static let fileExtension = "json"
     let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)
     
-    // MARK: Logging
-    
-    let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
-    
     /// A fetched results controller for the Task entity, sorted by the sortKey property.
     private(set) lazy var fetchedResultsController: NSFetchedResultsController<Task> = {
         let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
@@ -45,6 +41,8 @@ class TaskProvider: FetchingDataProvider {
         }
         return controller
     }()
+    
+    private let logger = Logger.Category.persistence.logger
     
     // MARK: Init
 
@@ -97,7 +95,7 @@ extension TaskProvider {
     /// Fetches the task list from the JSON file, and imports it into Core Data.
     func fetchJSONData() async throws {
         guard let url = url, let data = try? Data(contentsOf: url) else {
-            logger.debug("Failed to receive valid directory and/or data.")
+            logger.error("Failed to receive valid directory and/or Task data.")
             throw JSONError.missingData
         }
 
@@ -107,12 +105,12 @@ extension TaskProvider {
             jsonDecoder.dateDecodingStrategy = .secondsSince1970
             let taskJSON = try jsonDecoder.decode(TasksJSON.self, from: data)
             let taskPropertiesList = taskJSON.taskPropertiesList
-            logger.debug("Received \(taskPropertiesList.count) records.")
+            logger.info("Received \(taskPropertiesList.count) Task records.")
 
             // Import the TasksJSON into Core Data.
-            logger.debug("Start importing data to the store...")
+            logger.info("Start importing Task data to the store...")
             try await importTasks(from: taskPropertiesList)
-            logger.debug("Finished importing data.")
+            logger.info("Finished importing Task data.")
         } catch {
             throw JSONError.wrongDataFormat(error: error)
         }
@@ -137,11 +135,11 @@ extension TaskProvider {
                let success = batchInsertResult.result as? Bool, success {
                 return
             }
-            self.logger.debug("Failed to execute batch insert request.")
+            self.logger.error("Failed to execute Task batch insert request.")
             throw JSONError.batchInsertError
         }
         
-        self.logger.debug("Successfully inserted data.")
+        self.logger.info("Successfully inserted Task data.")
     }
     
     private func newBatchInsertRequest(with propertyList: [TaskProperties]) -> NSBatchInsertRequest {

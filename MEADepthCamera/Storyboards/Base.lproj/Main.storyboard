@@ -4,7 +4,6 @@
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
-        <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -62,20 +61,20 @@
                         <rect key="frame" x="0.0" y="0.0" width="420" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacingType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="SVL-W4-3tA">
-                                <rect key="frame" x="0.0" y="74" width="390" height="722"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="SVL-W4-3tA">
+                                <rect key="frame" x="0.0" y="74" width="390" height="722.5"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MEA Depth Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="87G-3W-bDT">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="235.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="390" height="241"/>
                                         <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PlJ-n2-oaw" userLabel="List Button Container View">
-                                        <rect key="frame" x="0.0" y="243.5" width="390" height="235"/>
+                                        <rect key="frame" x="0.0" y="241" width="390" height="240.5"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP1-pS-WxO">
-                                                <rect key="frame" x="111.5" y="92" width="167.5" height="51"/>
+                                                <rect key="frame" x="111.5" y="94.5" width="167.5" height="51"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Use Case List"/>
                                                 <buttonConfiguration key="configuration" style="gray" title="Use Cases">
@@ -92,11 +91,11 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" id="xep-UG-Q1f" userLabel="About Button Container View">
-                                        <rect key="frame" x="0.0" y="486.5" width="390" height="235.5"/>
+                                        <rect key="frame" x="0.0" y="481.5" width="390" height="241"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DV8-F1-nPY">
-                                                <rect key="frame" x="142.5" y="92" width="105" height="51"/>
+                                                <rect key="frame" x="142.5" y="95" width="105" height="51"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                 <state key="normal" title="Use Case List"/>
                                                 <buttonConfiguration key="configuration" style="gray" title="About">
@@ -129,7 +128,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9qw-r2-GTA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2643" y="106"/>
+            <point key="canvasLocation" x="-2643.1654676258995" y="105.52763819095478"/>
         </scene>
         <!--Use Case List View Controller-->
         <scene sceneID="0Mn-9S-9bz">

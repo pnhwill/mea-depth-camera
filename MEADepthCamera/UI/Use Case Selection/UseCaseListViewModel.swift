@@ -8,6 +8,7 @@
 import UIKit
 import CoreData
 
+/// A ListViewModel for the UseCaseListViewController.
 class UseCaseListViewModel: NSObject, ListViewModel {
     
     enum Filter: Int {

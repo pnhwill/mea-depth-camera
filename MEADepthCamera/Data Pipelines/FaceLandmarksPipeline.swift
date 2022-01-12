@@ -17,12 +17,15 @@ protocol FaceLandmarksPipelineDelegate: AnyObject {
 }
 
 // MARK: - FaceLandmarksPipeline
+
+/// The `FaceLandmarksPipeline` class implements the post-processing pipeline for face landmarks tracking on previously recorded videos.
+///
 class FaceLandmarksPipeline {
     
     weak var delegate: FaceLandmarksPipelineDelegate?
     
     // Current recording being processed
-    private(set) var recording: Recording
+    let recording: Recording
     
     // Data Processors
     private var processorSettings: ProcessorSettings
@@ -147,27 +150,27 @@ class FaceLandmarksPipeline {
                 
                 let depthTime = CMTimeGetSeconds(depthFrame.presentationTimeStamp)
                 // If there is a dropped frame, then the videos will become misaligned and it will never record the depth data, so we must compare the timestamps
-                // This doesn't exactly work if many frames are dropped early, so we need another way to check (frame index?)
+                // This doesn't always work if many frames are dropped early, so we may need another way to check (frame index?)
                 switch (videoTime, depthTime) {
                 case let (videoTime, depthTime) where videoTime < depthTime:
                     // Video frame is before depth frame, so don't send the depth data to record
                     try trackAndRecord(video: videoImage, depth: nil, frames, videoTime)
                     // Start at beginning of next loop iteration without getting a new depth frame from the reader
-                    print("<")
+//                    print("<")
                     continue
                 case let (videoTime, depthTime) where videoTime == depthTime:
                     // Frames match, so send the depth data to be recorded
                     try trackAndRecord(video: videoImage, depth: depthImage, frames, videoTime)
-                    print("=")
+//                    print("=")
                 //case let (videoTime, depthTime) where videoTime > depthTime:
                 default:
                     // Video frame is after depth frame, so don't send the depth data
-                    print(">")
+//                    print(">")
                     try trackAndRecord(video: videoImage, depth: nil, frames, videoTime)
                 }
             } else {
                 // No more depth data
-                print("No more depth data frames found")
+//                print("No more depth data frames found")
                 try trackAndRecord(video: videoImage, depth: nil, frames, videoTime)
             }
             

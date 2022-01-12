@@ -22,6 +22,9 @@ protocol CapturePipelineDelegate: AnyObject {
 }
 
 // MARK: - CapturePipeline
+
+/// The `CapturePipeline` class implements the real-time processing pipeline for camera and microphone data received during recording.
+///
 class CapturePipeline: NSObject {
     
     typealias FileWriterSubject = PassthroughSubject<WriteState, Error>

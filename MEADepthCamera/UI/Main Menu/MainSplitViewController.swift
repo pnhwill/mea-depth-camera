@@ -7,11 +7,13 @@
 
 import UIKit
 
-/// A view controller that displays a two-column split view and passes data between the list and detail view controllers.
+/// A UISplitViewController subclass that displays a three-column split view and passes data between the list and detail view controllers.
 class MainSplitViewController: UISplitViewController {
     
+    /// The currently selected item in the list column. The list view controller uses this so it can re-select the same row every time it reloads its data.
     var selectedItemID: ListItem.ID?
     
+    // Convenience getters for each column's navigation controller.
     private var primaryNavigationController: UINavigationController? {
         viewController(for: .primary) as? UINavigationController
     }
@@ -22,7 +24,7 @@ class MainSplitViewController: UISplitViewController {
         viewController(for: .secondary) as? UINavigationController
     }
     
-    private var isInitialLaunch: Bool = true
+//    private var isInitialLaunch: Bool = true
     
     deinit {
         print("MainSplitViewController deinitialized.")
@@ -40,7 +42,7 @@ class MainSplitViewController: UISplitViewController {
     }
     
     // MARK: Transition to Use Case List
-    
+    /// Shows the UseCaseListViewController when the user taps the "Use Cases" button in the main menu.
     func transitionToUseCaseList() {
         if isCollapsed {
             show(.supplementary)
@@ -51,7 +53,7 @@ class MainSplitViewController: UISplitViewController {
     }
     
     // MARK: Transition to Task List
-    
+    /// Shows the TaskListViewController when the user selects a Use Case to start recording for.
     func transitionToTaskList(with useCase: UseCase) {
         let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
         guard let taskListVC = storyboard.instantiateViewController(withIdentifier: StoryboardID.taskListVC) as? TaskListViewController
@@ -65,7 +67,7 @@ class MainSplitViewController: UISplitViewController {
     }
     
     // MARK: Show Use Case Detail
-    
+    /// Shows the UseCaseDetailViewController for the Use Case that's selected in the list.
     func showUseCaseDetail(_ useCase: UseCase, isNew: Bool = false) {
         guard let id = useCase.id, id != selectedItemID else { return }
         selectedItemID = id
@@ -79,7 +81,7 @@ class MainSplitViewController: UISplitViewController {
     }
     
     // MARK: Show Task Detail
-    
+    /// Shows the TaskDetailViewController for the Task that's selected in the list.
     func showTaskDetail(_ task: Task, useCase: UseCase) {
         guard let id = task.id, id != selectedItemID else { return }
         selectedItemID = id
@@ -103,7 +105,7 @@ class MainSplitViewController: UISplitViewController {
     }
     
     // MARK: Show Camera
-    
+    /// Presents the CameraViewController in full screen when the user chooses to start recording a Task.
     func showCamera(task: Task, useCase: UseCase) {
         let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
         guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: StoryboardID.cameraNavController) as? UINavigationController,
@@ -118,7 +120,7 @@ class MainSplitViewController: UISplitViewController {
 extension MainSplitViewController: UINavigationControllerDelegate {
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
         if viewController is UseCaseListViewController, isCollapsed {
-            debugPrint(navigationController)
+//            debugPrint(navigationController)
             selectedItemID = nil
         }
     }
@@ -127,15 +129,14 @@ extension MainSplitViewController: UINavigationControllerDelegate {
 // MARK: UISplitViewControllerDelegate
 extension MainSplitViewController: UISplitViewControllerDelegate {
     func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
-//        debugPrint(proposedTopColumn.rawValue)
         return .primary
     }
     
-    func splitViewController(_ svc: UISplitViewController, willShow column: UISplitViewController.Column) {
-        debugPrint(column.rawValue)
-    }
-    
-    func splitViewController(_ svc: UISplitViewController, willHide column: UISplitViewController.Column) {
-        debugPrint(column.rawValue)
-    }
+//    func splitViewController(_ svc: UISplitViewController, willShow column: UISplitViewController.Column) {
+//        debugPrint(column.rawValue)
+//    }
+//
+//    func splitViewController(_ svc: UISplitViewController, willHide column: UISplitViewController.Column) {
+//        debugPrint(column.rawValue)
+//    }
 }

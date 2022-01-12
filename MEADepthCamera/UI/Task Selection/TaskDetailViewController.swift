@@ -6,8 +6,8 @@
 //
 
 import UIKit
-import Combine
 
+/// A detail view controller for viewing a single Task.
 class TaskDetailViewController: UICollectionViewController {
     
     typealias Section = TaskDetailViewModel.Section

@@ -102,7 +102,7 @@ class LensDistortionCorrectionProcessor: FilterRenderer {
         
         // Get camera calibration data
         guard let cameraCalibrationData = (settings.decodedCameraCalibrationData ?? settings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
-              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
+              let lookupTable = cameraCalibrationData.lensDistortionLookupTable else {
             print("\(description): Could not find camera calibration data")
             return nil
         }

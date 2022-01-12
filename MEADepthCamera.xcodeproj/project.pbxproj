@@ -114,7 +114,7 @@
 		B5E5E723275AB8D40074894D /* MathUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E5E722275AB8D40074894D /* MathUtilities.swift */; };
 		B5E65DA026B0D6100052FFE4 /* PointCloudProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */; };
 		B5F0E6B02762AFE800FFF2FF /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F0E6AF2762AFE800FFF2FF /* Alert.swift */; };
-		B5F0E6B22762F40E00FFF2FF /* LoggerCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */; };
+		B5F0E6B22762F40E00FFF2FF /* Logger+Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F0E6B12762F40E00FFF2FF /* Logger+Category.swift */; };
 		B5F447EC26EFF7A100528ACA /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447EB26EFF7A100528ACA /* ListViewController.swift */; };
 		B5F447F126EFFB6C00528ACA /* TaskListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */; };
 		B5F447F526F0047800528ACA /* ProcessorSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F447F426F0047800528ACA /* ProcessorSettings.swift */; };
@@ -267,7 +267,7 @@
 		B5E5E722275AB8D40074894D /* MathUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathUtilities.swift; sourceTree = "<group>"; };
 		B5E65D9F26B0D6100052FFE4 /* PointCloudProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudProcessor.swift; sourceTree = "<group>"; };
 		B5F0E6AF2762AFE800FFF2FF /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
-		B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerCategory.swift; sourceTree = "<group>"; };
+		B5F0E6B12762F40E00FFF2FF /* Logger+Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Category.swift"; sourceTree = "<group>"; };
 		B5F447EB26EFF7A100528ACA /* ListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskListViewController.swift; sourceTree = "<group>"; };
 		B5F447F426F0047800528ACA /* ProcessorSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessorSettings.swift; sourceTree = "<group>"; };
@@ -496,8 +496,8 @@
 			isa = PBXGroup;
 			children = (
 				B5D209A3271A19EA005CEC9A /* ModelStore.swift */,
-				B56ED3D72761BF84002FB747 /* UIKit+Convenience.swift */,
 				B5F0E6AF2762AFE800FFF2FF /* Alert.swift */,
+				B56ED3D72761BF84002FB747 /* UIKit+Convenience.swift */,
 				B58F4D61273A51AE0073B107 /* Views */,
 				B5F447EA26EFF72400528ACA /* Lists */,
 				B591615427279630005604BF /* Details */,
@@ -527,7 +527,7 @@
 				B5CEB8DC27694D1B00634CFF /* Sequences+Extensions.swift */,
 				B5886E0026AA7F8500EB344C /* Foundation+Extensions.swift */,
 				B57B3C14273B26EA00CCF9A8 /* NotificationName.swift */,
-				B5F0E6B12762F40E00FFF2FF /* LoggerCategory.swift */,
+				B5F0E6B12762F40E00FFF2FF /* Logger+Category.swift */,
 				B59970842764293D00574607 /* NameDescribable.swift */,
 			);
 			path = Utilities;
@@ -966,7 +966,7 @@
 				B57B3C11273B244E00CCF9A8 /* AVCapture+Utilities.swift in Sources */,
 				B542161026C45F7300A4F984 /* PersistentContainer.swift in Sources */,
 				B50160872735A4F9003AB94D /* ExpandableHeaderCell.swift in Sources */,
-				B5F0E6B22762F40E00FFF2FF /* LoggerCategory.swift in Sources */,
+				B5F0E6B22762F40E00FFF2FF /* Logger+Category.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
 				B55429AE27605D74000D3620 /* FileWriterError.swift in Sources */,
 				B511F7DF276852AC00A7D2CA /* AboutViewModel.swift in Sources */,

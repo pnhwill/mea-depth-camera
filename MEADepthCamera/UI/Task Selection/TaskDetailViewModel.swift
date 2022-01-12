@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 
+/// The view model for TaskDetailViewController.
 class TaskDetailViewModel {
     
     // MARK: Section

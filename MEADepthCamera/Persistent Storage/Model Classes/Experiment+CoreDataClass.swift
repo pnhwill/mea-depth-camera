@@ -64,10 +64,9 @@ struct ExperimentsJSON: Decodable {
 }
 
 // MARK: Experiment Properties
+
+/// A struct encapsulating the properties of an Experiment's JSON representation.
 struct ExperimentProperties: Decodable {
-    /// A struct encapsulating the properties of an Experiment's JSON representation.
-    
-    // Codable
     
     private enum CodingKeys: String, CodingKey {
         case title
@@ -80,6 +79,8 @@ struct ExperimentProperties: Decodable {
     let title: String
     let tasks: [String]
     let id: UUID
+    
+    private let logger = Logger.Category.json.logger
     
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -97,8 +98,7 @@ struct ExperimentProperties: Decodable {
         guard let title = rawTitle, !rawTasks.isEmpty
         else {
             let values = "title = \(rawTitle?.description ?? "nil")"
-            let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.parsing.rawValue)
-            logger.debug("Ignored experiment: \(values)")
+            logger.error("Ignored experiment with missing data: \(values)")
             throw JSONError.missingData
         }
         let tasks = rawTasks
@@ -108,7 +108,7 @@ struct ExperimentProperties: Decodable {
         self.id = UUID()
     }
     
-    // The keys must have the same name as the attributes of the Experiment entity.
+    /// The keys must have the same name as the attributes of the Experiment entity.
     var dictionaryValue: [String: Any] {
         [
             "title": title,
@@ -116,5 +116,4 @@ struct ExperimentProperties: Decodable {
             "id": id
         ]
     }
-    
 }

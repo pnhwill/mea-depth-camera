@@ -8,6 +8,7 @@
 import UIKit
 import Combine
 
+/// ListViewController subclass that displays all of the user's Use Cases.
 class UseCaseListViewController: ListViewController {
     
     private var useCaseListViewModel: UseCaseListViewModel? {

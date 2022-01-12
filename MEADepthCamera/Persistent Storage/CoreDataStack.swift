@@ -14,8 +14,6 @@ class CoreDataStack: ObservableObject {
     
     @Published private(set) var isLoaded: Bool = false
     
-    let logger = Logger(subsystem: Bundle.main.reverseDNS(), category: LoggerCategory.persistence.rawValue)
-    
     // MARK: Persistent Container
     /// The persistent container for the application. This implementation
     /// creates and returns a container, having loaded the store for the
@@ -67,6 +65,8 @@ class CoreDataStack: ObservableObject {
         
         return container
     }()
+    
+    private let logger = Logger.Category.persistence.logger
     
     // MARK: Load Experiments from JSON
     /// Asynchronously load the stored JSON data into the Core Data store.

@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// The view model for the ProcessingListViewController.
 class ProcessingListViewModel {
     
     typealias ProcessingCompleteAction = () -> Void

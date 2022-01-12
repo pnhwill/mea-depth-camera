@@ -8,6 +8,7 @@
 import Vision
 
 /// Encapsulation of necessary conditions for correct face alignment in the captured image.
+/// Automatically calculates if the detected face is centered on and facing towards the camera using SIMD operations.
 ///
 /// Note that the  `boundingBox` property of `VNFaceObservation` is normalized to the dimensions of
 /// the processed image, with the origin at the lower-left corner of the image.
@@ -20,8 +21,8 @@ struct FaceAlignment {
     static let alignedPosition = Position(0.5, 0.43)
     static let alignedSize = Size(0.45, 0.25)
     
-    static let positionMargin: Float = 0.1
-    static let sizeMargin: Float = 0.15
+    static let positionMargin: Float = pow(0.1, 2)
+    static let sizeMargin: Float = pow(0.15, 2)
     static let rotationMargin = Rotation(repeating: degreesToRadians(10))
     
     let position: Position
@@ -30,8 +31,8 @@ struct FaceAlignment {
     
     var isAligned: Bool { positionCondition && sizeCondition && rotationCondition }
     
-    private var positionError: Float { distance(position, Self.alignedPosition) }
-    private var sizeError: Float { distance(size, Self.alignedSize) }
+    private var positionError: Float { distance_squared(position, Self.alignedPosition) }
+    private var sizeError: Float { distance_squared(size, Self.alignedSize) }
     private var rotationError: Rotation { abs(rotation) }
     
     private var positionCondition: Bool { positionError < Self.positionMargin }

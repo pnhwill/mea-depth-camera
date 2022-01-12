@@ -31,10 +31,6 @@ extension FloatingPoint {
     }
 }
 
-// MARK: Collections
-
-
-
 // MARK: Core Graphics
 
 extension CGPoint {

@@ -7,7 +7,7 @@
 
 import AVFoundation
 
-/// Contains the video reader implementation using AVCapture.
+/// Contains the video reader implementation using AVFoundation.
 class VideoReader {
     static private let millisecondsInSecond: Float32 = 1000.0
     

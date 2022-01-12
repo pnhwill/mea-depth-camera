@@ -8,6 +8,7 @@
 import UIKit
 import Combine
 
+/// A UICollectionViewController subclass that displays all Recordings associated with the current Use Case, grouped by Task, for initiating post-processing and updating the user on its progress.
 class ProcessingListViewController: UICollectionViewController {
     
     typealias Section = ProcessingListViewModel.Section

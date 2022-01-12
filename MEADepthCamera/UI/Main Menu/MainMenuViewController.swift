@@ -6,8 +6,8 @@
 //
 
 import UIKit
-import CoreData
 
+/// A view controller for the app's top-level menu, providing a starting point to reach every part of the app.
 class MainMenuViewController: UIViewController {
     
     private var mainSplitViewController: MainSplitViewController? {

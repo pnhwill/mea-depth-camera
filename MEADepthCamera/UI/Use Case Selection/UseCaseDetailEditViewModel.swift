@@ -8,6 +8,7 @@
 import UIKit
 import CoreData
 
+/// The view model for UseCaseDetailViewController when it is in edit mode.
 class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
     
     enum Section: Int, CaseIterable {
