@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import OSLog
 
 /// Helper class that creates and manages the AVCaptureSession.
 class CaptureSessionManager: NSObject {
@@ -32,13 +33,15 @@ class CaptureSessionManager: NSObject {
     //private(set) var metadataOutput = AVCaptureMetadataOutput()
     
     // Video output resolution and orientation for processor settings
-    private var videoDimensions: CMVideoDimensions?
-    private var depthDimensions: CMVideoDimensions?
-    private var videoOrientation: AVCaptureVideoOrientation?
+//    private var videoDimensions: CMVideoDimensions?
+//    private var depthDimensions: CMVideoDimensions?
+//    private var videoOrientation: AVCaptureVideoOrientation?
     
     // Configuration options
     private let discardLateFrames: Bool = false
     private let depthDataFiltering: Bool = false
+    
+    private let logger = Logger.Category.camera.logger
     
     // MARK: - Session Configuration
     
@@ -46,6 +49,7 @@ class CaptureSessionManager: NSObject {
         if setupResult != .success {
             return
         }
+        logger.info("Start configuring AVCaptureSession...")
         
         session.beginConfiguration()
         defer {
@@ -64,10 +68,11 @@ class CaptureSessionManager: NSObject {
             try configureDeviceFormat()
         } catch {
             setupResult = .configurationFailed
-            print("Session Setup Error \(error): \(error.localizedDescription)")
+            logger.error("Failed to configure AVCaptureSession with code \(String(describing: error)): \(error.localizedDescription)")
             return
         }
         
+        logger.info("Finished configuring AVCaptureSession.")
         completion(videoDevice, videoDataOutput, depthDataOutput, audioDataOutput)
     }
     
@@ -95,6 +100,7 @@ class CaptureSessionManager: NSObject {
         } else {
             throw SessionSetupError.cannotAddVideoInput
         }
+        logger.info("Successfully added video device input.")
     }
     
     private func configureMicrophone() throws {
@@ -112,6 +118,7 @@ class CaptureSessionManager: NSObject {
         } catch {
             throw SessionSetupError.audioInputInitializationFailed(error)
         }
+        logger.info("Successfully added audio device input.")
     }
     
     // MARK: - Data Outputs
@@ -135,6 +142,7 @@ class CaptureSessionManager: NSObject {
             throw SessionSetupError.cannotAddVideoDataOutput
         }
         videoDataOutput.alwaysDiscardsLateVideoFrames = discardLateFrames
+        logger.info("Successfully added video data output.")
     }
     
     private func configureDepthDataOutput() throws {
@@ -151,6 +159,7 @@ class CaptureSessionManager: NSObject {
             throw SessionSetupError.cannotAddDepthDataOutput
         }
         depthDataOutput.alwaysDiscardsLateDepthData = discardLateFrames
+        logger.info("Successfully added depth data output.")
     }
     
     private func configureAudioDataOutput() throws {
@@ -165,6 +174,7 @@ class CaptureSessionManager: NSObject {
         } else {
             throw SessionSetupError.cannotAddAudioDataOutput
         }
+        logger.info("Successfully added audio data output.")
     }
     
     // MARK: - Video Format
@@ -190,7 +200,9 @@ class CaptureSessionManager: NSObject {
             } catch {
                 throw SessionSetupError.videoDeviceConfigurationFailed(error)
             }
-            videoDimensions = resolution
+            logger.info("Color video framerate: \(frameRateRange.maxFrameRate, format: .fixed(precision: 1)) Hz.")
+            logger.info("Color video dimensions: \(resolution).")
+//            videoDimensions = resolution
         } else {
             throw SessionSetupError.noValidVideoFormat
         }
@@ -210,10 +222,10 @@ class CaptureSessionManager: NSObject {
             CMVideoFormatDescriptionGetDimensions(first.formatDescription).width < CMVideoFormatDescriptionGetDimensions(second.formatDescription).width })
         
         if let selectedFormatDescription = selectedFormat?.formatDescription {
-            depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
-            
+            let depthDimensions = CMVideoFormatDescriptionGetDimensions(selectedFormatDescription)
+            logger.info("Depth video dimensions: \(depthDimensions).")
         } else {
-            print("Failed to obtain depth data resolution")
+            logger.info("Failed to obtain depth data format.")
         }
         
         // Set the depth data format
@@ -224,6 +236,7 @@ class CaptureSessionManager: NSObject {
         } catch {
             throw SessionSetupError.videoDeviceConfigurationFailed(error)
         }
+        logger.info("Successfully configured video device format.")
     }
     
     private func bestDeviceFormat(for device: AVCaptureDevice) -> (format: AVCaptureDevice.Format, frameRateRange: AVFrameRateRange, resolution: CMVideoDimensions)? {
@@ -286,3 +299,5 @@ class CaptureSessionManager: NSObject {
  return
  }
  */
+
+

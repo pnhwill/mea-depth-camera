@@ -28,7 +28,7 @@ class TaskDetailViewController: UICollectionViewController {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        print("TaskDetailViewController Initialized.")
+//        print("TaskDetailViewController Initialized.")
     }
     
     deinit {

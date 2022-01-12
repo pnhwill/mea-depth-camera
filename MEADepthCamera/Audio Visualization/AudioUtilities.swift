@@ -12,6 +12,7 @@ import Accelerate
 class AudioUtilities {
     
     static let maxFloat = Float(Int16.max)
+    static let minFloat = Float(Int16.min)
     
     // MARK: Extract Audio Data
     

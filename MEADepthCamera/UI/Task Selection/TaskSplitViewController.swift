@@ -34,10 +34,6 @@ class TaskSplitViewController: UISplitViewController {
         displayModeButtonVisibility = .never
     }
     
-    @IBAction func unwindFromCamera(unwindSegue: UIStoryboardSegue) {
-        selectedItemID = nil
-    }
-    
     func showDetail(with task: Task) {
         guard let detailViewController = self.viewController(for: .secondary) as? TaskDetailViewController,
               let useCase = useCase,

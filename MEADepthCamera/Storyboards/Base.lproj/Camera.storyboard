@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="dark"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19454"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -103,10 +103,10 @@
                             <constraint firstItem="kVo-r9-gFf" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="zqW-LG-y5T"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="Nmy-QZ-inJ">
+                    <navigationItem key="navigationItem" leftItemsSupplementBackButton="YES" id="Nmy-QZ-inJ">
                         <barButtonItem key="leftBarButtonItem" title="Tasks" id="mS6-8O-AQS">
                             <connections>
-                                <segue destination="2cV-U4-Cah" kind="unwind" unwindAction="unwindFromCameraWithUnwindSegue:" id="LfN-as-2QH"/>
+                                <action selector="taskListButtonTapped:" destination="BYZ-38-t0r" id="uPj-rK-wBM"/>
                             </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" enabled="NO" style="done" systemItem="done" id="44R-A0-nmG"/>
@@ -118,10 +118,10 @@
                         <outlet property="previewView" destination="BrA-k0-goQ" id="HaZ-lt-X2n"/>
                         <outlet property="recordButton" destination="cK1-YN-reQ" id="VtD-5r-Jn0"/>
                         <outlet property="resumeButton" destination="fWx-1M-8GV" id="iO2-WW-wfZ"/>
+                        <outlet property="taskListButton" destination="mS6-8O-AQS" id="mUD-NN-3Sq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
-                <exit id="2cV-U4-Cah" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="401" y="-189"/>
         </scene>

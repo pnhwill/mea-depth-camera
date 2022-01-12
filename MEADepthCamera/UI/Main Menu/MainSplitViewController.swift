@@ -24,12 +24,6 @@ class MainSplitViewController: UISplitViewController {
         viewController(for: .secondary) as? UINavigationController
     }
     
-//    private var isInitialLaunch: Bool = true
-    
-    deinit {
-        print("MainSplitViewController deinitialized.")
-    }
-    
     // MARK: VC Life Cycle
     
     override func viewDidLoad() {
@@ -112,7 +106,8 @@ class MainSplitViewController: UISplitViewController {
               let cameraViewController = cameraNavController.topViewController as? CameraViewController
         else { return }
         cameraViewController.configure(useCase: useCase, task: task)
-        show(cameraNavController, sender: nil)
+//        show(cameraNavController, sender: nil)
+        present(cameraNavController, animated: true, completion: nil)
     }
 }
 

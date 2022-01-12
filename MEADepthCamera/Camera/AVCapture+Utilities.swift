@@ -8,6 +8,13 @@
 import AVFoundation
 import UIKit
 
+// MARK: CMVideoDimensions
+extension CMVideoDimensions: CustomStringConvertible {
+    public var description: String {
+        "\(width) x \(height)"
+    }
+}
+
 // MARK: AVCaptureVideoOrientation
 extension AVCaptureVideoOrientation {
     

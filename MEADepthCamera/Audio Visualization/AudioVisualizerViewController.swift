@@ -69,7 +69,7 @@ class AudioVisualizerViewController: UIViewController {
                 self.displayWaveInLayer(self.audioShapeLayer,
                                         ofColor: .red,
                                         signal: samples,
-                                        min: AudioUtilities.maxFloat,
+                                        min: AudioUtilities.minFloat,
                                         max: AudioUtilities.maxFloat,
                                         hScale: 1)
                 

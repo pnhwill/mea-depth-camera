@@ -8,6 +8,7 @@
 import UIKit
 import AVFoundation
 import Vision
+import OSLog
 
 /// A view controller that displays the camera preview, manages camera controls, and contains an embedded audio visualizer view controller.
 class CameraViewController: UIViewController {
@@ -25,6 +26,7 @@ class CameraViewController: UIViewController {
     @IBOutlet private weak var faceGuideView: FaceGuideView!
     
     // Navigation bar button
+    @IBOutlet private weak var taskListButton: UIBarButtonItem!
     @IBOutlet private weak var doneButton: UIBarButtonItem!
     
     // Post-processing in progress
@@ -63,6 +65,8 @@ class CameraViewController: UIViewController {
         }
     }
     
+    private let logger = Logger.Category.camera.logger
+    
     // KVO
     private var keyValueObservations = [NSKeyValueObservation]()
     
@@ -86,6 +90,10 @@ class CameraViewController: UIViewController {
         let audioVisualizerViewController = AudioVisualizerViewController(coder: coder)
         self.audioVisualizerViewController = audioVisualizerViewController
         return audioVisualizerViewController
+    }
+    
+    @IBAction func taskListButtonTapped(_ sender: UIBarButtonItem) {
+        dismiss(animated: true, completion: nil)
     }
     
     // MARK: - View Controller Life Cycle
@@ -202,6 +210,7 @@ class CameraViewController: UIViewController {
                 
                 self.sessionManager.session.startRunning()
                 self.isSessionRunning = self.sessionManager.session.isRunning
+                self.logger.notice("AVCaptureSession started running.")
                 
             case .notAuthorized:
                 DispatchQueue.main.async {
@@ -270,13 +279,14 @@ class CameraViewController: UIViewController {
     @objc
     func thermalStateChanged(notification: NSNotification) {
         if let processInfo = notification.object as? ProcessInfo {
+            logger.notice("Thermal state changed to \(processInfo.thermalState.thermalStateString).")
             showThermalState(state: processInfo.thermalState)
         }
     }
     
     private func showThermalState(state: ProcessInfo.ThermalState) {
         DispatchQueue.main.async {
-            let message = NSLocalizedString("Thermal state: \(state.thermalStateString)", comment: "Alert message when thermal state has changed")
+            let message = NSLocalizedString("Thermal state changed to \(state.thermalStateString).", comment: "Alert message when thermal state has changed")
             let actions = [UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil)]
             self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
         }
@@ -393,7 +403,7 @@ class CameraViewController: UIViewController {
         if let userInfoValue = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as AnyObject?,
            let reasonIntegerValue = userInfoValue.integerValue,
            let reason = AVCaptureSession.InterruptionReason(rawValue: reasonIntegerValue) {
-            print("Capture session was interrupted with reason \(reason)")
+            logger.error("Capture session was interrupted with reason \(reason).")
             
             if reason == .audioDeviceInUseByAnotherClient || reason == .videoDeviceInUseByAnotherClient {
                 // Fade-in a button to enable the user to try to resume the session running.
@@ -410,14 +420,14 @@ class CameraViewController: UIViewController {
                     self.cameraUnavailableLabel.alpha = 1
                 }
             } else if reason == .videoDeviceNotAvailableDueToSystemPressure {
-                print("Session stopped running due to shutdown system pressure level.")
+                logger.error("Session stopped running due to shutdown system pressure level.")
             }
         }
     }
     
     @objc
     func sessionInterruptionEnded(notification: NSNotification) {
-        print("Capture session interruption ended")
+        logger.info("Capture session interruption ended.")
         if !resumeButton.isHidden {
             UIView.animate(withDuration: 0.25,
                            animations: {
@@ -445,7 +455,7 @@ class CameraViewController: UIViewController {
         }
         
         let error = AVError(_nsError: errorValue)
-        print("Capture session runtime error: \(error)")
+        logger.error("Capture session runtime error with code \(error.errorCode).")
         
         /*
          Automatically try to restart the session running if media services were
@@ -469,6 +479,7 @@ class CameraViewController: UIViewController {
     }
     
     private func pressureStateChanged(systemPressureState: AVCaptureDevice.SystemPressureState) {
+        logger.notice("System pressure state is now \(systemPressureState.pressureLevelString).")
         // Take action to reduce pressure level e.g. reduce framerate, resolution, disable depth, etc.
         DispatchQueue.main.async {
             self.displayPressureState(systemPressureState: systemPressureState)
@@ -477,7 +488,6 @@ class CameraViewController: UIViewController {
     
     private func displayPressureState(systemPressureState: AVCaptureDevice.SystemPressureState) {
         //let pressureFactors = systemPressureState.factors
-        print("System pressure state is now \(systemPressureState.pressureLevelString)")
         let message = NSLocalizedString("System pressure level: \(systemPressureState.pressureLevelString)", comment: "Alert message when system pressure level has changed")
         let actions = [UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil)]
         self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
@@ -489,7 +499,7 @@ class CameraViewController: UIViewController {
                        exposureMode: AVCaptureDevice.ExposureMode,
                        at devicePoint: CGPoint,
                        monitorSubjectAreaChange: Bool) {
-        
+        logger.info("Attempting to refocus camera.")
         sessionQueue.async {
             let device = self.sessionManager.videoDeviceInput.device
             do {
@@ -511,7 +521,7 @@ class CameraViewController: UIViewController {
                 device.isSubjectAreaChangeMonitoringEnabled = monitorSubjectAreaChange
                 device.unlockForConfiguration()
             } catch {
-                print("Could not lock device for configuration: \(error)")
+                self.logger.error("Could not lock device for configuration during refocus with code \(String(describing: error))")
             }
         }
     }
@@ -543,19 +553,25 @@ class CameraViewController: UIViewController {
                 if UIDevice.current.isMultitaskingSupported {
                     self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
                 }
-                // Hide the navigation bar back button and update title
+                // Hide the navigation bar task list button
                 DispatchQueue.main.async {
-                    self.navigationItem.setHidesBackButton(true, animated: true)
+//                    self.navigationItem.setHidesBackButton(true, animated: true)
+                    self.taskListButton.isEnabled = false
                 }
                 self.capturePipeline?.startRecording()
+                self.logger.notice("Start recording...")
                 
             case .recording:
+                self.logger.notice("Stop recording.")
                 self.capturePipeline?.stopRecording()
                 if let currentBackgroundRecordingID = self.backgroundRecordingID {
                     self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
                     if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
                         UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
                     }
+                }
+                DispatchQueue.main.async {
+                    self.taskListButton.isEnabled = true
                 }
 
             default:
