@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Vision
+import OSLog
 
 /// Writes face landmark position data from a recording to a CSV file.
 class FaceLandmarksFileWriter: CSVFileWriter {
@@ -35,6 +36,8 @@ class FaceLandmarksFileWriter: CSVFileWriter {
     }
     
     private let numLandmarks: Int
+    
+    private let logger = Logger.Category.fileIO.logger
     
     init?(recording: Recording, outputType: OutputType) {
         guard let numLandmarks = recording.processorSettings?.numLandmarks,
@@ -67,7 +70,7 @@ class FaceLandmarksFileWriter: CSVFileWriter {
         
         // Convert string to data buffer
         guard let dataBuffer = data.data(using: String.Encoding.utf8) else {
-            print("Failed to convert data from type String to type Data.")
+            logger.error("\(self.typeName): Failed to convert data from type String to type Data.")
             return
         }
         // Write data to file
@@ -78,7 +81,7 @@ class FaceLandmarksFileWriter: CSVFileWriter {
             fileHandle.seekToEndOfFile()
             fileHandle.write(dataBuffer)
         } else {
-            print("Failed to write data to file.")
+            logger.error("\(self.typeName): Failed to write data to file.")
         }
     }
 }

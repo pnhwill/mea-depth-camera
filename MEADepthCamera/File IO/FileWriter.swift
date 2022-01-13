@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 // MARK: FileWriter
 /// Protocol for all file writer types.
@@ -42,7 +43,7 @@ extension CSVFileWriter {
         do {
             try columnLabels.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
         } catch {
-            print("Failed to write to file: \(error)")
+            Logger.Category.fileIO.logger.error("Failed to write to file: \(String(describing: error))")
         }
     }
 }

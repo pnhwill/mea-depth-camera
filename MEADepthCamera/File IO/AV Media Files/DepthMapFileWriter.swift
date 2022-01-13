@@ -43,7 +43,7 @@ class DepthMapFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
         if assetWriter.canAdd(videoWriterInput) {
             assetWriter.add(videoWriterInput)
         } else {
-            print("\(typeName): no video input added to the video asset writer")
+            logger.error("\(self.typeName): No video input added to the video asset writer.")
         }
         
         // The audio track and video track are transfered to the writer in parallel.
@@ -62,12 +62,12 @@ class DepthMapFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
         videoQueue.async {
             if self.videoWriterInput.isReadyForMoreMediaData {
                 guard self.pixelBufferAdaptor.append(pixelBuffer, withPresentationTime: timeStamp) else {
-                    print("\(self.typeName): Error appending pixel buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    self.logger.error("\(self.typeName): Error appending pixel buffer to video input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.videoDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("\(self.typeName): Video writer input not ready for more media data. Sample dropped without writing to video file")
+                self.logger.notice("\(self.typeName): Video writer input not ready for more media data. Sample dropped without writing to video file.")
             }
         }
     }

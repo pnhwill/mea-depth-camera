@@ -7,6 +7,7 @@
 
 import Vision
 import UIKit
+import OSLog
 
 /// Detects faces from the selfie cam feed in real time.
 class LiveFaceDetectionProcessor: VisionProcessor {
@@ -34,7 +35,7 @@ class LiveFaceDetectionProcessor: VisionProcessor {
                 completion(face)
             }
         } catch {
-            print("Vision error: \(error.localizedDescription)")
+            Logger.Category.vision.logger.error("\(self.description) Vision error: \(error.localizedDescription)")
         }
     }
 }

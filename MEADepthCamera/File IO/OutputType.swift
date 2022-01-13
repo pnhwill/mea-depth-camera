@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Enumeration of the different output files saved to the device.
 enum OutputType: String {
     case video
     case audio

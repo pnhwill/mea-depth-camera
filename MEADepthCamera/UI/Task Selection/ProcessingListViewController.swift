@@ -39,6 +39,8 @@ class ProcessingListViewController: UICollectionViewController {
     private var listItemsSubscriber: AnyCancellable?
     private var recordingDidChangeSubscriber: Cancellable?
     
+    private var backgroundRecordingID: UIBackgroundTaskIdentifier?
+    
     func configure(useCase: UseCase) {
         self.useCase = useCase
         viewModel = ProcessingListViewModel(useCase: useCase, processingCompleteAction: { [weak self] in
@@ -102,10 +104,19 @@ extension ProcessingListViewController {
     private func handleTrackingStateChange() {
         switch trackingState {
         case .tracking:
+            if UIDevice.current.isMultitaskingSupported {
+                self.backgroundRecordingID = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+            }
             navigationItem.title = "Processing..."
             startStopButton.title = "Stop Processing"
             isModalInPresentation = true
         case .stopped:
+            if let currentBackgroundRecordingID = self.backgroundRecordingID {
+                self.backgroundRecordingID = UIBackgroundTaskIdentifier.invalid
+                if currentBackgroundRecordingID != UIBackgroundTaskIdentifier.invalid {
+                    UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
+                }
+            }
             navigationItem.title = "Review Recordings"
             startStopButton.title = "Start Processing"
             isModalInPresentation = false

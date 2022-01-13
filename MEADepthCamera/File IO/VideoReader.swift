@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import OSLog
 
 /// Contains the video reader implementation using AVFoundation.
 class VideoReader {
@@ -74,7 +75,7 @@ class VideoReader {
         do {
             self.assetReader = try AVAssetReader(asset: videoAsset)
         } catch {
-            print("Failed to create AVAssetReader object: \(error)")
+            Logger.Category.fileIO.logger.error("Failed to create AVAssetReader object: \(String(describing: error))")
             return false
         }
         

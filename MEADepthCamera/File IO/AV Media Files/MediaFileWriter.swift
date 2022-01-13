@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Combine
+import OSLog
 
 enum WriteState {
     case inactive, active
@@ -35,6 +36,8 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
     // File writer state
     var writeState = WriteState.inactive
     
+    let logger = Logger.Category.fileIO.logger
+    
     init(outputType: OutputType, folderURL: URL, configuration: FileConfiguration, subject: S) throws {
         let fileURL = Self.createFileURL(in: folderURL, outputType: outputType)
         self.outputType = outputType
@@ -48,7 +51,7 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
     func start(at startTime: CMTime) {
         writeState = .active
         guard assetWriter.startWriting() else {
-            print("\(typeName): Failed to start writing to file.")
+            logger.error("\(self.typeName): Failed to start writing to file.")
             switch self.assetWriter.status {
             case .failed:
                 subject.send(completion: .failure(self.assetWriter.error!))
@@ -59,7 +62,7 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
             return
         }
         assetWriter.startSession(atSourceTime: startTime)
-        
+        logger.notice("\(self.typeName) is ready to start writing to file(s).")
         subject.send(writeState)
     }
     
@@ -75,11 +78,14 @@ class MediaFileWriter<S>: FileWriter where S: Subject, S.Output == WriteState, S
             assetWriter.finishWriting {
                 switch self.assetWriter.status {
                 case .completed:
+                    self.logger.notice("\(self.typeName) successfully finished writing.")
                     self.subject.send(completion: .finished)
                 case .failed:
+                    self.logger.error("\(self.typeName) failed to finish writing.")
                     self.subject.send(completion: .failure(self.assetWriter.error!))
                 default:
                     let error = FileWriterError.getErrorForStatus(of: self.assetWriter)
+                    self.logger.error("\(self.typeName) finished writing with error: \(error.localizedDescription).")
                     self.subject.send(completion: .failure(error))
                 }
             }

@@ -7,8 +7,8 @@
         "version": {
             "stage": "Pre-Alpha",
             "number": "1.9.9",
-            "build": "1",
-            "date": "January 11, 2021"
+            "build": "3",
+            "date": "January 13, 2021"
         },
         "source": {
             "link": "github.com/pnhwill/mea-depth-camera",

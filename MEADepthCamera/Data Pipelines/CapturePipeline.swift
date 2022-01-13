@@ -8,6 +8,7 @@
 import AVFoundation
 import Combine
 import Vision
+import OSLog
 
 // MARK: - CapturePipelineDelegate
 protocol CapturePipelineDelegate: AnyObject {
@@ -100,6 +101,8 @@ class CapturePipeline: NSObject {
     private let useCase: UseCase
     private let task: Task
     
+    private let logger = Logger.Category.capture.logger
+    
     // MARK: INIT
     init?(delegate: CapturePipelineDelegate,
           useCase: UseCase,
@@ -142,7 +145,7 @@ class CapturePipeline: NSObject {
         let videoSettingsForVideo = videoDataOutput.recommendedVideoSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
         let audioSettingsForVideo = audioDataOutput.recommendedAudioSettingsForAssetWriter(writingTo: videoFileSettings.fileType)
         guard let videoTransform = self.createVideoTransform(for: videoDataOutput) else {
-            print("Could not create video transform")
+            logger.error("Could not create video transform.")
             return
         }
         videoFileSettings.configuration = VideoFileConfiguration(
@@ -179,14 +182,14 @@ class CapturePipeline: NSObject {
         recordingQueue.async {
             // Create folder for all data files
             guard let folderURL = self.captureRecordingDataSource.createFolder() else {
-                print("Failed to create save folder")
+                self.logger.error("Failed to create save folder.")
                 return
             }
             guard let videoConfiguration = self.videoFileSettings.configuration as? VideoFileConfiguration,
                   let audioConfiguration = self.audioFileSettings.configuration as? AudioFileConfiguration,
                   let depthMapConfiguration = self.depthMapFileSettings.configuration as? DepthMapFileConfiguration
             else {
-                print("AV file configurations not found")
+                self.logger.error("AV file configurations not found.")
                 return
             }
             
@@ -215,7 +218,7 @@ class CapturePipeline: NSObject {
                 self.audioFileWriter = audioFileWriter
                 self.depthMapFileWriter = depthMapFileWriter
             } catch {
-                print("Error creating file writer: \(error)")
+                self.logger.error("Error creating file writer: \(String(describing: error))")
             }
         }
         
@@ -223,9 +226,11 @@ class CapturePipeline: NSObject {
         self.fileWritingDone = self.videoWriterSubject!
             .combineLatest(self.depthWriterSubject!, self.audioWriterSubject!)
             .sink(receiveCompletion: { [weak self] completion in
+                self?.logger.notice("File writing completed.")
                 self?.handleRecordingFinish(completion: completion)
             }, receiveValue: { [weak self] state in
                 if state == (.active, .active, .active) {
+                    self?.logger.notice("Recording is active. Frames will now be saved to files.")
                     self?.recordingState = .recording
                 }
             })
@@ -248,12 +253,12 @@ extension CapturePipeline {
     
     private func createVideoTransform(for output: AVCaptureOutput) -> CGAffineTransform? {
         guard let connection = output.connection(with: .video) else {
-            print("Could not find the camera video connection")
+            logger.error("Could not find the camera video connection.")
             return nil
         }
         // We set the desired destination video orientation here. The interface orientation is locked in portrait for this version
         guard let destinationVideoOrientation = AVCaptureVideoOrientation(interfaceOrientation: .portrait) else {
-            print("Unsupported interface orientation")
+            logger.error("Unsupported interface orientation.")
             return nil
         }
         
@@ -273,7 +278,7 @@ extension CapturePipeline {
             if let cameraCalibrationData = depthData.cameraCalibrationData {
                 processorSettings.cameraCalibrationData = cameraCalibrationData
             } else {
-                print("Failed to retrieve camera calibration data")
+                logger.error("Failed to retrieve camera calibration data.")
             }
         }
         
@@ -307,7 +312,7 @@ extension CapturePipeline {
                     depthMapFileConfiguration.videoSettings?["AVVideoHeightKey"] = Int(inputDimensions.height)
                     self.depthMapFileSettings.configuration = depthMapFileConfiguration
                 } else {
-                    print("Failed to set depth map source format in file configuration")
+                    logger.error("Failed to set depth map source format in file configuration.")
                 }
             }
         }
@@ -316,7 +321,7 @@ extension CapturePipeline {
             recordingQueue.async {
                 // Convert the depth map to a video format accepted by the AVAssetWriter, then write to file
                 guard let depthPixelBuffer = self.videoDepthConverter.render(pixelBuffer: convertedDepth.depthDataMap) else {
-                    print("Unable to process depth")
+                    self.logger.error("Unable to process depth.")
                     return
                 }
                 self.writeDepthMapToFile(depthMap: depthPixelBuffer, timeStamp: timestamp)
@@ -333,7 +338,7 @@ extension CapturePipeline {
         }
         
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            print("Failed to obtain a CVPixelBuffer for the current output frame.")
+            logger.error("Failed to obtain a CVPixelBuffer for the current output frame.")
             return
         }
         sampleBuffer.propagateAttachments(to: pixelBuffer)
@@ -345,7 +350,7 @@ extension CapturePipeline {
                     delegate?.setFaceAlignment(faceAlignment.isAligned)
                 }
             } else {
-                print("Vision face detection processor not found.")
+                logger.error("Vision face detection processor not found.")
             }
         }
         
@@ -366,13 +371,12 @@ extension CapturePipeline {
     private func handleRecordingFinish(completion: Subscribers.Completion<Error>) {
         switch completion {
         case .finished:
-            // update ui with success
-            print("File writing success")
+            logger.info("Successfully saved recording to files.")
             delegate?.capturePipelineRecordingDidStop()
             break
         case .failure(let error):
-            // update ui with failure
-            print("File writing failure: \(error.localizedDescription)")
+            // TODO: update ui with failure
+            logger.error("File writing failure: \(error.localizedDescription)")
             break
         }
         recordingState = .idle
@@ -383,7 +387,7 @@ extension CapturePipeline {
     
     private func writeDepthMapToFile(depthMap: CVPixelBuffer, timeStamp: CMTime) {
         guard let depthMapWriter = depthMapFileWriter else {
-            print("No depth map file writer found")
+            logger.error("No depth map file writer found.")
             return
         }
         
@@ -402,7 +406,7 @@ extension CapturePipeline {
     
     private func writeOutputToFile(_ output: AVCaptureOutput, sampleBuffer: CMSampleBuffer) {
         guard let videoWriter = videoFileWriter, let audioWriter = audioFileWriter else {
-            print("No video and/or audio file writer found.")
+            logger.error("No video and/or audio file writer found.")
             return
         }
         
@@ -436,8 +440,8 @@ extension CapturePipeline {
 extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
     
     func dataOutputSynchronizer(_ synchronizer: AVCaptureDataOutputSynchronizer, didOutput synchronizedDataCollection: AVCaptureSynchronizedDataCollection) {
-        //let dataCount = synchronizedDataCollection.count
-        //print("\(dataCount) data outputs received")
+//        let dataCount = synchronizedDataCollection.count
+//        logger.notice("\(dataCount) data outputs received.")
         
         if let syncedDepthData: AVCaptureSynchronizedDepthData = synchronizedDataCollection.synchronizedData(for: depthDataOutput) as? AVCaptureSynchronizedDepthData {
             let depthTimestamp = syncedDepthData.timestamp
@@ -446,7 +450,7 @@ extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
                 let depthData = syncedDepthData.depthData
                 processDepth(depthData: depthData, timestamp: depthTimestamp)
             } else {
-                print("depth frame dropped for reason: \(syncedDepthData.droppedReason.rawValue)")
+                logger.notice("Depth frame dropped at \(CMTimeGetSeconds(depthTimestamp), format: .fixed(precision: 3)) for reason: \(syncedDepthData.droppedReason.rawValue)")
             }
         }
         
@@ -457,7 +461,7 @@ extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
                 let videoSampleBuffer = syncedVideoData.sampleBuffer
                 processVideo(sampleBuffer: videoSampleBuffer, timestamp: videoTimestamp)
             } else {
-                print("video frame dropped for reason: \(syncedVideoData.droppedReason.rawValue)")
+                logger.notice("Video frame dropped at \(CMTimeGetSeconds(videoTimestamp), format: .fixed(precision: 3)) for reason: \(syncedVideoData.droppedReason.rawValue)")
             }
         }
         
@@ -468,7 +472,7 @@ extension CapturePipeline: AVCaptureDataOutputSynchronizerDelegate {
                 let audioSampleBuffer = syncedAudioData.sampleBuffer
                 processAudio(sampleBuffer: audioSampleBuffer, timestamp: audioTimestamp)
             } else {
-                print("audio frame dropped for reason: \(syncedAudioData.droppedReason.rawValue)")
+                logger.notice("Audio frame dropped at \(CMTimeGetSeconds(audioTimestamp), format: .fixed(precision: 3)) for reason: \(syncedAudioData.droppedReason.rawValue)")
             }
         }
     }

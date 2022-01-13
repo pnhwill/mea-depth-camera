@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import OSLog
 
 /// Data source implementing the storage abstraction to keep face capture recording sessions for the data pipelines.
 class CaptureRecordingDataSource {
@@ -46,12 +47,14 @@ class CaptureRecordingDataSource {
         return formatter
     }()
     
+    private let logger = Logger.Category.fileIO.logger
+    
     init?() {
         do {
             let docsURL = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             self.baseURL = docsURL
         } catch {
-            print("Data source initialization failure: Unable to locate Documents directory (\(error))")
+            logger.error("Data source initialization failure: Unable to locate Documents directory (\(String(describing: error)))")
             return nil
         }
     }
@@ -67,7 +70,7 @@ class CaptureRecordingDataSource {
             do {
                 try fileManager.createDirectory(at: dataURL, withIntermediateDirectories: true, attributes: nil)
             } catch {
-                print("Error creating folder in documents directory: \(error.localizedDescription)")
+                logger.error("Error creating folder in documents directory: \(error.localizedDescription)")
             }
         }
         return dataURL
@@ -88,7 +91,7 @@ class CaptureRecordingDataSource {
             newRecording.useCase = useCase
             newRecording.task = task
             newRecording.folderURL = recording.folderURL
-            print("Recording saved in folder named: \(recording.folderURL)")
+            self.logger.notice("Recording saved in folder named: \(recording.folderURL)")
             newRecording.name = recording.name
             newRecording.duration = recording.duration ?? 0
             newRecording.processorSettings = self.processorSettings

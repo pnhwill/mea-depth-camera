@@ -35,7 +35,7 @@ class AudioFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
         if assetWriter.canAdd(audioWriterInput) {
             assetWriter.add(audioWriterInput)
         } else {
-            print("\(typeName): no audio input added to the audio asset writer")
+            logger.error("\(self.typeName): No audio input added to the audio asset writer.")
         }
         
         // The audio track and video track are transfered to the writer in parallel.
@@ -54,12 +54,12 @@ class AudioFileWriter: MediaFileWriter<CapturePipeline.FileWriterSubject> {
         audioQueue.async {
             if self.audioWriterInput.isReadyForMoreMediaData {
                 guard self.audioWriterInput.append(sampleBuffer) else {
-                    print("\(self.typeName): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
+                    self.logger.error("\(self.typeName): Error appending sample buffer to audio input: \(self.assetWriter.error?.localizedDescription ?? "error unknown")")
                     self.audioDone.send(completion: .failure(self.assetWriter.error!))
                     return
                 }
             } else {
-                print("\(self.typeName): Audio writer input not ready for more media data. Sample dropped without writing to audio file")
+                self.logger.notice("\(self.typeName): Audio writer input not ready for more media data. Sample dropped without writing to audio file.")
             }
         }
     }

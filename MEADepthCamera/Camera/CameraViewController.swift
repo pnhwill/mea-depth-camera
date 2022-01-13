@@ -499,7 +499,7 @@ class CameraViewController: UIViewController {
                        exposureMode: AVCaptureDevice.ExposureMode,
                        at devicePoint: CGPoint,
                        monitorSubjectAreaChange: Bool) {
-        logger.info("Attempting to refocus camera.")
+        logger.info("Refocusing camera.")
         sessionQueue.async {
             let device = self.sessionManager.videoDeviceInput.device
             do {

@@ -7,8 +7,11 @@
 
 import UIKit
 import CoreData
+import OSLog
 
 class PersistentContainer: NSPersistentContainer {
+    
+    private let logger = Logger.Category.persistence.logger
     
     // MARK: Core Data Saving support
     
@@ -20,12 +23,14 @@ class PersistentContainer: NSPersistentContainer {
             try context.save()
         } catch {
             handleSavingError(error, contextualInfo: contextualInfo)
+            return
         }
+        logger.info("Successfully saved the NSManagedObjectContext to the store.")
     }
     
     /// Handles save error by presenting an alert.
     private func handleSavingError(_ error: Error, contextualInfo: ContextSaveContextualInfo?) {
-        print("Context saving error: \(error)")
+        logger.error("Context saving error when \(contextualInfo?.rawValue ?? "UNKNOWN"): \(String(describing: error))")
         if let contextualInfo = contextualInfo {
             DispatchQueue.main.async {
                 guard let mainWindowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,

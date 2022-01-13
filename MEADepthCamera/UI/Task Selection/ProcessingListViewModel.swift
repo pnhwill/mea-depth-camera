@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 /// The view model for the ProcessingListViewController.
 class ProcessingListViewModel {
@@ -90,6 +91,8 @@ class ProcessingListViewModel {
     private var processingCompleteAction: ProcessingCompleteAction?
     private var cancelRequested = false
     
+    private let logger = Logger.Category.processing.logger
+    
     init(useCase: UseCase, processingCompleteAction: ProcessingCompleteAction? = nil) {
         self.useCase = useCase
         self.processingCompleteAction = processingCompleteAction
@@ -151,6 +154,7 @@ extension ProcessingListViewModel: FaceLandmarksPipelineDelegate {
     
     func didFinishTracking(success: Bool) {
         guard let recording = faceLandmarksPipeline?.recording else { return }
+        logger.notice("Finished processing Recording \(recording.id!.uuidString) \(success ? "successfully" : "due to early exit").")
         let context = recording.managedObjectContext
         let container = AppDelegate.shared.coreDataStack.persistentContainer
         if success {

@@ -15,8 +15,10 @@ extension Logger {
         case json = "JSON"
         case ui = "UI"
         case camera = "Camera"
+        case capture = "CapturePipeline"
         case vision = "Vision"
         case processing = "Processing"
+        case fileIO = "File IO"
         
         var logger: Logger {
             Logger(subsystem: Logger.subsystem, category: self.rawValue)

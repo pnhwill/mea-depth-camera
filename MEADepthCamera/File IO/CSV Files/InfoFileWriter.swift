@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 /// Writes information about a recording to a CSV file.
 class InfoFileWriter: CSVFileWriter {
@@ -36,6 +37,8 @@ class InfoFileWriter: CSVFileWriter {
     private let subjectID: String
     private let taskName: String
     
+    let logger = Logger.Category.fileIO.logger
+    
     init?(recording: Recording) {
         guard let processorSettings = recording.processorSettings,
               let folderURL = recording.folderURL,
@@ -60,7 +63,7 @@ class InfoFileWriter: CSVFileWriter {
         
         // Convert string to data buffer.
         guard let dataBuffer = data.data(using: String.Encoding.utf8) else {
-            print("Failed to convert data from type String to type Data.")
+            logger.error("\(self.typeName): Failed to convert data from type String to type Data.")
             return
         }
         // Write data to file.
@@ -71,7 +74,7 @@ class InfoFileWriter: CSVFileWriter {
             fileHandle.seekToEndOfFile()
             fileHandle.write(dataBuffer)
         } else {
-            print("Failed to write data to file.")
+            logger.error("\(self.typeName): Failed to write data to file.")
         }
     }
 }

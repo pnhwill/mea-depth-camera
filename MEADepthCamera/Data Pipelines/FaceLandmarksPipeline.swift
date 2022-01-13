@@ -7,6 +7,7 @@
 
 import AVFoundation
 import Vision
+import OSLog
 
 // MARK: - FaceLandmarksPipelineDelegate
 protocol FaceLandmarksPipelineDelegate: AnyObject {
@@ -46,13 +47,15 @@ class FaceLandmarksPipeline {
     
     private var cancelRequested = false
     
+    private let logger = Logger.Category.processing.logger
+    
     init?(recording: Recording) {
         guard let processorSettings = recording.processorSettings,
               let infoFileWriter = InfoFileWriter(recording: recording),
               let faceLandmarks2DFileWriter = FaceLandmarksFileWriter(recording: recording, outputType: .landmarks2D),
               let faceLandmarks3DFileWriter = FaceLandmarksFileWriter(recording: recording, outputType: .landmarks3D)
         else {
-            print("Failed to initialize FaceLandmarksPipeline: recording is missing data.")
+            logger.error("Failed to initialize FaceLandmarksPipeline: Recording \(recording.id!.uuidString) is missing data.")
             return nil
         }
         self.processorSettings = processorSettings
@@ -67,7 +70,10 @@ class FaceLandmarksPipeline {
     
     // MARK: - Pipeline Setup
     
+    /// Starts the post-processing setup including loading the video assets and creating the CSV output files.
     func startTracking() throws {
+        logger.notice("Start processing Recording \(self.recording.id!.uuidString)...")
+        
         // Load RGB and depth map video files from saved URLs.
         guard let (videoAsset, depthAsset) = recording.loadAssets(),
               let saveFolder = recording.folderURL
@@ -91,11 +97,17 @@ class FaceLandmarksPipeline {
         try self.performTracking()
     }
     
+    /// Tells the pipeline to stop tracking at the start of the next frame.
+    ///
+    /// All processing will still be completed for the current frame.
     func cancelTracking() {
+        logger.notice("Processing cancelled while processing Recording \(self.recording.id!.uuidString).")
         cancelRequested = true
     }
     
     // MARK: Read Video and Perform Tracking
+    
+    /// Starts reading the recording's video assets and performs face tracking and post-processing at every frame.
     private func performTracking() throws {
         guard let videoAsset = videoAsset, let depthAsset = depthAsset,
               let videoReader = VideoReader(videoAsset: videoAsset, videoDataType: .video),
@@ -108,6 +120,8 @@ class FaceLandmarksPipeline {
         guard videoReader.nextFrame() != nil else {
             throw VisionTrackerProcessorError.firstFrameReadFailed
         }
+        
+        logger.notice("Processing setup completed successfully. Performing face tracking on Recording \(self.recording.id!.uuidString).")
         
         cancelRequested = false
         
@@ -141,7 +155,7 @@ class FaceLandmarksPipeline {
             let videoTime = CMTimeGetSeconds(videoFrame.presentationTimeStamp)
             
             guard let videoImage = CMSampleBufferGetImageBuffer(videoFrame) else {
-                print("No image found in video sample")
+                logger.error("No image found in video sample.")
                 break
             }
             
@@ -281,7 +295,7 @@ extension FaceLandmarksPipeline {
         }
         let pointCloud = pointCloudProcessor.render(landmarks: landmarks, depthFrame: depthMap)
         if pointCloud == nil {
-            print("Metal point cloud processor failed to render point cloud.")
+            logger.error("Metal point cloud processor failed to render point cloud.")
         }
         return pointCloud
     }
@@ -300,7 +314,7 @@ extension FaceLandmarksPipeline {
         }
         let correctedDepthMap = lensDistortionCorrectionProcessor.render(pixelBuffer: depthDataMap)
         if correctedDepthMap == nil {
-            print("Metal lens distortion correction processor failed to render depth map.")
+            logger.error("Metal lens distortion correction processor failed to render depth map.")
         }
         return correctedDepthMap
     }
@@ -308,8 +322,9 @@ extension FaceLandmarksPipeline {
     private func rectifyLandmarks(landmarks: [CGPoint]) -> [CGPoint]? {
         // Get camera instrinsics
         guard let cameraCalibrationData = (processorSettings.decodedCameraCalibrationData ?? processorSettings.cameraCalibrationData) as? CameraCalibrationDataProtocol,
-              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable else {
-            print("FaceLandmarksPipeline.rectifyLandmarks: Could not find camera calibration data")
+              let lookupTable = cameraCalibrationData.inverseLensDistortionLookupTable
+        else {
+            logger.error("FaceLandmarksPipeline.rectifyLandmarks: Could not find camera calibration data")
             return nil
         }
         let referenceDimensions: CGSize = cameraCalibrationData.intrinsicMatrixReferenceDimensions

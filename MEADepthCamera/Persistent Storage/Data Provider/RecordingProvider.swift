@@ -6,6 +6,7 @@
 //
 
 import CoreData
+import OSLog
 
 /// A class to wrap everything related to creating and deleting recordings.
 class RecordingProvider: DataProvider {
@@ -16,6 +17,8 @@ class RecordingProvider: DataProvider {
     
     private let fileManager = FileManager.default
     
+    private let logger = Logger.Category.persistence.logger
+    
     init(with persistentContainer: PersistentContainer) {
         self.persistentContainer = persistentContainer
     }
@@ -23,8 +26,10 @@ class RecordingProvider: DataProvider {
     func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
         context.perform {
             let recording = Recording(context: context)
-            recording.id = UUID()
+            let id = UUID()
+            recording.id = id
             recording.isProcessed = false
+            self.logger.info("Recording \(id.uuidString) added to NSManagedObjectContext.")
             if shouldSave {
                 self.persistentContainer.saveContext(backgroundContext: context, with: .addRecording)
             }
@@ -52,7 +57,7 @@ class RecordingProvider: DataProvider {
             do {
                 try fileManager.trashItem(at: url, resultingItemURL: nil)
             } catch {
-                debugPrint("###\(#function): Failed to trash files for recording at: \(url.path)")
+                logger.error("\(#function): Failed to trash files for recording at: \(url.path)")
             }
         }
     }
