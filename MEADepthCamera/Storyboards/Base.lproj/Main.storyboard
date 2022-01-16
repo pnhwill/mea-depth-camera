@@ -186,7 +186,17 @@
                             <outlet property="delegate" destination="kqc-Wg-YNO" id="exJ-4Z-HWY"/>
                         </connections>
                     </collectionView>
+                    <toolbarItems>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="QAf-zG-w1r"/>
+                        <barButtonItem title="Process" id="nB9-Bc-rr2">
+                            <connections>
+                                <segue destination="xcl-cG-EWk" kind="presentation" identifier="ShowProcessingListSegue" id="CW8-0d-2CC"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Mpl-4d-urQ"/>
+                    </toolbarItems>
                     <navigationItem key="navigationItem" id="Xcv-1V-PFu"/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="eHn-cx-cVW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -195,11 +205,15 @@
         <!--Navigation Controller-->
         <scene sceneID="Q7m-FB-ZeS">
             <objects>
-                <navigationController id="6Eg-Bx-Ju3" sceneMemberID="viewController">
+                <navigationController toolbarHidden="NO" id="6Eg-Bx-Ju3" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="5AK-Mj-zxh">
                         <rect key="frame" x="0.0" y="24" width="458.5" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="DZf-Qg-Td9">
+                        <rect key="frame" x="0.0" y="1129" width="458.5" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="kqc-Wg-YNO" kind="relationship" relationship="rootViewController" id="vmg-DM-0Mj"/>
                     </connections>
@@ -237,6 +251,64 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cKZ-kw-kUE" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-4516" y="1038"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="2Ep-wy-XVb">
+            <objects>
+                <navigationController toolbarHidden="NO" id="xcl-cG-EWk" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="qoj-Nz-4cA">
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="56"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="vrE-Ox-cSv">
+                        <rect key="frame" x="0.0" y="945.5" width="704" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
+                    <connections>
+                        <segue destination="6Ik-U3-KOW" kind="relationship" relationship="rootViewController" id="gJx-2e-OzR"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="JL0-zu-lLX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1773" y="1540"/>
+        </scene>
+        <!--Processing List View Controller-->
+        <scene sceneID="e8w-zi-pqX">
+            <objects>
+                <collectionViewController id="6Ik-U3-KOW" customClass="ProcessingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="MJE-ZZ-m5A">
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="ijB-MM-0CR">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="6Ik-U3-KOW" id="5w9-z3-TuS"/>
+                            <outlet property="delegate" destination="6Ik-U3-KOW" id="ckI-Xg-tJ3"/>
+                        </connections>
+                    </collectionView>
+                    <toolbarItems>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Gu1-CA-YvZ"/>
+                        <barButtonItem title="Start Processing" id="11T-PZ-z2d">
+                            <connections>
+                                <action selector="handleStartStopButton:" destination="6Ik-U3-KOW" id="BHf-cA-JmN"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Wg6-0N-zZK"/>
+                    </toolbarItems>
+                    <navigationItem key="navigationItem" id="RYg-DJ-GYC"/>
+                    <connections>
+                        <outlet property="startStopButton" destination="11T-PZ-z2d" id="HGh-h2-Rcl"/>
+                    </connections>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HeG-wU-2hl" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1019" y="1540"/>
         </scene>
     </scenes>
     <resources>

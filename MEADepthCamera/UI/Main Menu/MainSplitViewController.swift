@@ -35,7 +35,8 @@ class MainSplitViewController: UISplitViewController {
         secondaryNavigationController?.delegate = self
     }
     
-    // MARK: Transition to Use Case List
+    // MARK: Use Case List
+    
     /// Shows the UseCaseListViewController when the user taps the "Use Cases" button in the main menu.
     func transitionToUseCaseList() {
         if isCollapsed {
@@ -46,21 +47,6 @@ class MainSplitViewController: UISplitViewController {
         }
     }
     
-    // MARK: Transition to Task List
-    /// Shows the TaskListViewController when the user selects a Use Case to start recording for.
-    func transitionToTaskList(with useCase: UseCase) {
-        let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
-        guard let taskListVC = storyboard.instantiateViewController(withIdentifier: StoryboardID.taskListVC) as? TaskListViewController
-        else { return }
-        taskListVC.configure(with: useCase)
-        if isCollapsed {
-            primaryNavigationController?.pushViewController(taskListVC, animated: true)
-        } else {
-            supplementaryNavigationController?.pushViewController(taskListVC, animated: true)
-        }
-    }
-    
-    // MARK: Show Use Case Detail
     /// Shows the UseCaseDetailViewController for the Use Case that's selected in the list.
     func showUseCaseDetail(_ useCase: UseCase, isNew: Bool = false) {
         guard let id = useCase.id, id != selectedItemID else { return }
@@ -74,7 +60,31 @@ class MainSplitViewController: UISplitViewController {
         }
     }
     
-    // MARK: Show Task Detail
+    /// Presents the CameraViewController in full screen when the user chooses to start recording a Task.
+    func showCamera(task: Task, useCase: UseCase) {
+        let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
+        guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: StoryboardID.cameraNavController) as? UINavigationController,
+              let taskDetailVC = cameraNavController.topViewController as? TaskDetailViewController
+        else { return }
+        taskDetailVC.configure(with: task, useCase: useCase)
+        present(cameraNavController, animated: true, completion: nil)
+    }
+    
+    // MARK: Task List
+    
+    /// Shows the TaskListViewController when the user selects a Use Case to start recording for.
+    func transitionToTaskList(with useCase: UseCase) {
+        let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
+        guard let taskListVC = storyboard.instantiateViewController(withIdentifier: StoryboardID.taskListVC) as? TaskListViewController
+        else { return }
+        taskListVC.configure(with: useCase)
+        if isCollapsed {
+            primaryNavigationController?.pushViewController(taskListVC, animated: true)
+        } else {
+            supplementaryNavigationController?.pushViewController(taskListVC, animated: true)
+        }
+    }
+    
     /// Shows the TaskDetailViewController for the Task that's selected in the list.
     func showTaskDetail(_ task: Task, useCase: UseCase) {
         guard let id = task.id, id != selectedItemID else { return }
@@ -98,17 +108,6 @@ class MainSplitViewController: UISplitViewController {
         }
     }
     
-    // MARK: Show Camera
-    /// Presents the CameraViewController in full screen when the user chooses to start recording a Task.
-    func showCamera(task: Task, useCase: UseCase) {
-        let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
-        guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: StoryboardID.cameraNavController) as? UINavigationController,
-              let cameraViewController = cameraNavController.topViewController as? CameraViewController
-        else { return }
-        cameraViewController.configure(useCase: useCase, task: task)
-//        show(cameraNavController, sender: nil)
-        present(cameraNavController, animated: true, completion: nil)
-    }
 }
 
 // MARK: UINavigationControllerDelegate

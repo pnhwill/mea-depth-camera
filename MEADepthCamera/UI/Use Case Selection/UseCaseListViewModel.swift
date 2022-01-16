@@ -84,7 +84,7 @@ class UseCaseListViewModel: NSObject, ListViewModel {
     }
     
     func useCase(with id: UUID?) -> UseCase? {
-        return useCases?.first(where: { $0.id == id})
+        return useCases?.first(where: { $0.id == id })
     }
     
     func add(completion: @escaping (UseCase) -> Void) {

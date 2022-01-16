@@ -65,6 +65,12 @@ protocol ListItemArrayConvertible {
     var listItems: [ListItem] { get }
 }
 
+//extension ListItemArrayConvertible where Self: DictionaryIdentifiable & CaseIterable {
+//    var listItems: [ListItem] {
+//        Self.allCases.map { ListItem(id: $0.id, title: ) }
+//    }
+//}
+
 // MARK: IdentifiedListItemArrayConvertible
 /// ListItemArrayConvertible types that use an associated Hashable type as an identifier.
 protocol IdentifiedListItemArrayConvertible: ListItemArrayConvertible {

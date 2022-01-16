@@ -25,9 +25,8 @@ class CameraViewController: UIViewController {
     
     @IBOutlet private weak var faceGuideView: FaceGuideView!
     
-    // Navigation bar button
-    @IBOutlet private weak var taskListButton: UIBarButtonItem!
-    @IBOutlet private weak var doneButton: UIBarButtonItem!
+    // Navigation bar buttons
+    private var doneButton: UIBarButtonItem?
     
     // Post-processing in progress
     private lazy var spinner: UIActivityIndicatorView = {
@@ -92,7 +91,8 @@ class CameraViewController: UIViewController {
         return audioVisualizerViewController
     }
     
-    @IBAction func taskListButtonTapped(_ sender: UIBarButtonItem) {
+    @objc
+    func doneButtonTapped(_ sender: UIBarButtonItem) {
         dismiss(animated: true, completion: nil)
     }
     
@@ -104,7 +104,12 @@ class CameraViewController: UIViewController {
         navigationItem.title = task.name
         // Disable the UI. Enable the UI later, if and only if the session starts running.
         recordButton.isEnabled = false
-        //doneButton.isEnabled = false
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done,
+                                         target: self,
+                                         action: #selector(doneButtonTapped(_:)))
+        navigationItem.rightBarButtonItem = doneButton
+        doneButton.isEnabled = false
+        self.doneButton = doneButton
         
         sessionQueue.async {
             self.sessionManager = CaptureSessionManager()
@@ -487,7 +492,7 @@ class CameraViewController: UIViewController {
     }
     
     private func displayPressureState(systemPressureState: AVCaptureDevice.SystemPressureState) {
-        //let pressureFactors = systemPressureState.factors
+//        let pressureFactors = systemPressureState.factors
         let message = NSLocalizedString("System pressure level: \(systemPressureState.pressureLevelString)", comment: "Alert message when system pressure level has changed")
         let actions = [UIAlertAction(title: NSLocalizedString("OK", comment: "Alert OK button"), style: .cancel, handler: nil)]
         self.alert(title: Bundle.main.applicationName, message: message, actions: actions)
@@ -555,8 +560,8 @@ class CameraViewController: UIViewController {
                 }
                 // Hide the navigation bar task list button
                 DispatchQueue.main.async {
-//                    self.navigationItem.setHidesBackButton(true, animated: true)
-                    self.taskListButton.isEnabled = false
+                    self.navigationItem.setHidesBackButton(true, animated: true)
+                    self.navigationItem.setRightBarButton(nil, animated: true)
                 }
                 self.capturePipeline?.startRecording()
                 self.logger.notice("Start recording...")
@@ -570,8 +575,11 @@ class CameraViewController: UIViewController {
                         UIApplication.shared.endBackgroundTask(currentBackgroundRecordingID)
                     }
                 }
+                // Show the nav bar buttons, and enable the Done button
                 DispatchQueue.main.async {
-                    self.taskListButton.isEnabled = true
+                    self.navigationItem.setHidesBackButton(false, animated: true)
+                    self.navigationItem.setRightBarButton(self.doneButton, animated: true)
+                    self.doneButton?.isEnabled = true
                 }
 
             default:

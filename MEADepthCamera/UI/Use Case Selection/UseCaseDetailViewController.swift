@@ -30,6 +30,15 @@ class UseCaseDetailViewController: UICollectionViewController {
         setEditing(isNew, animated: false)
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == SegueID.showProcessingListSegueIdentifier,
+           let destination = segue.destination as? UINavigationController,
+           let processingListViewController = destination.topViewController as? ProcessingListViewController {
+            guard let useCase = useCase else { return }
+            processingListViewController.configure(useCase: useCase)
+        }
+    }
+    
     // MARK: Life Cycle
     
     override func viewDidLoad() {
@@ -120,6 +129,18 @@ extension UseCaseDetailViewController {
         guard elementKind == UseCaseDetailViewModel.sectionFooterElementKind, let view = view as? ButtonSupplementaryView else { return }
         view.setButtonAction(buttonAction: startButtonTapped)
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // Push the detail view when the cell is tapped.
+        if let useCase = useCase,
+           let viewModel = viewModel as? UseCaseDetailViewModel,
+           let itemID = viewModel.dataSource?.itemIdentifier(for: indexPath),
+           let task = viewModel.task(with: itemID) {
+            mainSplitViewController.showCamera(task: task, useCase: useCase)
+        } else {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
+    }
 }
 
 // MARK: Button Actions
@@ -138,7 +159,7 @@ extension UseCaseDetailViewController {
     private func startButtonTapped() {
         guard let useCase = useCase else { return }
         // Show the task list split view when start button is tapped
-        mainSplitViewController.transitionToTaskList(with: useCase)
+//        mainSplitViewController.transitionToTaskList(with: useCase)
     }
 }
 
