@@ -20,6 +20,7 @@
 		B511F7DD2768522D00A7D2CA /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B511F7DC2768522D00A7D2CA /* AboutViewController.swift */; };
 		B511F7DF276852AC00A7D2CA /* AboutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B511F7DE276852AC00A7D2CA /* AboutViewModel.swift */; };
 		B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5235ECB26C207CB0042106C /* InfoFileWriter.swift */; };
+		B535F7CB2795FCAD00A7E307 /* MainMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B535F7CA2795FCAD00A7E307 /* MainMenuViewModel.swift */; };
 		B536DA3D271F781200A9C3BB /* ReadjustingStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B536DA3C271F781200A9C3BB /* ReadjustingStackView.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
@@ -164,6 +165,7 @@
 		B511F7DE276852AC00A7D2CA /* AboutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutViewModel.swift; sourceTree = "<group>"; };
 		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		B5235ECB26C207CB0042106C /* InfoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoFileWriter.swift; sourceTree = "<group>"; };
+		B535F7CA2795FCAD00A7E307 /* MainMenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuViewModel.swift; sourceTree = "<group>"; };
 		B536DA3C271F781200A9C3BB /* ReadjustingStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadjustingStackView.swift; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
@@ -366,6 +368,7 @@
 			isa = PBXGroup;
 			children = (
 				B54215B926C316F600A4F984 /* MainMenuViewController.swift */,
+				B535F7CA2795FCAD00A7E307 /* MainMenuViewModel.swift */,
 				B5C89315272BDDC2002E2EC1 /* MainSplitViewController.swift */,
 				B511F7DC2768522D00A7D2CA /* AboutViewController.swift */,
 				B511F7DE276852AC00A7D2CA /* AboutViewModel.swift */,
@@ -906,6 +909,7 @@
 				B5C732B126BDD32F002B01C2 /* VisionProcessor.swift in Sources */,
 				B57965B626A096B10070C294 /* VideoFileWriter.swift in Sources */,
 				B50944B426E94FEC0020971D /* JSONError.swift in Sources */,
+				B535F7CB2795FCAD00A7E307 /* MainMenuViewModel.swift in Sources */,
 				B5FB0A4D26D5765000F65FA5 /* ProcessingListViewController.swift in Sources */,
 				BE64A214272A8C4000DA1689 /* TextViewCell.swift in Sources */,
 				B56F1A8C26E0786200A29C42 /* UseCaseProvider.swift in Sources */,

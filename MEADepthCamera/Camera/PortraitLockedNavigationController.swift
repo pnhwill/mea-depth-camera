@@ -23,4 +23,13 @@ class PortraitLockedNavigationController: UINavigationController {
     override var shouldAutorotate: Bool {
         return false
     }
+    
+//    required init?(coder: NSCoder) {
+//        super.init(coder: coder)
+//        print("PortraitLockedNavigationController Initialized.")
+//    }
+//    
+//    deinit {
+//        print("PortraitLockedNavigationController deinitialized.")
+//    }
 }

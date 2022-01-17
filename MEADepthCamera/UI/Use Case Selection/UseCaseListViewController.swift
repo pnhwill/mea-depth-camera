@@ -11,6 +11,8 @@ import Combine
 /// ListViewController subclass that displays all of the user's Use Cases.
 class UseCaseListViewController: ListViewController {
     
+    @IBOutlet private weak var addButton: UIBarButtonItem!
+    
     private var useCaseListViewModel: UseCaseListViewModel? {
         get {
             viewModel as? UseCaseListViewModel
@@ -34,6 +36,12 @@ class UseCaseListViewController: ListViewController {
     private var coreDataStackSubscriber: AnyCancellable?
     
     private var isSearching: Bool = false
+    private var isAdding: Bool = false {
+        didSet {
+            addButton.isEnabled = !isAdding
+            editButtonItem.isEnabled = !isAdding
+        }
+    }
     
     deinit {
         print("UseCaseListViewController deinitialized.")
@@ -138,7 +146,10 @@ extension UseCaseListViewController {
     
     private func addUseCase() {
         useCaseListViewModel?.add { [weak self] useCase in
-            self?.mainSplitViewController.showUseCaseDetail(useCase, isNew: true)
+            self?.isAdding = true
+            self?.mainSplitViewController.showUseCaseDetail(useCase, isNew: true) {
+                self?.isAdding = false
+            }
         }
     }
 }
@@ -159,6 +170,10 @@ extension UseCaseListViewController: ListTextCellDelegate {
 extension UseCaseListViewController {
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard !isAdding else {
+            selectItemIfNeeded()
+            return
+        }
         // Push the detail view when the cell is tapped.
         if let itemID = dataSource?.itemIdentifier(for: indexPath),
            let useCase = useCaseListViewModel?.useCase(with: itemID) {

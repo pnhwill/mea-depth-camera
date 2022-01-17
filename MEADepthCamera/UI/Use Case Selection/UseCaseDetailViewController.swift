@@ -11,10 +11,13 @@ import Combine
 /// A detail view controller for both viewing and editing a single Use Case.
 class UseCaseDetailViewController: UICollectionViewController {
     
+    typealias AddCompletion = MainSplitViewController.AddCompletion
+    
     private var viewModel: DetailViewModel?
     private var useCase: UseCase?
     private var isNew = false
     private var useCaseDidChangeSubscriber: Cancellable?
+    private var addCompletion: AddCompletion?
     
     private var mainSplitViewController: MainSplitViewController {
         self.splitViewController as! MainSplitViewController
@@ -24,9 +27,10 @@ class UseCaseDetailViewController: UICollectionViewController {
         print("UseCaseDetailViewController deinitialized.")
     }
     
-    func configure(with useCase: UseCase, isNew: Bool = false) {
+    func configure(with useCase: UseCase, isNew: Bool = false, addCompletion: AddCompletion? = nil) {
         self.useCase = useCase
         self.isNew = isNew
+        self.addCompletion = addCompletion
         setEditing(isNew, animated: false)
     }
     
@@ -106,6 +110,7 @@ extension UseCaseDetailViewController {
         navigationItem.title = NSLocalizedString("View Use Case", comment: "view use case nav title")
         navigationItem.leftBarButtonItem = nil
         editButtonItem.isEnabled = true
+        addCompletion?()
     }
     
     private func transitionToEditMode(_ useCase: UseCase) {
@@ -127,7 +132,7 @@ extension UseCaseDetailViewController {
 extension UseCaseDetailViewController {
     override func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
         guard elementKind == UseCaseDetailViewModel.sectionFooterElementKind, let view = view as? ButtonSupplementaryView else { return }
-        view.setButtonAction(buttonAction: startButtonTapped)
+//        view.setButtonAction(buttonAction: startButtonTapped)
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -154,6 +159,7 @@ extension UseCaseDetailViewController {
         } else {
             setEditing(false, animated: true)
         }
+        addCompletion?()
     }
     
     private func startButtonTapped() {

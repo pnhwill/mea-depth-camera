@@ -3,7 +3,6 @@
     <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="dark"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -11,9 +10,9 @@
         <!--About View Controller-->
         <scene sceneID="32U-RH-0bb">
             <objects>
-                <collectionViewController id="Kq3-2h-2mw" customClass="AboutViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="AboutViewController" id="Kq3-2h-2mw" customClass="AboutViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="rA8-a9-h16">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Ua0-RM-xGC">
@@ -31,7 +30,7 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dAg-Gt-eaG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1822" y="106"/>
+            <point key="canvasLocation" x="-1692" y="106"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="vIH-4Q-Nbk">
@@ -52,83 +51,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="j9l-zw-zrB" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-3440" y="796"/>
-        </scene>
-        <!--Main Menu-->
-        <scene sceneID="QZN-RH-IPq">
-            <objects>
-                <viewController id="A6m-RR-31J" customClass="MainMenuViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="Wh0-cP-6xn">
-                        <rect key="frame" x="0.0" y="0.0" width="420" height="1194"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="SVL-W4-3tA">
-                                <rect key="frame" x="0.0" y="74" width="390" height="722.5"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="MEA Depth Camera" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="87G-3W-bDT">
-                                        <rect key="frame" x="0.0" y="0.0" width="390" height="241"/>
-                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle0"/>
-                                        <nil key="textColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PlJ-n2-oaw" userLabel="List Button Container View">
-                                        <rect key="frame" x="0.0" y="241" width="390" height="240.5"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bP1-pS-WxO">
-                                                <rect key="frame" x="111.5" y="94.5" width="167.5" height="51"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                                <state key="normal" title="Use Case List"/>
-                                                <buttonConfiguration key="configuration" style="gray" title="Use Cases">
-                                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle0"/>
-                                                </buttonConfiguration>
-                                                <connections>
-                                                    <action selector="useCaseListButtonTapped:" destination="A6m-RR-31J" eventType="touchUpInside" id="Lyf-J0-X4E"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                        <constraints>
-                                            <constraint firstItem="bP1-pS-WxO" firstAttribute="centerX" secondItem="PlJ-n2-oaw" secondAttribute="centerX" id="TLt-ZZ-F5S"/>
-                                            <constraint firstItem="bP1-pS-WxO" firstAttribute="centerY" secondItem="PlJ-n2-oaw" secondAttribute="centerY" id="rL3-gc-bwp"/>
-                                        </constraints>
-                                    </view>
-                                    <view contentMode="scaleToFill" id="xep-UG-Q1f" userLabel="About Button Container View">
-                                        <rect key="frame" x="0.0" y="481.5" width="390" height="241"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DV8-F1-nPY">
-                                                <rect key="frame" x="142.5" y="95" width="105" height="51"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                                <state key="normal" title="Use Case List"/>
-                                                <buttonConfiguration key="configuration" style="gray" title="About">
-                                                    <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle0"/>
-                                                </buttonConfiguration>
-                                                <connections>
-                                                    <segue destination="Kq3-2h-2mw" kind="presentation" id="EZx-Rf-yKH"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                        <viewLayoutGuide key="safeArea" id="4xo-7g-bD9"/>
-                                        <constraints>
-                                            <constraint firstItem="DV8-F1-nPY" firstAttribute="centerX" secondItem="xep-UG-Q1f" secondAttribute="centerX" id="O7c-WM-myx"/>
-                                            <constraint firstItem="DV8-F1-nPY" firstAttribute="centerY" secondItem="xep-UG-Q1f" secondAttribute="centerY" id="WZL-CF-SBh"/>
-                                        </constraints>
-                                    </view>
-                                </subviews>
-                            </stackView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="Atc-ih-wkx"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="SVL-W4-3tA" firstAttribute="top" secondItem="Atc-ih-wkx" secondAttribute="top" id="iqv-1u-aWF"/>
-                            <constraint firstItem="Atc-ih-wkx" firstAttribute="bottom" secondItem="SVL-W4-3tA" secondAttribute="bottom" id="kSQ-EO-bB7"/>
-                            <constraint firstItem="SVL-W4-3tA" firstAttribute="leading" secondItem="Atc-ih-wkx" secondAttribute="leading" id="mYr-OF-EVP"/>
-                            <constraint firstItem="Atc-ih-wkx" firstAttribute="trailing" secondItem="SVL-W4-3tA" secondAttribute="trailing" id="p8c-OP-X5P"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Main Menu" largeTitleDisplayMode="always" id="7PU-7A-QQD"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="9qw-r2-GTA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2643.1654676258995" y="105.52763819095478"/>
         </scene>
         <!--Use Case List View Controller-->
         <scene sceneID="0Mn-9S-9bz">
@@ -161,6 +83,9 @@
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="IW8-Tg-PQ2"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="addButton" destination="cJJ-CJ-U2t" id="ukx-kR-8b7"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fua-28-8Qh" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -171,7 +96,7 @@
             <objects>
                 <collectionViewController id="kqc-Wg-YNO" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="coM-bn-zGm">
-                        <rect key="frame" x="0.0" y="0.0" width="458.5" height="1194"/>
+                        <rect key="frame" x="0.0" y="0.0" width="458" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="KV1-HY-o93">
@@ -231,12 +156,38 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="A6m-RR-31J" kind="relationship" relationship="rootViewController" id="Y2s-T9-qcA"/>
+                        <segue destination="Vd0-BV-GtV" kind="relationship" relationship="rootViewController" id="FD1-Ic-lWd"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="AUj-2e-5eb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-3440" y="106"/>
+        </scene>
+        <!--Main Menu-->
+        <scene sceneID="0df-6B-BCx">
+            <objects>
+                <collectionViewController id="Vd0-BV-GtV" customClass="MainMenuViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="RTR-FT-Ot4">
+                        <rect key="frame" x="0.0" y="0.0" width="420" height="1194"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="3ye-lk-AqZ">
+                            <size key="itemSize" width="128" height="128"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                        </collectionViewFlowLayout>
+                        <cells/>
+                        <connections>
+                            <outlet property="dataSource" destination="Vd0-BV-GtV" id="Djr-4J-Drk"/>
+                            <outlet property="delegate" destination="Vd0-BV-GtV" id="6zw-iB-3sS"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" title="Main Menu" id="P4I-aa-Vfs"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xCX-dU-cY8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2560" y="106"/>
         </scene>
         <!--Main Split View Controller-->
         <scene sceneID="zqH-yJ-rPL">
@@ -277,7 +228,7 @@
             <objects>
                 <collectionViewController id="6Ik-U3-KOW" customClass="ProcessingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="MJE-ZZ-m5A">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="ijB-MM-0CR">

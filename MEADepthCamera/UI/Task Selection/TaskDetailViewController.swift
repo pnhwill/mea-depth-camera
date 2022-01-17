@@ -24,7 +24,7 @@ class TaskDetailViewController: UICollectionViewController {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-//        print("TaskDetailViewController Initialized.")
+        print("TaskDetailViewController Initialized.")
     }
     
     deinit {
@@ -57,7 +57,7 @@ class TaskDetailViewController: UICollectionViewController {
 }
 
 extension TaskDetailViewController {
-    private func startButtonTapped() {
+    func startButtonTapped() {
         guard let task = task, let useCase = useCase else { return }
         let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
         guard let cameraViewController = storyboard.instantiateViewController(withIdentifier: StoryboardID.cameraViewController) as? CameraViewController
@@ -166,8 +166,9 @@ extension TaskDetailViewController {
     private func createInfoFooterRegistration() -> UICollectionView.SupplementaryRegistration<ButtonSupplementaryView> {
         return UICollectionView.SupplementaryRegistration<ButtonSupplementaryView>(elementKind: ElementKind.infoSectionFooter) {
             [weak self] (supplementaryView, elementKind, indexPath) in
-            guard let self = self else { return }
-            supplementaryView.setButtonAction(buttonAction: self.startButtonTapped)
+            supplementaryView.setButtonAction() {
+                self?.startButtonTapped()
+            }
         }
     }
     
@@ -187,3 +188,5 @@ extension TaskDetailViewController {
         }
     }
 }
+
+

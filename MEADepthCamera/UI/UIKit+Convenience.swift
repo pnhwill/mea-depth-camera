@@ -11,11 +11,13 @@ import UIKit
 extension UIViewController {
     
     enum StoryboardName {
+        static let main = "Main"
         static let taskList = "TaskList"
         static let camera = "Camera"
     }
     
     enum StoryboardID {
+        static let aboutViewController = "AboutViewController"
         static let cameraNavController = "CameraNavigationController"
         static let cameraViewController = "CameraViewController"
         static let taskListVC = "TaskListVC"

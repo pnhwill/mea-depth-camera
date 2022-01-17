@@ -41,6 +41,15 @@ class ProcessingListViewController: UICollectionViewController {
     
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        print("ProcessingListViewController Initialized.")
+    }
+    
+    deinit {
+        print("ProcessingListViewController deinitialized.")
+    }
+    
     func configure(useCase: UseCase) {
         self.useCase = useCase
         viewModel = ProcessingListViewModel(useCase: useCase, processingCompleteAction: { [weak self] in

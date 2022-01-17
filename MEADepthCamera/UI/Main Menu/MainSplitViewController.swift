@@ -10,6 +10,8 @@ import UIKit
 /// A UISplitViewController subclass that displays a three-column split view and passes data between the list and detail view controllers.
 class MainSplitViewController: UISplitViewController {
     
+    typealias AddCompletion = () -> Void
+    
     /// The currently selected item in the list column. The list view controller uses this so it can re-select the same row every time it reloads its data.
     var selectedItemID: ListItem.ID?
     
@@ -48,14 +50,18 @@ class MainSplitViewController: UISplitViewController {
     }
     
     /// Shows the UseCaseDetailViewController for the Use Case that's selected in the list.
-    func showUseCaseDetail(_ useCase: UseCase, isNew: Bool = false) {
+    func showUseCaseDetail(_ useCase: UseCase, isNew: Bool = false, addCompletion: AddCompletion? = nil) {
         guard let id = useCase.id, id != selectedItemID else { return }
         selectedItemID = id
         if let useCaseDetailVC = secondaryNavigationController?.topViewController as? UseCaseDetailViewController {
-            useCaseDetailVC.configure(with: useCase, isNew: isNew)
+            useCaseDetailVC.configure(with: useCase, isNew: isNew) {
+                addCompletion?()
+            }
             show(.secondary)
         } else if let useCaseDetailVC = secondaryNavigationController?.viewControllers.first as? UseCaseDetailViewController {
-            useCaseDetailVC.configure(with: useCase, isNew: isNew)
+            useCaseDetailVC.configure(with: useCase, isNew: isNew) {
+                addCompletion?()
+            }
             secondaryNavigationController?.popToRootViewController(animated: true)
         }
     }
