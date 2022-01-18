@@ -99,6 +99,7 @@ struct TaskProperties: Decodable {
     let name: String // "Big smile"
     let instructions: String // "Smile big. Repeat 3 times."
     let id: UUID
+    let isDefault: Bool
     
     private let logger = Logger.Category.json.logger
     
@@ -128,6 +129,7 @@ struct TaskProperties: Decodable {
         self.name = name
         self.instructions = instructions
         self.id = UUID()
+        self.isDefault = true
     }
     
     /// The keys must have the same name as the attributes of the Task entity.
@@ -137,7 +139,8 @@ struct TaskProperties: Decodable {
             "fileNameLabel": fileName,
             "name": name,
             "instructions": instructions,
-            "id": id
+            "id": id,
+            "isDefault": isDefault
         ]
     }
 }

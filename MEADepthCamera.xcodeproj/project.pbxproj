@@ -21,6 +21,9 @@
 		B511F7DF276852AC00A7D2CA /* AboutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B511F7DE276852AC00A7D2CA /* AboutViewModel.swift */; };
 		B5235ECC26C207CB0042106C /* InfoFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5235ECB26C207CB0042106C /* InfoFileWriter.swift */; };
 		B535F7CB2795FCAD00A7E307 /* MainMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B535F7CA2795FCAD00A7E307 /* MainMenuViewModel.swift */; };
+		B535F7CF27962D5000A7E307 /* TaskPlanDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B535F7CE27962D5000A7E307 /* TaskPlanDetailViewController.swift */; };
+		B535F7D127962F9200A7E307 /* TaskPlanDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B535F7D027962F9200A7E307 /* TaskPlanDetailViewModel.swift */; };
+		B535F7D327962FA000A7E307 /* TaskPlanDetailEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B535F7D227962FA000A7E307 /* TaskPlanDetailEditViewModel.swift */; };
 		B536DA3D271F781200A9C3BB /* ReadjustingStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B536DA3C271F781200A9C3BB /* ReadjustingStackView.swift */; };
 		B5380D0D26A20383003328D8 /* FaceLandmarksFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */; };
 		B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */ = {isa = PBXBuildFile; fileRef = B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */; };
@@ -88,7 +91,6 @@
 		B58F4D60273A08600073B107 /* TitleSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58F4D5F273A08600073B107 /* TitleSupplementaryView.swift */; };
 		B5916151272362E8005604BF /* LabelListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5916150272362E8005604BF /* LabelListView.swift */; };
 		B591615327236D67005604BF /* TextCellContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B591615227236D67005604BF /* TextCellContentView.swift */; };
-		B59161562727AA33005604BF /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161552727AA33005604BF /* DetailViewController.swift */; };
 		B59161582727AA95005604BF /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59161572727AA95005604BF /* DetailViewModel.swift */; };
 		B59970852764293D00574607 /* NameDescribable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59970842764293D00574607 /* NameDescribable.swift */; };
 		B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */; };
@@ -124,7 +126,6 @@
 		B5FB0A4B26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A4A26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift */; };
 		B5FB0A4D26D5765000F65FA5 /* ProcessingListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A4C26D5765000F65FA5 /* ProcessingListViewController.swift */; };
 		B5FB0A5226D577C900F65FA5 /* ProcessingListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A5126D577C900F65FA5 /* ProcessingListCell.swift */; };
-		B5FB0A5426D5858600F65FA5 /* RecordingDetailEditDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */; };
 		BE64A20A272949A200DA1689 /* UseCaseListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A209272949A200DA1689 /* UseCaseListViewModel.swift */; };
 		BE64A212272A8C4000DA1689 /* PickerViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A20E272A8C4000DA1689 /* PickerViewCell.swift */; };
 		BE64A213272A8C4000DA1689 /* TextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE64A20F272A8C4000DA1689 /* TextFieldCell.swift */; };
@@ -166,6 +167,9 @@
 		B518049126ACBB0F0036F104 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		B5235ECB26C207CB0042106C /* InfoFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoFileWriter.swift; sourceTree = "<group>"; };
 		B535F7CA2795FCAD00A7E307 /* MainMenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainMenuViewModel.swift; sourceTree = "<group>"; };
+		B535F7CE27962D5000A7E307 /* TaskPlanDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskPlanDetailViewController.swift; sourceTree = "<group>"; };
+		B535F7D027962F9200A7E307 /* TaskPlanDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskPlanDetailViewModel.swift; sourceTree = "<group>"; };
+		B535F7D227962FA000A7E307 /* TaskPlanDetailEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskPlanDetailEditViewModel.swift; sourceTree = "<group>"; };
 		B536DA3C271F781200A9C3BB /* ReadjustingStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadjustingStackView.swift; sourceTree = "<group>"; };
 		B5380D0C26A20383003328D8 /* FaceLandmarksFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceLandmarksFileWriter.swift; sourceTree = "<group>"; };
 		B53CD4AF26B3585B003BBFD9 /* lensDistortionPointForPoint.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lensDistortionPointForPoint.m; sourceTree = "<group>"; };
@@ -241,7 +245,6 @@
 		B58F4D5F273A08600073B107 /* TitleSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleSupplementaryView.swift; sourceTree = "<group>"; };
 		B5916150272362E8005604BF /* LabelListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelListView.swift; sourceTree = "<group>"; };
 		B591615227236D67005604BF /* TextCellContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCellContentView.swift; sourceTree = "<group>"; };
-		B59161552727AA33005604BF /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		B59161572727AA95005604BF /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		B59970842764293D00574607 /* NameDescribable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameDescribable.swift; sourceTree = "<group>"; };
 		B5A7CE1E26A8D68B008C4900 /* AudioFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFileWriter.swift; sourceTree = "<group>"; };
@@ -278,7 +281,6 @@
 		B5FB0A4A26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailViewDataSource.swift; sourceTree = "<group>"; };
 		B5FB0A4C26D5765000F65FA5 /* ProcessingListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingListViewController.swift; sourceTree = "<group>"; };
 		B5FB0A5126D577C900F65FA5 /* ProcessingListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessingListCell.swift; sourceTree = "<group>"; };
-		B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingDetailEditDataSource.swift; sourceTree = "<group>"; };
 		BE64A209272949A200DA1689 /* UseCaseListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UseCaseListViewModel.swift; sourceTree = "<group>"; };
 		BE64A20E272A8C4000DA1689 /* PickerViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PickerViewCell.swift; sourceTree = "<group>"; };
 		BE64A20F272A8C4000DA1689 /* TextFieldCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldCell.swift; sourceTree = "<group>"; };
@@ -323,6 +325,26 @@
 				B5886DFB26AA5FB900EB344C /* Camera Preview Views */,
 			);
 			path = Camera;
+			sourceTree = "<group>";
+		};
+		B535F7CC279623D900A7E307 /* Task Planning */ = {
+			isa = PBXGroup;
+			children = (
+				B501607E27345670003AB94D /* TaskSplitViewController.swift */,
+				B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */,
+				B50160802734577A003AB94D /* TaskListViewModel.swift */,
+				B535F7CE27962D5000A7E307 /* TaskPlanDetailViewController.swift */,
+				B535F7D027962F9200A7E307 /* TaskPlanDetailViewModel.swift */,
+				B535F7D227962FA000A7E307 /* TaskPlanDetailEditViewModel.swift */,
+			);
+			path = "Task Planning";
+			sourceTree = "<group>";
+		};
+		B535F7CD2796287700A7E307 /* Experiment Planning */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = "Experiment Planning";
 			sourceTree = "<group>";
 		};
 		B54215BB26C31E9300A4F984 /* Use Case Selection */ = {
@@ -506,8 +528,10 @@
 				B591615427279630005604BF /* Details */,
 				B56F1A6126E03F9100A29C42 /* Main Menu */,
 				B54215BB26C31E9300A4F984 /* Use Case Selection */,
-				B5DF4B8826C4928D0045AE43 /* Recording */,
 				B5F447EF26EFFB3200528ACA /* Task Selection */,
+				B5DF4B8826C4928D0045AE43 /* Recording Detail */,
+				B535F7CC279623D900A7E307 /* Task Planning */,
+				B535F7CD2796287700A7E307 /* Experiment Planning */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -590,7 +614,6 @@
 		B591615427279630005604BF /* Details */ = {
 			isa = PBXGroup;
 			children = (
-				B59161552727AA33005604BF /* DetailViewController.swift */,
 				B59161572727AA95005604BF /* DetailViewModel.swift */,
 				BE64A20D272A8C4000DA1689 /* Cells and Views */,
 			);
@@ -668,14 +691,13 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		B5DF4B8826C4928D0045AE43 /* Recording */ = {
+		B5DF4B8826C4928D0045AE43 /* Recording Detail */ = {
 			isa = PBXGroup;
 			children = (
 				B5FB0A4826D44FBB00F65FA5 /* RecordingDetailViewController.swift */,
 				B5FB0A4A26D4548D00F65FA5 /* RecordingDetailViewDataSource.swift */,
-				B5FB0A5326D5858600F65FA5 /* RecordingDetailEditDataSource.swift */,
 			);
-			path = Recording;
+			path = "Recording Detail";
 			sourceTree = "<group>";
 		};
 		B5F447EA26EFF72400528ACA /* Lists */ = {
@@ -691,9 +713,6 @@
 		B5F447EF26EFFB3200528ACA /* Task Selection */ = {
 			isa = PBXGroup;
 			children = (
-				B501607E27345670003AB94D /* TaskSplitViewController.swift */,
-				B5F447F026EFFB6C00528ACA /* TaskListViewController.swift */,
-				B50160802734577A003AB94D /* TaskListViewModel.swift */,
 				B5016082273465F0003AB94D /* TaskDetailViewController.swift */,
 				B501608427346799003AB94D /* TaskDetailViewModel.swift */,
 				B5FB0A4C26D5765000F65FA5 /* ProcessingListViewController.swift */,
@@ -876,7 +895,6 @@
 				B575413F26B8E077004ED4E4 /* LandmarksTrackerProcessor.swift in Sources */,
 				B5796586269DED5F0070C294 /* CameraViewController.swift in Sources */,
 				B59161582727AA95005604BF /* DetailViewModel.swift in Sources */,
-				B5FB0A5426D5858600F65FA5 /* RecordingDetailEditDataSource.swift in Sources */,
 				B53E75F02755C0470084A532 /* LensDistortionCorrectionProcessor.swift in Sources */,
 				B56F2EA726AB654B00998C27 /* PointCloud.metal in Sources */,
 				B5E5E71F2759CB4A0074894D /* AudioLevelMeter.swift in Sources */,
@@ -888,7 +906,7 @@
 				B511F7DD2768522D00A7D2CA /* AboutViewController.swift in Sources */,
 				B53CD4B026B3585B003BBFD9 /* lensDistortionPointForPoint.m in Sources */,
 				B56F1A9626E0903100A29C42 /* OutputFileProvider.swift in Sources */,
-				B59161562727AA33005604BF /* DetailViewController.swift in Sources */,
+				B535F7D127962F9200A7E307 /* TaskPlanDetailViewModel.swift in Sources */,
 				BE64A217272A8C8700DA1689 /* ListTextCell.swift in Sources */,
 				B5D4E3FC26B2192000CB1241 /* PreviewMetalView.swift in Sources */,
 				B5796582269DED5F0070C294 /* AppDelegate.swift in Sources */,
@@ -941,6 +959,7 @@
 				B5886E0126AA7F8500EB344C /* Foundation+Extensions.swift in Sources */,
 				B58F4D5E2739DF6B0073B107 /* BackButton.swift in Sources */,
 				B5916151272362E8005604BF /* LabelListView.swift in Sources */,
+				B535F7D327962FA000A7E307 /* TaskPlanDetailEditViewModel.swift in Sources */,
 				B5886E0326AB249A00EB344C /* FileConfigurations.swift in Sources */,
 				B5D209A7271A2087005CEC9A /* ItemListCell.swift in Sources */,
 				B54215C226C3582C00A4F984 /* UseCaseDetailViewController.swift in Sources */,
@@ -972,6 +991,7 @@
 				B50160872735A4F9003AB94D /* ExpandableHeaderCell.swift in Sources */,
 				B5F0E6B22762F40E00FFF2FF /* Logger+Category.swift in Sources */,
 				B5A7CE1F26A8D68B008C4900 /* AudioFileWriter.swift in Sources */,
+				B535F7CF27962D5000A7E307 /* TaskPlanDetailViewController.swift in Sources */,
 				B55429AE27605D74000D3620 /* FileWriterError.swift in Sources */,
 				B511F7DF276852AC00A7D2CA /* AboutViewModel.swift in Sources */,
 			);

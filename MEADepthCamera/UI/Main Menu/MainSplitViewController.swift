@@ -78,38 +78,45 @@ class MainSplitViewController: UISplitViewController {
     
     // MARK: Task List
     
-    /// Shows the TaskListViewController when the user selects a Use Case to start recording for.
-    func transitionToTaskList(with useCase: UseCase) {
+    /// Shows the TaskListViewController when the user selects the "Tasks" item in the main menu.
+    func transitionToTaskList() {
+//        selectedItemID = nil
         let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
         guard let taskListVC = storyboard.instantiateViewController(withIdentifier: StoryboardID.taskListVC) as? TaskListViewController
         else { return }
-        taskListVC.configure(with: useCase)
         if isCollapsed {
             primaryNavigationController?.pushViewController(taskListVC, animated: true)
         } else {
             supplementaryNavigationController?.pushViewController(taskListVC, animated: true)
+            show(.secondary)
         }
     }
     
-    /// Shows the TaskDetailViewController for the Task that's selected in the list.
-    func showTaskDetail(_ task: Task, useCase: UseCase) {
+    /// Shows the TaskPlanDetailViewController for the Task that's selected in the list.
+    func showTaskPlanDetail(_ task: Task, isNew: Bool = false, addCompletion: AddCompletion? = nil) {
         guard let id = task.id, id != selectedItemID else { return }
         selectedItemID = id
         
-        if let taskDetailVC = secondaryNavigationController?.topViewController as? TaskDetailViewController {
-            taskDetailVC.configure(with: task, useCase: useCase)
+        if let taskDetailVC = secondaryNavigationController?.topViewController as? TaskPlanDetailViewController {
+            taskDetailVC.configure(with: task, isNew: isNew) {
+                addCompletion?()
+            }
         } else {
             let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
             guard let taskDetailVC = storyboard.instantiateViewController(
-                withIdentifier: StoryboardID.taskDetailVC) as? TaskDetailViewController
+                withIdentifier: StoryboardID.taskPlanDetailVC) as? TaskPlanDetailViewController
             else { fatalError() }
-            taskDetailVC.configure(with: task, useCase: useCase)
+            taskDetailVC.configure(with: task, isNew: isNew) {
+                addCompletion?()
+            }
+//            showDetailViewController(taskDetailVC, sender: nil)
             
             if isCollapsed {
                 primaryNavigationController?.pushViewController(taskDetailVC, animated: true)
             } else {
 //                showDetailViewController(taskDetailVC, sender: nil)
                 secondaryNavigationController?.pushViewController(taskDetailVC, animated: true)
+                show(.secondary)
             }
         }
     }

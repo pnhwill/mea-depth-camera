@@ -30,7 +30,7 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dAg-Gt-eaG" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1692" y="106"/>
+            <point key="canvasLocation" x="-1786" y="106"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="vIH-4Q-Nbk">
@@ -96,7 +96,7 @@
             <objects>
                 <collectionViewController id="kqc-Wg-YNO" customClass="UseCaseDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="coM-bn-zGm">
-                        <rect key="frame" x="0.0" y="0.0" width="458" height="1194"/>
+                        <rect key="frame" x="0.0" y="0.0" width="458.5" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="KV1-HY-o93">
@@ -187,7 +187,7 @@
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xCX-dU-cY8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2560" y="106"/>
+            <point key="canvasLocation" x="-2643" y="106"/>
         </scene>
         <!--Main Split View Controller-->
         <scene sceneID="zqH-yJ-rPL">
@@ -228,7 +228,7 @@
             <objects>
                 <collectionViewController id="6Ik-U3-KOW" customClass="ProcessingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="MJE-ZZ-m5A">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995"/>
+                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="ijB-MM-0CR">

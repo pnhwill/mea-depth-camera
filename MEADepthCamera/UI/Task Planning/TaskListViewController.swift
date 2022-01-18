@@ -10,13 +10,7 @@ import UIKit
 /// ListViewController subclass for the list of tasks associated with a single use case, which the user selects from to begin recording.
 class TaskListViewController: ListViewController {
     
-    private var useCase: UseCase? {
-        didSet {
-            if let useCase = useCase {
-                viewModel = TaskListViewModel(useCase: useCase)
-            }
-        }
-    }
+    @IBOutlet private weak var addButton: UIBarButtonItem!
     
     private var taskListViewModel: TaskListViewModel {
         self.viewModel as! TaskListViewModel
@@ -26,32 +20,29 @@ class TaskListViewController: ListViewController {
         self.splitViewController as! MainSplitViewController
     }
     
+    private var isSearching: Bool = false
+    private var isAdding: Bool = false {
+        didSet {
+            addButton.isEnabled = !isAdding
+            editButtonItem.isEnabled = !isAdding
+        }
+    }
+    
     deinit {
         print("TaskListViewController deinitialized.")
-    }
-    
-    func configure(with useCase: UseCase) {
-        self.useCase = useCase
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == SegueID.showProcessingListSegueIdentifier,
-           let destination = segue.destination as? UINavigationController,
-           let processingListViewController = destination.topViewController as? ProcessingListViewController {
-            guard let useCase = useCase else { return }
-            processingListViewController.configure(useCase: useCase)
-        }
     }
     
     // MARK: Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.setHidesBackButton(true, animated: false)
+        viewModel = TaskListViewModel()
+        configureNavigationItem()
         sectionsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.refreshListData()
-                self?.reloadHeaderData()
                 self?.selectItemIfNeeded()
             }
     }
@@ -59,16 +50,27 @@ class TaskListViewController: ListViewController {
     override func viewWillAppear(_ animated: Bool) {
         // Clear the collectionView selection when splitViewController is collapsed.
         clearsSelectionOnViewWillAppear = mainSplitViewController.isCollapsed
-        navigationItem.setHidesBackButton(!mainSplitViewController.isCollapsed, animated: false)
-        if mainSplitViewController.isCollapsed {
-            mainSplitViewController.selectedItemID = nil
-        }
+//        navigationItem.setHidesBackButton(!mainSplitViewController.isCollapsed, animated: false)
+//        if mainSplitViewController.isCollapsed {
+//            mainSplitViewController.selectedItemID = nil
+//        }
         super.viewWillAppear(animated)
-        taskListViewModel.reloadStores()
+//        taskListViewModel.reloadStores()
+        selectItemIfNeeded()
     }
 }
 
 extension TaskListViewController {
+    
+    private func configureNavigationItem() {
+        navigationItem.setRightBarButton(editButtonItem, animated: false)
+        let searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = viewModel as? UISearchResultsUpdating
+        searchController.obscuresBackgroundDuringPresentation = false
+        navigationItem.searchController = searchController
+        navigationItem.searchController?.searchResultsUpdater = taskListViewModel
+        navigationItem.searchController?.delegate = self
+    }
     
     private func selectItemIfNeeded() {
         guard !mainSplitViewController.isCollapsed else { return }
@@ -80,10 +82,30 @@ extension TaskListViewController {
             // Select and show detail for the first list item (we have 2 headers, so first item is at index 2).
             let indexPath = IndexPath(item: 2, section: ListSection.Identifier.list.rawValue)
             if let itemID = dataSource?.itemIdentifier(for: indexPath),
-               let task = taskListViewModel.task(with: itemID),
-               let useCase = useCase {
+               let task = taskListViewModel.task(with: itemID) {
                 collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
-                mainSplitViewController.showTaskDetail(task, useCase: useCase)
+                mainSplitViewController.showTaskPlanDetail(task)
+            }
+        }
+    }
+    
+    private func addTask() {
+        taskListViewModel.add { [weak self] task in
+            self?.isAdding = true
+            self?.mainSplitViewController.showTaskPlanDetail(task) {
+                self?.isAdding = false
+            }
+        }
+    }
+}
+
+// MARK: ListTextCellDelegate
+extension TaskListViewController: ListTextCellDelegate {
+    
+    func delete(objectFor item: ListItem) {
+        taskListViewModel.delete(item.id) { [weak self] success in
+            if success {
+                self?.refreshListData() // maybe redundant?
             }
         }
     }
@@ -95,11 +117,19 @@ extension TaskListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Push the detail view when the cell is tapped.
         if let itemID = dataSource?.itemIdentifier(for: indexPath),
-           let task = taskListViewModel.task(with: itemID),
-           let useCase = useCase {
-            mainSplitViewController.showTaskDetail(task, useCase: useCase)
+           let task = taskListViewModel.task(with: itemID) {
+            mainSplitViewController.showTaskPlanDetail(task)
         } else {
             collectionView.deselectItem(at: indexPath, animated: true)
         }
+    }
+}
+// MARK: UISearchControllerDelegate
+extension TaskListViewController: UISearchControllerDelegate {
+    func willPresentSearchController(_ searchController: UISearchController) {
+        isSearching = true
+    }
+    func didDismissSearchController(_ searchController: UISearchController) {
+        isSearching = false
     }
 }

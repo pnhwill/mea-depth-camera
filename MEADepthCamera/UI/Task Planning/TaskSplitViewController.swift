@@ -17,7 +17,7 @@ class TaskSplitViewController: UISplitViewController {
                   let taskListNavController = viewController(for: columnForTaskList) as? UINavigationController,
                   let taskListVC = taskListNavController.topViewController as? TaskListViewController
             else { return }
-            taskListVC.configure(with: useCase)
+//            taskListVC.configure(with: useCase)
         }
     }
     

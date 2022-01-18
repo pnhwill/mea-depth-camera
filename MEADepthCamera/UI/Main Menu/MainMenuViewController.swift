@@ -128,6 +128,8 @@ extension MainMenuViewController {
         switch MainMenuViewModel.StandardItem(rawValue: item.title) {
         case .useCases:
             mainSplitViewController?.transitionToUseCaseList()
+        case .tasks:
+            mainSplitViewController?.transitionToTaskList()
         case .about:
             let storyboard = UIStoryboard(name: StoryboardName.main, bundle: nil)
             let aboutViewController = storyboard.instantiateViewController(withIdentifier: StoryboardID.aboutViewController)

@@ -7,64 +7,6 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Navigation Controller-->
-        <scene sceneID="K1J-GU-yo9">
-            <objects>
-                <navigationController toolbarHidden="NO" id="bxV-eo-Xuc" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="6wN-3B-NDy">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="56"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="eCM-EZ-xl1">
-                        <rect key="frame" x="0.0" y="945.5" width="704" height="50"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </toolbar>
-                    <connections>
-                        <segue destination="ulQ-Ml-GYW" kind="relationship" relationship="rootViewController" id="lyX-tM-Ugc"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="cf1-Oz-gJP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="3914" y="145"/>
-        </scene>
-        <!--Processing List View Controller-->
-        <scene sceneID="6W3-jW-ifC">
-            <objects>
-                <collectionViewController id="ulQ-Ml-GYW" customClass="ProcessingListViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="e75-pc-JZE">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="Qrj-zp-bpb">
-                            <size key="itemSize" width="128" height="128"/>
-                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
-                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
-                            <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                        </collectionViewFlowLayout>
-                        <cells/>
-                        <connections>
-                            <outlet property="dataSource" destination="ulQ-Ml-GYW" id="UNH-lD-Z1h"/>
-                            <outlet property="delegate" destination="ulQ-Ml-GYW" id="9NM-SH-Igz"/>
-                        </connections>
-                    </collectionView>
-                    <toolbarItems>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="itP-Cv-Khz"/>
-                        <barButtonItem title="Start Processing" id="t3N-IA-KOk">
-                            <connections>
-                                <action selector="handleStartStopButton:" destination="ulQ-Ml-GYW" id="Xxi-82-vEM"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Xy5-Iz-kLR"/>
-                    </toolbarItems>
-                    <navigationItem key="navigationItem" id="nDd-lx-EQ8"/>
-                    <connections>
-                        <outlet property="startStopButton" destination="t3N-IA-KOk" id="qVn-6g-R7Q"/>
-                    </connections>
-                </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="1x2-lD-UcS" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4667" y="145"/>
-        </scene>
         <!--Task List View Controller-->
         <scene sceneID="OQA-DE-aJu">
             <objects>
@@ -86,28 +28,28 @@
                         </connections>
                     </collectionView>
                     <toolbarItems>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="EzU-cg-qkT"/>
-                        <barButtonItem title="Process" style="done" id="6Ox-9G-Qeo">
-                            <connections>
-                                <segue destination="bxV-eo-Xuc" kind="presentation" identifier="ShowProcessingListSegue" id="gWn-bI-pkL"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Hqn-7f-iF0"/>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="iEt-Ja-Ii4"/>
+                        <barButtonItem systemItem="add" id="Bsw-HY-yBK"/>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="LTc-A9-SKQ"/>
                     </toolbarItems>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="addButton" destination="Bsw-HY-yBK" id="et6-G3-RmR"/>
+                    </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="kK7-mw-S8q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3044" y="145"/>
+            <point key="canvasLocation" x="3650" y="206"/>
         </scene>
-        <!--Task Detail View Controller-->
-        <scene sceneID="YVS-xc-bCK">
+        <!--Task Plan Detail View Controller-->
+        <scene sceneID="mhp-FJ-ekB">
             <objects>
-                <collectionViewController storyboardIdentifier="TaskDetailVC" id="BZ3-R2-1cM" customClass="TaskDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
-                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="xgg-l6-uhK">
+                <collectionViewController storyboardIdentifier="TaskPlanDetailVC" id="GtN-ai-jKK" customClass="TaskPlanDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="pus-i1-B4v">
                         <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="sKz-0H-gP0">
+                        <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="xkc-sF-cAE">
                             <size key="itemSize" width="128" height="128"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
                             <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -115,14 +57,14 @@
                         </collectionViewFlowLayout>
                         <cells/>
                         <connections>
-                            <outlet property="dataSource" destination="BZ3-R2-1cM" id="PTK-1a-1m4"/>
-                            <outlet property="delegate" destination="BZ3-R2-1cM" id="efP-vE-Up2"/>
+                            <outlet property="dataSource" destination="GtN-ai-jKK" id="GkA-TZ-4t7"/>
+                            <outlet property="delegate" destination="GtN-ai-jKK" id="Hkf-16-SJs"/>
                         </connections>
                     </collectionView>
                 </collectionViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="YYK-5H-xWv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="du0-hi-UWb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3044" y="910"/>
+            <point key="canvasLocation" x="3650" y="917"/>
         </scene>
     </scenes>
     <resources>

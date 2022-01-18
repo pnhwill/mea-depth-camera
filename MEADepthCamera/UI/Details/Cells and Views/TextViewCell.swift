@@ -47,7 +47,7 @@ extension TextViewCell {
             textView.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
             textView.topAnchor.constraint(equalTo: contentView.layoutMarginsGuide.topAnchor),
             textView.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor),
-//            textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 194)
+            textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 194)
         ])
     }
     private func configureTextView() {

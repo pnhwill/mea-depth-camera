@@ -27,7 +27,7 @@ class MainMenuViewModel {
         private var standardItems: [StandardItem] {
             switch self {
             case .main:
-                return [.useCases]
+                return [.useCases, .tasks]
             case .info:
                 return [.about]
             }
@@ -47,6 +47,7 @@ class MainMenuViewModel {
     
     enum StandardItem: String {
         case useCases = "Use Cases"
+        case tasks = "Tasks"
         case about = "About"
         
         var item: Item {

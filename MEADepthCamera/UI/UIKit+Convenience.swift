@@ -21,7 +21,7 @@ extension UIViewController {
         static let cameraNavController = "CameraNavigationController"
         static let cameraViewController = "CameraViewController"
         static let taskListVC = "TaskListVC"
-        static let taskDetailVC = "TaskDetailVC"
+        static let taskPlanDetailVC = "TaskPlanDetailVC"
     }
     
     enum SegueID {

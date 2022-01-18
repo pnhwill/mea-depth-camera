@@ -14,10 +14,12 @@ import Foundation
 extension NSNotification.Name {
     static let useCaseDidChange = Notification.Name(Bundle.main.reverseDNS("useCaseDidChange"))
     static let recordingDidChange = Notification.Name(Bundle.main.reverseDNS("recordingDidChange"))
+    static let taskDidChange = Notification.Name(Bundle.main.reverseDNS("taskDidChange"))
 }
 
 /// Custom keys to use with userInfo dictionaries.
 enum NotificationKeys: String {
     case useCaseId
     case recordingId
+    case taskId
 }

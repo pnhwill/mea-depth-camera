@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-/// ListViewController subclass that displays all of the user's Use Cases.
+/// ListViewController subclass that displays all of the user's Tasks.
 class UseCaseListViewController: ListViewController {
     
     @IBOutlet private weak var addButton: UIBarButtonItem!
@@ -89,10 +89,6 @@ class UseCaseListViewController: ListViewController {
 //            mainSplitViewController.selectedItemID = nil
 //        }
         selectItemIfNeeded()
-//        if let navigationController = navigationController,
-//           navigationController.isToolbarHidden {
-//            navigationController.setToolbarHidden(false, animated: animated)
-//        }
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
