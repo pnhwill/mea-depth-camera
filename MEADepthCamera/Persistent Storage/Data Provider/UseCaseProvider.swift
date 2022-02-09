@@ -41,7 +41,7 @@ class UseCaseProvider: FetchingDataProvider {
         self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
     
-    func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
+    func add(in context: NSManagedObjectContext, shouldSave: Bool = false, completionHandler: AddAction? = nil) {
         context.perform {
             let useCase = UseCase(context: context)
             useCase.title = "New Use Case"

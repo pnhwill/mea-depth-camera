@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 /// ListViewController subclass for the list of tasks associated with a single use case, which the user selects from to begin recording.
 class TaskListViewController: ListViewController {
@@ -20,6 +21,8 @@ class TaskListViewController: ListViewController {
         self.splitViewController as! MainSplitViewController
     }
     
+    private var taskDidChangeSubscriber: Cancellable?
+    
     private var isSearching: Bool = false
     private var isAdding: Bool = false {
         didSet {
@@ -27,6 +30,11 @@ class TaskListViewController: ListViewController {
             editButtonItem.isEnabled = !isAdding
         }
     }
+    
+//    required init?(coder: NSCoder) {
+//        super.init(coder: coder)
+//        viewModel = TaskListViewModel()
+//    }
     
     deinit {
         print("TaskListViewController deinitialized.")
@@ -45,6 +53,15 @@ class TaskListViewController: ListViewController {
                 self?.refreshListData()
                 self?.selectItemIfNeeded()
             }
+        taskDidChangeSubscriber = NotificationCenter.default
+            .publisher(for: .taskDidChange)
+            .receive(on: RunLoop.main)
+            .map { $0.userInfo?[NotificationKeys.taskId] }
+            .sink { [weak self] id in
+                guard let taskId = id as? UUID else { return }
+                self?.reconfigureItem(taskId)
+                self?.selectItemIfNeeded()
+            }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -57,6 +74,20 @@ class TaskListViewController: ListViewController {
         super.viewWillAppear(animated)
 //        taskListViewModel.reloadStores()
         selectItemIfNeeded()
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        taskListViewModel.setDeleteMode(editing)
+        collectionView.isEditing = isEditing
+        refreshListData()
+        if !editing {
+            selectItemIfNeeded()
+        }
+    }
+    
+    @IBAction func addButtonTapped(_ sender: UIBarButtonItem) {
+        addTask()
     }
 }
 
@@ -92,7 +123,7 @@ extension TaskListViewController {
     private func addTask() {
         taskListViewModel.add { [weak self] task in
             self?.isAdding = true
-            self?.mainSplitViewController.showTaskPlanDetail(task) {
+            self?.mainSplitViewController.showTaskPlanDetail(task, isNew: true) {
                 self?.isAdding = false
             }
         }
@@ -115,6 +146,10 @@ extension TaskListViewController: ListTextCellDelegate {
 extension TaskListViewController {
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard !isAdding else {
+            selectItemIfNeeded()
+            return
+        }
         // Push the detail view when the cell is tapped.
         if let itemID = dataSource?.itemIdentifier(for: indexPath),
            let task = taskListViewModel.task(with: itemID) {

@@ -42,9 +42,33 @@ class TaskPlanDetailEditViewModel: NSObject, DetailViewModel {
     private var task: Task
     private var isNew: Bool
     
+    private lazy var dataProvider: TaskProvider = {
+        let container = AppDelegate.shared.coreDataStack.persistentContainer
+        let provider = TaskProvider(with: container, fetchedResultsControllerDelegate: nil)
+        return provider
+    }()
+    
     init(task: Task, isNew: Bool) {
         self.task = task
         self.isNew = isNew
+    }
+    
+    func save(completion: ((Bool) -> Void)? = nil) {
+        let context = task.managedObjectContext
+        let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addTask : .updateTask
+        dataProvider.persistentContainer.saveContext(backgroundContext: context, with: contextSaveInfo) { success in
+            completion?(success)
+        }
+    }
+    
+    func checkValidTask() -> Bool {
+        if let name = task.name,
+           let fileNameLabel = task.fileNameLabel,
+           let instructions = task.instructions {
+            let isValid = !name.isEmpty && !fileNameLabel.isEmpty && !instructions.isEmpty
+            return isValid
+        }
+        return false
     }
     
     // MARK: Configure Collection View

@@ -16,15 +16,19 @@ class PersistentContainer: NSPersistentContainer {
     // MARK: Core Data Saving support
     
     /// Save a context, or handle the save error (for example, when there data inconsistency or low memory).
-    func saveContext(backgroundContext: NSManagedObjectContext? = nil, with contextualInfo: ContextSaveContextualInfo? = nil) {
+    func saveContext(backgroundContext: NSManagedObjectContext? = nil,
+                     with contextualInfo: ContextSaveContextualInfo? = nil,
+                     completion: ((Bool) -> Void)? = nil) {
         let context = backgroundContext ?? viewContext
         guard context.hasChanges else { return }
         do {
             try context.save()
         } catch {
             handleSavingError(error, contextualInfo: contextualInfo)
+            completion?(false)
             return
         }
+        completion?(true)
         logger.info("Successfully saved the NSManagedObjectContext to the store.")
     }
     

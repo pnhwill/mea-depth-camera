@@ -29,7 +29,11 @@
                     </collectionView>
                     <toolbarItems>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="iEt-Ja-Ii4"/>
-                        <barButtonItem systemItem="add" id="Bsw-HY-yBK"/>
+                        <barButtonItem systemItem="add" id="Bsw-HY-yBK">
+                            <connections>
+                                <action selector="addButtonTapped:" destination="yBd-9k-eGR" id="wJt-b5-aIc"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="LTc-A9-SKQ"/>
                     </toolbarItems>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>

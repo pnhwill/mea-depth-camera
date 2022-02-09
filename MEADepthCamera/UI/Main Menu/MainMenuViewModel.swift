@@ -12,7 +12,7 @@ class MainMenuViewModel {
     
     // MARK: Section
     
-    enum Section: Int, CaseIterable {
+    enum Section: CaseIterable {
         case main
         case info
         

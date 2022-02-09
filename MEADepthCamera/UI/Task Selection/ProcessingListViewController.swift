@@ -70,7 +70,7 @@ class ProcessingListViewController: UICollectionViewController {
         
         listItemsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] a in
                 self?.refreshListData(isInitialSnapshot: false)
             }
         recordingDidChangeSubscriber = NotificationCenter.default

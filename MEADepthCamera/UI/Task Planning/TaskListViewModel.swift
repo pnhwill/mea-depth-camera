@@ -11,6 +11,19 @@ import CoreData
 /// A ListViewModel for the TaskListViewController.
 class TaskListViewModel: NSObject, ListViewModel {
     
+    private enum Filter {
+        case all, customOnly
+        
+        func shouldInclude(_ task: Task) -> Bool {
+            switch self {
+            case .customOnly:
+                return !task.isDefault
+            case .all:
+                return true
+            }
+        }
+    }
+    
     // MARK: TaskHeaders
     private struct TaskHeaders {
         enum HeaderType: Int, CaseIterable {
@@ -72,10 +85,12 @@ class TaskListViewModel: NSObject, ListViewModel {
         }
         
         static func taskItem(_ task: Task) -> ListItem? {
-            guard let id = task.id, let titleText = task.name else { return nil }
-            return ListItem(id: id, title: titleText)
+            guard let id = task.id, let titleText = task.name, let bodyText = task.fileNameLabel else { return nil }
+            return ListItem(id: id, title: titleText, bodyText: [bodyText])
         }
     }
+    
+    private var filter: Filter = .all
     
     // MARK: Model Stores
     lazy var sectionsStore: ObservableModelStore<Section>? = {
@@ -95,6 +110,15 @@ class TaskListViewModel: NSObject, ListViewModel {
     
     private var tasks: [Task]? {
         return dataProvider.fetchedResultsController.fetchedObjects
+    }
+    
+    private var filteredTasks: [Task]? {
+        tasks?.filter { filter.shouldInclude($0) }
+    }
+    
+    func setDeleteMode(_ isDeleting: Bool) {
+        filter = isDeleting ? .customOnly : .all
+        reloadStores()
     }
     
     func task(with id: UUID) -> Task? {
@@ -124,14 +148,26 @@ extension TaskListViewModel {
         sectionsStore?.merge(newModels: [section])
     }
     
-    private func addToListStores(_ task: Task) {
-        guard let id = task.id,
-              let item = TaskItems.taskItem(task),
-              var listSection = sectionsStore?.fetchByID(.list)
-        else { return }
-        listSection.items?.append(id)
-        itemsStore?.merge(newModels: [item])
-        sectionsStore?.merge(newModels: [listSection])
+    private func addToListStores(_ newTask: Task) {
+//        guard let id = task.id,
+//              let item = TaskItems.taskItem(task),
+//              var listSection = sectionsStore?.fetchByID(.list),
+//              var taskItems = taskItems()
+//        else { return }
+//        listSection.items?.append(id)
+//        taskItems.append(item)
+//        itemsStore?.merge(newModels: [item])
+//
+//        sectionsStore?.merge(newModels: [listSection])
+        guard var tasks = tasks else { return }
+        tasks.append(newTask)
+        let taskItems = TaskItems(tasks: tasks)
+        let headerTypes = TaskHeaders.HeaderType.allCases
+        let headerItems = headerTypes.map { ListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
+        let headerIds = headerTypes.map { $0.id }
+        let section = ListSection(id: .list, items: headerIds)
+        itemsStore?.merge(newModels: headerItems)
+        sectionsStore?.merge(newModels: [section])
     }
     
     private func reconfigureItem(_ task: Task) {
@@ -147,7 +183,7 @@ extension TaskListViewModel {
     }
     
     private func taskItems() -> [ListItem]? {
-        guard let allTasks = tasks else { return nil }
+        guard let allTasks = filteredTasks else { return nil }
         let taskItems = TaskItems(tasks: allTasks)
         let headerTypes = TaskHeaders.HeaderType.allCases
         let headerItems = headerTypes.map { ListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
@@ -155,9 +191,11 @@ extension TaskListViewModel {
     }
     
     private func taskListSection() -> ListSection? {
-        guard let allTasks = tasks else { return nil }
+        guard let allTasks = filteredTasks else { return nil }
         let taskItems = TaskItems(tasks: allTasks)
-        let listItemsIds = TaskHeaders.HeaderType.allCases.filter { $0.shouldIncludeHeader(for: taskItems) }.map { $0.id }
+        let listItemsIds = TaskHeaders.HeaderType.allCases
+            .filter { $0.shouldIncludeHeader(for: taskItems) }
+            .map { $0.id }
         return ListSection(id: .list, items: listItemsIds)
     }
 }
@@ -173,6 +211,7 @@ extension TaskListViewModel: NSFetchedResultsControllerDelegate {
      - update: reconfigure the item, make it visible, and select it.
      */
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        debugPrint("fsekrugieufvh")
         guard let task = anObject as? Task,
               let id = task.id
         else { return }

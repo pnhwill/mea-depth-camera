@@ -51,10 +51,11 @@ class TaskProvider: FetchingDataProvider {
         self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
     
-    func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?) {
+    func add(in context: NSManagedObjectContext, shouldSave: Bool = false, completionHandler: AddAction?) {
         context.perform {
             let task = Task(context: context)
             task.id = UUID()
+            task.name = "New Task"
             if shouldSave {
                 self.persistentContainer.saveContext(backgroundContext: context, with: .addTask)
             }
@@ -73,6 +74,18 @@ class TaskProvider: FetchingDataProvider {
             }
         } else {
             completionHandler?(false)
+        }
+    }
+    
+    func copy(_ task: Task, completionHandler: AddAction?) {
+//        let context = persistentContainer.newBackgroundContext()
+        let context = task.managedObjectContext ?? persistentContainer.viewContext
+        add(in: context) { newTask in
+            newTask.name = task.name
+            newTask.fileNameLabel = task.fileNameLabel
+            newTask.instructions = task.name
+            newTask.modality = task.modality
+            completionHandler?(newTask)
         }
     }
     

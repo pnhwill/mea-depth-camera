@@ -88,7 +88,7 @@ class MainSplitViewController: UISplitViewController {
             primaryNavigationController?.pushViewController(taskListVC, animated: true)
         } else {
             supplementaryNavigationController?.pushViewController(taskListVC, animated: true)
-            show(.secondary)
+//            show(.secondary)
         }
     }
     

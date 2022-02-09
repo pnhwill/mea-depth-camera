@@ -156,6 +156,7 @@ extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
      - update: reconfigure the item, make it visible, and select it.
      */
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+        print(#function)
         guard let useCase = anObject as? UseCase,
               let id = useCase.id
         else { return }
@@ -163,6 +164,7 @@ extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
         case .insert:
             addToListStores(useCase)
         case .delete:
+            print("DELETE")
             deleteFromListStores(id)
         case .move:
             reloadListStores()

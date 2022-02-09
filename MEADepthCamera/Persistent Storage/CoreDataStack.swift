@@ -54,7 +54,8 @@ class CoreDataStack: ObservableObject {
         // Set viewContext properties
         container.viewContext.name = "viewContext"
         container.viewContext.automaticallyMergesChangesFromParent = true
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+//        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+//        container.viewContext.mergePolicy = NSRollbackMergePolicy
         
         // Pin the viewContext to the current generation token and set it to keep itself up to date with local changes.
         do {

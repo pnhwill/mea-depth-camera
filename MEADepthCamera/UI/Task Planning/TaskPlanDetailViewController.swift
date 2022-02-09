@@ -28,6 +28,7 @@ class TaskPlanDetailViewController: UICollectionViewController {
     }
     
     func configure(with task: Task, isNew: Bool = false, addCompletion: AddCompletion? = nil) {
+//        saveIfNeeded()
         self.task = task
         self.isNew = isNew
         self.addCompletion = addCompletion
@@ -38,6 +39,7 @@ class TaskPlanDetailViewController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         navigationItem.setRightBarButton(editButtonItem, animated: false)
         navigationItem.setHidesBackButton(true, animated: false)
         
@@ -49,11 +51,14 @@ class TaskPlanDetailViewController: UICollectionViewController {
                 guard let taskId = self?.task?.id,
                       taskId == id as? UUID
                 else { return }
-                self?.checkValidTask()
+                if let editViewModel = self?.viewModel as? TaskPlanDetailEditViewModel {
+                    self?.editButtonItem.isEnabled = editViewModel.checkValidTask()
+                }
             }
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
 //        if let navigationController = navigationController,
 //           !navigationController.isToolbarHidden {
 //            navigationController.setToolbarHidden(true, animated: animated)
@@ -91,17 +96,12 @@ extension TaskPlanDetailViewController {
         // Resign the first responder
         view.endEditing(true)
         // Save the task to persistent storage if needed
-        if task.hasChanges {
-            let container = AppDelegate.shared.coreDataStack.persistentContainer
-            let context = task.managedObjectContext
-            let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addTask : .updateTask
-            container.saveContext(backgroundContext: context, with: contextSaveInfo)
-        }
+        saveIfNeeded()
         isNew = false
         viewModel = TaskPlanDetailViewModel(task: task)
         navigationItem.title = NSLocalizedString("View Task", comment: "view task nav title")
         navigationItem.leftBarButtonItem = nil
-        editButtonItem.isEnabled = true
+        editButtonItem.isEnabled = !task.isDefault
         addCompletion?()
     }
     
@@ -112,10 +112,13 @@ extension TaskPlanDetailViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTrigger))
     }
     
-    private func checkValidTask() {
-        if let name = task?.name, let fileNameLabel = task?.fileNameLabel, let instructions = task?.instructions {
-            let isValid = !name.isEmpty && !fileNameLabel.isEmpty && !instructions.isEmpty
-            self.editButtonItem.isEnabled = isValid
+    private func saveIfNeeded() {
+        if let task = task, task.hasChanges, let editViewModel = viewModel as? TaskPlanDetailEditViewModel {
+            editViewModel.save() { success in
+                if !success {
+                    task.managedObjectContext?.rollback()
+                }
+            }
         }
     }
 }

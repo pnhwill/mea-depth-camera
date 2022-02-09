@@ -33,9 +33,9 @@
         <relationship name="useCase" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="UseCase" inverseName="recordings" inverseEntity="UseCase"/>
     </entity>
     <entity name="Task" representedClassName="Task" syncable="YES" codeGenerationType="category">
-        <attribute name="fileNameLabel" optional="YES" attributeType="String"/>
+        <attribute name="fileNameLabel" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="instructions" optional="YES" attributeType="String"/>
+        <attribute name="instructions" attributeType="String"/>
         <attribute name="isDefault" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
         <attribute name="modality" optional="YES" attributeType="String"/>
         <attribute name="name" attributeType="String"/>
