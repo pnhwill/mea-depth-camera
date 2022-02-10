@@ -8,7 +8,7 @@
 import UIKit
 
 /// ItemListCell subclass for expandable outline headers.
-class ExpandableHeaderCell: ItemListCell<ListItem> {
+class ExpandableHeaderCell: ItemListCell<OldListItem> {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -20,7 +20,7 @@ class ExpandableHeaderCell: ItemListCell<ListItem> {
     }
     
     override func updateConfiguration(using state: UICellConfigurationState) {
-        guard let item = state.item as? ListItem else { return }
+        guard let item = state.item as? OldListItem else { return }
         var content = defaultListContentConfiguration().updated(for: state)
         content.text = item.title
         contentConfiguration = content

@@ -18,7 +18,7 @@ class TaskDetailViewController: UICollectionViewController {
     }
     
     private var viewModel: TaskDetailViewModel?
-    private var dataSource: UICollectionViewDiffableDataSource<Section.ID, ListItem.ID>?
+    private var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
     private var useCase: UseCase?
     private var task: Task?
     
@@ -106,7 +106,7 @@ extension TaskDetailViewController {
         let recordingCellRegistration = createRecordingCellRegistration()
         let recordingHeaderRegistration = createRecordingHeaderRegistration()
         
-        dataSource = UICollectionViewDiffableDataSource<Section.ID, ListItem.ID>(collectionView: collectionView) {
+        dataSource = UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>(collectionView: collectionView) {
             (collectionView, indexPath, itemID) -> UICollectionViewCell? in
             guard let section = Section.ID(rawValue: indexPath.section) else { return nil }
             
@@ -133,14 +133,14 @@ extension TaskDetailViewController {
     private func applyInitialSnapshot() {
         // Set the order for our sections
         let sections = Section.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, ListItem.ID>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, OldListItem.ID>()
         snapshot.appendSections(sections)
         dataSource?.apply(snapshot, animatingDifferences: false)
         
         // Set section snapshots for each section
         for section in sections {
             guard let items = viewModel?.sectionsStore?.fetchByID(section)?.items else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<ListItem.ID>()
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<OldListItem.ID>()
             sectionSnapshot.append(items)
             dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: false)
         }
@@ -150,8 +150,8 @@ extension TaskDetailViewController {
 // MARK: Cell Registration
 extension TaskDetailViewController {
     
-    private func createInfoCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, ListItem.ID> {
-        return UICollectionView.CellRegistration<UICollectionViewListCell, ListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createInfoCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             var content = indexPath.item == 0 ? UIListContentConfiguration.extraProminentInsetGroupedHeader() : cell.defaultContentConfiguration()
             content.text = item.title
@@ -172,8 +172,8 @@ extension TaskDetailViewController {
         }
     }
     
-    private func createRecordingCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, ListItem.ID> {
-        return UICollectionView.CellRegistration<ListTextCell, ListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createRecordingCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, OldListItem.ID> {
+        return UICollectionView.CellRegistration<OldListTextCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }

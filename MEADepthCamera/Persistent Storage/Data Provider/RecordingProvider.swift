@@ -9,7 +9,7 @@ import CoreData
 import OSLog
 
 /// A class to wrap everything related to creating and deleting recordings.
-class RecordingProvider: DataProvider {
+class RecordingProvider: OldDataProvider {
     
     typealias Object = Recording
     

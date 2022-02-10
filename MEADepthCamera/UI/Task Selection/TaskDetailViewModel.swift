@@ -19,7 +19,7 @@ class TaskDetailViewModel {
         }
         
         var id: Identifier
-        var items: [ListItem.ID]
+        var items: [OldListItem.ID]
     }
     
     // MARK: Info Items
@@ -83,8 +83,8 @@ class TaskDetailViewModel {
             self.filesCountText = recording.filesCountText
         }
         
-        var listItem: ListItem {
-            ListItem(id: id, title: name, subTitle: isProcessedText, bodyText: [durationText, filesCountText])
+        var listItem: OldListItem {
+            OldListItem(id: id, title: name, subTitle: isProcessedText, bodyText: [durationText, filesCountText])
         }
     }
     
@@ -94,7 +94,7 @@ class TaskDetailViewModel {
         let recordingsSection = Section(id: .recordings, items: recordingItemIds ?? [])
         return ObservableModelStore([infoSection, recordingsSection])
     }()
-    lazy var itemsStore: ObservableModelStore<ListItem>? = {
+    lazy var itemsStore: ObservableModelStore<OldListItem>? = {
         let items = [infoItems, recordingItems].compactMap { $0 }.flatMap { $0 }
         return ObservableModelStore(items)
     }()
@@ -108,10 +108,10 @@ class TaskDetailViewModel {
     private var sortedRecordings: [Recording]? {
         recordings?.sorted { $0.name! < $1.name! }
     }
-    private var infoItems: [ListItem] {
-        InfoItems.ItemType.allCases.map { ListItem(id: $0.id, title: $0.displayText(for: task) ?? "?") }
+    private var infoItems: [OldListItem] {
+        InfoItems.ItemType.allCases.map { OldListItem(id: $0.id, title: $0.displayText(for: task) ?? "?") }
     }
-    private var recordingItems: [ListItem]? {
+    private var recordingItems: [OldListItem]? {
         sortedRecordings?.compactMap { RecordingItem($0)?.listItem }
     }
     private var infoItemIds: [UUID] {

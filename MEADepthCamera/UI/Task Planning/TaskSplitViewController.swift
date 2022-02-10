@@ -9,7 +9,7 @@ import UIKit
 
 class TaskSplitViewController: UISplitViewController {
     
-    var selectedItemID: ListItem.ID?
+    var selectedItemID: OldListItem.ID?
     
     private var useCase: UseCase? {
         didSet {

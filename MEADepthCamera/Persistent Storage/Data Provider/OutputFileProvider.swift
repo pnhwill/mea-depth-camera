@@ -8,7 +8,7 @@
 import CoreData
 
 /// A class to wrap everything related to creating, and deleting output files, and saving and deleting file data.
-class OutputFileProvider: DataProvider {
+class OutputFileProvider: OldDataProvider {
     
     typealias Object = OutputFile
     

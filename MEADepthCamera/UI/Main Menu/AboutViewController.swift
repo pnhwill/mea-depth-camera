@@ -7,8 +7,8 @@
 
 import UIKit
 
-/// ListViewController subclass for the app's "About" view.
-class AboutViewController: ListViewController {
+/// OldListViewController subclass for the app's "About" view.
+class AboutViewController: OldListViewController {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)

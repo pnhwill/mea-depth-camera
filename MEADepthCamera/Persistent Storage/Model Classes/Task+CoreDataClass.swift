@@ -32,7 +32,25 @@ public class Task: NSManagedObject {
         id = newID
     }
     
+    public override func awakeFromInsert() {
+        id = UUID()
+        name = "New Task"
+    }
 }
+
+extension Task: Searchable {
+    static var searchPredicate: String = "\(Schema.Task.name.rawValue) CONTAINS[cd] %@"
+}
+
+extension Task {
+    enum SectionName: String {
+        case all = ""
+        case custom = "Custom Tasks"
+        case standard = "Default Tasks"
+    }
+}
+
+extension Task: ListObject {}
 
 // MARK: Text Formatters
 extension Task {

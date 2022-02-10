@@ -26,7 +26,25 @@ public class UseCase: NSManagedObject {
         let recordings = recordings as! Set<Recording>
         return recordings.reduce(0) { $0 + ($1.task == task ? 1 : 0) }
     }
+    
+    public override func awakeFromInsert() {
+        id = UUID()
+        date = Date()
+        title = "New Use Case"
+    }
 }
+
+extension UseCase: Searchable {
+    static var searchPredicate: String = "\(Schema.UseCase.title.rawValue) CONTAINS[cd] %@"
+}
+
+extension UseCase {
+    enum SectionName: String {
+        case all = ""
+    }
+}
+
+extension UseCase: ListObject {}
 
 // MARK: Text Formatters
 extension UseCase {
@@ -64,7 +82,7 @@ extension UseCase {
         return dateFormatter
     }()
 
-    func dateTimeText(for filter: UseCaseListViewModel.Filter) -> String? {
+    func dateTimeText(for filter: OldUseCaseListViewModel.Filter) -> String? {
         guard let date = date else { return nil }
         let isInToday = Locale.current.calendar.isDateInToday(date)
         switch filter {

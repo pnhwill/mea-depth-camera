@@ -19,8 +19,8 @@ class MainMenuViewController: UICollectionViewController {
     
     private var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
-    private var mainSplitViewController: MainSplitViewController? {
-        self.splitViewController as? MainSplitViewController
+    private var mainSplitViewController: OldMainSplitViewController? {
+        self.splitViewController as? OldMainSplitViewController
     }
     
     deinit {

@@ -8,14 +8,14 @@
 import UIKit
 import Combine
 
-/// ListViewController subclass that displays all of the user's Tasks.
-class UseCaseListViewController: ListViewController {
+/// OldListViewController subclass that displays all of the user's Tasks.
+class UseCaseListViewController: OldListViewController {
     
     @IBOutlet private weak var addButton: UIBarButtonItem!
     
-    private var useCaseListViewModel: UseCaseListViewModel? {
+    private var useCaseListViewModel: OldUseCaseListViewModel? {
         get {
-            viewModel as? UseCaseListViewModel
+            viewModel as? OldUseCaseListViewModel
         }
         set {
             viewModel = newValue
@@ -28,8 +28,8 @@ class UseCaseListViewController: ListViewController {
         }
     }
     
-    private var mainSplitViewController: MainSplitViewController {
-        self.splitViewController as! MainSplitViewController
+    private var mainSplitViewController: OldMainSplitViewController {
+        self.splitViewController as! OldMainSplitViewController
     }
     
     private var useCaseDidChangeSubscriber: Cancellable?
@@ -53,7 +53,7 @@ class UseCaseListViewController: ListViewController {
         super.viewDidLoad()
         configureNavigationItem()
         func setUpAndLoad() {
-            useCaseListViewModel = UseCaseListViewModel()
+            useCaseListViewModel = OldUseCaseListViewModel()
             navigationItem.searchController?.searchResultsUpdater = useCaseListViewModel
             navigationItem.searchController?.delegate = self
             loadData()
@@ -126,7 +126,7 @@ extension UseCaseListViewController {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
         } else {
             // Select and show detail for the first list item, if any (item 0 is the header, so item 1 is the first use case in the list).
-            let indexPath = IndexPath(item: 1, section: ListSection.Identifier.list.rawValue)
+            let indexPath = IndexPath(item: 1, section: OldListSection.Identifier.list.rawValue)
             if let itemID = dataSource?.itemIdentifier(for: indexPath),
                let useCase = useCaseListViewModel?.useCase(with: itemID) {
                 collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
@@ -153,7 +153,7 @@ extension UseCaseListViewController {
 // MARK: ListTextCellDelegate
 extension UseCaseListViewController: ListTextCellDelegate {
     
-    func delete(objectFor item: ListItem) {
+    func delete(objectFor item: OldListItem) {
         useCaseListViewModel?.delete(item.id) { [weak self] success in
             if success {
                 self?.refreshListData() // maybe redundant?

@@ -12,6 +12,10 @@ import CoreData
 /// Use these to check whether a persistent history change is relevant to the current view.
 enum Schema {
     
+    enum Shared: String {
+        case id
+    }
+    
     enum UseCase: String {
         case title, date
     }

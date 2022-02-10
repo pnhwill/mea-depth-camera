@@ -7,8 +7,8 @@
 
 import Foundation
 
-/// ListViewModel for the app's "About" view.
-class AboutViewModel: ListViewModel {
+/// OldListViewModel for the app's "About" view.
+class AboutViewModel: OldListViewModel {
     
     // MARK: AboutInfo Model
     /// The data model for the app's "About" information.
@@ -74,7 +74,7 @@ class AboutViewModel: ListViewModel {
     
     // MARK: Model Stores
     private(set) lazy var sectionsStore: ObservableModelStore<Section>? = {
-        let section = ListSection(id: .header, items: headerListItemIds)
+        let section = OldListSection(id: .header, items: headerListItemIds)
         return ObservableModelStore([section])
     }()
     private(set) lazy var itemsStore: ObservableModelStore<Item>? = {
@@ -83,9 +83,9 @@ class AboutViewModel: ListViewModel {
     
     private var aboutInfo: AboutInfo
     
-    private let titleListItem = ListItem(id: UUID(), title: "About MEADepthCamera")
+    private let titleListItem = OldListItem(id: UUID(), title: "About MEADepthCamera")
     
-    private var allListItems: [ListItem] {
+    private var allListItems: [OldListItem] {
         [[titleListItem],
          aboutInfo.listItems,
          aboutInfo.author.listItems,

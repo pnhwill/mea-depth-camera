@@ -8,17 +8,17 @@
 import UIKit
 import Combine
 
-/// ListViewController subclass for the list of tasks associated with a single use case, which the user selects from to begin recording.
-class TaskListViewController: ListViewController {
+/// OldListViewController subclass for the list of tasks associated with a single use case, which the user selects from to begin recording.
+class TaskListViewController: OldListViewController {
     
     @IBOutlet private weak var addButton: UIBarButtonItem!
     
-    private var taskListViewModel: TaskListViewModel {
-        self.viewModel as! TaskListViewModel
+    private var taskListViewModel: OldTaskListViewModel {
+        self.viewModel as! OldTaskListViewModel
     }
     
-    private var mainSplitViewController: MainSplitViewController {
-        self.splitViewController as! MainSplitViewController
+    private var mainSplitViewController: OldMainSplitViewController {
+        self.splitViewController as! OldMainSplitViewController
     }
     
     private var taskDidChangeSubscriber: Cancellable?
@@ -33,7 +33,7 @@ class TaskListViewController: ListViewController {
     
 //    required init?(coder: NSCoder) {
 //        super.init(coder: coder)
-//        viewModel = TaskListViewModel()
+//        viewModel = OldTaskListViewModel()
 //    }
     
     deinit {
@@ -45,7 +45,7 @@ class TaskListViewController: ListViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.setHidesBackButton(true, animated: false)
-        viewModel = TaskListViewModel()
+        viewModel = OldTaskListViewModel()
         configureNavigationItem()
         sectionsSubscriber = viewModel?.sectionsStore?.$allModels
             .receive(on: RunLoop.main)
@@ -111,7 +111,7 @@ extension TaskListViewController {
             collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
         } else {
             // Select and show detail for the first list item (we have 2 headers, so first item is at index 2).
-            let indexPath = IndexPath(item: 2, section: ListSection.Identifier.list.rawValue)
+            let indexPath = IndexPath(item: 2, section: OldListSection.Identifier.list.rawValue)
             if let itemID = dataSource?.itemIdentifier(for: indexPath),
                let task = taskListViewModel.task(with: itemID) {
                 collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
@@ -133,7 +133,7 @@ extension TaskListViewController {
 // MARK: ListTextCellDelegate
 extension TaskListViewController: ListTextCellDelegate {
     
-    func delete(objectFor item: ListItem) {
+    func delete(objectFor item: OldListItem) {
         taskListViewModel.delete(item.id) { [weak self] success in
             if success {
                 self?.refreshListData() // maybe redundant?

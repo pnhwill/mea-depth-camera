@@ -11,7 +11,7 @@ import Combine
 /// A detail view controller for both viewing and editing a single Task.
 class TaskPlanDetailViewController: UICollectionViewController {
     
-    typealias AddCompletion = MainSplitViewController.AddCompletion
+    typealias AddCompletion = OldMainSplitViewController.AddCompletion
     
     private var viewModel: DetailViewModel?
     private var task: Task?
@@ -19,8 +19,8 @@ class TaskPlanDetailViewController: UICollectionViewController {
     private var taskDidChangeSubscriber: Cancellable?
     private var addCompletion: AddCompletion?
     
-    private var mainSplitViewController: MainSplitViewController {
-        self.splitViewController as! MainSplitViewController
+    private var mainSplitViewController: OldMainSplitViewController {
+        self.splitViewController as! OldMainSplitViewController
     }
     
     deinit {

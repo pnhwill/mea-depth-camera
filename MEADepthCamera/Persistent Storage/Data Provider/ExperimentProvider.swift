@@ -9,7 +9,7 @@ import CoreData
 import OSLog
 
 /// A class to wrap everything related to fetching, creating, and deleting experiments, and to fetch data from the JSON file and save it to the Core Data store.
-class ExperimentProvider: FetchingDataProvider {
+class ExperimentProvider: OldFetchingDataProvider {
     
     typealias Object = Experiment
     

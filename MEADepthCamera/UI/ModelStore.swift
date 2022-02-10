@@ -24,6 +24,18 @@ class AnyModelStore<Model: Identifiable>: ModelStore {
     func fetchByID(_ id: Model.ID) -> Model? {
         return self.models[id]
     }
+    /// Reinitializes the model store with the given models.
+    func reload(with newModels: [Model]) {
+        models = newModels.groupingByUniqueID()
+    }
+    /// Merges the given models into the store, replacing models that have duplicate IDs with the new values.
+    func merge(newModels: [Model]) {
+        models.merge(newModels.groupingByUniqueID()) { (_, new) in new }
+    }
+    /// Deletes the model with the given ID from the store.
+    func deleteByID(_ id: Model.ID) {
+        models.removeValue(forKey: id)
+    }
 }
 
 // MARK: ObservableModelStore

@@ -8,12 +8,12 @@
 import UIKit
 
 /// A UISplitViewController subclass that displays a three-column split view and passes data between the list and detail view controllers.
-class MainSplitViewController: UISplitViewController {
+class OldMainSplitViewController: UISplitViewController {
     
     typealias AddCompletion = () -> Void
     
     /// The currently selected item in the list column. The list view controller uses this so it can re-select the same row every time it reloads its data.
-    var selectedItemID: ListItem.ID?
+    var selectedItemID: OldListItem.ID?
     
     // Convenience getters for each column's navigation controller.
     private var primaryNavigationController: UINavigationController? {
@@ -124,7 +124,7 @@ class MainSplitViewController: UISplitViewController {
 }
 
 // MARK: UINavigationControllerDelegate
-extension MainSplitViewController: UINavigationControllerDelegate {
+extension OldMainSplitViewController: UINavigationControllerDelegate {
     func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
         if viewController is UseCaseListViewController, isCollapsed {
 //            debugPrint(navigationController)
@@ -134,7 +134,7 @@ extension MainSplitViewController: UINavigationControllerDelegate {
 }
 
 // MARK: UISplitViewControllerDelegate
-extension MainSplitViewController: UISplitViewControllerDelegate {
+extension OldMainSplitViewController: UISplitViewControllerDelegate {
     func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
         return .primary
     }

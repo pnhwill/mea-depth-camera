@@ -1,5 +1,5 @@
 //
-//  TaskListViewModel.swift
+//  OldTaskListViewModel.swift
 //  MEADepthCamera
 //
 //  Created by Will on 11/4/21.
@@ -8,8 +8,8 @@
 import UIKit
 import CoreData
 
-/// A ListViewModel for the TaskListViewController.
-class TaskListViewModel: NSObject, ListViewModel {
+/// A OldListViewModel for the TaskListViewController.
+class OldTaskListViewModel: NSObject, OldListViewModel {
     
     private enum Filter {
         case all, customOnly
@@ -44,7 +44,7 @@ class TaskListViewModel: NSObject, ListViewModel {
                 TaskHeaders.identifiers[self.rawValue]
             }
             
-            func subItems(in allItems: TaskItems) -> [ListItem] {
+            func subItems(in allItems: TaskItems) -> [OldListItem] {
                 switch self {
                 case .standard:
                     return allItems.standardTasks
@@ -74,8 +74,8 @@ class TaskListViewModel: NSObject, ListViewModel {
     
     // MARK: TaskItems
     private struct TaskItems {
-        let standardTasks: [ListItem]
-        let customTasks: [ListItem]
+        let standardTasks: [OldListItem]
+        let customTasks: [OldListItem]
         
         init(tasks: [Task]) {
             var allTasks = tasks
@@ -84,9 +84,9 @@ class TaskListViewModel: NSObject, ListViewModel {
             standardTasks = allTasks[p...].compactMap { Self.taskItem($0) }.sorted { $0.title < $1.title }
         }
         
-        static func taskItem(_ task: Task) -> ListItem? {
+        static func taskItem(_ task: Task) -> OldListItem? {
             guard let id = task.id, let titleText = task.name, let bodyText = task.fileNameLabel else { return nil }
-            return ListItem(id: id, title: titleText, bodyText: [bodyText])
+            return OldListItem(id: id, title: titleText, bodyText: [bodyText])
         }
     }
     
@@ -140,7 +140,7 @@ class TaskListViewModel: NSObject, ListViewModel {
 }
 
 // MARK: Model Store Configuration
-extension TaskListViewModel {
+extension OldTaskListViewModel {
     
     private func reloadStores() {
         guard let items = taskItems(), let section = taskListSection() else { return }
@@ -163,9 +163,9 @@ extension TaskListViewModel {
         tasks.append(newTask)
         let taskItems = TaskItems(tasks: tasks)
         let headerTypes = TaskHeaders.HeaderType.allCases
-        let headerItems = headerTypes.map { ListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
+        let headerItems = headerTypes.map { OldListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
         let headerIds = headerTypes.map { $0.id }
-        let section = ListSection(id: .list, items: headerIds)
+        let section = OldListSection(id: .list, items: headerIds)
         itemsStore?.merge(newModels: headerItems)
         sectionsStore?.merge(newModels: [section])
     }
@@ -182,25 +182,25 @@ extension TaskListViewModel {
         itemsStore?.deleteByID(itemID)
     }
     
-    private func taskItems() -> [ListItem]? {
+    private func taskItems() -> [OldListItem]? {
         guard let allTasks = filteredTasks else { return nil }
         let taskItems = TaskItems(tasks: allTasks)
         let headerTypes = TaskHeaders.HeaderType.allCases
-        let headerItems = headerTypes.map { ListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
+        let headerItems = headerTypes.map { OldListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
         return [headerItems, taskItems.standardTasks, taskItems.customTasks].flatMap { $0 }
     }
     
-    private func taskListSection() -> ListSection? {
+    private func taskListSection() -> OldListSection? {
         guard let allTasks = filteredTasks else { return nil }
         let taskItems = TaskItems(tasks: allTasks)
         let listItemsIds = TaskHeaders.HeaderType.allCases
             .filter { $0.shouldIncludeHeader(for: taskItems) }
             .map { $0.id }
-        return ListSection(id: .list, items: listItemsIds)
+        return OldListSection(id: .list, items: listItemsIds)
     }
 }
 
-extension TaskListViewModel: NSFetchedResultsControllerDelegate {
+extension OldTaskListViewModel: NSFetchedResultsControllerDelegate {
     /**
      controller(:didChange:at:for:newIndexPath:) is called as part of NSFetchedResultsControllerDelegate.
      
@@ -234,7 +234,7 @@ extension TaskListViewModel: NSFetchedResultsControllerDelegate {
 }
 
 // MARK: UISearchResultsUpdating
-extension TaskListViewModel: UISearchResultsUpdating {
+extension OldTaskListViewModel: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
         let predicate: NSPredicate

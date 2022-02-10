@@ -2,65 +2,39 @@
 //  ListTextCell.swift
 //  MEADepthCamera
 //
-//  Created by Will on 10/27/21.
+//  Created by Will on 1/21/22.
 //
 
 import UIKit
 
-/// The delegate protocol for ListTextCells, to support interaction with the cell's item from within the cell.
-protocol ListTextCellDelegate: AnyObject {
-    /**
-     Deletes the ListItem's stored NSManagedObject.
-     
-     When the user deletes a cell, the cell calls this method to notify the delegate (the list view model) to delete the item's object.
-     */
-    func delete(objectFor item: ListItem)
-}
-
 class ListTextCell: ItemListCell<ListItem> {
     
-    weak var delegate: ListTextCellDelegate?
-    
-    private var separatorConstraint: NSLayoutConstraint?
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configureAccessories()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: updateConfiguration(using:)
     override func updateConfiguration(using state: UICellConfigurationState) {
         guard let item = state.item as? ListItem else { return }
-        let content = TextCellContentConfiguration(titleText: item.title, subtitleText: item.subtitle, bodyText: item.bodyText).updated(for: state)
+        var content = defaultContentConfiguration().updated(for: state)
+        content.text = item.title
+        content.secondaryText = item.subtitle
         contentConfiguration = content
-        updateSeparatorConstraint()
     }
 }
 
-extension ListTextCell {
-    private func configureAccessories() {
-        let disclosure = UICellAccessory.disclosureIndicator()
-        let delete = UICellAccessory.delete() { self.deleteAction() }
-        accessories = [delete, disclosure]
-    }
-    
-    private func deleteAction() {
-        guard let item = configurationState.item as? ListItem else { return }
-        delegate?.delete(objectFor: item)
-    }
-    
-    private func updateSeparatorConstraint() {
-        guard let listContentView = contentView as? TextCellContentView,
-              let textLayoutGuide = listContentView.titleView.textLayoutGuide else { return }
-        if let existingConstraint = separatorConstraint, existingConstraint.isActive {
-            return
-        }
-        let constraint = separatorLayoutGuide.leadingAnchor.constraint(equalTo: textLayoutGuide.leadingAnchor)
-        constraint.isActive = true
-        separatorConstraint = constraint
-    }
-}
+//struct ListTextCellModel: Hashable, ListCellModel {
+//    var title: String
+//    var subTitle: String
+//
+//    init(listItem: ListItem) {
+//        title = listItem.title
+//        subTitle = listItem.subtitle ?? ""
+//    }
+//}
+//
+//class ListTextCell: ItemListCell<ListTextCellModel> {
+//
+//    override func updateConfiguration(using state: UICellConfigurationState) {
+//        guard let item = state.item as? ListTextCellModel else { return }
+//        var content = defaultContentConfiguration().updated(for: state)
+//        content.text = item.title
+//        content.secondaryText = item.subTitle
+//        contentConfiguration = content
+//    }
+//}

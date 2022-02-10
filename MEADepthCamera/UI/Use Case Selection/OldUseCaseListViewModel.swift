@@ -1,5 +1,5 @@
 //
-//  UseCaseListViewModel.swift
+//  OldUseCaseListViewModel.swift
 //  MEADepthCamera
 //
 //  Created by William Harrington on 10/27/21.
@@ -8,8 +8,8 @@
 import UIKit
 import CoreData
 
-/// A ListViewModel for the UseCaseListViewController.
-class UseCaseListViewModel: NSObject, ListViewModel {
+/// A OldListViewModel for the UseCaseListViewController.
+class OldUseCaseListViewModel: NSObject, OldListViewModel {
     
     enum Filter: Int {
         case today
@@ -34,19 +34,19 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         static let title = "Use Cases"
     }
     
-    var filter: UseCaseListViewModel.Filter = .all {
+    var filter: OldUseCaseListViewModel.Filter = .all {
         didSet {
             reloadListStores()
         }
     }
     
     // MARK: Data Stores
-    lazy var sectionsStore: ObservableModelStore<ListSection>? = {
+    lazy var sectionsStore: ObservableModelStore<OldListSection>? = {
         guard let items = allItemIds else { return nil }
-        return ObservableModelStore([ListSection(id: .list, items: items)])
+        return ObservableModelStore([OldListSection(id: .list, items: items)])
     }()
     
-    lazy var itemsStore: ObservableModelStore<ListItem>? = {
+    lazy var itemsStore: ObservableModelStore<OldListItem>? = {
         guard let items = allItems else { return nil }
         return ObservableModelStore(items)
     }()
@@ -73,9 +73,9 @@ class UseCaseListViewModel: NSObject, ListViewModel {
         return useCases
     }
     
-    private var allItems: [ListItem]? {
+    private var allItems: [OldListItem]? {
         guard let listItems = sortedUseCases?.compactMap({ listItem(useCase: $0) }) else { return nil }
-        return [ListItem(id: HeaderItem.id, title: HeaderItem.title)] + listItems
+        return [OldListItem(id: HeaderItem.id, title: HeaderItem.title)] + listItems
     }
     
     private var allItemIds: [UUID]? {
@@ -102,9 +102,9 @@ class UseCaseListViewModel: NSObject, ListViewModel {
 }
 
 // MARK: Model Store Configuration
-extension UseCaseListViewModel {
+extension OldUseCaseListViewModel {
     
-    private func listItem(useCase: UseCase) -> ListItem? {
+    private func listItem(useCase: UseCase) -> OldListItem? {
         guard let id = useCase.id else { return nil }
         let titleText = useCase.title ?? "?"
         let subTitleText = useCase.experimentTitle ?? useCase.experiment?.title ?? "?"
@@ -112,12 +112,12 @@ extension UseCaseListViewModel {
         let subjectID = useCase.subjectID ?? "?"
         let subjectIDText = "Subject ID: " + subjectID
         let bodyText = [subjectIDText, dateText]
-        return ListItem(id: id, title: titleText, subTitle: subTitleText, bodyText: bodyText)
+        return OldListItem(id: id, title: titleText, subTitle: subTitleText, bodyText: bodyText)
     }
 
     private func reloadListStores() {
         guard let items = allItems, let itemIDs = allItemIds else { return }
-        sectionsStore?.merge(newModels: [ListSection(id: .list, items: itemIDs)])
+        sectionsStore?.merge(newModels: [OldListSection(id: .list, items: itemIDs)])
         itemsStore?.reload(with: items)
     }
     
@@ -145,7 +145,7 @@ extension UseCaseListViewModel {
 }
 
 // MARK: NSFetchedResultsControllerDelegate
-extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
+extension OldUseCaseListViewModel: NSFetchedResultsControllerDelegate {
     /**
      controller(:didChange:at:for:newIndexPath:) is called as part of NSFetchedResultsControllerDelegate.
      
@@ -180,7 +180,7 @@ extension UseCaseListViewModel: NSFetchedResultsControllerDelegate {
 }
 
 // MARK: UISearchResultsUpdating
-extension UseCaseListViewModel: UISearchResultsUpdating {
+extension OldUseCaseListViewModel: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
         let predicate: NSPredicate
