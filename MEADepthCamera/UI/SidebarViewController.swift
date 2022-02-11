@@ -20,7 +20,7 @@ final class SidebarViewController: UICollectionViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = "Main Menu"
+        navigationItem.title = "MEADepthCamera"
         configureCollectionView()
         configureDataSource()
         applySnapshots()

@@ -70,7 +70,7 @@ class OldMainSplitViewController: UISplitViewController {
     func showCamera(task: Task, useCase: UseCase) {
         let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
         guard let cameraNavController = storyboard.instantiateViewController(withIdentifier: StoryboardID.cameraNavController) as? UINavigationController,
-              let taskDetailVC = cameraNavController.topViewController as? TaskDetailViewController
+              let taskDetailVC = cameraNavController.topViewController as? TaskStartViewController
         else { return }
         taskDetailVC.configure(with: task, useCase: useCase)
         present(cameraNavController, animated: true, completion: nil)

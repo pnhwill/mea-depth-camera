@@ -1,5 +1,5 @@
 //
-//  TaskDetailViewModel.swift
+//  TaskStartViewModel.swift
 //  MEADepthCamera
 //
 //  Created by Will on 11/4/21.
@@ -8,8 +8,8 @@
 import Foundation
 import UIKit
 
-/// The view model for TaskDetailViewController.
-class TaskDetailViewModel {
+/// The view model for TaskStartViewController.
+class TaskStartViewModel {
     
     // MARK: Section
     struct Section: Identifiable {

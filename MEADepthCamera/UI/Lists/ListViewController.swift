@@ -26,10 +26,7 @@ final class ListViewController: UICollectionViewController {
     private var sectionStore: AnyModelStore<ListSection>?
     private var itemStore: AnyModelStore<ListItem>?
     
-    private var addBarButtonItem = UIBarButtonItem(
-        barButtonSystemItem: .add,
-        target: self,
-        action: #selector(addButtonAction(_:)))
+    private var isInitialLoad: Bool = true
 
     private var mainSplitViewController: MainSplitViewController? {
         return splitViewController as? MainSplitViewController
@@ -44,7 +41,11 @@ final class ListViewController: UICollectionViewController {
         navigationItem.title = viewModel.navigationTitle
         showBarsIfNeeded()
         applyInititalBackingStore()
-        configureCollectionView()
+        if isInitialLoad {
+            configureCollectionView()
+            isInitialLoad = false
+        }
+        loadData()
         bindToViewModel()
         selectItemIfNeeded()
     }
@@ -164,10 +165,8 @@ extension ListViewController {
 extension ListViewController {
 
     private func configureCollectionView() {
-        // TODO: using view.bounds may be causing transparent nav bar glitch
-        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+        collectionView.collectionViewLayout = createLayout()
         configureDataSource()
-        loadData()
     }
 
     private func createLayout() -> UICollectionViewLayout {
@@ -265,6 +264,10 @@ extension ListViewController {
                             target: nil,
                             action: nil)
         }
+        let addBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .add,
+            target: self,
+            action: #selector(addButtonAction(_:)))
         
         let toolbarButtonItems = [
             flexibleSpaceBarButtonItem,

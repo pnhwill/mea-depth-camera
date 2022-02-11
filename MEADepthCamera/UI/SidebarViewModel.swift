@@ -15,7 +15,7 @@ enum SidebarSection: CaseIterable {
     var title: String {
         switch self {
         case .main:
-            return "Main"
+            return "Main Menu"
         case .info:
             return "Info"
         }

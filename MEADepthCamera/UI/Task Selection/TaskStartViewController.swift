@@ -1,5 +1,5 @@
 //
-//  TaskDetailViewController.swift
+//  TaskStartViewController.swift
 //  MEADepthCamera
 //
 //  Created by Will on 11/4/21.
@@ -8,16 +8,16 @@
 import UIKit
 
 /// A detail view controller for viewing a single Task.
-class TaskDetailViewController: UICollectionViewController {
+class TaskStartViewController: UICollectionViewController {
     
-    typealias Section = TaskDetailViewModel.Section
+    typealias Section = TaskStartViewModel.Section
     
     private struct ElementKind {
         static let recordingsSectionHeader = "RecordingsSectionHeader"
         static let infoSectionFooter = "StartButtonFooter"
     }
     
-    private var viewModel: TaskDetailViewModel?
+    private var viewModel: TaskStartViewModel?
     private var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
     private var useCase: UseCase?
     private var task: Task?
@@ -34,7 +34,7 @@ class TaskDetailViewController: UICollectionViewController {
     func configure(with task: Task, useCase: UseCase) {
         self.task = task
         self.useCase = useCase
-        self.viewModel = TaskDetailViewModel(task: task, useCase: useCase)
+        self.viewModel = TaskStartViewModel(task: task, useCase: useCase)
         configureDataSource()
         applyInitialSnapshot()
     }
@@ -56,7 +56,7 @@ class TaskDetailViewController: UICollectionViewController {
     }
 }
 
-extension TaskDetailViewController {
+extension TaskStartViewController {
     func startButtonTapped() {
         guard let task = task, let useCase = useCase else { return }
         let storyboard = UIStoryboard(name: StoryboardName.camera, bundle: nil)
@@ -68,7 +68,7 @@ extension TaskDetailViewController {
 }
 
 // MARK: Collection View Configuration
-extension TaskDetailViewController {
+extension TaskStartViewController {
     private func configureCollectionView() {
         collectionView.collectionViewLayout = createLayout()
     }
@@ -148,7 +148,7 @@ extension TaskDetailViewController {
 }
 
 // MARK: Cell Registration
-extension TaskDetailViewController {
+extension TaskStartViewController {
     
     private func createInfoCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
         return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
@@ -156,7 +156,7 @@ extension TaskDetailViewController {
             var content = indexPath.item == 0 ? UIListContentConfiguration.extraProminentInsetGroupedHeader() : cell.defaultContentConfiguration()
             content.text = item.title
             content.secondaryText = item.subtitle
-            if let itemType = TaskDetailViewModel.InfoItems.ItemType(rawValue: indexPath.item) {
+            if let itemType = TaskStartViewModel.InfoItems.ItemType(rawValue: indexPath.item) {
                 content.image = itemType.cellImage
             }
             cell.contentConfiguration = content

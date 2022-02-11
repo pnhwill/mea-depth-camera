@@ -9,13 +9,15 @@ import UIKit
 import Combine
 
 /// A detail view controller for both viewing and editing a single Use Case.
-class UseCaseDetailViewController: UICollectionViewController {
+class UseCaseDetailViewController: UICollectionViewController, DetailViewController {
     
     typealias AddCompletion = OldMainSplitViewController.AddCompletion
     
     private var viewModel: DetailViewModel?
     private var useCase: UseCase?
-    private var isNew = false
+    private var isNew: Bool = false
+    private var isHidden: Bool = true
+    
     private var useCaseDidChangeSubscriber: Cancellable?
     private var addCompletion: AddCompletion?
     
@@ -32,6 +34,24 @@ class UseCaseDetailViewController: UICollectionViewController {
         self.isNew = isNew
         self.addCompletion = addCompletion
         setEditing(isNew, animated: false)
+    }
+    
+    // MARK: DetailViewController
+    
+    func configure(with useCaseID: UUID, isNew: Bool) {
+        self.useCase = UseCaseProvider.fetchObject(with: useCaseID)
+        self.isNew = isNew
+        navigationController?.setNavigationBarHidden(false, animated: true)
+        isHidden = false
+        setEditing(isNew, animated: false)
+    }
+    
+    func hide() {
+        guard !isHidden else { return }
+        useCase = nil
+        collectionView.isHidden = true
+        navigationController?.setNavigationBarHidden(true, animated: true)
+        isHidden = true
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
