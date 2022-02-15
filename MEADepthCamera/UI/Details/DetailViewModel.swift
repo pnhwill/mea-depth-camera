@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol DetailViewModel {
+protocol DetailViewModel: NavigationTitleProviding {
     
     func createLayout() -> UICollectionViewLayout
     func configureDataSource(for collectionView: UICollectionView)

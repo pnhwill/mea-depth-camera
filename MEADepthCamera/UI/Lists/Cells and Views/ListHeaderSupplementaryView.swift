@@ -17,6 +17,10 @@ struct ListHeaderViewModel: Hashable {
     init(_ listSection: ListSection) {
         self.title = listSection.id
     }
+    
+    init(_ aboutSection: AboutViewModel.AboutSection) {
+        self.title = aboutSection.title
+    }
 }
 
 class ListHeaderSupplementaryView: ItemListCell<ListHeaderViewModel> {

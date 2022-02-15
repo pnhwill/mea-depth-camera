@@ -1,5 +1,5 @@
 //
-//  TaskPlanDetailViewModel.swift
+//  TaskDetailViewModel.swift
 //  MEADepthCamera
 //
 //  Created by Will on 1/17/22.
@@ -8,7 +8,7 @@
 import UIKit
 
 /// The view model for TaskDetailViewController.
-class TaskPlanDetailViewModel: DetailViewModel {
+class TaskDetailViewModel: DetailViewModel {
     
     // MARK: Section
     struct Section: Identifiable {
@@ -64,16 +64,18 @@ class TaskPlanDetailViewModel: DetailViewModel {
         }()
     }
     
+    let navigationTitle: String = NSLocalizedString("View Task", comment: "view task nav title")
+    
     var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
     
     // MARK: Data Stores
-    lazy var sectionsStore: ObservableModelStore<Section>? = {
+    lazy var sectionsStore: AnyModelStore<Section>? = {
         let infoSection = Section(id: .info, items: infoItemIds)
-        return ObservableModelStore([infoSection])
+        return AnyModelStore([infoSection])
     }()
-    lazy var itemsStore: ObservableModelStore<OldListItem>? = {
+    lazy var itemsStore: AnyModelStore<OldListItem>? = {
         let items = [infoItems].compactMap { $0 }.flatMap { $0 }
-        return ObservableModelStore(items)
+        return AnyModelStore(items)
     }()
     
     private var task: Task
@@ -162,7 +164,7 @@ class TaskPlanDetailViewModel: DetailViewModel {
 }
 
 // MARK: Cell Registration
-extension TaskPlanDetailViewModel {
+extension TaskDetailViewModel {
     
     private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
         return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in

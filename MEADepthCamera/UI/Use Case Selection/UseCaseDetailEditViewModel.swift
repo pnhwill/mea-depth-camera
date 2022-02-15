@@ -40,16 +40,16 @@ class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
         private let identifier = UUID()
     }
     
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>?
+    var navigationTitle: String {
+        isNew ? NSLocalizedString("Add Use Case", comment: "add use case nav title") : NSLocalizedString("Edit Use Case", comment: "edit use case nav title")
+    }
     
     private var useCase: UseCase
     private var isNew: Bool
     
-    private lazy var experimentProvider: ExperimentProvider = {
-        let container = AppDelegate.shared.coreDataStack.persistentContainer
-        let provider = ExperimentProvider(with: container, fetchedResultsControllerDelegate: nil)
-        return provider
-    }()
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Item>?
+    
+    private lazy var experimentProvider: ExperimentProvider = ExperimentProvider()
     
     private var experiments: [Experiment]? {
         return experimentProvider.fetchedResultsController.fetchedObjects
@@ -60,7 +60,22 @@ class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
         self.isNew = isNew
     }
     
-    // MARK: Configure Collection View
+    func validateInput(title: String?, subjectID: String?) -> Bool {
+        guard let title = title, let subjectID = subjectID else { return false }
+        return !title.isEmpty && !subjectID.isEmpty
+    }
+    
+    func save(completion: ((Bool) -> Void)? = nil) {
+        let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addUseCase : .updateUseCase
+        AppDelegate.shared.coreDataStack.persistentContainer.saveContext(
+            backgroundContext: useCase.managedObjectContext,
+            with: contextSaveInfo) { success in
+                completion?(success)
+        }
+    }
+    
+    // MARK: DetailViewModel
+    
     func createLayout() -> UICollectionViewLayout {
         var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         config.headerMode = .firstItemInSection

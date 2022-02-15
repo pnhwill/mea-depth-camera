@@ -16,7 +16,20 @@ protocol ModelStore {
 }
 
 // MARK: AnyModelStore
+/// Basic `ModelStore` implementation for static model collections.
 class AnyModelStore<Model: Identifiable>: ModelStore {
+    private var models = [Model.ID: Model]()
+    init(_ models: [Model]) {
+        self.models = models.groupingByUniqueID()
+    }
+    func fetchByID(_ id: Model.ID) -> Model? {
+        return self.models[id]
+    }
+}
+
+// MARK: ListModelStore
+/// A `ModelStore` implementation with additional methods for changing the underlying model collection.
+class ListModelStore<Model: Identifiable>: ModelStore {
     private var models = [Model.ID: Model]()
     init(_ models: [Model]) {
         self.models = models.groupingByUniqueID()

@@ -10,17 +10,17 @@ import UIKit
 /// A view controller for the app's top-level main menu, providing a starting point to reach every part of the app.
 final class SidebarViewController: UICollectionViewController {
     
-    typealias SidebarDataSource = UICollectionViewDiffableDataSource<SidebarSection, SidebarItem>
+    typealias SidebarDiffableDataSource = UICollectionViewDiffableDataSource<SidebarSection, SidebarItem>
     
     private var mainSplitViewController: MainSplitViewController? {
         self.splitViewController as? MainSplitViewController
     }
     
-    private var dataSource: SidebarDataSource?
+    private var dataSource: SidebarDiffableDataSource?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.title = "MEADepthCamera"
+        navigationItem.title = Bundle.main.applicationName
         configureCollectionView()
         configureDataSource()
         applySnapshots()
@@ -46,7 +46,7 @@ extension SidebarViewController {
         let itemCellRegistration = createItemCellRegistration()
         let headerSupplementaryRegistration = createHeaderSupplementaryRegistration()
         
-        dataSource = SidebarDataSource(collectionView: collectionView) {
+        dataSource = SidebarDiffableDataSource(collectionView: collectionView) {
             (collectionView, indexPath, item) -> UICollectionViewCell in
             return collectionView.dequeueConfiguredReusableCell(using: itemCellRegistration, for: indexPath, item: item)
         }
@@ -100,7 +100,16 @@ extension SidebarViewController {
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let item = dataSource?.itemIdentifier(for: indexPath) else { return }
-        mainSplitViewController?.selectedList = item
+        switch item {
+        case .useCases, .tasks:
+            mainSplitViewController?.selectedList = item
+        case .about:
+            let aboutViewController: AboutViewController = UIStoryboard(storyboard: .info).instantiateViewController()
+            let navigationController = UINavigationController(rootViewController: aboutViewController)
+            present(navigationController, animated: true) {
+                collectionView.deselectItem(at: indexPath, animated: true)
+            }
+        }
     }
 }
 

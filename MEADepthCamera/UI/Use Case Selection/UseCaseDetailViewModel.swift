@@ -147,6 +147,8 @@ class UseCaseDetailViewModel: DetailViewModel {
         }
     }
     
+    let navigationTitle: String = NSLocalizedString("View Use Case", comment: "view use case nav title")
+    
     static let sectionFooterElementKind = "StartButtonFooter"
     
     var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
@@ -157,24 +159,24 @@ class UseCaseDetailViewModel: DetailViewModel {
     }()
     
     // MARK: Model Stores
-    lazy var sectionsStore: ObservableModelStore<Section>? = {
+    lazy var sectionsStore: AnyModelStore<Section>? = {
         guard let taskListSection = taskListSection() else { return nil }
         let headerItemIds = UseCaseItem.allCases.map { $0.id }
         let useCaseHeaderSection = Section(id: .info, items: headerItemIds)
-        return ObservableModelStore([useCaseHeaderSection, taskListSection])
+        return AnyModelStore([useCaseHeaderSection, taskListSection])
     }()
-    lazy var itemsStore: ObservableModelStore<OldListItem>? = {
+    lazy var itemsStore: AnyModelStore<OldListItem>? = {
         guard let taskItems = taskItems() else { return nil }
         let items = UseCaseItem.listItems(for: useCase) + taskItems
-        return ObservableModelStore(items)
+        return AnyModelStore(items)
     }()
     
     init(useCase: UseCase) {
         self.useCase = useCase
     }
     
-    func task(with id: UUID?) -> Task? {
-        return tasks?.first(where: { $0.id == id })
+    func itemID(at indexPath: IndexPath) -> UUID? {
+        return dataSource?.itemIdentifier(for: indexPath)
     }
     
     // MARK: Configure Collection View

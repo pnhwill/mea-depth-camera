@@ -5,7 +5,7 @@
 //  Created by Will on 12/10/21.
 //
 
-import Foundation
+import UIKit
 
 /// Protocol to get string of type name.
 protocol NameDescribable {
@@ -22,3 +22,5 @@ extension NameDescribable {
         return String(describing: self)
     }
 }
+
+extension UIViewController: NameDescribable {}

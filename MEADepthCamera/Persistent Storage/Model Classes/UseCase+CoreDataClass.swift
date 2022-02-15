@@ -35,7 +35,11 @@ public class UseCase: NSManagedObject {
 }
 
 extension UseCase: Searchable {
-    static var searchPredicate: String = "\(Schema.UseCase.title.rawValue) CONTAINS[cd] %@"
+    static var searchKeys: [String] = [
+        Schema.UseCase.title.rawValue,
+        Schema.UseCase.subjectID.rawValue,
+        Schema.UseCase.experimentTitle.rawValue,
+    ]
 }
 
 extension UseCase {

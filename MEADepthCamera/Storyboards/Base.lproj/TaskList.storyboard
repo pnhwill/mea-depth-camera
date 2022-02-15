@@ -45,10 +45,10 @@
             </objects>
             <point key="canvasLocation" x="3650" y="206"/>
         </scene>
-        <!--Task Plan Detail View Controller-->
+        <!--Task Detail View Controller-->
         <scene sceneID="mhp-FJ-ekB">
             <objects>
-                <collectionViewController storyboardIdentifier="TaskPlanDetailVC" id="GtN-ai-jKK" customClass="TaskPlanDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="TaskPlanDetailVC" id="GtN-ai-jKK" customClass="TaskDetailViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="pus-i1-B4v">
                         <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

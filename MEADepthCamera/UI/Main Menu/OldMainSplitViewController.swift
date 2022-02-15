@@ -52,18 +52,18 @@ class OldMainSplitViewController: UISplitViewController {
     /// Shows the UseCaseDetailViewController for the Use Case that's selected in the list.
     func showUseCaseDetail(_ useCase: UseCase, isNew: Bool = false, addCompletion: AddCompletion? = nil) {
         guard let id = useCase.id, id != selectedItemID else { return }
-        selectedItemID = id
-        if let useCaseDetailVC = secondaryNavigationController?.topViewController as? UseCaseDetailViewController {
-            useCaseDetailVC.configure(with: useCase, isNew: isNew) {
-                addCompletion?()
-            }
-            show(.secondary)
-        } else if let useCaseDetailVC = secondaryNavigationController?.viewControllers.first as? UseCaseDetailViewController {
-            useCaseDetailVC.configure(with: useCase, isNew: isNew) {
-                addCompletion?()
-            }
-            secondaryNavigationController?.popToRootViewController(animated: true)
-        }
+//        selectedItemID = id
+//        if let useCaseDetailVC = secondaryNavigationController?.topViewController as? UseCaseDetailViewController {
+//            useCaseDetailVC.configure(with: useCase, isNew: isNew) {
+//                addCompletion?()
+//            }
+//            show(.secondary)
+//        } else if let useCaseDetailVC = secondaryNavigationController?.viewControllers.first as? UseCaseDetailViewController {
+//            useCaseDetailVC.configure(with: useCase, isNew: isNew) {
+//                addCompletion?()
+//            }
+//            secondaryNavigationController?.popToRootViewController(animated: true)
+//        }
     }
     
     /// Presents the CameraViewController in full screen when the user chooses to start recording a Task.
@@ -97,28 +97,28 @@ class OldMainSplitViewController: UISplitViewController {
         guard let id = task.id, id != selectedItemID else { return }
         selectedItemID = id
         
-        if let taskDetailVC = secondaryNavigationController?.topViewController as? TaskPlanDetailViewController {
-            taskDetailVC.configure(with: task, isNew: isNew) {
-                addCompletion?()
-            }
-        } else {
-            let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
-            guard let taskDetailVC = storyboard.instantiateViewController(
-                withIdentifier: StoryboardID.taskPlanDetailVC) as? TaskPlanDetailViewController
-            else { fatalError() }
-            taskDetailVC.configure(with: task, isNew: isNew) {
-                addCompletion?()
-            }
-//            showDetailViewController(taskDetailVC, sender: nil)
-            
-            if isCollapsed {
-                primaryNavigationController?.pushViewController(taskDetailVC, animated: true)
-            } else {
-//                showDetailViewController(taskDetailVC, sender: nil)
-                secondaryNavigationController?.pushViewController(taskDetailVC, animated: true)
-                show(.secondary)
-            }
-        }
+//        if let taskDetailVC = secondaryNavigationController?.topViewController as? TaskDetailViewController {
+//            taskDetailVC.configure(with: task, isNew: isNew) {
+//                addCompletion?()
+//            }
+//        } else {
+//            let storyboard = UIStoryboard(name: StoryboardName.taskList, bundle: nil)
+//            guard let taskDetailVC = storyboard.instantiateViewController(
+//                withIdentifier: StoryboardID.taskPlanDetailVC) as? TaskDetailViewController
+//            else { fatalError() }
+//            taskDetailVC.configure(with: task, isNew: isNew) {
+//                addCompletion?()
+//            }
+////            showDetailViewController(taskDetailVC, sender: nil)
+//
+//            if isCollapsed {
+//                primaryNavigationController?.pushViewController(taskDetailVC, animated: true)
+//            } else {
+////                showDetailViewController(taskDetailVC, sender: nil)
+//                secondaryNavigationController?.pushViewController(taskDetailVC, animated: true)
+//                show(.secondary)
+//            }
+//        }
     }
     
 }

@@ -39,7 +39,11 @@ public class Task: NSManagedObject {
 }
 
 extension Task: Searchable {
-    static var searchPredicate: String = "\(Schema.Task.name.rawValue) CONTAINS[cd] %@"
+    static var searchKeys: [String] = [
+        Schema.Task.name.rawValue,
+        Schema.Task.fileNameLabel.rawValue,
+        Schema.Task.instructions.rawValue,
+    ]
 }
 
 extension Task {

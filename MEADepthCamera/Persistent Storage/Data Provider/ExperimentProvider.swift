@@ -9,7 +9,7 @@ import CoreData
 import OSLog
 
 /// A class to wrap everything related to fetching, creating, and deleting experiments, and to fetch data from the JSON file and save it to the Core Data store.
-class ExperimentProvider: OldFetchingDataProvider {
+final class ExperimentProvider: FetchingDataProvider {
     
     typealias Object = Experiment
     
@@ -48,30 +48,30 @@ class ExperimentProvider: OldFetchingDataProvider {
         self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
     }
     
-    func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?) {
-        context.perform {
-            let experiment = Experiment(context: context)
-            experiment.id = UUID()
-            if shouldSave {
-                self.persistentContainer.saveContext(backgroundContext: context, with: .addExperiment)
-            }
-            completionHandler?(experiment)
-        }
-    }
-    
-    func delete(_ experiment: Experiment, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
-        if let context = experiment.managedObjectContext {
-            context.perform {
-                context.delete(experiment)
-                if shouldSave {
-                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteExperiment)
-                }
-                completionHandler?(true)
-            }
-        } else {
-            completionHandler?(false)
-        }
-    }
+//    func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?) {
+//        context.perform {
+//            let experiment = Experiment(context: context)
+//            experiment.id = UUID()
+//            if shouldSave {
+//                self.persistentContainer.saveContext(backgroundContext: context, with: .addExperiment)
+//            }
+//            completionHandler?(experiment)
+//        }
+//    }
+//
+//    func delete(_ experiment: Experiment, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
+//        if let context = experiment.managedObjectContext {
+//            context.perform {
+//                context.delete(experiment)
+//                if shouldSave {
+//                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteExperiment)
+//                }
+//                completionHandler?(true)
+//            }
+//        } else {
+//            completionHandler?(false)
+//        }
+//    }
     
 }
 

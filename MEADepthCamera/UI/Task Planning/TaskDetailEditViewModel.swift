@@ -1,5 +1,5 @@
 //
-//  TaskPlanDetailEditViewModel.swift
+//  TaskDetailEditViewModel.swift
 //  MEADepthCamera
 //
 //  Created by Will on 1/17/22.
@@ -9,7 +9,7 @@ import UIKit
 import CoreData
 
 /// The view model for TaskDetailViewController when it is in edit mode.
-class TaskPlanDetailEditViewModel: NSObject, DetailViewModel {
+class TaskDetailEditViewModel: NSObject, DetailViewModel {
     
     enum Section: Int, CaseIterable {
         case name
@@ -37,16 +37,14 @@ class TaskPlanDetailEditViewModel: NSObject, DetailViewModel {
         private let identifier = UUID()
     }
     
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>?
+    var navigationTitle: String {
+        isNew ? NSLocalizedString("Add Task", comment: "add task nav title") : NSLocalizedString("Edit Task", comment: "edit task nav title")
+    }
     
     private var task: Task
     private var isNew: Bool
     
-    private lazy var dataProvider: TaskProvider = {
-        let container = AppDelegate.shared.coreDataStack.persistentContainer
-        let provider = TaskProvider(with: container, fetchedResultsControllerDelegate: nil)
-        return provider
-    }()
+    private var dataSource: UICollectionViewDiffableDataSource<Section, Item>?
     
     init(task: Task, isNew: Bool) {
         self.task = task
@@ -54,24 +52,21 @@ class TaskPlanDetailEditViewModel: NSObject, DetailViewModel {
     }
     
     func save(completion: ((Bool) -> Void)? = nil) {
-        let context = task.managedObjectContext
         let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addTask : .updateTask
-        dataProvider.persistentContainer.saveContext(backgroundContext: context, with: contextSaveInfo) { success in
-            completion?(success)
+        AppDelegate.shared.coreDataStack.persistentContainer.saveContext(
+            backgroundContext: task.managedObjectContext,
+            with: contextSaveInfo) { success in
+                completion?(success)
         }
     }
     
-    func checkValidTask() -> Bool {
-        if let name = task.name,
-           let fileNameLabel = task.fileNameLabel,
-           let instructions = task.instructions {
-            let isValid = !name.isEmpty && !fileNameLabel.isEmpty && !instructions.isEmpty
-            return isValid
-        }
-        return false
+    func validateInput(name: String?, fileNameLabel: String?, instructions: String?) -> Bool {
+        guard let name = name, let fileNameLabel = fileNameLabel, let instructions = instructions else { return false }
+        return !name.isEmpty && !fileNameLabel.isEmpty && !instructions.isEmpty
     }
     
-    // MARK: Configure Collection View
+    // MARK: DetailViewModel
+    
     func createLayout() -> UICollectionViewLayout {
         var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         config.headerMode = .firstItemInSection
@@ -122,7 +117,7 @@ class TaskPlanDetailEditViewModel: NSObject, DetailViewModel {
 }
 
 // MARK: Cell Registration
-extension TaskPlanDetailEditViewModel {
+extension TaskDetailEditViewModel {
     private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item> {
         return UICollectionView.CellRegistration<UICollectionViewListCell, Item> { (cell, indexPath, item) in
             guard let section = Section(rawValue: indexPath.section) else { return }
@@ -161,7 +156,7 @@ extension TaskPlanDetailEditViewModel {
 }
 
 // MARK: TextInputCellDelegate
-extension TaskPlanDetailEditViewModel: TextInputCellDelegate {
+extension TaskDetailEditViewModel: TextInputCellDelegate {
     func textChangedAt(indexPath: IndexPath, replacementString string: String) {
         guard let section = Section(rawValue: indexPath.section) else { return }
         switch section {

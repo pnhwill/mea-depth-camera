@@ -7,92 +7,103 @@
 
 import Foundation
 
-/// OldListViewModel for the app's "About" view.
-class AboutViewModel: OldListViewModel {
+protocol CaseIdentifiable {
+    associatedtype Item: Hashable, CaseIterable
+}
+
+protocol CaseSubtitleRepresentable: CaseIdentifiable {
+    var subtitles: [Item: String] { get }
+}
+
+protocol SubtitleTextRepresentable {
+    var subtitleText: [String: String] { get }
+}
+
+extension SubtitleTextRepresentable where Self: CaseSubtitleRepresentable, Item: RawRepresentable, Item.RawValue == String {
+    var subtitleText: [String: String] {
+        Dictionary(uniqueKeysWithValues: subtitles.map { ($0.key.rawValue, $0.value) })
+    }
+}
+
+/// View model for the app's "About" view.
+class AboutViewModel: NavigationTitleProviding {
+    
+    struct AboutSection: Hashable {
+        let title: String
+        let items: [AboutItem]
+        
+        init(title: String, item: SubtitleTextRepresentable) {
+            self.title = title
+            self.items = item.subtitleText.map { AboutItem(title: $0.key, subtitle: $0.value) }
+        }
+    }
+    
+    struct AboutItem: Hashable {
+        let title: String
+        let subtitle: String
+    }
     
     // MARK: AboutInfo Model
     /// The data model for the app's "About" information.
-    private struct AboutInfo: Codable, OutlineItemArrayConvertible {
+    struct AboutInfo: Codable {
         /// AboutInfo's three different categories.
-        enum Item: String, CaseIterable, DictionaryIdentifiable {
+        enum Section: String, CaseIterable {
             case author = "Author"
             case version = "Version"
             case source = "Source Code"
-            
-            static let identifiers = newIdentifierDictionary()
         }
         /// Model for AboutInfo's author information.
-        struct Author: Codable, SubtitleItemArrayConvertible {
-            enum Item: String, CaseIterable, DictionaryIdentifiable {
+        struct Author: Codable, SubtitleTextRepresentable, CaseSubtitleRepresentable {
+            enum Item: String, CaseIterable {
                 case name = "Name"
                 case email = "Email"
-                
-                static let identifiers = newIdentifierDictionary()
             }
             let name: String
             let email: String
             
-            var subtitleText: [Item: String] { [.name: name, .email: email] }
+            var subtitles: [Item: String] { [.name: name, .email: email] }
         }
         /// Model for AboutInfo's version information.
-        struct Version: Codable, SubtitleItemArrayConvertible {
-            enum Item: String, CaseIterable, DictionaryIdentifiable {
+        struct Version: Codable, SubtitleTextRepresentable, CaseSubtitleRepresentable {
+            enum Item: String, CaseIterable {
                 case stage = "Stage"
                 case number = "Number"
                 case build = "Build"
                 case date = "Date"
-                
-                static let identifiers = newIdentifierDictionary()
             }
             let stage: String
             let number: String
             let build: String
             let date: String
             
-            var subtitleText: [Item: String] { [.stage: stage, .number: number, .build: build, .date: date] }
+            var subtitles: [Item: String] { [.stage: stage, .number: number, .build: build, .date: date] }
         }
         /// Model for AboutInfo's source code information.
-        struct Source: Codable, SubtitleItemArrayConvertible {
-            enum Item: String, CaseIterable, DictionaryIdentifiable {
+        struct Source: Codable, SubtitleTextRepresentable, CaseSubtitleRepresentable {
+            enum Item: String, CaseIterable {
                 case link = "Link"
                 case license = "License"
-
-                static let identifiers = newIdentifierDictionary()
             }
             let link: String
             let license: String
             
-            var subtitleText: [Item: String] { [.link: link, .license: license] }
+            var subtitles: [Item: String] { [.link: link, .license: license] }
         }
         
-        let author: Author
-        let version: Version
-        let source: Source
+        var aboutSections: [AboutSection] {
+            sections.map { AboutSection(title: $0.key.rawValue, item: $0.value) }
+        }
         
-        var subItems: [Item: ListItemArrayConvertible] { [.author: author, .version: version, .source: source] }
+        private let author: Author
+        private let version: Version
+        private let source: Source
+        
+        private var sections: [Section: SubtitleTextRepresentable] { [.author: author, .version: version, .source: source] }
     }
     
-    // MARK: Model Stores
-    private(set) lazy var sectionsStore: ObservableModelStore<Section>? = {
-        let section = OldListSection(id: .header, items: headerListItemIds)
-        return ObservableModelStore([section])
-    }()
-    private(set) lazy var itemsStore: ObservableModelStore<Item>? = {
-        ObservableModelStore(allListItems)
-    }()
+    let aboutInfo: AboutInfo
     
-    private var aboutInfo: AboutInfo
-    
-    private let titleListItem = OldListItem(id: UUID(), title: "About MEADepthCamera")
-    
-    private var allListItems: [OldListItem] {
-        [[titleListItem],
-         aboutInfo.listItems,
-         aboutInfo.author.listItems,
-         aboutInfo.version.listItems,
-         aboutInfo.source.listItems].flatMap { $0 }
-    }
-    private var headerListItemIds: [UUID] { [[titleListItem.id], AboutInfo.Item.allCases.map { $0.id }].flatMap { $0 } }
+    let navigationTitle: String = "About \(Bundle.main.applicationName)"
     
     init() {
         let aboutInfo: [AboutInfo] = load("about.json")

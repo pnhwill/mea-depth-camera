@@ -33,10 +33,6 @@ where
     
     private let repository = Repository()
     
-    deinit {
-        print("converter deinit")
-    }
-    
     func fetchData() -> ([ListSection], [ListItem]) {
         let listItems = repository.objects.compactMap { Item($0)?.listItem }
         let listSections = repository.sections.compactMap { Section(sectionInfo: $0)?.listSection }

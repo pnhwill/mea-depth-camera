@@ -8,6 +8,8 @@
 import CoreData
 import Combine
 
+// MARK: ListRepositoryProtocol
+
 protocol ListRepositoryProtocol {
     
     associatedtype Object: ListObject
@@ -26,6 +28,8 @@ protocol ListRepositoryProtocol {
         deleteItem: AnyPublisher<ListItem.ID, Never>,
         searchTerm: AnyPublisher<String, Never>)
 }
+
+// MARK: ListRepository Class
 
 final class ListRepository<Provider: ListDataProvider>:
     NSObject,
@@ -52,10 +56,6 @@ final class ListRepository<Provider: ListDataProvider>:
     }
     var didUpdateObjectPublisher: AnyPublisher<Object, Never> {
         didUpdateObjectSubject.eraseToAnyPublisher()
-    }
-    
-    deinit {
-        print("repository deinit")
     }
     
     func attachEventListeners(
@@ -100,7 +100,12 @@ final class ListRepository<Provider: ListDataProvider>:
     private var didUpdateObjectSubject = PassthroughSubject<Object, Never>()
     
     private func search(query: String) {
-        let predicate = !query.isEmpty ? NSPredicate(format: Object.searchPredicate, query) : NSPredicate(value: true)
+        let predicate: NSPredicate
+        if query.isEmpty {
+            predicate = NSPredicate(value: true)
+        } else {
+            predicate = NSPredicate(format: Object.searchFormat, argumentArray: Array(repeating: query, count: Object.searchKeys.count))
+        }
         dataProvider.fetchedResultsController.fetchRequest.predicate = predicate
         do {
             try dataProvider.fetchedResultsController.performFetch()
@@ -111,13 +116,11 @@ final class ListRepository<Provider: ListDataProvider>:
     }
     
     private func add() {
-        print(#function)
         searchQuery = ""
-        dataProvider.add(in: dataProvider.persistentContainer.viewContext)
+        dataProvider.add(in: dataProvider.persistentContainer.viewContext, shouldSave: false)
     }
     
     private func delete(_ id: ListItem.ID) {
-        print(#function)
         guard let object = Provider.fetchObject(with: id) else { return }
         dataProvider.delete(object)
     }
@@ -131,7 +134,6 @@ final class ListRepository<Provider: ListDataProvider>:
         for type: NSFetchedResultsChangeType,
         newIndexPath: IndexPath?)
     {
-        print(type.rawValue)
         guard let object = anObject as? Object else { return }
         switch type {
         case .insert:

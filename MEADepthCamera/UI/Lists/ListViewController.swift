@@ -8,6 +8,7 @@
 import UIKit
 import Combine
 
+/// A `UICollectionViewController` subclass that lists item data from any `ListViewModel` and presents a detail view for selected cells.
 final class ListViewController: UICollectionViewController {
 
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<ListSection.ID, ListItem.ID>
@@ -23,8 +24,8 @@ final class ListViewController: UICollectionViewController {
 
     private var sectionIdentifiers: [ListSection.ID] = []
     
-    private var sectionStore: AnyModelStore<ListSection>?
-    private var itemStore: AnyModelStore<ListItem>?
+    private var sectionStore: ListModelStore<ListSection>?
+    private var itemStore: ListModelStore<ListItem>?
     
     private var isInitialLoad: Bool = true
 
@@ -105,8 +106,8 @@ extension ListViewController {
     private func applyInititalBackingStore() {
         guard let (sections, items) = viewModel?.fetchData() else { return }
         sectionIdentifiers = sections.map { $0.id }
-        sectionStore = AnyModelStore(sections)
-        itemStore = AnyModelStore(items)
+        sectionStore = ListModelStore(sections)
+        itemStore = ListModelStore(items)
     }
 
     private func selectItemIfNeeded() {

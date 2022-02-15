@@ -26,14 +26,16 @@ enum SidebarSection: CaseIterable {
         case .main:
             return [.useCases, .tasks]
         case .info:
-            return []
+            return [.about]
         }
     }
 }
 
 /// View model for the sidebar main menu items.
 enum SidebarItem: CaseIterable {
-    case useCases, tasks
+    case useCases
+    case tasks
+    case about
     
     var title: String {
         switch self {
@@ -41,6 +43,8 @@ enum SidebarItem: CaseIterable {
             return "Use Cases"
         case .tasks:
             return "Tasks"
+        case .about:
+            return "About"
         }
     }
 }

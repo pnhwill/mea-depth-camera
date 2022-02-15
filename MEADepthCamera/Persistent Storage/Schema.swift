@@ -17,7 +17,7 @@ enum Schema {
     }
     
     enum UseCase: String {
-        case title, date
+        case title, date, subjectID, experimentTitle
     }
     
     enum Recording: String {
@@ -29,6 +29,6 @@ enum Schema {
     }
     
     enum Task: String {
-        case name
+        case name, fileNameLabel, instructions
     }
 }

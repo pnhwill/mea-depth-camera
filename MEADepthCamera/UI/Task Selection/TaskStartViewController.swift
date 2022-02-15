@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// A detail view controller for viewing a single Task.
+/// A detail view controller for viewing a Task's instructions and previously captured recordings.
 class TaskStartViewController: UICollectionViewController {
     
     typealias Section = TaskStartViewModel.Section
@@ -21,15 +21,6 @@ class TaskStartViewController: UICollectionViewController {
     private var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
     private var useCase: UseCase?
     private var task: Task?
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        print("TaskDetailViewController Initialized.")
-    }
-    
-    deinit {
-        print("TaskDetailViewController deinitialized.")
-    }
     
     func configure(with task: Task, useCase: UseCase) {
         self.task = task

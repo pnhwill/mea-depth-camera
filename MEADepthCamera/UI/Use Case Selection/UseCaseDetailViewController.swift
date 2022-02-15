@@ -9,41 +9,42 @@ import UIKit
 import Combine
 
 /// A detail view controller for both viewing and editing a single Use Case.
-class UseCaseDetailViewController: UICollectionViewController, DetailViewController {
-    
-    typealias AddCompletion = OldMainSplitViewController.AddCompletion
+final class UseCaseDetailViewController: UICollectionViewController, DetailViewController {
     
     private var viewModel: DetailViewModel?
     private var useCase: UseCase?
     private var isNew: Bool = false
     private var isHidden: Bool = true
     
-    private var useCaseDidChangeSubscriber: Cancellable?
-    private var addCompletion: AddCompletion?
+    private var isInputValid: Cancellable?
     
-    private var mainSplitViewController: OldMainSplitViewController {
-        self.splitViewController as! OldMainSplitViewController
+    private var mainSplitViewController: MainSplitViewController? {
+        return splitViewController as? MainSplitViewController
     }
     
     deinit {
         print("UseCaseDetailViewController deinitialized.")
     }
     
-    func configure(with useCase: UseCase, isNew: Bool = false, addCompletion: AddCompletion? = nil) {
-        self.useCase = useCase
-        self.isNew = isNew
-        self.addCompletion = addCompletion
-        setEditing(isNew, animated: false)
-    }
-    
     // MARK: DetailViewController
     
     func configure(with useCaseID: UUID, isNew: Bool) {
-        self.useCase = UseCaseProvider.fetchObject(with: useCaseID)
+        guard let useCase = UseCaseProvider.fetchObject(with: useCaseID) else { return }
+        self.useCase = useCase
         self.isNew = isNew
         navigationController?.setNavigationBarHidden(false, animated: true)
         isHidden = false
         setEditing(isNew, animated: false)
+        
+        isInputValid = useCase.publisher(for: \.title)
+            .combineLatest(useCase.publisher(for: \.subjectID))
+            .receive(on: RunLoop.main)
+            .sink { [weak self] (title, subjectID) in
+                guard let editViewModel = self?.viewModel as? UseCaseDetailEditViewModel else { return }
+                self?.editButtonItem.isEnabled = editViewModel.validateInput(
+                    title: title,
+                    subjectID: subjectID)
+            }
     }
     
     func hide() {
@@ -68,24 +69,6 @@ class UseCaseDetailViewController: UICollectionViewController, DetailViewControl
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.setRightBarButton(editButtonItem, animated: false)
-        
-        useCaseDidChangeSubscriber = NotificationCenter.default
-            .publisher(for: .useCaseDidChange)
-            .receive(on: RunLoop.main)
-            .map { $0.userInfo?[NotificationKeys.useCaseId] }
-            .sink { [weak self] id in
-                guard let useCaseId = self?.useCase?.id,
-                      useCaseId == id as? UUID
-                else { return }
-                self?.checkValidUseCase()
-            }
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-//        if let navigationController = navigationController,
-//           !navigationController.isToolbarHidden {
-//            navigationController.setToolbarHidden(true, animated: animated)
-//        }
     }
 }
 
@@ -112,59 +95,27 @@ extension UseCaseDetailViewController {
         } else {
             transitionToViewMode(useCase)
         }
+        navigationItem.title = viewModel?.navigationTitle
         configureCollectionView()
     }
     
     private func transitionToViewMode(_ useCase: UseCase) {
         // Resign the first responder
         view.endEditing(true)
-        // Save the use case to persistent storage if needed
-        if useCase.hasChanges {
-            let container = AppDelegate.shared.coreDataStack.persistentContainer
-            let context = useCase.managedObjectContext
-            let contextSaveInfo: ContextSaveContextualInfo = isNew ? .addUseCase : .updateUseCase
-            container.saveContext(backgroundContext: context, with: contextSaveInfo)
-        }
+        saveIfNeeded()
         isNew = false
         viewModel = UseCaseDetailViewModel(useCase: useCase)
-        navigationItem.title = NSLocalizedString("View Use Case", comment: "view use case nav title")
         navigationItem.leftBarButtonItem = nil
         editButtonItem.isEnabled = true
-        addCompletion?()
     }
     
     private func transitionToEditMode(_ useCase: UseCase) {
         editButtonItem.isEnabled = false
         viewModel = UseCaseDetailEditViewModel(useCase: useCase, isNew: isNew)
-        navigationItem.title = isNew ? NSLocalizedString("Add Use Case", comment: "add use case nav title") : NSLocalizedString("Edit Use Case", comment: "edit use case nav title")
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelButtonTrigger))
-    }
-    
-    private func checkValidUseCase() {
-        if let title = useCase?.title, let subjectID = useCase?.subjectID {
-            let isValid = !title.isEmpty && !subjectID.isEmpty
-            self.editButtonItem.isEnabled = isValid
-        }
-    }
-}
-
-// MARK: UICollectionViewDelegate
-extension UseCaseDetailViewController {
-    override func collectionView(_ collectionView: UICollectionView, willDisplaySupplementaryView view: UICollectionReusableView, forElementKind elementKind: String, at indexPath: IndexPath) {
-        guard elementKind == UseCaseDetailViewModel.sectionFooterElementKind, let view = view as? ButtonSupplementaryView else { return }
-//        view.setButtonAction(buttonAction: startButtonTapped)
-    }
-    
-    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Push the detail view when the cell is tapped.
-        if let useCase = useCase,
-           let viewModel = viewModel as? UseCaseDetailViewModel,
-           let itemID = viewModel.dataSource?.itemIdentifier(for: indexPath),
-           let task = viewModel.task(with: itemID) {
-            mainSplitViewController.showCamera(task: task, useCase: useCase)
-        } else {
-            collectionView.deselectItem(at: indexPath, animated: true)
-        }
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            barButtonSystemItem: .cancel,
+            target: self,
+            action: #selector(cancelButtonTrigger))
     }
 }
 
@@ -174,18 +125,33 @@ extension UseCaseDetailViewController {
     @objc
     func cancelButtonTrigger() {
         useCase?.managedObjectContext?.rollback()
-        if isNew {
-            mainSplitViewController.transitionToUseCaseList()
-        } else {
-            setEditing(false, animated: true)
-        }
-        addCompletion?()
+        setEditing(false, animated: true)
     }
     
-    private func startButtonTapped() {
-        guard let useCase = useCase else { return }
-        // Show the task list split view when start button is tapped
-//        mainSplitViewController.transitionToTaskList(with: useCase)
+    /// Saves the `UseCase` to persistent storage if it has changes.
+    private func saveIfNeeded() {
+        if let useCase = useCase, useCase.hasChanges, let editViewModel = viewModel as? UseCaseDetailEditViewModel {
+            editViewModel.save() { success in
+                if !success {
+                    useCase.managedObjectContext?.rollback()
+                }
+            }
+        }
     }
 }
 
+// MARK: UICollectionViewDelegate
+extension UseCaseDetailViewController {
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        // Push the camera view when the cell is tapped.
+        if let useCase = useCase,
+           let viewModel = viewModel as? UseCaseDetailViewModel,
+           let itemID = viewModel.itemID(at: indexPath),
+           let task = TaskProvider.fetchObject(with: itemID) {
+            mainSplitViewController?.showCamera(task: task, useCase: useCase)
+        } else {
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
+    }
+}
