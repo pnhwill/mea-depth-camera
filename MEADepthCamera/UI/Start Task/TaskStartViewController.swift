@@ -18,7 +18,7 @@ class TaskStartViewController: UICollectionViewController {
     }
     
     private var viewModel: TaskStartViewModel?
-    private var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
+    private var dataSource: UICollectionViewDiffableDataSource<Section.ID, DetailItem.ID>?
     private var useCase: UseCase?
     private var task: Task?
     
@@ -97,7 +97,7 @@ extension TaskStartViewController {
         let recordingCellRegistration = createRecordingCellRegistration()
         let recordingHeaderRegistration = createRecordingHeaderRegistration()
         
-        dataSource = UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>(collectionView: collectionView) {
+        dataSource = UICollectionViewDiffableDataSource<Section.ID, DetailItem.ID>(collectionView: collectionView) {
             (collectionView, indexPath, itemID) -> UICollectionViewCell? in
             guard let section = Section.ID(rawValue: indexPath.section) else { return nil }
             
@@ -124,14 +124,14 @@ extension TaskStartViewController {
     private func applyInitialSnapshot() {
         // Set the order for our sections
         let sections = Section.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, OldListItem.ID>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, DetailItem.ID>()
         snapshot.appendSections(sections)
         dataSource?.apply(snapshot, animatingDifferences: false)
         
         // Set section snapshots for each section
         for section in sections {
             guard let items = viewModel?.sectionsStore?.fetchByID(section)?.items else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<OldListItem.ID>()
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<DetailItem.ID>()
             sectionSnapshot.append(items)
             dataSource?.apply(sectionSnapshot, to: section, animatingDifferences: false)
         }
@@ -141,15 +141,12 @@ extension TaskStartViewController {
 // MARK: Cell Registration
 extension TaskStartViewController {
     
-    private func createInfoCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createInfoCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             var content = indexPath.item == 0 ? UIListContentConfiguration.extraProminentInsetGroupedHeader() : cell.defaultContentConfiguration()
             content.text = item.title
-            content.secondaryText = item.subtitle
-            if let itemType = TaskStartViewModel.InfoItems.ItemType(rawValue: indexPath.item) {
-                content.image = itemType.cellImage
-            }
+            content.image = item.image
             cell.contentConfiguration = content
         }
     }
@@ -163,10 +160,11 @@ extension TaskStartViewController {
         }
     }
     
-    private func createRecordingCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<OldListTextCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createRecordingCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
-            cell.updateWithItem(item)
+            let cellModel = ListTextCellModel(detailItem: item)
+            cell.updateWithItem(cellModel)
         }
     }
     

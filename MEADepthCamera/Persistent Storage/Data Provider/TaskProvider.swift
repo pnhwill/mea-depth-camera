@@ -9,13 +9,12 @@ import CoreData
 import OSLog
 
 /// A class to wrap everything related to fetching, creating, and deleting tasks, and to fetch data from the JSON file and save it to the Core Data store.
-class TaskProvider: DataFetcher<Task>, ListDataProvider {
+final class TaskProvider: DataFetcher<Task>, ListDataProvider {
     typealias Object = Task
     
     override var sortKeyPaths: [String]? {
         [Schema.Task.name.rawValue]
     }
-    
 //    override var sectionNameKeyPath: String? {
 //        Schema.Entity.isDefaultString.rawValue
 //    }
@@ -28,62 +27,6 @@ class TaskProvider: DataFetcher<Task>, ListDataProvider {
     private static let fileExtension = "json"
     private let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)
     
-//    private(set) var persistentContainer: PersistentContainer
-//    private weak var fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?
-//    var sortKey: String = Schema.Task.name.rawValue
-//    var sortAscending: Bool = true
-//
-//    /// A fetched results controller for the Task entity, sorted by the sortKey property.
-//    private(set) lazy var fetchedResultsController: NSFetchedResultsController<Task> = {
-//        let fetchRequest: NSFetchRequest<Task> = Task.fetchRequest()
-//        fetchRequest.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: sortAscending)]
-//
-//        let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
-//                                                    managedObjectContext: persistentContainer.viewContext,
-//                                                    sectionNameKeyPath: nil, cacheName: nil)
-//        controller.delegate = fetchedResultsControllerDelegate
-//
-//        do {
-//            try controller.performFetch()
-//        } catch {
-//            fatalError("###\(#function): Failed to performFetch: \(error)")
-//        }
-//        return controller
-//    }()
-//
-//    // MARK: Init
-//
-//    init(with persistentContainer: PersistentContainer, fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?) {
-//        self.persistentContainer = persistentContainer
-//        self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
-//    }
-//
-//    func add(in context: NSManagedObjectContext, shouldSave: Bool = false, completionHandler: AddAction?) {
-//        context.perform {
-//            let task = Task(context: context)
-//            task.id = UUID()
-//            task.name = "New Task"
-//            if shouldSave {
-//                self.persistentContainer.saveContext(backgroundContext: context, with: .addTask)
-//            }
-//            completionHandler?(task)
-//        }
-//    }
-//
-//    func delete(_ task: Task, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
-//        if let context = task.managedObjectContext {
-//            context.perform {
-//                context.delete(task)
-//                if shouldSave {
-//                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteTask)
-//                }
-//                completionHandler?(true)
-//            }
-//        } else {
-//            completionHandler?(false)
-//        }
-//    }
-//
 //    func copy(_ task: Task, completionHandler: AddAction?) {
 ////        let context = persistentContainer.newBackgroundContext()
 //        let context = task.managedObjectContext ?? persistentContainer.viewContext

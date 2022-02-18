@@ -24,19 +24,6 @@ final class MainSplitViewController: UISplitViewController {
     ///
     /// The list view controller uses this so it can re-select the same row every time it reloads its data.
     private(set) var selectedItemID: ListItem.ID?
-    
-    // MARK: Columns
-    
-    // Convenience getters for each column's navigation controller.
-    private var primaryNavigationController: UINavigationController? {
-        viewController(for: .primary) as? UINavigationController
-    }
-    private var supplementaryNavigationController: UINavigationController? {
-        viewController(for: .supplementary) as? UINavigationController
-    }
-    private var secondaryNavigationController: UINavigationController? {
-        viewController(for: .secondary) as? UINavigationController
-    }
 
     // MARK: Life Cycle
     
@@ -49,13 +36,13 @@ final class MainSplitViewController: UISplitViewController {
     
     /// Shows the DetailViewController for the item that's selected in the list.
     func showDetail(itemID: ListItem.ID, isNew: Bool = false) {
-        guard let selectedList = selectedList,
-              let navController = secondaryNavigationController
-        else { return }
         if let selectedItemID = selectedItemID, itemID == selectedItemID {
             return
         }
         selectedItemID = itemID
+        guard let selectedList = selectedList,
+              let navController = secondaryNavigationController
+        else { return }
         let detailViewController: DetailViewController
         switch selectedList {
         case .useCases:
@@ -92,9 +79,20 @@ final class MainSplitViewController: UISplitViewController {
 
 }
 
-// MARK: List
 extension MainSplitViewController {
+    // MARK: Columns
+    // Convenience getters for each column's navigation controller.
+    private var primaryNavigationController: UINavigationController? {
+        viewController(for: .primary) as? UINavigationController
+    }
+    private var supplementaryNavigationController: UINavigationController? {
+        viewController(for: .supplementary) as? UINavigationController
+    }
+    private var secondaryNavigationController: UINavigationController? {
+        viewController(for: .secondary) as? UINavigationController
+    }
     
+    // MARK: List
     /// Reconfigures the ListViewController when the user taps a cell in the sidebar main menu.
     private func showList(_ selectedList: SidebarItem) {
         guard let listViewController = supplementaryNavigationController?.topViewController as? ListViewController
@@ -109,6 +107,7 @@ extension MainSplitViewController {
             return
         }
         listViewController.configure(viewModel: listViewModel)
+        hideDetail()
         show(.supplementary)
     }
 }

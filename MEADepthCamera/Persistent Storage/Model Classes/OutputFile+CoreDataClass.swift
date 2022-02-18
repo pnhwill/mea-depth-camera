@@ -17,4 +17,9 @@ public class OutputFile: NSManagedObject {
         fileURL = recording?.folderURL?.appendingPathComponent(fileName!)
     }
     
+    public override func awakeFromInsert() {
+        super.awakeFromInsert()
+        id = UUID()
+    }
+    
 }

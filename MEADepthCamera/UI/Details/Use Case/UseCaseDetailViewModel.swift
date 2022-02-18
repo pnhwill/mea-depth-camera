@@ -18,7 +18,7 @@ class UseCaseDetailViewModel: DetailViewModel {
         }
         
         var id: Identifier
-        var items: [OldListItem.ID]
+        var items: [DetailItem.ID]
     }
     
     // MARK: UseCaseItem
@@ -30,7 +30,7 @@ class UseCaseDetailViewModel: DetailViewModel {
         case completedTasks
         case notes
         
-        static var identifiers = newIdentifierDictionary()
+        static let identifiers = newIdentifierDictionary()
         
         static let timeFormatter: DateFormatter = {
             let formatter = DateFormatter()
@@ -86,8 +86,8 @@ class UseCaseDetailViewModel: DetailViewModel {
             }
         }
         
-        static func listItems(for useCase: UseCase) -> [OldListItem] {
-            Self.allCases.map { OldListItem(id: $0.id, title: $0.displayText(for: useCase) ?? "", image: $0.cellImage) }
+        static func listItems(for useCase: UseCase) -> [DetailItem] {
+            Self.allCases.map { DetailItem(id: $0.id, title: $0.displayText(for: useCase) ?? "", image: $0.cellImage) }
         }
     }
     
@@ -107,7 +107,7 @@ class UseCaseDetailViewModel: DetailViewModel {
                 }
             }
             
-            func subItems(in allItems: TaskItems) -> [OldListItem] {
+            func subItems(in allItems: TaskItems) -> [DetailItem] {
                 switch self {
                 case .incomplete:
                     return allItems.incompleteTasks
@@ -129,8 +129,8 @@ class UseCaseDetailViewModel: DetailViewModel {
     
     // MARK: TaskItems
     private struct TaskItems {
-        let incompleteTasks: [OldListItem]
-        let completeTasks: [OldListItem]
+        let incompleteTasks: [DetailItem]
+        let completeTasks: [DetailItem]
         
         init(useCase: UseCase, tasks: [Task]) {
             var allTasks = tasks
@@ -139,11 +139,11 @@ class UseCaseDetailViewModel: DetailViewModel {
             completeTasks = allTasks[p...].compactMap { Self.taskItem($0, useCase: useCase) }.sorted { $0.title < $1.title }
         }
         
-        private static func taskItem(_ task: Task, useCase: UseCase) -> OldListItem? {
+        private static func taskItem(_ task: Task, useCase: UseCase) -> DetailItem? {
             guard let id = task.id, let titleText = task.name else { return nil }
             let recordingsCountText = task.recordingsCountText(for: useCase)
             let bodyText = [recordingsCountText]
-            return OldListItem(id: id, title: titleText, bodyText: bodyText)
+            return DetailItem(id: id, title: titleText, bodyText: bodyText)
         }
     }
     
@@ -151,7 +151,7 @@ class UseCaseDetailViewModel: DetailViewModel {
     
     static let sectionFooterElementKind = "StartButtonFooter"
     
-    var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
+    var dataSource: UICollectionViewDiffableDataSource<Section.ID, DetailItem.ID>?
     
     private var useCase: UseCase
     private lazy var tasks: [Task]? = {
@@ -159,16 +159,16 @@ class UseCaseDetailViewModel: DetailViewModel {
     }()
     
     // MARK: Model Stores
-    lazy var sectionsStore: AnyModelStore<Section>? = {
+    lazy var sectionsStore: ListModelStore<Section>? = {
         guard let taskListSection = taskListSection() else { return nil }
         let headerItemIds = UseCaseItem.allCases.map { $0.id }
         let useCaseHeaderSection = Section(id: .info, items: headerItemIds)
-        return AnyModelStore([useCaseHeaderSection, taskListSection])
+        return ListModelStore([useCaseHeaderSection, taskListSection])
     }()
-    lazy var itemsStore: AnyModelStore<OldListItem>? = {
+    lazy var itemsStore: ListModelStore<DetailItem>? = {
         guard let taskItems = taskItems() else { return nil }
         let items = UseCaseItem.listItems(for: useCase) + taskItems
-        return AnyModelStore(items)
+        return ListModelStore(items)
     }()
     
     init(useCase: UseCase) {
@@ -188,11 +188,14 @@ class UseCaseDetailViewModel: DetailViewModel {
             case .info:
                 var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
                 config.headerMode = .firstItemInSection
-                config.footerMode = .supplementary
+//                config.footerMode = .supplementary
                 let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
-                let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
-                let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: footerSize, elementKind: Self.sectionFooterElementKind, alignment: .bottom)
-                section.boundarySupplementaryItems = [sectionFooter]
+//                let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
+//                let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(
+//                    layoutSize: footerSize,
+//                    elementKind: Self.sectionFooterElementKind,
+//                    alignment: .bottom)
+//                section.boundarySupplementaryItems = [sectionFooter]
                 return section
             case .tasks:
                 var configuration = UICollectionLayoutListConfiguration(appearance: .sidebarPlain)
@@ -209,11 +212,11 @@ class UseCaseDetailViewModel: DetailViewModel {
         
         let useCaseHeaderRegistration = createUseCaseHeaderRegistration()
         let useCaseCellRegistration = createUseCaseCellRegistration()
-        let footerRegistration = createStartButtonFooterRegistration()
+//        let footerRegistration = createStartButtonFooterRegistration()
         let taskContainerCellRegistration = createTaskContainerCellRegistration()
         let taskListCellRegistration = createTaskListCellRegistration()
         
-        dataSource = UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>(collectionView: collectionView) {
+        dataSource = UICollectionViewDiffableDataSource<Section.ID, DetailItem.ID>(collectionView: collectionView) {
             [weak self] (collectionView, indexPath, itemID) -> UICollectionViewCell? in
             guard let sectionID = Section.ID(rawValue: indexPath.section) else { return nil }
             
@@ -234,30 +237,41 @@ class UseCaseDetailViewModel: DetailViewModel {
             }
         }
         
-        dataSource?.supplementaryViewProvider = { (collectionView, elementKind, indexPath) in
-            return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
-        }
+//        dataSource?.supplementaryViewProvider = { (collectionView, elementKind, indexPath) in
+//            return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
+//        }
     }
     
     func applyInitialSnapshots() {
         // Set the order for our sections
         let sections = Section.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, OldListItem.ID>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, DetailItem.ID>()
         snapshot.appendSections(sections)
-        dataSource?.apply(snapshot, animatingDifferences: false)
-        
+        dataSource?.applySnapshotUsingReloadData(snapshot)
+        applySectionSnapshots(sections, animated: false)
+    }
+    
+    func refreshData() {
+        reloadStores()
+        guard var snapshot = dataSource?.snapshot() else { return }
+        snapshot.reconfigureItems([UseCaseItem.completedTasks.id])
+        dataSource?.apply(snapshot)
+        applySectionSnapshots([Section.ID.tasks], animated: true)
+    }
+    
+    private func applySectionSnapshots(_ sections: [Section.ID], animated: Bool) {
         // Set section snapshots for each section
         for sectionID in sections {
             guard let sectionSnapshot = createSnapshot(for: sectionID) else { continue }
-            dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: false)
+            dataSource?.apply(sectionSnapshot, to: sectionID, animatingDifferences: animated)
         }
     }
     
-    private func createSnapshot(for section: Section.ID) -> NSDiffableDataSourceSectionSnapshot<OldListItem.ID>? {
+    private func createSnapshot(for section: Section.ID) -> NSDiffableDataSourceSectionSnapshot<DetailItem.ID>? {
         guard let items = sectionsStore?.fetchByID(section)?.items else { return nil }
-        var snapshot = NSDiffableDataSourceSectionSnapshot<OldListItem.ID>()
+        var snapshot = NSDiffableDataSourceSectionSnapshot<DetailItem.ID>()
         
-        func addItems(_ itemIds: [OldListItem.ID], to parent: OldListItem.ID?) {
+        func addItems(_ itemIds: [DetailItem.ID], to parent: DetailItem.ID?) {
             snapshot.append(itemIds, to: parent)
             let menuItems = itemIds.compactMap { itemsStore?.fetchByID($0) }
             for menuItem in menuItems where !menuItem.subItems.isEmpty {
@@ -274,6 +288,17 @@ class UseCaseDetailViewModel: DetailViewModel {
 
 // MARK: Model Store Configuration
 extension UseCaseDetailViewModel {
+    private func reloadStores() {
+        guard let taskListSection = taskListSection(), let taskItems = taskItems() else { return }
+        // Sections
+        let headerItemIds = UseCaseItem.allCases.map { $0.id }
+        let useCaseHeaderSection = Section(id: .info, items: headerItemIds)
+        sectionsStore?.reload(with: [useCaseHeaderSection, taskListSection])
+        // Items
+        let items = UseCaseItem.listItems(for: useCase) + taskItems
+        itemsStore?.reload(with: items)
+    }
+    
     private func taskListSection() -> Section? {
         guard let allTasks = tasks else { return nil }
         let taskItems = TaskItems(useCase: useCase, tasks: allTasks)
@@ -281,19 +306,19 @@ extension UseCaseDetailViewModel {
         return Section(id: .tasks, items: listItemsIds)
     }
     
-    private func taskItems() -> [OldListItem]? {
+    private func taskItems() -> [DetailItem]? {
         guard let allTasks = tasks else { return nil }
         let taskItems = TaskItems(useCase: useCase, tasks: allTasks)
         let headerTypes = TaskHeaders.HeaderType.allCases
-        let headerItems = headerTypes.map { OldListItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
+        let headerItems = headerTypes.map { DetailItem(id: $0.id, title: $0.headerTitle, subItems: $0.subItems(in: taskItems)) }
         return [headerItems, taskItems.incompleteTasks, taskItems.completeTasks].flatMap { $0 }
     }
 }
 
 // MARK: Cell Registration
 extension UseCaseDetailViewModel {
-    private func createUseCaseHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createUseCaseHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
             var content = UIListContentConfiguration.extraProminentInsetGroupedHeader()
             content.text = item.title
@@ -301,8 +326,8 @@ extension UseCaseDetailViewModel {
         }
     }
     
-    private func createUseCaseCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createUseCaseCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
             var content = cell.defaultContentConfiguration()
             content.text = item.title
@@ -318,18 +343,18 @@ extension UseCaseDetailViewModel {
         }
     }
     
-    private func createTaskContainerCellRegistration() -> UICollectionView.CellRegistration<ExpandableHeaderCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<ExpandableHeaderCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createTaskContainerCellRegistration() -> UICollectionView.CellRegistration<ExpandableHeaderCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<ExpandableHeaderCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }
     }
     
-    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<OldListTextCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
-            cell.updateWithItem(item)
-//            cell.delegate = self as? ListTextCellDelegate
+            let cellModel = ListTextCellModel(detailItem: item)
+            cell.updateWithItem(cellModel)
         }
     }
 }

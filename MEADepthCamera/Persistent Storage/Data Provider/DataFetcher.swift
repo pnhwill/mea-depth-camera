@@ -7,9 +7,10 @@
 
 import CoreData
 
-class DataFetcher<Model: NSManagedObject>: FetchingDataProvider {
+/// Generic implementation of `FetchingDataProvider` that initializes an `NSFetchedResultsController` and provides overridable properties for sort and section key paths.
+class DataFetcher<Entity: NSManagedObject>: FetchingDataProvider {
     
-    typealias Object = Model
+    typealias Object = Entity
     
     private(set) var sortKeyPaths: [String]?
     private(set) var sectionNameKeyPath: String?
@@ -17,9 +18,9 @@ class DataFetcher<Model: NSManagedObject>: FetchingDataProvider {
     private(set) var persistentContainer: PersistentContainer
     private weak var fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?
 
-    /// A fetched results controller for the Model entity, sorted by the sortKey property.
-    private(set) lazy var fetchedResultsController: NSFetchedResultsController<Model> = {
-        let fetchRequest: NSFetchRequest<Model> = Model.fetchRequest() as! NSFetchRequest<Model>
+    /// A fetched results controller for the `Entity`, sorted by the `sortKeyPaths` property and sectioned by the `sectionNameKeyPath` property.
+    private(set) lazy var fetchedResultsController: NSFetchedResultsController<Entity> = {
+        let fetchRequest: NSFetchRequest<Entity> = Entity.fetchRequest() as! NSFetchRequest<Entity>
         fetchRequest.sortDescriptors = sortKeyPaths?.map { NSSortDescriptor(key: $0, ascending: true) }
 
         let controller = NSFetchedResultsController(fetchRequest: fetchRequest,

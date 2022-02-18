@@ -56,6 +56,13 @@ final class ListViewController: UICollectionViewController {
         configureSearchController()
         configureToolbar()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let mainSplitViewController = mainSplitViewController {
+            clearsSelectionOnViewWillAppear = mainSplitViewController.isCollapsed
+        }
+        super.viewWillAppear(animated)
+    }
 
     @objc
     func addButtonAction(_ sender: UIBarButtonItem) {
@@ -232,6 +239,7 @@ extension ListViewController {
     private func createListCellRegistration() -> ListCellRegistration {
         return ListCellRegistration { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.itemStore?.fetchByID(itemID) else { return }
+//            let cellModel = ListTextCellModel(listItem: item)
             cell.updateWithItem(item)
         }
     }

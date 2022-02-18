@@ -9,7 +9,7 @@ import CoreData
 import OSLog
 
 /// A class to wrap everything related to creating and deleting recordings.
-class RecordingProvider: OldDataProvider {
+final class RecordingProvider: AddingDataProvider, DeletingDataProvider {
     
     typealias Object = Recording
     
@@ -23,20 +23,7 @@ class RecordingProvider: OldDataProvider {
         self.persistentContainer = persistentContainer
     }
     
-    func add(in context: NSManagedObjectContext, shouldSave: Bool = true, completionHandler: AddAction? = nil) {
-        context.perform {
-            let recording = Recording(context: context)
-            let id = UUID()
-            recording.id = id
-            recording.isProcessed = false
-            self.logger.info("Recording \(id.uuidString) added to NSManagedObjectContext.")
-            if shouldSave {
-                self.persistentContainer.saveContext(backgroundContext: context, with: .addRecording)
-            }
-            completionHandler?(recording)
-        }
-    }
-    
+    /// Custom implementation of delete method for deleting the files on disk.
     func delete(_ recording: Recording, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
         if let context = recording.managedObjectContext {
             context.perform {

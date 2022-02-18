@@ -17,7 +17,7 @@ class TaskDetailViewModel: DetailViewModel {
         }
         
         var id: Identifier
-        var items: [OldListItem.ID]
+        var items: [DetailItem.ID]
     }
     
     // MARK: Info Items
@@ -66,22 +66,22 @@ class TaskDetailViewModel: DetailViewModel {
     
     let navigationTitle: String = NSLocalizedString("View Task", comment: "view task nav title")
     
-    var dataSource: UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>?
+    var dataSource: UICollectionViewDiffableDataSource<Section.ID, DetailItem.ID>?
     
     // MARK: Data Stores
     lazy var sectionsStore: AnyModelStore<Section>? = {
         let infoSection = Section(id: .info, items: infoItemIds)
         return AnyModelStore([infoSection])
     }()
-    lazy var itemsStore: AnyModelStore<OldListItem>? = {
+    lazy var itemsStore: AnyModelStore<DetailItem>? = {
         let items = [infoItems].compactMap { $0 }.flatMap { $0 }
         return AnyModelStore(items)
     }()
     
     private var task: Task
     
-    private var infoItems: [OldListItem] {
-        InfoItems.ItemType.allCases.map { OldListItem(id: $0.id,
+    private var infoItems: [DetailItem] {
+        InfoItems.ItemType.allCases.map { DetailItem(id: $0.id,
                                                    title: $0.displayText(for: task) ?? "?",
                                                    image: $0.cellImage) }
     }
@@ -114,7 +114,7 @@ class TaskDetailViewModel: DetailViewModel {
         let headerRegistration = createHeaderRegistration()
         let cellRegistration = createCellRegistration()
         
-        dataSource = UICollectionViewDiffableDataSource<Section.ID, OldListItem.ID>(collectionView: collectionView) {
+        dataSource = UICollectionViewDiffableDataSource<Section.ID, DetailItem.ID>(collectionView: collectionView) {
             (collectionView, indexPath, itemID) -> UICollectionViewCell? in
             guard let sectionID = Section.ID(rawValue: indexPath.section) else { return nil }
             
@@ -132,7 +132,7 @@ class TaskDetailViewModel: DetailViewModel {
     func applyInitialSnapshots() {
         // Set the order for our sections
         let sections = Section.ID.allCases
-        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, OldListItem.ID>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section.ID, DetailItem.ID>()
         snapshot.appendSections(sections)
         dataSource?.apply(snapshot, animatingDifferences: false)
         
@@ -143,11 +143,11 @@ class TaskDetailViewModel: DetailViewModel {
         }
     }
     
-    private func createSnapshot(for section: Section.ID) -> NSDiffableDataSourceSectionSnapshot<OldListItem.ID>? {
+    private func createSnapshot(for section: Section.ID) -> NSDiffableDataSourceSectionSnapshot<DetailItem.ID>? {
         guard let items = sectionsStore?.fetchByID(section)?.items else { return nil }
-        var snapshot = NSDiffableDataSourceSectionSnapshot<OldListItem.ID>()
+        var snapshot = NSDiffableDataSourceSectionSnapshot<DetailItem.ID>()
         
-        func addItems(_ itemIds: [OldListItem.ID], to parent: OldListItem.ID?) {
+        func addItems(_ itemIds: [DetailItem.ID], to parent: DetailItem.ID?) {
             snapshot.append(itemIds, to: parent)
             let menuItems = itemIds.compactMap { itemsStore?.fetchByID($0) }
             for menuItem in menuItems where !menuItem.subItems.isEmpty {
@@ -166,8 +166,8 @@ class TaskDetailViewModel: DetailViewModel {
 // MARK: Cell Registration
 extension TaskDetailViewModel {
     
-    private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
             var content = UIListContentConfiguration.extraProminentInsetGroupedHeader()
             content.text = item.title
@@ -175,8 +175,8 @@ extension TaskDetailViewModel {
         }
     }
     
-    private func createCellRegistration()  -> UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> {
-        return UICollectionView.CellRegistration<UICollectionViewListCell, OldListItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createCellRegistration()  -> UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
             var content = cell.defaultContentConfiguration()
             content.text = item.title

@@ -11,4 +11,3 @@ protocol DetailViewController where Self: UIViewController {
     func configure(with: UUID, isNew: Bool)
     func hide()
 }
-

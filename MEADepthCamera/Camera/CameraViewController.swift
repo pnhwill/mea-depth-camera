@@ -75,7 +75,7 @@ class CameraViewController: UIViewController {
     }
     
     deinit {
-        print("CameraViewController deinitialized.")
+        print("\(typeName) deinitialized.")
     }
     
     // MARK: - Configuration

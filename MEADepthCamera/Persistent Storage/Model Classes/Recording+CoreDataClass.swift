@@ -21,6 +21,12 @@ public class Recording: NSManagedObject {
         folderURL = docsURL.appendingPathComponent(name!)
     }
     
+    public override func awakeFromInsert() {
+        super.awakeFromInsert()
+        id = UUID()
+//        isProcessed = false
+    }
+    
     func addFiles(_ newFiles: [OutputType: URL]) {
         guard let context = managedObjectContext else { return }
         for file in newFiles {

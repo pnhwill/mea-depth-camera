@@ -147,14 +147,17 @@ extension ProcessingListViewModel {
 // MARK: FaceLandmarksPipelineDelegate
 extension ProcessingListViewModel: FaceLandmarksPipelineDelegate {
     func displayFrameCounter(_ frame: Int) {
-        guard let recording = faceLandmarksPipeline?.recording else { return }
+        guard let recording = faceLandmarksPipeline?.recording, let id = recording.id else { return }
         reconfigureItem(recording: recording, processedFrames: frame)
-        NotificationCenter.default.post(name: .recordingDidChange, object: self, userInfo: [NotificationKeys.recordingId: recording.id!])
+        NotificationCenter.default.post(
+            name: .recordingDidChange,
+            object: self,
+            userInfo: [NotificationKeys.recordingId: id])
     }
     
     func didFinishTracking(success: Bool) {
-        guard let recording = faceLandmarksPipeline?.recording else { return }
-        logger.notice("Finished processing Recording \(recording.id!.uuidString) \(success ? "successfully" : "due to early exit").")
+        guard let recording = faceLandmarksPipeline?.recording, let id = recording.id else { return }
+        logger.notice("Finished processing Recording \(id.uuidString) \(success ? "successfully" : "due to early exit").")
         let context = recording.managedObjectContext
         let container = AppDelegate.shared.coreDataStack.persistentContainer
         if success {

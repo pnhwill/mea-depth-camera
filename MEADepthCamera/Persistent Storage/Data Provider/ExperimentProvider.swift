@@ -9,69 +9,22 @@ import CoreData
 import OSLog
 
 /// A class to wrap everything related to fetching, creating, and deleting experiments, and to fetch data from the JSON file and save it to the Core Data store.
-final class ExperimentProvider: FetchingDataProvider {
-    
+final class ExperimentProvider: DataFetcher<Experiment> {
     typealias Object = Experiment
     
-    private(set) var persistentContainer: PersistentContainer
-    private weak var fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?
-    var sortKey: String = Schema.Experiment.title.rawValue
-    var sortAscending: Bool = true
-    
-    /// Experiment JSON Data
-    static let fileName = "MEADepthCamera_experiments"
-    static let fileExtension = "json"
-    let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)
-    
-    /// A fetched results controller for the Experiment entity, sorted by the sortKey property.
-    private(set) lazy var fetchedResultsController: NSFetchedResultsController<Experiment> = {
-        let fetchRequest: NSFetchRequest<Experiment> = Experiment.fetchRequest()
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: sortKey, ascending: sortAscending)]
-        
-        let controller = NSFetchedResultsController(fetchRequest: fetchRequest,
-                                                    managedObjectContext: persistentContainer.viewContext,
-                                                    sectionNameKeyPath: nil, cacheName: nil)
-        controller.delegate = fetchedResultsControllerDelegate
-        
-        do {
-            try controller.performFetch()
-        } catch {
-            fatalError("###\(#function): Failed to performFetch: \(error)")
-        }
-        return controller
-    }()
+    override var sortKeyPaths: [String]? {
+        [Schema.Experiment.title.rawValue]
+    }
+    //    override var sectionNameKeyPath: String? {
+    //        Schema.Entity.isDefaultString.rawValue
+    //    }
     
     private let logger = Logger.Category.persistence.logger
     
-    init(with persistentContainer: PersistentContainer, fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?) {
-        self.persistentContainer = persistentContainer
-        self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
-    }
-    
-//    func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?) {
-//        context.perform {
-//            let experiment = Experiment(context: context)
-//            experiment.id = UUID()
-//            if shouldSave {
-//                self.persistentContainer.saveContext(backgroundContext: context, with: .addExperiment)
-//            }
-//            completionHandler?(experiment)
-//        }
-//    }
-//
-//    func delete(_ experiment: Experiment, shouldSave: Bool = true, completionHandler: DeleteAction? = nil) {
-//        if let context = experiment.managedObjectContext {
-//            context.perform {
-//                context.delete(experiment)
-//                if shouldSave {
-//                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteExperiment)
-//                }
-//                completionHandler?(true)
-//            }
-//        } else {
-//            completionHandler?(false)
-//        }
-//    }
+    /// Experiment JSON Data
+    private static let fileName = "MEADepthCamera_experiments"
+    private static let fileExtension = "json"
+    private let url = Bundle.main.url(forResource: fileName, withExtension: fileExtension)
     
 }
 

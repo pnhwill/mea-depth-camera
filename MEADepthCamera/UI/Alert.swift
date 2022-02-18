@@ -23,8 +23,8 @@ struct Alert {
         return alertController
     }
     
-    static func confirmDelete(of item: OldListItem, completion: ((Bool) -> Void)?) -> UIAlertController? {
-        return nil
-    }
+//    static func confirmDelete(of item: OldListItem, completion: ((Bool) -> Void)?) -> UIAlertController? {
+//        return nil
+//    }
     
 }

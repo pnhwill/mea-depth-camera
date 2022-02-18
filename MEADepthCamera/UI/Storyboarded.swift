@@ -7,6 +7,7 @@
 
 import UIKit
 
+/// Protocol for objects loaded from a storyboard.
 protocol Storyboarded {
     static var storyboardIdentifier: String { get }
 }

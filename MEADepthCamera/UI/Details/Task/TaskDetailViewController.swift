@@ -18,13 +18,17 @@ final class TaskDetailViewController: UICollectionViewController, DetailViewCont
     
     private var isInputValid: Cancellable?
     
+    deinit {
+        print("\(typeName) deinitialized.")
+    }
+    
     // MARK: DetailViewController
     
     func configure(with taskID: UUID, isNew: Bool) {
         guard let task = TaskProvider.fetchObject(with: taskID) else { return }
         self.task = task
         self.isNew = isNew
-        navigationController?.setNavigationBarHidden(false, animated: true)
+//        navigationController?.setNavigationBarHidden(false, animated: true)
         isHidden = false
         setEditing(isNew, animated: false)
         
@@ -43,7 +47,15 @@ final class TaskDetailViewController: UICollectionViewController, DetailViewCont
     func hide() {
         guard !isHidden else { return }
         task = nil
-        collectionView.isHidden = true
+        UIViewPropertyAnimator.runningPropertyAnimator(
+            withDuration: 0.2,
+            delay: 0.0,
+            options: .curveEaseIn,
+            animations: { [weak self] in
+                self?.collectionView.alpha = 0.0
+            },
+            completion: nil
+        )
         navigationController?.setNavigationBarHidden(true, animated: true)
         isHidden = true
     }
@@ -54,9 +66,14 @@ final class TaskDetailViewController: UICollectionViewController, DetailViewCont
         super.viewDidLoad()
         navigationItem.setRightBarButton(editButtonItem, animated: false)
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showBarsIfNeeded()
+    }
 }
 
-// MARK: Configure Collection View
+// MARK: Configure Views
 
 extension TaskDetailViewController {
     
@@ -65,6 +82,13 @@ extension TaskDetailViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         viewModel?.configureDataSource(for: collectionView)
         viewModel?.applyInitialSnapshots()
+    }
+    
+    private func showBarsIfNeeded(animated: Bool = true) {
+        guard let navigationController = navigationController else { return }
+        if navigationController.isNavigationBarHidden {
+            navigationController.setNavigationBarHidden(false, animated: animated)
+        }
     }
 }
 
@@ -81,6 +105,7 @@ extension TaskDetailViewController {
         }
         navigationItem.title = viewModel?.navigationTitle
         configureCollectionView()
+        showBarsIfNeeded()
     }
     
     private func transitionToViewMode(_ task: Task) {
@@ -101,6 +126,7 @@ extension TaskDetailViewController {
             barButtonSystemItem: .cancel,
             target: self,
             action: #selector(cancelButtonTrigger))
+        navigationController?.setToolbarHidden(true, animated: true)
     }
 }
 

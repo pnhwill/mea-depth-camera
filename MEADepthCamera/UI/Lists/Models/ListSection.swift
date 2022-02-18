@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Generic model of a section in a list of items, containing an array of the item identifiers for that section.
 struct ListSection: Identifiable {
     var id: String
     var items: [ListItem.ID]

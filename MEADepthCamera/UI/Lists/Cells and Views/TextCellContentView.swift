@@ -12,10 +12,9 @@ import UIKit
 struct TextCellContentConfiguration: UIContentConfiguration, Hashable {
     
     var titleText: String
-    var subtitleText: String?
     var bodyText: [String]
-    var listContentConfiguration = UIListContentConfiguration.sidebarCell()
-    var titleContentConfiguration = UIListContentConfiguration.sidebarHeader()
+    var titleContentConfiguration: UIListContentConfiguration
+    var bodyContentConfiguration: UIListContentConfiguration
     
     func makeContentView() -> UIView & UIContentView {
         return TextCellContentView(configuration: self)
@@ -24,7 +23,7 @@ struct TextCellContentConfiguration: UIContentConfiguration, Hashable {
     func updated(for state: UIConfigurationState) -> TextCellContentConfiguration {
         guard let state = state as? UICellConfigurationState else { return self }
         var updatedConfiguration = self
-        updatedConfiguration.listContentConfiguration = listContentConfiguration.updated(for: state)
+        updatedConfiguration.bodyContentConfiguration = bodyContentConfiguration.updated(for: state)
         updatedConfiguration.titleContentConfiguration = titleContentConfiguration.updated(for: state)
         return updatedConfiguration
     }
@@ -44,21 +43,18 @@ class TextCellContentView: UIView, UIContentView {
     
     private var appliedConfiguration: TextCellContentConfiguration!
     
-    private(set) lazy var titleView = UIListContentView(configuration: defaultTitleContentConfiguration())
+    private(set) var titleView: UIListContentView!
     private lazy var bodyView = LabelListView()
     
     init(configuration: TextCellContentConfiguration) {
         super.init(frame: .zero)
+        titleView = UIListContentView(configuration: configuration.titleContentConfiguration)
         setUpInternalViews()
         apply(configuration: configuration)
     }
     
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func defaultTitleContentConfiguration() -> UIListContentConfiguration {
-        return .sidebarHeader()
     }
     
     private func setUpInternalViews() {
@@ -86,23 +82,23 @@ class TextCellContentView: UIView, UIContentView {
         
         var titleContent = configuration.titleContentConfiguration
         titleContent.text = configuration.titleText
-        titleContent.secondaryText = configuration.subtitleText
         titleContent.axesPreservingSuperviewLayoutMargins = []
         titleContent.directionalLayoutMargins.bottom = 0
         titleView.configuration = titleContent
         
-        let listConfiguration = configuration.listContentConfiguration
+        let listConfiguration = configuration.bodyContentConfiguration
         var rowLabels: [UILabel] = []
         for rowText in configuration.bodyText {
             let label = UILabel()
             label.translatesAutoresizingMaskIntoConstraints = false
             label.text = rowText
-            label.font = listConfiguration.textProperties.font
-            label.textColor = listConfiguration.textProperties.resolvedColor()
+            label.font = listConfiguration.secondaryTextProperties.font
+            label.textColor = listConfiguration.secondaryTextProperties.resolvedColor()
             label.adjustsFontForContentSizeCategory = true
             label.numberOfLines = 1
             rowLabels.append(label)
         }
+//        listConfiguration.axesPreservingSuperviewLayoutMargins = []
         bodyView.directionalLayoutMargins = listConfiguration.directionalLayoutMargins
         bodyView.directionalLayoutMargins.top = 0
         bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.top

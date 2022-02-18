@@ -14,6 +14,7 @@ extension UIStoryboard {
         case detail
         case info
         case camera
+        case processing
         
         var filename: String {
             rawValue.capitalized

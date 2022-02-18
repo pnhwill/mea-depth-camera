@@ -23,7 +23,7 @@ final class UseCaseDetailViewController: UICollectionViewController, DetailViewC
     }
     
     deinit {
-        print("UseCaseDetailViewController deinitialized.")
+        print("\(typeName) deinitialized.")
     }
     
     // MARK: DetailViewController
@@ -32,7 +32,7 @@ final class UseCaseDetailViewController: UICollectionViewController, DetailViewC
         guard let useCase = UseCaseProvider.fetchObject(with: useCaseID) else { return }
         self.useCase = useCase
         self.isNew = isNew
-        navigationController?.setNavigationBarHidden(false, animated: true)
+//        navigationController?.setNavigationBarHidden(false, animated: true)
         isHidden = false
         setEditing(isNew, animated: false)
         
@@ -50,18 +50,18 @@ final class UseCaseDetailViewController: UICollectionViewController, DetailViewC
     func hide() {
         guard !isHidden else { return }
         useCase = nil
-        collectionView.isHidden = true
+        UIViewPropertyAnimator.runningPropertyAnimator(
+            withDuration: 0.2,
+            delay: 0.0,
+            options: .curveEaseIn,
+            animations: { [weak self] in
+                self?.collectionView.alpha = 0.0
+            },
+            completion: nil
+        )
         navigationController?.setNavigationBarHidden(true, animated: true)
+        navigationController?.setToolbarHidden(true, animated: true)
         isHidden = true
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == SegueID.showProcessingListSegueIdentifier,
-           let destination = segue.destination as? UINavigationController,
-           let processingListViewController = destination.topViewController as? ProcessingListViewController {
-            guard let useCase = useCase else { return }
-            processingListViewController.configure(useCase: useCase)
-        }
     }
     
     // MARK: Life Cycle
@@ -69,10 +69,23 @@ final class UseCaseDetailViewController: UICollectionViewController, DetailViewC
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.setRightBarButton(editButtonItem, animated: false)
+        configureToolbar()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let viewModel = viewModel as? UseCaseDetailViewModel {
+            viewModel.refreshData()
+        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showBarsIfNeeded()
     }
 }
 
-// MARK: Configure Collection View
+// MARK: Configure Views
 
 extension UseCaseDetailViewController {
     
@@ -81,6 +94,36 @@ extension UseCaseDetailViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         viewModel?.configureDataSource(for: collectionView)
         viewModel?.applyInitialSnapshots()
+    }
+    
+    private func configureToolbar() {
+        var flexibleSpaceBarButtonItem: UIBarButtonItem {
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+                            target: nil,
+                            action: nil)
+        }
+        let addBarButtonItem = UIBarButtonItem(
+            title: "Process Recordings",
+            style: .plain,
+            target: self,
+            action: #selector(showProcessingList))
+        
+        let toolbarButtonItems = [
+            flexibleSpaceBarButtonItem,
+            addBarButtonItem,
+            flexibleSpaceBarButtonItem,
+        ]
+        toolbarItems = toolbarButtonItems
+    }
+    
+    private func showBarsIfNeeded(animated: Bool = true) {
+        guard let navigationController = navigationController else { return }
+        if navigationController.isNavigationBarHidden {
+            navigationController.setNavigationBarHidden(false, animated: animated)
+        }
+        if !isEditing, navigationController.isToolbarHidden {
+            navigationController.setToolbarHidden(false, animated: animated)
+        }
     }
 }
 
@@ -97,6 +140,7 @@ extension UseCaseDetailViewController {
         }
         navigationItem.title = viewModel?.navigationTitle
         configureCollectionView()
+        showBarsIfNeeded()
     }
     
     private func transitionToViewMode(_ useCase: UseCase) {
@@ -116,6 +160,7 @@ extension UseCaseDetailViewController {
             barButtonSystemItem: .cancel,
             target: self,
             action: #selector(cancelButtonTrigger))
+        navigationController?.setToolbarHidden(true, animated: true)
     }
 }
 
@@ -137,6 +182,15 @@ extension UseCaseDetailViewController {
                 }
             }
         }
+    }
+    
+    @objc
+    private func showProcessingList() {
+        guard let useCase = useCase else { return }
+        let processingListViewController: ProcessingListViewController = UIStoryboard(storyboard: .processing).instantiateViewController()
+        processingListViewController.configure(useCase: useCase)
+        let navigationController = UINavigationController(rootViewController: processingListViewController)
+        present(navigationController, animated: true)
     }
 }
 

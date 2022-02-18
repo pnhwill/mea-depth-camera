@@ -38,12 +38,3 @@ extension UICellConfigurationState {
 extension UIConfigurationStateCustomKey {
     static let item = UIConfigurationStateCustomKey(Bundle.main.reverseDNS("ItemListCell.item"))
 }
-
-
-
-
-
-
-
-
-

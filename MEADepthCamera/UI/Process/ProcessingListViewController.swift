@@ -13,13 +13,12 @@ class ProcessingListViewController: UICollectionViewController {
     
     typealias Section = ProcessingListViewModel.Section
     typealias Item = ProcessingListViewModel.Item
+    typealias ProcessingListDiffableDataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>
     
     enum TrackingState {
         case tracking
         case stopped
     }
-    
-    private static let sectionHeaderElementKind = "SectionHeaderElementKind"
     
     private let visionTrackingQueue = DispatchQueue(
         label: Bundle.main.reverseDNS("visionTrackingQueue"),
@@ -30,7 +29,7 @@ class ProcessingListViewController: UICollectionViewController {
     
     private var useCase: UseCase?
     private var viewModel: ProcessingListViewModel?
-    private var dataSource: UICollectionViewDiffableDataSource<Section.ID, Item.ID>?
+    private var dataSource: ProcessingListDiffableDataSource?
     private var trackingState: TrackingState = .stopped {
         didSet {
             self.handleTrackingStateChange()
@@ -41,13 +40,8 @@ class ProcessingListViewController: UICollectionViewController {
     
     private var backgroundRecordingID: UIBackgroundTaskIdentifier?
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        print("ProcessingListViewController Initialized.")
-    }
-    
     deinit {
-        print("ProcessingListViewController deinitialized.")
+        print("\(typeName) deinitialized.")
     }
     
     func configure(useCase: UseCase) {
@@ -64,6 +58,7 @@ class ProcessingListViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "Review Recordings"
+        navigationController?.isToolbarHidden = false
         configureCollectionView()
         configureDataSource()
         refreshListData(isInitialSnapshot: true)
@@ -155,12 +150,16 @@ extension ProcessingListViewController {
     
     // MARK: Layout
     private func createLayout() -> UICollectionViewLayout {
-        return UICollectionViewCompositionalLayout() { (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
-            var config = UICollectionLayoutListConfiguration(appearance: .plain)
+        return UICollectionViewCompositionalLayout() {
+            (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            var config = UICollectionLayoutListConfiguration(appearance: .grouped)
             config.headerMode = .supplementary
             let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
-            let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: headerSize, elementKind: Self.sectionHeaderElementKind, alignment: .top)
+            let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: headerSize,
+                elementKind: UICollectionView.elementKindSectionHeader,
+                alignment: .top)
             section.boundarySupplementaryItems = [sectionHeader]
             return section
         }
@@ -171,7 +170,7 @@ extension ProcessingListViewController {
         let headerRegistration = createHeaderRegistration()
         let cellRegistration = createCellRegistration()
         
-        dataSource = UICollectionViewDiffableDataSource<Section.ID, Item.ID>(collectionView: collectionView) {
+        dataSource = ProcessingListDiffableDataSource(collectionView: collectionView) {
             (collectionView, indexPath, itemID) -> UICollectionViewCell? in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: itemID)
         }
@@ -213,8 +212,11 @@ extension ProcessingListViewController {
 // MARK: Cell Registration
 extension ProcessingListViewController {
     
-    private func createHeaderRegistration() -> UICollectionView.SupplementaryRegistration<UICollectionViewListCell> {
-        return UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: Self.sectionHeaderElementKind) {
+    typealias ProcessingListHeaderRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>
+    typealias ProcessingListCellRegistration = UICollectionView.CellRegistration<ProcessingListCell, Item.ID>
+    
+    private func createHeaderRegistration() -> ProcessingListHeaderRegistration {
+        return ProcessingListHeaderRegistration(elementKind: UICollectionView.elementKindSectionHeader) {
             [weak self] (supplementaryView, elementKind, indexPath) in
             guard let sectionID = self?.dataSource?.snapshot().sectionIdentifiers[indexPath.section],
                   let section = self?.viewModel?.sectionsStore?.fetchByID(sectionID)
@@ -231,8 +233,8 @@ extension ProcessingListViewController {
         }
     }
     
-    private func createCellRegistration() -> UICollectionView.CellRegistration<ProcessingListCell, Item.ID> {
-        return UICollectionView.CellRegistration<ProcessingListCell, Item.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createCellRegistration() -> ProcessingListCellRegistration {
+        return ProcessingListCellRegistration{ [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             cell.updateWithItem(item)
         }

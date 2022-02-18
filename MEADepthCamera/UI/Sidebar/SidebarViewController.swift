@@ -71,6 +71,15 @@ extension SidebarViewController {
         }
         dataSource?.apply(snapshot, animatingDifferences: false)
     }
+    
+    private func selectItemIfNeeded() {
+        guard let mainSplitViewController = mainSplitViewController,
+              !mainSplitViewController.isCollapsed,
+              let selectedList = mainSplitViewController.selectedList
+        else { return }
+        let indexPath = dataSource?.indexPath(for: selectedList)
+        collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .bottom)
+    }
 }
 
 // MARK: Cell Registrations
@@ -106,8 +115,9 @@ extension SidebarViewController {
         case .about:
             let aboutViewController: AboutViewController = UIStoryboard(storyboard: .info).instantiateViewController()
             let navigationController = UINavigationController(rootViewController: aboutViewController)
-            present(navigationController, animated: true) {
+            present(navigationController, animated: true) { [weak self] in
                 collectionView.deselectItem(at: indexPath, animated: true)
+                self?.selectItemIfNeeded()
             }
         }
     }

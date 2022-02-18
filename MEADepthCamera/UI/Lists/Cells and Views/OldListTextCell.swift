@@ -7,51 +7,39 @@
 
 import UIKit
 
-/// The delegate protocol for ListTextCells, to support interaction with the cell's item from within the cell.
-protocol ListTextCellDelegate: AnyObject {
-    /**
-     Deletes the OldListItem's stored NSManagedObject.
-     
-     When the user deletes a cell, the cell calls this method to notify the delegate (the list view model) to delete the item's object.
-     */
-    func delete(objectFor item: OldListItem)
+struct ListTextCellModel: Hashable {
+    let title: String
+    let bodyText: [String]
+    
+    init(listItem: ListItem) {
+        title = listItem.title
+        bodyText = listItem.bodyText
+    }
+    init(detailItem: DetailItem) {
+        title = detailItem.title
+        bodyText = detailItem.bodyText
+    }
 }
 
-class OldListTextCell: ItemListCell<OldListItem> {
-    
-    weak var delegate: ListTextCellDelegate?
+class OldListTextCell: ItemListCell<ListTextCellModel> {
     
     private var separatorConstraint: NSLayoutConstraint?
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configureAccessories()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
     // MARK: updateConfiguration(using:)
     override func updateConfiguration(using state: UICellConfigurationState) {
-        guard let item = state.item as? OldListItem else { return }
-        let content = TextCellContentConfiguration(titleText: item.title, subtitleText: item.subtitle, bodyText: item.bodyText).updated(for: state)
+        guard let item = state.item as? ListTextCellModel else { return }
+        let content = TextCellContentConfiguration(
+            titleText: item.title,
+            bodyText: item.bodyText,
+            titleContentConfiguration: .cell(),
+            bodyContentConfiguration: .subtitleCell()
+        ).updated(for: state)
         contentConfiguration = content
         updateSeparatorConstraint()
     }
 }
 
 extension OldListTextCell {
-    private func configureAccessories() {
-        let disclosure = UICellAccessory.disclosureIndicator()
-        let delete = UICellAccessory.delete() { self.deleteAction() }
-        accessories = [delete, disclosure]
-    }
-    
-    private func deleteAction() {
-        guard let item = configurationState.item as? OldListItem else { return }
-        delegate?.delete(objectFor: item)
-    }
     
     private func updateSeparatorConstraint() {
         guard let listContentView = contentView as? TextCellContentView,
@@ -64,3 +52,4 @@ extension OldListTextCell {
         separatorConstraint = constraint
     }
 }
+

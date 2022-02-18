@@ -19,7 +19,7 @@ class TaskStartViewModel {
         }
         
         var id: Identifier
-        var items: [OldListItem.ID]
+        var items: [DetailItem.ID]
     }
     
     // MARK: Info Items
@@ -83,20 +83,20 @@ class TaskStartViewModel {
             self.filesCountText = recording.filesCountText
         }
         
-        var listItem: OldListItem {
-            OldListItem(id: id, title: name, subTitle: isProcessedText, bodyText: [durationText, filesCountText])
+        var listItem: DetailItem {
+            DetailItem(id: id, title: name, bodyText: [isProcessedText, durationText, filesCountText])
         }
     }
     
     // MARK: Data Stores
-    lazy var sectionsStore: ObservableModelStore<Section>? = {
+    lazy var sectionsStore: AnyModelStore<Section>? = {
         let infoSection = Section(id: .info, items: infoItemIds)
         let recordingsSection = Section(id: .recordings, items: recordingItemIds ?? [])
-        return ObservableModelStore([infoSection, recordingsSection])
+        return AnyModelStore([infoSection, recordingsSection])
     }()
-    lazy var itemsStore: ObservableModelStore<OldListItem>? = {
+    lazy var itemsStore: AnyModelStore<DetailItem>? = {
         let items = [infoItems, recordingItems].compactMap { $0 }.flatMap { $0 }
-        return ObservableModelStore(items)
+        return AnyModelStore(items)
     }()
     
     private var useCase: UseCase
@@ -108,10 +108,10 @@ class TaskStartViewModel {
     private var sortedRecordings: [Recording]? {
         recordings?.sorted { $0.name! < $1.name! }
     }
-    private var infoItems: [OldListItem] {
-        InfoItems.ItemType.allCases.map { OldListItem(id: $0.id, title: $0.displayText(for: task) ?? "?") }
+    private var infoItems: [DetailItem] {
+        InfoItems.ItemType.allCases.map { DetailItem(id: $0.id, title: $0.displayText(for: task) ?? "?", image: $0.cellImage) }
     }
-    private var recordingItems: [OldListItem]? {
+    private var recordingItems: [DetailItem]? {
         sortedRecordings?.compactMap { RecordingItem($0)?.listItem }
     }
     private var infoItemIds: [UUID] {
@@ -125,6 +125,5 @@ class TaskStartViewModel {
         self.useCase = useCase
         self.task = task
     }
-    
 }
 

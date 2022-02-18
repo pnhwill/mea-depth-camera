@@ -6,30 +6,25 @@
 //
 
 import Foundation
-import UIKit
 
-// MARK: ListItem
-
-protocol ListItemRepresentable {
-    var listItem: ListItem { get }
-}
-
+/// A generic model of an item contained in a list cell with title text, optional subtitle text, and body text with an arbitrary number of lines.
 struct ListItem: Identifiable, Hashable {
     var id: UUID
     var title: String
-    var subtitle: String?
+//    var subtitle: String?
     var bodyText: [String]
     
     init(id: UUID,
          title: String,
-         subTitle: String? = nil,
+//         subTitle: String? = nil,
          bodyText: [String] = []) {
         self.id = id
         self.title = title
-        self.subtitle = subTitle
+//        self.subtitle = subTitle
         self.bodyText = bodyText
     }
 }
 
-
-
+protocol ListItemRepresentable {
+    var listItem: ListItem { get }
+}

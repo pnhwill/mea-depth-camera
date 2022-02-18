@@ -8,13 +8,14 @@
 import CoreData
 
 // MARK: DataProvider
-
+/// Properties and methods for classes that interact with `NSManagedObject` subclasses in the Core Data model.
 protocol DataProvider: AnyObject {
     associatedtype Object: NSManagedObject
     var persistentContainer: PersistentContainer { get }
 }
 
 extension DataProvider {
+    /// Utility method for fetching a single object with the given `UUID`.
     static func fetchObject(with id: UUID) -> Object? {
         let context = AppDelegate.shared.coreDataStack.persistentContainer.viewContext
         let fetchRequest: NSFetchRequest<Object> = Object.fetchRequest() as! NSFetchRequest<Object>
@@ -31,7 +32,7 @@ extension DataProvider {
 }
 
 // MARK: FetchingDataProvider
-
+/// Additional properties for any `DataProvider` that performs Core Data fetch requests to retrieve their associated objects.
 protocol FetchingDataProvider: DataProvider {
     var fetchedResultsController: NSFetchedResultsController<Object> { get }
     init(with persistentContainer: PersistentContainer, fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate?)
@@ -47,7 +48,7 @@ extension FetchingDataProvider {
 }
 
 // MARK: AddingDataProvider
-
+/// Additional methods for classes that create objects in the Core Data model.
 protocol AddingDataProvider: DataProvider {
     typealias AddAction = (Object) -> Void
     func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?)
@@ -66,7 +67,7 @@ extension AddingDataProvider {
 }
 
 // MARK: DeletingDataProvider
-
+/// Additional methods for classes that delete objects in the Core Data model.
 protocol DeletingDataProvider: DataProvider {
     typealias DeleteAction = (Bool) -> Void
     func delete(_ object: Object, shouldSave: Bool, completionHandler: DeleteAction?)
@@ -89,7 +90,7 @@ extension DeletingDataProvider {
 }
 
 // MARK: ListDataProvider
-
+/// All required conformances for DataProviders that interact with Core Data objects through the list column.
 protocol ListDataProvider:
     FetchingDataProvider,
     AddingDataProvider,

@@ -93,11 +93,15 @@
         <!--Navigation Controller-->
         <scene sceneID="9kb-IO-vuE">
             <objects>
-                <navigationController id="5hP-TS-vqB" sceneMemberID="viewController">
+                <navigationController toolbarHidden="NO" id="5hP-TS-vqB" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="hhk-Lc-QiX">
                         <rect key="frame" x="0.0" y="24" width="458.5" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Bvb-Wq-1Kk">
+                        <rect key="frame" x="0.0" y="1129" width="458.5" height="50"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YxW-Nz-WB6" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
