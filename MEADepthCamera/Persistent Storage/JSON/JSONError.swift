@@ -39,8 +39,8 @@ extension JSONError: LocalizedError {
     }
 }
 
-extension JSONError: Identifiable {
-    var id: String? {
-        errorDescription
-    }
-}
+//extension JSONError: Identifiable {
+//    var id: String? {
+//        errorDescription
+//    }
+//}

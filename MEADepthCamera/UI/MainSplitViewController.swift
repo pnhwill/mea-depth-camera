@@ -52,8 +52,8 @@ final class MainSplitViewController: UISplitViewController {
         default:
             return
         }
-        detailViewController.configure(with: itemID, isNew: isNew)
         navController.setViewControllers([detailViewController], animated: true)
+        detailViewController.configure(with: itemID, isNew: isNew)
         show(.secondary)
     }
     

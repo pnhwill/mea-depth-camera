@@ -1,5 +1,5 @@
 //
-//  Task+JSON.swift
+//  TasksJSON.swift
 //  MEADepthCamera
 //
 //  Created by Will on 2/16/22.
@@ -57,6 +57,7 @@ struct TaskProperties: Decodable {
     let instructions: String // "Smile big. Repeat 3 times."
     let id: UUID
     let isDefault: Bool
+    let isDefaultString: String
     
     private let logger = Logger.Category.json.logger
     
@@ -87,6 +88,7 @@ struct TaskProperties: Decodable {
         self.instructions = instructions
         self.id = UUID()
         self.isDefault = true
+        self.isDefaultString = Task.SectionName.standard.rawValue
     }
     
     /// The keys must have the same name as the attributes of the Task entity.
@@ -97,7 +99,8 @@ struct TaskProperties: Decodable {
             "name": name,
             "instructions": instructions,
             "id": id,
-            "isDefault": isDefault
+            "isDefault": isDefault,
+            "isDefaultString": isDefaultString,
         ]
     }
 }

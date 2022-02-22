@@ -160,8 +160,8 @@ extension TaskStartViewController {
         }
     }
     
-    private func createRecordingCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> {
-        return UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createRecordingCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.viewModel?.itemsStore?.fetchByID(itemID) else { return }
             let cellModel = ListTextCellModel(detailItem: item)
             cell.updateWithItem(cellModel)

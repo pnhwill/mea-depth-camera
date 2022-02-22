@@ -17,6 +17,7 @@ public class Task: NSManagedObject {
         super.awakeFromInsert()
         id = UUID()
         name = "New Task"
+        isDefaultString = isDefault ? SectionName.standard.rawValue : SectionName.custom.rawValue
     }
 }
 

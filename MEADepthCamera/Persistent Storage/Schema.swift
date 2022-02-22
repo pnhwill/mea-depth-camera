@@ -29,6 +29,6 @@ enum Schema {
     }
     
     enum Task: String {
-        case name, fileNameLabel, instructions
+        case name, fileNameLabel, instructions, isDefaultString
     }
 }

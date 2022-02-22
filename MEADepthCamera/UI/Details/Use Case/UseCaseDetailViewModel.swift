@@ -350,8 +350,8 @@ extension UseCaseDetailViewModel {
         }
     }
     
-    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> {
-        return UICollectionView.CellRegistration<OldListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
+    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
             let cellModel = ListTextCellModel(detailItem: item)
             cell.updateWithItem(cellModel)

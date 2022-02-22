@@ -13,40 +13,45 @@ class UseCaseListViewModel:
 {
     struct Section: ListSectionViewModel {
         var listSection: ListSection {
-            ListSection(id: name.rawValue,
+            ListSection(id: name,
                         items: itemIdentifiers,
                         canDelete: canDelete)
         }
         
-        private let name: UseCase.SectionName
+        private let name: String
         private let itemIdentifiers: [ListItem.ID]
-        private var canDelete: Bool {
-            switch name {
-            case .all: return true
-            }
-        }
+        private var canDelete: Bool { true }
         
         init?(sectionInfo: NSFetchedResultsSectionInfo) {
-            guard let sectionName = UseCase.SectionName(rawValue: sectionInfo.name),
-                  let objects = sectionInfo.objects as? [UseCase]
-            else { return nil }
-            self.name = sectionName
+            guard let objects = sectionInfo.objects as? [UseCase] else { return nil }
+            self.name = sectionInfo.name
             self.itemIdentifiers = objects.compactMap { $0.id }
         }
     }
     
     struct Item: ListItemViewModel {
         var listItem: ListItem {
-            ListItem(id: id, title: name)
+            ListItem(id: id, title: name, bodyText: [experiment, date, subjectID])
         }
         
-        private let name: String
         private let id: UUID
+        private let name: String
+        private let experiment: String
+        private let date: String
+        private let subjectID: String
         
         init?(_ useCase: UseCase) {
-            guard let name = useCase.title, let id = useCase.id else { return nil }
-            self.name = name
+            guard let id = useCase.id,
+                  let name = useCase.title,
+                  let date = useCase.dateTimeText()
+            else { return nil }
+            let experiment = useCase.experimentTitle ?? "?"
+            let subjectID = useCase.subjectID ?? "?"
             self.id = id
+            self.name = name
+            self.experiment = experiment
+            self.date = date
+            self.subjectID = subjectID
         }
     }
     

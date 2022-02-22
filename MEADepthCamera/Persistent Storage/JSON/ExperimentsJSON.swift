@@ -1,5 +1,5 @@
 //
-//  Experiment+JSON.swift
+//  ExperimentsJSON.swift
 //  MEADepthCamera
 //
 //  Created by Will on 2/16/22.
@@ -92,7 +92,7 @@ struct ExperimentProperties: Decodable {
         [
             "title": title,
             "tasks": tasks,
-            "id": id
+            "id": id,
         ]
     }
 }

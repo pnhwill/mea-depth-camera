@@ -26,7 +26,8 @@ protocol ListRepositoryProtocol {
     func attachEventListeners(
         addItem: AnyPublisher<Void, Never>,
         deleteItem: AnyPublisher<ListItem.ID, Never>,
-        searchTerm: AnyPublisher<String, Never>)
+        searchTerm: AnyPublisher<String, Never>
+    )
 }
 
 // MARK: ListRepository Class
@@ -65,7 +66,9 @@ final class ListRepository<Provider: ListDataProvider>:
     ) {
         addItem
             .debounce(for: .seconds(0.1), scheduler: RunLoop.current)
-            .sink { [weak self] in self?.add() }
+            .sink { [weak self] in
+                print("ADD LISTENER")
+                self?.add() }
             .store(in: &inputBindings)
         
         deleteItem
@@ -137,6 +140,7 @@ final class ListRepository<Provider: ListDataProvider>:
         guard let object = anObject as? Object else { return }
         switch type {
         case .insert:
+            print("INSERT CALLBACK")
             didInsertObjectSubject.send(object)
             didChangeSectionsSubject.send(sections)
         case .delete:

@@ -46,10 +46,13 @@ final class ListViewController: UICollectionViewController {
             configureCollectionView()
             isInitialLoad = false
         }
+        configureDataSource()
         loadData()
         bindToViewModel()
         selectItemIfNeeded()
     }
+    
+    // MARK: Life Cycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,6 +66,12 @@ final class ListViewController: UICollectionViewController {
         }
         super.viewWillAppear(animated)
     }
+    
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//        print(view)
+//        print(collectionView)
+//    }
 
     @objc
     func addButtonAction(_ sender: UIBarButtonItem) {
@@ -79,6 +88,7 @@ extension ListViewController {
             .throttle(for: .seconds(0.1), scheduler: RunLoop.main, latest: true)
             .receive(on: RunLoop.main)
             .sink { [weak self] sections in
+                print("RELOAD UPDATER")
                 self?.sectionIdentifiers = sections.map { $0.id }
                 self?.sectionStore?.reload(with: sections)
                 self?.refreshData()
@@ -88,6 +98,7 @@ extension ListViewController {
         viewModel?.reconfigureItemPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] item in
+                print("RECONFIGURE UPDATER")
                 self?.itemStore?.merge(newModels: [item])
                 self?.reconfigureItem(item.id)
             }
@@ -95,6 +106,7 @@ extension ListViewController {
         viewModel?.addItemPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] item in
+                print("ADD UPDATER")
                 self?.itemStore?.merge(newModels: [item])
                 self?.mainSplitViewController?.showDetail(itemID: item.id, isNew: true)
             }
@@ -174,7 +186,8 @@ extension ListViewController {
 
     private func configureCollectionView() {
         collectionView.collectionViewLayout = createLayout()
-        configureDataSource()
+//        collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: createLayout())
+//        configureDataSource()
     }
 
     private func createLayout() -> UICollectionViewLayout {
@@ -239,8 +252,8 @@ extension ListViewController {
     private func createListCellRegistration() -> ListCellRegistration {
         return ListCellRegistration { [weak self] (cell, indexPath, itemID) in
             guard let item = self?.itemStore?.fetchByID(itemID) else { return }
-//            let cellModel = ListTextCellModel(listItem: item)
-            cell.updateWithItem(item)
+            let cellModel = ListTextCellModel(listItem: item)
+            cell.updateWithItem(cellModel)
         }
     }
     

@@ -13,11 +13,14 @@ final class TaskProvider: DataFetcher<Task>, ListDataProvider {
     typealias Object = Task
     
     override var sortKeyPaths: [String]? {
-        [Schema.Task.name.rawValue]
+        [
+            Schema.Task.isDefaultString.rawValue,
+            Schema.Task.name.rawValue,
+        ]
     }
-//    override var sectionNameKeyPath: String? {
-//        Schema.Entity.isDefaultString.rawValue
-//    }
+    override var sectionNameKeyPath: String? {
+        Schema.Task.isDefaultString.rawValue
+    }
     
     private let logger = Logger.Category.persistence.logger
     

@@ -87,21 +87,14 @@ extension UseCase {
         return dateFormatter
     }()
 
-//    func dateTimeText(for filter: OldUseCaseListViewModel.Filter) -> String? {
-//        guard let date = date else { return nil }
-//        let isInToday = Locale.current.calendar.isDateInToday(date)
-//        switch filter {
-//        case .today:
-//            return Self.timeFormatter.string(from: date)
-//        case .past:
-//            return Self.pastDateFormatter.string(from: date)
-//        case .all:
-//            if isInToday {
-//                return Self.todayDateFormatter.string(from: date)
-//            } else {
-//                return Self.pastDateFormatter.string(from: date)
-//            }
-//        }
-//    }
+    func dateTimeText() -> String? {
+        guard let date = date else { return nil }
+        let isInToday = Locale.current.calendar.isDateInToday(date)
+        if isInToday {
+            return Self.todayDateFormatter.string(from: date)
+        } else {
+            return Self.pastDateFormatter.string(from: date)
+        }
+    }
 }
 

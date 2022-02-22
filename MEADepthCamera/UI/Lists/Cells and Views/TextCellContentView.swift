@@ -30,7 +30,7 @@ struct TextCellContentConfiguration: UIContentConfiguration, Hashable {
 }
 
 // MARK: TextCellContentView
-
+/// Custom `UIContentView` that displays large title text with a list of smaller body text below.
 class TextCellContentView: UIView, UIContentView {
     
     var configuration: UIContentConfiguration {
@@ -72,7 +72,7 @@ class TextCellContentView: UIView, UIContentView {
             bodyView.topAnchor.constraint(equalTo: titleView.bottomAnchor),
             bodyView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             bodyView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
-            bodyView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor)
+            bodyView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
         ])
     }
     
@@ -81,27 +81,35 @@ class TextCellContentView: UIView, UIContentView {
         appliedConfiguration = configuration
         
         var titleContent = configuration.titleContentConfiguration
-        titleContent.text = configuration.titleText
         titleContent.axesPreservingSuperviewLayoutMargins = []
-        titleContent.directionalLayoutMargins.bottom = 0
-        titleView.configuration = titleContent
+        titleContent.text = configuration.titleText
         
-        let listConfiguration = configuration.bodyContentConfiguration
-        var rowLabels: [UILabel] = []
-        for rowText in configuration.bodyText {
-            let label = UILabel()
-            label.translatesAutoresizingMaskIntoConstraints = false
-            label.text = rowText
-            label.font = listConfiguration.secondaryTextProperties.font
-            label.textColor = listConfiguration.secondaryTextProperties.resolvedColor()
-            label.adjustsFontForContentSizeCategory = true
-            label.numberOfLines = 1
-            rowLabels.append(label)
+        // Check if configuration contains body text and set up body labels, otherwise remove the body view.
+        if !configuration.bodyText.isEmpty {
+            titleContent.directionalLayoutMargins.bottom = 0
+            
+            var bodyContent = configuration.bodyContentConfiguration
+            bodyContent.axesPreservingSuperviewLayoutMargins = []
+            bodyView.directionalLayoutMargins = bodyContent.directionalLayoutMargins
+            bodyView.directionalLayoutMargins.top = 0
+            bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.top
+            
+            var rowLabels: [UILabel] = []
+            for rowText in configuration.bodyText {
+                let label = UILabel()
+                label.translatesAutoresizingMaskIntoConstraints = false
+                label.text = rowText
+                label.font = bodyContent.secondaryTextProperties.font
+                label.textColor = bodyContent.secondaryTextProperties.resolvedColor()
+                label.adjustsFontForContentSizeCategory = true
+                label.numberOfLines = 1
+                rowLabels.append(label)
+            }
+            bodyView.labels = rowLabels
+        } else {
+            bodyView.removeFromSuperview()
+            titleView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor).isActive = true
         }
-//        listConfiguration.axesPreservingSuperviewLayoutMargins = []
-        bodyView.directionalLayoutMargins = listConfiguration.directionalLayoutMargins
-        bodyView.directionalLayoutMargins.top = 0
-        bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.top
-        bodyView.labels = rowLabels
+        titleView.configuration = titleContent
     }
 }

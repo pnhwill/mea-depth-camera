@@ -13,11 +13,14 @@ final class UseCaseProvider: DataFetcher<UseCase>, ListDataProvider {
     typealias Object = UseCase
     
     override var sortKeyPaths: [String]? {
-        [Schema.UseCase.title.rawValue]
+        [
+            Schema.UseCase.experimentTitle.rawValue,
+            Schema.UseCase.date.rawValue,
+        ]
     }
     
-//    override var sectionNameKeyPath: String? {
-//        Schema.Entity.isDefaultString.rawValue
-//    }
+    override var sectionNameKeyPath: String? {
+        Schema.UseCase.experimentTitle.rawValue
+    }
 
 }
