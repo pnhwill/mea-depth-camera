@@ -99,5 +99,25 @@
                 "name": "FLUENCY_SEMANTIC"
             }
         ]
+    },
+    {
+        "title": "Validation Study",
+        "tasks": [
+            {
+                "name": "RST_REST1"
+            },
+            {
+                "name": "NSM_BIGSMILE"
+            },
+            {
+                "name": "NSM_PUCKER"
+            },
+            {
+                "name": "NSM_JAW_NORMAL"
+            },
+            {
+                "name": "BBP_NORMAL"
+            }
+        ]
     }
 ]

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 /// A `UISplitViewController` subclass that displays a three-column split view and passes data between the list and detail view controllers.
 final class MainSplitViewController: UISplitViewController {
@@ -24,13 +25,10 @@ final class MainSplitViewController: UISplitViewController {
     ///
     /// The list view controller uses this so it can re-select the same row every time it reloads its data.
     private(set) var selectedItemID: ListItem.ID?
-
-    // MARK: Life Cycle
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
-    }
+    // MARK: Messages
+    
+    private(set) lazy var detailEditingSubject = PassthroughSubject<Bool, Never>()
     
     // MARK: Detail
     

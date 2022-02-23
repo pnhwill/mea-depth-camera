@@ -32,7 +32,6 @@ final class UseCaseDetailViewController: UICollectionViewController, DetailViewC
         guard let useCase = UseCaseProvider.fetchObject(with: useCaseID) else { return }
         self.useCase = useCase
         self.isNew = isNew
-//        navigationController?.setNavigationBarHidden(false, animated: true)
         isHidden = false
         setEditing(isNew, animated: false)
         
@@ -49,6 +48,7 @@ final class UseCaseDetailViewController: UICollectionViewController, DetailViewC
     
     func hide() {
         guard !isHidden else { return }
+        useCase?.managedObjectContext?.rollback()
         useCase = nil
         UIViewPropertyAnimator.runningPropertyAnimator(
             withDuration: 0.2,
@@ -141,6 +141,7 @@ extension UseCaseDetailViewController {
         navigationItem.title = viewModel?.navigationTitle
         configureCollectionView()
         showBarsIfNeeded()
+        mainSplitViewController?.detailEditingSubject.send(editing)
     }
     
     private func transitionToViewMode(_ useCase: UseCase) {
@@ -177,8 +178,11 @@ extension UseCaseDetailViewController {
     private func saveIfNeeded() {
         if let useCase = useCase, useCase.hasChanges, let editViewModel = viewModel as? UseCaseDetailEditViewModel {
             editViewModel.save() { success in
-                if !success {
-                    useCase.managedObjectContext?.rollback()
+                let context = useCase.managedObjectContext
+                if success {
+                    context?.refresh(useCase, mergeChanges: true)
+                } else {
+                    context?.rollback()
                 }
             }
         }

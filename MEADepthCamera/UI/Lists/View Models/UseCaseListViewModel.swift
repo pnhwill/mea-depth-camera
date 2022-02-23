@@ -7,7 +7,7 @@
 
 import CoreData
 
-class UseCaseListViewModel:
+final class UseCaseListViewModel:
     ListDataConverter<ListRepository<UseCaseProvider>, UseCaseListViewModel.Section, UseCaseListViewModel.Item>,
     ListViewModel
 {

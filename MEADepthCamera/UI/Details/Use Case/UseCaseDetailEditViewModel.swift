@@ -8,8 +8,8 @@
 import UIKit
 import CoreData
 
-/// The view model for UseCaseDetailViewController when it is in edit mode.
-class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
+/// The view model for `UseCaseDetailViewController` when it is in edit mode.
+final class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
     
     enum Section: Int, CaseIterable {
         case title
@@ -83,12 +83,13 @@ class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
     }
     
     func configureDataSource(for collectionView: UICollectionView) {
-        
         let headerRegistration = createHeaderRegistration()
         let titleRegistration = createTitleCellRegistration()
         let subjectIDRegistration = createSubjectIDCellRegistration()
-        let experimentRegistration = createExperimentCellRegistration()
+        let experimentPickerRegistration = createExperimentPickerCellRegistration()
+        let experimentTextRegistration = createExperimentTextCellRegistration()
         let notesRegistration = createNotesCellRegistration()
+        let isNew = isNew
 
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) {
             (collectionView, indexPath, item) -> UICollectionViewCell? in
@@ -101,7 +102,11 @@ class UseCaseDetailEditViewModel: NSObject, DetailViewModel {
                 case .title:
                     return collectionView.dequeueConfiguredReusableCell(using: titleRegistration, for: indexPath, item: item)
                 case .experiment:
-                    return collectionView.dequeueConfiguredReusableCell(using: experimentRegistration, for: indexPath, item: item)
+                    if isNew {
+                        return collectionView.dequeueConfiguredReusableCell(using: experimentPickerRegistration, for: indexPath, item: item)
+                    } else {
+                        return collectionView.dequeueConfiguredReusableCell(using: experimentTextRegistration, for: indexPath, item: item)
+                    }
                 case .subjectID:
                     return collectionView.dequeueConfiguredReusableCell(using: subjectIDRegistration, for: indexPath, item: item)
                 case .notes:
@@ -133,7 +138,7 @@ extension UseCaseDetailEditViewModel {
     private func createHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item> {
         return UICollectionView.CellRegistration<UICollectionViewListCell, Item> { (cell, indexPath, item) in
             guard let section = Section(rawValue: indexPath.section) else { return }
-            var content = UIListContentConfiguration.groupedHeader()
+            var content = cell.defaultContentConfiguration()
             content.text = section.displayText
             cell.contentConfiguration = content
         }
@@ -159,10 +164,19 @@ extension UseCaseDetailEditViewModel {
             cell.textField.spellCheckingType = .no
         }
     }
-    private func createExperimentCellRegistration() -> UICollectionView.CellRegistration<PickerViewCell, Item> {
+    private func createExperimentPickerCellRegistration() -> UICollectionView.CellRegistration<PickerViewCell, Item> {
         return UICollectionView.CellRegistration<PickerViewCell, Item> { [weak self] (cell, indexPath, item) in
             guard let self = self else { return }
             cell.configure(dataSource: self, delegate: self)
+        }
+    }
+    private func createExperimentTextCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, Item> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, Item> { [weak self] (cell, indexPath, item) in
+            guard let self = self else { return }
+//            var content = cell.defaultContentConfiguration()
+            var content = UIListContentConfiguration.plainHeader()
+            content.text = self.useCase.experimentTitle
+            cell.contentConfiguration = content
         }
     }
     private func createNotesCellRegistration() -> UICollectionView.CellRegistration<TextViewCell, Item> {

@@ -7,16 +7,20 @@
 
 import UIKit
 import Combine
+import CoreData
 
 /// A `UICollectionViewController` subclass that lists item data from any `ListViewModel` and presents a detail view for selected cells.
 final class ListViewController: UICollectionViewController {
 
     typealias ListDiffableDataSource = UICollectionViewDiffableDataSource<ListSection.ID, ListItem.ID>
     
+    private var addButton: UIBarButtonItem?
+    
     private var viewModel: ListViewModel?
     private var dataSource: ListDiffableDataSource?
 
     private var updateBindings = Set<AnyCancellable>(minimumCapacity: 4)
+    private var detailSubscriber: Cancellable?
 
     private var addItemSubject = PassthroughSubject<Void, Never>()
     private var deleteItemSubject = PassthroughSubject<ListItem.ID, Never>()
@@ -35,12 +39,11 @@ final class ListViewController: UICollectionViewController {
 
     func configure(viewModel: ListViewModel) {
         self.viewModel = viewModel
-        viewModel.bindToView(
-            addItem: addItemSubject.eraseToAnyPublisher(),
-            deleteItem: deleteItemSubject.eraseToAnyPublisher(),
-            searchTerm: searchTermSubject.eraseToAnyPublisher())
+        // Configure navigation controller
         navigationItem.title = viewModel.navigationTitle
         showBarsIfNeeded()
+        addButton?.isEnabled = true
+        // Configure collection view
         applyInititalBackingStore()
         if isInitialLoad {
             configureCollectionView()
@@ -48,8 +51,14 @@ final class ListViewController: UICollectionViewController {
         }
         configureDataSource()
         loadData()
-        bindToViewModel()
+        collectionView.isUserInteractionEnabled = true
         selectItemIfNeeded()
+        // Set up bindings
+        bindToViewModel()
+        viewModel.bindToView(
+            addItem: addItemSubject.eraseToAnyPublisher(),
+            deleteItem: deleteItemSubject.eraseToAnyPublisher(),
+            searchTerm: searchTermSubject.eraseToAnyPublisher())
     }
     
     // MARK: Life Cycle
@@ -58,6 +67,7 @@ final class ListViewController: UICollectionViewController {
         super.viewDidLoad()
         configureSearchController()
         configureToolbar()
+        bindToDetail()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -66,12 +76,6 @@ final class ListViewController: UICollectionViewController {
         }
         super.viewWillAppear(animated)
     }
-    
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//        print(view)
-//        print(collectionView)
-//    }
 
     @objc
     func addButtonAction(_ sender: UIBarButtonItem) {
@@ -88,7 +92,6 @@ extension ListViewController {
             .throttle(for: .seconds(0.1), scheduler: RunLoop.main, latest: true)
             .receive(on: RunLoop.main)
             .sink { [weak self] sections in
-                print("RELOAD UPDATER")
                 self?.sectionIdentifiers = sections.map { $0.id }
                 self?.sectionStore?.reload(with: sections)
                 self?.refreshData()
@@ -98,7 +101,6 @@ extension ListViewController {
         viewModel?.reconfigureItemPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] item in
-                print("RECONFIGURE UPDATER")
                 self?.itemStore?.merge(newModels: [item])
                 self?.reconfigureItem(item.id)
             }
@@ -106,7 +108,6 @@ extension ListViewController {
         viewModel?.addItemPublisher
             .receive(on: RunLoop.main)
             .sink { [weak self] item in
-                print("ADD UPDATER")
                 self?.itemStore?.merge(newModels: [item])
                 self?.mainSplitViewController?.showDetail(itemID: item.id, isNew: true)
             }
@@ -120,6 +121,16 @@ extension ListViewController {
                 }
             }
             .store(in: &updateBindings)
+    }
+    
+    private func bindToDetail() {
+        detailSubscriber = mainSplitViewController?.detailEditingSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] editing in
+                // TODO: maybe add an isDetailEditing property with didSet to encapsulate this
+                self?.addButton?.isEnabled = !editing
+                self?.collectionView.isUserInteractionEnabled = !editing
+            }
     }
 
     private func applyInititalBackingStore() {
@@ -290,7 +301,7 @@ extension ListViewController {
             barButtonSystemItem: .add,
             target: self,
             action: #selector(addButtonAction(_:)))
-        
+        self.addButton = addBarButtonItem
         let toolbarButtonItems = [
             flexibleSpaceBarButtonItem,
             addBarButtonItem,
