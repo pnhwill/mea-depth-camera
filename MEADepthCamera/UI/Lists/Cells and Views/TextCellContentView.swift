@@ -13,8 +13,7 @@ struct TextCellContentConfiguration: UIContentConfiguration, Hashable {
     
     var titleText: String
     var bodyText: [String]
-    var titleContentConfiguration: UIListContentConfiguration
-    var bodyContentConfiguration: UIListContentConfiguration
+    var defaultContentConfiguration: UIListContentConfiguration
     
     func makeContentView() -> UIView & UIContentView {
         return TextCellContentView(configuration: self)
@@ -23,15 +22,14 @@ struct TextCellContentConfiguration: UIContentConfiguration, Hashable {
     func updated(for state: UIConfigurationState) -> TextCellContentConfiguration {
         guard let state = state as? UICellConfigurationState else { return self }
         var updatedConfiguration = self
-        updatedConfiguration.bodyContentConfiguration = bodyContentConfiguration.updated(for: state)
-        updatedConfiguration.titleContentConfiguration = titleContentConfiguration.updated(for: state)
+        updatedConfiguration.defaultContentConfiguration = defaultContentConfiguration.updated(for: state)
         return updatedConfiguration
     }
 }
 
 // MARK: TextCellContentView
 /// Custom `UIContentView` that displays large title text with a list of smaller body text below.
-class TextCellContentView: UIView, UIContentView {
+final class TextCellContentView: UIView, UIContentView {
     
     var configuration: UIContentConfiguration {
         get { appliedConfiguration }
@@ -48,7 +46,7 @@ class TextCellContentView: UIView, UIContentView {
     
     init(configuration: TextCellContentConfiguration) {
         super.init(frame: .zero)
-        titleView = UIListContentView(configuration: configuration.titleContentConfiguration)
+        titleView = UIListContentView(configuration: configuration.defaultContentConfiguration)
         setUpInternalViews()
         apply(configuration: configuration)
     }
@@ -62,25 +60,25 @@ class TextCellContentView: UIView, UIContentView {
         
         addSubview(titleView)
         addSubview(bodyView)
-        
         titleView.translatesAutoresizingMaskIntoConstraints = false
         bodyView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             titleView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             titleView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
             titleView.topAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor),
-            bodyView.topAnchor.constraint(equalTo: titleView.bottomAnchor),
+//            bodyView.topAnchor.constraint(equalTo: titleView.bottomAnchor),
             bodyView.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             bodyView.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
             bodyView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor),
         ])
+        
     }
     
     private func apply(configuration: TextCellContentConfiguration) {
         guard appliedConfiguration != configuration else { return }
         appliedConfiguration = configuration
         
-        var titleContent = configuration.titleContentConfiguration
+        var titleContent = configuration.defaultContentConfiguration
         titleContent.axesPreservingSuperviewLayoutMargins = []
         titleContent.text = configuration.titleText
         
@@ -88,11 +86,10 @@ class TextCellContentView: UIView, UIContentView {
         if !configuration.bodyText.isEmpty {
             titleContent.directionalLayoutMargins.bottom = 0
             
-            var bodyContent = configuration.bodyContentConfiguration
+            var bodyContent = configuration.defaultContentConfiguration
             bodyContent.axesPreservingSuperviewLayoutMargins = []
+            bodyContent.directionalLayoutMargins.top = 0
             bodyView.directionalLayoutMargins = bodyContent.directionalLayoutMargins
-            bodyView.directionalLayoutMargins.top = 0
-            bodyView.directionalLayoutMargins.bottom = titleContent.directionalLayoutMargins.top
             
             var rowLabels: [UILabel] = []
             for rowText in configuration.bodyText {
@@ -106,6 +103,7 @@ class TextCellContentView: UIView, UIContentView {
                 rowLabels.append(label)
             }
             bodyView.labels = rowLabels
+            bodyView.topAnchor.constraint(equalToSystemSpacingBelow: titleView.bottomAnchor, multiplier: 1).isActive = true
         } else {
             bodyView.removeFromSuperview()
             titleView.bottomAnchor.constraint(equalTo: layoutMarginsGuide.bottomAnchor).isActive = true

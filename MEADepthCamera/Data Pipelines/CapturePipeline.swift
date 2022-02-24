@@ -26,7 +26,7 @@ protocol CapturePipelineDelegate: AnyObject {
 
 /// The `CapturePipeline` class implements the real-time processing pipeline for camera and microphone data received during recording.
 ///
-class CapturePipeline: NSObject {
+final class CapturePipeline: NSObject {
     
     typealias FileWriterSubject = PassthroughSubject<WriteState, Error>
     
@@ -179,9 +179,11 @@ class CapturePipeline: NSObject {
         self.audioWriterSubject = FileWriterSubject()
         self.depthWriterSubject = FileWriterSubject()
         
+        let taskFileName = task.fileNameLabel ?? "UNKNOWN_TASK"
+        
         recordingQueue.async {
             // Create folder for all data files
-            guard let folderURL = self.captureRecordingDataSource.createFolder() else {
+            guard let folderURL = self.captureRecordingDataSource.createFolder(prefix: taskFileName) else {
                 self.logger.error("Failed to create save folder.")
                 return
             }

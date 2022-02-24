@@ -21,14 +21,13 @@ class ExpandableHeaderCell: ItemListCell<DetailItem> {
     
     override func updateConfiguration(using state: UICellConfigurationState) {
         guard let item = state.item as? DetailItem else { return }
-        var content = defaultListContentConfiguration().updated(for: state)
+        var content = defaultContentConfiguration().updated(for: state)
         content.text = item.title
         contentConfiguration = content
     }
 }
 
 extension ExpandableHeaderCell {
-    private func defaultListContentConfiguration() -> UIListContentConfiguration { return .sidebarHeader() }
     
     private func configureAccessories() {
         let outlineDisclosure = UICellAccessory.outlineDisclosure()

@@ -49,13 +49,17 @@ class FaceLandmarksPipeline {
     
     private let logger = Logger.Category.processing.logger
     
+    private var recordingName: String {
+        recording.name!
+    }
+    
     init?(recording: Recording) {
         guard let processorSettings = recording.processorSettings,
               let infoFileWriter = InfoFileWriter(recording: recording),
               let faceLandmarks2DFileWriter = FaceLandmarksFileWriter(recording: recording, outputType: .landmarks2D),
               let faceLandmarks3DFileWriter = FaceLandmarksFileWriter(recording: recording, outputType: .landmarks3D)
         else {
-            logger.error("Failed to initialize FaceLandmarksPipeline: Recording \(recording.id!.uuidString) is missing data.")
+            logger.error("Failed to initialize FaceLandmarksPipeline: Recording \(recording.name!) is missing data.")
             return nil
         }
         self.processorSettings = processorSettings
@@ -72,7 +76,7 @@ class FaceLandmarksPipeline {
     
     /// Starts the post-processing setup including loading the video assets and creating the CSV output files.
     func startTracking() throws {
-        logger.notice("Start processing Recording \(self.recording.id!.uuidString)...")
+        logger.notice("Start processing Recording \(self.recordingName)...")
         
         // Load RGB and depth map video files from saved URLs.
         guard let (videoAsset, depthAsset) = recording.loadAssets(),
@@ -101,7 +105,7 @@ class FaceLandmarksPipeline {
     ///
     /// All processing will still be completed for the current frame.
     func cancelTracking() {
-        logger.notice("Processing cancelled while processing Recording \(self.recording.id!.uuidString).")
+        logger.notice("Processing cancelled while processing Recording \(self.recordingName).")
         cancelRequested = true
     }
     
@@ -121,7 +125,7 @@ class FaceLandmarksPipeline {
             throw VisionTrackerProcessorError.firstFrameReadFailed
         }
         
-        logger.notice("Processing setup completed successfully. Performing face tracking on Recording \(self.recording.id!.uuidString).")
+        logger.notice("Processing setup completed successfully. Performing face tracking on Recording \(self.recordingName).")
         
         cancelRequested = false
         

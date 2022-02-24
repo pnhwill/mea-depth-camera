@@ -9,7 +9,7 @@ import CoreData
 import OSLog
 
 /// Data source implementing the storage abstraction to keep face capture recording sessions for the data pipelines.
-class CaptureRecordingDataSource {
+final class CaptureRecordingDataSource {
     
     struct CaptureFile {
         let outputType: OutputType
@@ -59,12 +59,13 @@ class CaptureRecordingDataSource {
         }
     }
     
-    func createFolder() -> URL? {
+    func createFolder(prefix: String) -> URL? {
         // Get current datetime and format the folder name.
         let date = Date()
         let timeStamp = dateFormatter.string(from: date)
+        let pathName = prefix + "_" + timeStamp
         // Create URL for folder inside documents path.
-        let dataURL = baseURL.appendingPathComponent(timeStamp, isDirectory: true)
+        let dataURL = baseURL.appendingPathComponent(pathName, isDirectory: true)
         // Create folder at desired path if it does not already exist.
         if !fileManager.fileExists(atPath: dataURL.path) {
             do {

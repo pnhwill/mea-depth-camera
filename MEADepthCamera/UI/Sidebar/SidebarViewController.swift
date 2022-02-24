@@ -25,6 +25,13 @@ final class SidebarViewController: UICollectionViewController {
         configureDataSource()
         applySnapshots()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let mainSplitViewController = mainSplitViewController {
+            clearsSelectionOnViewWillAppear = mainSplitViewController.isCollapsed
+        }
+        super.viewWillAppear(animated)
+    }
 }
 
 // MARK: Collection View

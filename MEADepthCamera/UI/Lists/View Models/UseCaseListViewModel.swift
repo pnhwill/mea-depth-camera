@@ -13,9 +13,10 @@ final class UseCaseListViewModel:
 {
     struct Section: ListSectionViewModel {
         var listSection: ListSection {
-            ListSection(id: name,
-                        items: itemIdentifiers,
-                        canDelete: canDelete)
+            ListSection(
+                id: name,
+                items: itemIdentifiers,
+                canDelete: canDelete)
         }
         
         private let name: String
@@ -31,7 +32,14 @@ final class UseCaseListViewModel:
     
     struct Item: ListItemViewModel {
         var listItem: ListItem {
-            ListItem(id: id, title: name, bodyText: [experiment, date, subjectID])
+            ListItem(
+                id: id,
+                title: name,
+                bodyText: [
+                    subjectID,
+                    experiment,
+                    date,
+                ])
         }
         
         private let id: UUID
@@ -46,12 +54,11 @@ final class UseCaseListViewModel:
                   let date = useCase.dateTimeText()
             else { return nil }
             let experiment = useCase.experimentTitle ?? "?"
-            let subjectID = useCase.subjectID ?? "?"
             self.id = id
             self.name = name
             self.experiment = experiment
             self.date = date
-            self.subjectID = subjectID
+            self.subjectID = useCase.subjectIDText
         }
     }
     

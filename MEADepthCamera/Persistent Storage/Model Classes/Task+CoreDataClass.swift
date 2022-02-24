@@ -45,9 +45,9 @@ extension Task {
         let recordingsCount = useCase.recordingsCount(for: self)
         switch recordingsCount {
         case 1:
-            return String(recordingsCount) + " Recording"
+            return String(recordingsCount) + " recording"
         default:
-            return String(recordingsCount) + " Recordings"
+            return String(recordingsCount) + " recordings"
         }
     }
     

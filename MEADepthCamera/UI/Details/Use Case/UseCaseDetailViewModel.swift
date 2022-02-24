@@ -7,8 +7,8 @@
 
 import UIKit
 
-/// The view model for UseCaseDetailViewController when it is in view mode.
-class UseCaseDetailViewModel: DetailViewModel {
+/// The view model for `UseCaseDetailViewController` when it is in view mode.
+final class UseCaseDetailViewModel: DetailViewModel {
     
     // MARK: Section
     struct Section: Identifiable {
@@ -32,16 +32,9 @@ class UseCaseDetailViewModel: DetailViewModel {
         
         static let identifiers = newIdentifierDictionary()
         
-        static let timeFormatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .none
-            formatter.timeStyle = .short
-            return formatter
-        }()
-        
         static let dateFormatter: DateFormatter = {
             let formatter = DateFormatter()
-            formatter.timeStyle = .none
+            formatter.timeStyle = .long
             formatter.dateStyle = .long
             return formatter
         }()
@@ -71,14 +64,9 @@ class UseCaseDetailViewModel: DetailViewModel {
                 return useCase.experimentTitle ?? useCase.experiment?.title
             case .date:
                 guard let date = useCase.date else { return nil }
-                let timeText = Self.timeFormatter.string(from: date)
-                if Locale.current.calendar.isDateInToday(date) {
-                    return UseCase.todayDateFormatter.string(from: date)
-                }
-                return Self.dateFormatter.string(from: date) + " at " + timeText
+                return Self.dateFormatter.string(from: date)
             case .subjectID:
-                guard let subjectID = useCase.subjectID else { return nil }
-                return "Subject ID: " + subjectID
+                return useCase.subjectIDText
             case .completedTasks:
                 return "\(useCase.completedTasks) out of \(useCase.tasksCount) tasks completed"
             case .notes:
@@ -188,17 +176,10 @@ class UseCaseDetailViewModel: DetailViewModel {
             case .info:
                 var config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
                 config.headerMode = .firstItemInSection
-//                config.footerMode = .supplementary
                 let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
-//                let footerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(44))
-//                let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(
-//                    layoutSize: footerSize,
-//                    elementKind: Self.sectionFooterElementKind,
-//                    alignment: .bottom)
-//                section.boundarySupplementaryItems = [sectionFooter]
                 return section
             case .tasks:
-                var configuration = UICollectionLayoutListConfiguration(appearance: .sidebarPlain)
+                var configuration = UICollectionLayoutListConfiguration(appearance: .plain)
                 configuration.headerMode = .firstItemInSection
                 configuration.headerTopPadding = 0
                 let section = NSCollectionLayoutSection.list(using: configuration,
@@ -212,7 +193,6 @@ class UseCaseDetailViewModel: DetailViewModel {
         
         let useCaseHeaderRegistration = createUseCaseHeaderRegistration()
         let useCaseCellRegistration = createUseCaseCellRegistration()
-//        let footerRegistration = createStartButtonFooterRegistration()
         let taskContainerCellRegistration = createTaskContainerCellRegistration()
         let taskListCellRegistration = createTaskListCellRegistration()
         
@@ -236,10 +216,6 @@ class UseCaseDetailViewModel: DetailViewModel {
                 }
             }
         }
-        
-//        dataSource?.supplementaryViewProvider = { (collectionView, elementKind, indexPath) in
-//            return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
-//        }
     }
     
     func applyInitialSnapshots() {
@@ -350,11 +326,20 @@ extension UseCaseDetailViewModel {
         }
     }
     
-    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> {
-        return UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
+//    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> {
+//        return UICollectionView.CellRegistration<ListTextCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
+//            guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
+//            let cellModel = ListTextCellModel(detailItem: item)
+//            cell.updateWithItem(cellModel)
+//        }
+//    }
+    private func createTaskListCellRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> {
+        return UICollectionView.CellRegistration<UICollectionViewListCell, DetailItem.ID> { [weak self] (cell, indexPath, itemID) in
             guard let self = self, let item = self.itemsStore?.fetchByID(itemID) else { return }
-            let cellModel = ListTextCellModel(detailItem: item)
-            cell.updateWithItem(cellModel)
+            var content = cell.defaultContentConfiguration()
+            content.text = item.title
+            content.secondaryText = item.bodyText.first
+            cell.contentConfiguration = content
         }
     }
 }

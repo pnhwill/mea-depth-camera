@@ -59,7 +59,8 @@ class LabelListView: UIView {
         NSLayoutConstraint.activate([
             currentLabel.leadingAnchor.constraint(equalTo: layoutMarginsGuide.leadingAnchor),
             currentLabel.trailingAnchor.constraint(equalTo: layoutMarginsGuide.trailingAnchor),
-            currentLabel.firstBaselineAnchor.constraint(equalToSystemSpacingBelow: layoutMarginsGuide.topAnchor, multiplier: 1)
+//            currentLabel.firstBaselineAnchor.constraint(equalToSystemSpacingBelow: layoutMarginsGuide.topAnchor, multiplier: 1)
+            currentLabel.firstBaselineAnchor.constraint(equalTo: layoutMarginsGuide.topAnchor)
         ])
         for label in labels[1...] {
             addSubview(label)

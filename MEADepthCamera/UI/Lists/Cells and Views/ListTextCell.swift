@@ -23,7 +23,7 @@ struct ListTextCellModel: Hashable {
 }
 
 /// Custom `ItemListCell` subclass for displaying large title text with an arbitrary number of body text lines below.
-class ListTextCell: ItemListCell<ListTextCellModel> {
+final class ListTextCell: ItemListCell<ListTextCellModel> {
     
     private var separatorConstraint: NSLayoutConstraint?
     
@@ -33,8 +33,7 @@ class ListTextCell: ItemListCell<ListTextCellModel> {
         let content = TextCellContentConfiguration(
             titleText: item.title,
             bodyText: item.bodyText,
-            titleContentConfiguration: .cell(),
-            bodyContentConfiguration: .subtitleCell()
+            defaultContentConfiguration: .sidebarSubtitleCell()
         ).updated(for: state)
         contentConfiguration = content
         updateSeparatorConstraint()

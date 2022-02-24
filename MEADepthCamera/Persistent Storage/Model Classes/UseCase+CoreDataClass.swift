@@ -13,20 +13,6 @@ import UIKit
 @objc(UseCase)
 public class UseCase: NSManagedObject {
     
-    var tasksCount: Int {
-        Int(experiment!.tasksCount)
-    }
-    
-    var completedTasks: Int {
-        let tasks = experiment!.tasks as! Set<Task>
-        return tasks.reduce(0) { $0 + ($1.isComplete(for: self) ? 1 : 0) }
-    }
-    
-    func recordingsCount(for task: Task) -> Int {
-        let recordings = recordings as! Set<Recording>
-        return recordings.reduce(0) { $0 + ($1.task == task ? 1 : 0) }
-    }
-    
     public override func awakeFromInsert() {
         super.awakeFromInsert()
         id = UUID()
@@ -51,8 +37,31 @@ extension UseCase {
 
 extension UseCase: ListObject {}
 
+// MARK: Convenience Accessors
+
+extension UseCase {
+    var tasksCount: Int {
+        Int(experiment!.tasksCount)
+    }
+    
+    var completedTasks: Int {
+        let tasks = experiment!.tasks as! Set<Task>
+        return tasks.reduce(0) { $0 + ($1.isComplete(for: self) ? 1 : 0) }
+    }
+    
+    func recordingsCount(for task: Task) -> Int {
+        let recordings = recordings as! Set<Recording>
+        return recordings.reduce(0) { $0 + ($1.task == task ? 1 : 0) }
+    }
+}
+
 // MARK: Text Formatters
 extension UseCase {
+    var subjectIDText: String {
+        let subjectID = subjectID ?? "?"
+        return "Subject ID: ".appending(subjectID)
+    }
+    
     func recordingsCountText() -> String {
         switch recordingsCount {
         case 1:
@@ -66,17 +75,10 @@ extension UseCase {
 // MARK: Date/Time Formatters
 extension UseCase {
 
-    static let timeFormatter: DateFormatter = {
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateStyle = .none
-        timeFormatter.timeStyle = .short
-        return timeFormatter
-    }()
-
     static let pastDateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
+        dateFormatter.timeStyle = .none
         return dateFormatter
     }()
 

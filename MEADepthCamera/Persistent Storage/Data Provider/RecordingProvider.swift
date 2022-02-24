@@ -42,7 +42,9 @@ final class RecordingProvider: AddingDataProvider, DeletingDataProvider {
     private func trashFiles(for recording: Recording) {
         if let url = recording.folderURL {
             do {
+                debugPrint("AAAAA")
                 try fileManager.trashItem(at: url, resultingItemURL: nil)
+                debugPrint("BBBBBB")
             } catch {
                 logger.error("\(#function): Failed to trash files for recording at: \(url.path)")
             }

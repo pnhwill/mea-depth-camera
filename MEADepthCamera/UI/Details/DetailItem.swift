@@ -22,13 +22,13 @@ struct DetailItem: Identifiable, Hashable {
     
     init(id: UUID,
          title: String,
-//         subTitle: String? = nil,
+//         subtitle: String? = nil,
          bodyText: [String] = [],
          image: UIImage? = nil,
          subItems: [DetailItem] = []) {
         self.id = id
         self.title = title
-//        self.subtitle = subTitle
+//        self.subtitle = subtitle
         self.bodyText = bodyText
         self.image = image
         self.subItems = subItems
