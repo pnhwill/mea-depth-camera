@@ -127,7 +127,8 @@ extension ProcessingListViewModel {
     }
     /// Call each time a new frame is processed.
     private func reconfigureItem(recording: Recording, processedFrames: Int) {
-        let item = Item(recording, processedFrames: processedFrames)
+        var item = Item(recording, processedFrames: processedFrames)
+        item.isProcessedText = "Processing..."
         itemsStore?.merge(newModels: [item])
     }
 }

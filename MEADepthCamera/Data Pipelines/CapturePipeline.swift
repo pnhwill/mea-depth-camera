@@ -35,16 +35,8 @@ final class CapturePipeline: NSObject {
     }
     
     private struct FileWriterSettings {
-        let fileExtensions: [AVFileType: String] = [.mov: "mov", .wav: "wav"]
-        
-        var configuration: FileConfiguration?
         let fileType: AVFileType
-        let fileExtension: String
-        
-        init(fileType: AVFileType) {
-            self.fileType = fileType
-            self.fileExtension = fileExtensions[fileType]!
-        }
+        var configuration: FileConfiguration?
     }
     
     // Data output synchronizer queue
@@ -56,6 +48,9 @@ final class CapturePipeline: NSObject {
     // Depth processing
     let videoDepthConverter = DepthToGrayscaleConverter()
     
+    // Recording
+    private(set) var recordingState = RecordingState.idle
+    
     private weak var delegate: CapturePipelineDelegate?
     
     // Data outputs
@@ -63,16 +58,13 @@ final class CapturePipeline: NSObject {
     private unowned var depthDataOutput: AVCaptureDepthDataOutput
     private unowned var audioDataOutput: AVCaptureAudioDataOutput
     
-    private(set) var processorSettings: ProcessorSettings!
+    private var processorSettings: ProcessorSettings!
     
     // Synchronized data capture
     private var outputSynchronizer: AVCaptureDataOutputSynchronizer?
     
-    // Recording
-    private(set) var recordingState = RecordingState.idle
-    
     // Real time Vision requests
-    private(set) var faceDetectionProcessor: LiveFaceDetectionProcessor?
+    private var faceDetectionProcessor: LiveFaceDetectionProcessor?
     
     // AV file writing
     private var videoFileWriter: VideoFileWriter?
@@ -110,7 +102,7 @@ final class CapturePipeline: NSObject {
           videoDataOutput: AVCaptureVideoDataOutput,
           depthDataOutput: AVCaptureDepthDataOutput,
           audioDataOutput: AVCaptureAudioDataOutput) {
-        guard let captureRecordingDataSource = CaptureRecordingDataSource() else { return nil }
+        guard let captureRecordingDataSource = CaptureRecordingDataSource(useCase: useCase) else { return nil }
         self.delegate = delegate
         self.useCase = useCase
         self.task = task
@@ -183,7 +175,7 @@ final class CapturePipeline: NSObject {
         
         recordingQueue.async {
             // Create folder for all data files
-            guard let folderURL = self.captureRecordingDataSource.createFolder(prefix: taskFileName) else {
+            guard let folderURL = self.captureRecordingDataSource.createRecordingFolder(prefix: taskFileName) else {
                 self.logger.error("Failed to create save folder.")
                 return
             }

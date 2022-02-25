@@ -21,7 +21,7 @@ protocol FaceLandmarksPipelineDelegate: AnyObject {
 
 /// The `FaceLandmarksPipeline` class implements the post-processing pipeline for face landmarks tracking on previously recorded videos.
 ///
-class FaceLandmarksPipeline {
+final class FaceLandmarksPipeline {
     
     weak var delegate: FaceLandmarksPipelineDelegate?
     
@@ -79,8 +79,7 @@ class FaceLandmarksPipeline {
         logger.notice("Start processing Recording \(self.recordingName)...")
         
         // Load RGB and depth map video files from saved URLs.
-        guard let (videoAsset, depthAsset) = recording.loadAssets(),
-              let saveFolder = recording.folderURL
+        guard let (videoAsset, depthAsset) = recording.loadAssets()
         else {
             throw VisionTrackerProcessorError.fileNotFound
         }
@@ -95,7 +94,7 @@ class FaceLandmarksPipeline {
         
         // Write the recording information to file now that totalFrames has been computed.
         // (somewhat abusing the fact that the recording's folder is named using the start time of the recording).
-        infoFileWriter.writeInfoRow(startTime: saveFolder.lastPathComponent, totalFrames: Int(recording.totalFrames))
+        infoFileWriter.writeInfoRow(startTime: recording.startTime!, totalFrames: Int(recording.totalFrames))
         
         // Try to perform the video tracking.
         try self.performTracking()
@@ -204,6 +203,13 @@ class FaceLandmarksPipeline {
     
     // MARK: - Landmarks Depth Processing
     
+    /// Process face observation results and write data to file.
+    private func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {
+        let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)
+        faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
+        faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
+    }
+    
     /// Combines a face observation and depth data to produce a bounding box and face landmarks in 3D space.
     ///
     /// If no depth is provided, it returns the 2D landmarks in image coordinates.
@@ -232,9 +238,6 @@ class FaceLandmarksPipeline {
                 Int(processorSettings.videoResolution.height))
             
             if let landmarks = faceObservation.landmarks?.allPoints {
-                
-                // TODO: TEST THIS, may need VNImagePointForFaceLandmarkPoint() instead (compare).
-//                let landmarkPointsInVideoImage = landmarks.pointsInImage(imageSize: processorSettings.videoResolution)
                 let landmarkPointsInVideoImage = landmarks.normalizedPoints.map { landmarkPoint in
                     VNImagePointForFaceLandmarkPoint(
                         vector_float2(landmarkPoint),
@@ -244,7 +247,6 @@ class FaceLandmarksPipeline {
                 }
                 landmarks2D = landmarkPointsInVideoImage.map { vector_float3(vector_float2($0), 0.0) }
                 
-//                let landmarkPointsInDepthImage = landmarks.pointsInImage(imageSize: processorSettings.depthResolution)
                 let landmarkPointsInDepthImage = landmarks.normalizedPoints.map { landmarkPoint in
                     VNImagePointForFaceLandmarkPoint(
                         vector_float2(landmarkPoint),
@@ -271,15 +273,6 @@ class FaceLandmarksPipeline {
             }
         }
         return (boundingBox, landmarks2D, landmarks3D)
-    }
-    
-    /// Write face observation results to file if collecting data.
-    private func recordLandmarks(of faceObservation: VNFaceObservation, with depthDataMap: CVPixelBuffer?, frame: Int, timeStamp: Float64) {
-        
-        // Perform data collection in background queue so that it does not hold up the UI.
-        let (boundingBox, landmarks2D, landmarks3D) = processFace(faceObservation, with: depthDataMap)
-        faceLandmarks2DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks2D)
-        faceLandmarks3DFileWriter.writeRowData(frame: frame, timeStamp: timeStamp, boundingBox: boundingBox, landmarks: landmarks3D)
     }
 }
 

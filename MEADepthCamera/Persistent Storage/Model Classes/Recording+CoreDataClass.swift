@@ -14,17 +14,12 @@ public class Recording: NSManagedObject {
     
     public override func awakeFromFetch() {
         super.awakeFromFetch()
-        //folderURL = useCase?.folderURL?.appendingPathComponent(name!)
-        guard let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            fatalError("Unable to locate Documents directory.")
-        }
-        folderURL = docsURL.appendingPathComponent(name!)
+        folderURL = useCase?.folderURL?.appendingPathComponent(name!)
     }
     
     public override func awakeFromInsert() {
         super.awakeFromInsert()
         id = UUID()
-//        isProcessed = false
     }
     
     func addFiles(_ newFiles: [OutputType: URL]) {

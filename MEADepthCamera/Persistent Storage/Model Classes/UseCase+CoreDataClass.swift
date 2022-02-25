@@ -9,15 +9,34 @@
 import Foundation
 import CoreData
 import UIKit
+import OSLog
 
 @objc(UseCase)
 public class UseCase: NSManagedObject {
+    
+    private let logger = Logger.Category.fileIO.logger
+    
+    public override func awakeFromFetch() {
+        super.awakeFromFetch()
+        updateFolderURL()
+    }
     
     public override func awakeFromInsert() {
         super.awakeFromInsert()
         id = UUID()
         date = Date()
         title = "New Use Case"
+    }
+    
+    func updateFolderURL() {
+        do {
+            let docsURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            guard let folderName = folderName else { return }
+            folderURL = docsURL.appendingPathComponent(folderName, isDirectory: true)
+        } catch {
+            logger.error("Unable to locate Documents directory (\(String(describing: error)))")
+            return
+        }
     }
 }
 
@@ -57,6 +76,13 @@ extension UseCase {
 
 // MARK: Text Formatters
 extension UseCase {
+    var folderName: String? {
+        guard let title = title, let subjectID = subjectID, let date = date else { return nil }
+        let dateText = Self.folderDateFormatter.string(from: date)
+        let pathName = [title, subjectID, dateText].joined(separator: "_")
+        return pathName
+    }
+    
     var subjectIDText: String {
         let subjectID = subjectID ?? "?"
         return "Subject ID: ".appending(subjectID)
@@ -74,6 +100,12 @@ extension UseCase {
 
 // MARK: Date/Time Formatters
 extension UseCase {
+    
+    static let folderDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
+        return formatter
+    }()
 
     static let pastDateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()

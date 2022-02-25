@@ -14,6 +14,9 @@ class OutputFileProvider: AddingDataProvider, DeletingDataProvider {
     
     private(set) var persistentContainer: PersistentContainer
     
+    let addInfo: ContextSaveContextualInfo = .addOutputFile
+    let deleteInfo: ContextSaveContextualInfo = .deleteOutputFile
+    
     init(with persistentContainer: PersistentContainer) {
         self.persistentContainer = persistentContainer
     }

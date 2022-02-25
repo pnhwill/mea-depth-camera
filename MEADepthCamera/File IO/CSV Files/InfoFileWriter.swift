@@ -39,6 +39,12 @@ class InfoFileWriter: CSVFileWriter {
     
     let logger = Logger.Category.fileIO.logger
     
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy HH:mm:ss.SSS"
+        return formatter
+    }()
+    
     init?(recording: Recording) {
         guard let processorSettings = recording.processorSettings,
               let folderURL = recording.folderURL,
@@ -54,12 +60,13 @@ class InfoFileWriter: CSVFileWriter {
     
     // MARK: Write Info Row
     
-    func writeInfoRow(startTime: String, totalFrames: Int) {
+    func writeInfoRow(startTime: Date, totalFrames: Int) {
         
         let (portraitVideoResolution, portraitDepthResolution) = processorSettings.getPortraitResolutions()
+        let startTimeString = dateFormatter.string(from: startTime)
         
         // Create string to hold the row's data.
-        let data = "\(subjectID),\(taskName),\(startTime),\(processorSettings.numLandmarks),\(portraitVideoResolution.width),\(portraitVideoResolution.height),\(portraitDepthResolution.width),\(portraitDepthResolution.height),\(totalFrames),\n"
+        let data = "\(subjectID),\(taskName),\(startTimeString),\(processorSettings.numLandmarks),\(portraitVideoResolution.width),\(portraitVideoResolution.height),\(portraitDepthResolution.width),\(portraitDepthResolution.height),\(totalFrames),\n"
         
         // Convert string to data buffer.
         guard let dataBuffer = data.data(using: String.Encoding.utf8) else {

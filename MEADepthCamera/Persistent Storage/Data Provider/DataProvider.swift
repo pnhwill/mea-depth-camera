@@ -51,6 +51,7 @@ extension FetchingDataProvider {
 /// Additional methods for classes that create objects in the Core Data model.
 protocol AddingDataProvider: DataProvider {
     typealias AddAction = (Object) -> Void
+    var addInfo: ContextSaveContextualInfo { get }
     func add(in context: NSManagedObjectContext, shouldSave: Bool, completionHandler: AddAction?)
 }
 
@@ -59,7 +60,7 @@ extension AddingDataProvider {
         context.perform {
             let newObject = Object(context: context)
             if shouldSave {
-                self.persistentContainer.saveContext(backgroundContext: context)
+                self.persistentContainer.saveContext(backgroundContext: context, with: self.addInfo)
             }
             completionHandler?(newObject)
         }
@@ -70,6 +71,7 @@ extension AddingDataProvider {
 /// Additional methods for classes that delete objects in the Core Data model.
 protocol DeletingDataProvider: DataProvider {
     typealias DeleteAction = (Bool) -> Void
+    var deleteInfo: ContextSaveContextualInfo { get }
     func delete(_ object: Object, shouldSave: Bool, completionHandler: DeleteAction?)
 }
 

@@ -19,6 +19,9 @@ final class RecordingProvider: AddingDataProvider, DeletingDataProvider {
     
     private let logger = Logger.Category.persistence.logger
     
+    let addInfo: ContextSaveContextualInfo = .addRecording
+    let deleteInfo: ContextSaveContextualInfo = .deleteRecording
+    
     init(with persistentContainer: PersistentContainer) {
         self.persistentContainer = persistentContainer
     }
@@ -30,7 +33,7 @@ final class RecordingProvider: AddingDataProvider, DeletingDataProvider {
                 self.trashFiles(for: recording)
                 context.delete(recording)
                 if shouldSave {
-                    self.persistentContainer.saveContext(backgroundContext: context, with: .deleteRecording)
+                    self.persistentContainer.saveContext(backgroundContext: context, with: self.deleteInfo)
                 }
                 completionHandler?(true)
             }
@@ -42,9 +45,7 @@ final class RecordingProvider: AddingDataProvider, DeletingDataProvider {
     private func trashFiles(for recording: Recording) {
         if let url = recording.folderURL {
             do {
-                debugPrint("AAAAA")
                 try fileManager.trashItem(at: url, resultingItemURL: nil)
-                debugPrint("BBBBBB")
             } catch {
                 logger.error("\(#function): Failed to trash files for recording at: \(url.path)")
             }

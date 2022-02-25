@@ -181,6 +181,7 @@ extension UseCaseDetailViewController {
                 let context = useCase.managedObjectContext
                 if success {
                     context?.refresh(useCase, mergeChanges: true)
+                    useCase.updateFolderURL()
                 } else {
                     context?.rollback()
                 }

@@ -22,6 +22,9 @@ final class TaskProvider: DataFetcher<Task>, ListDataProvider {
         Schema.Task.isDefaultString.rawValue
     }
     
+    let addInfo: ContextSaveContextualInfo = .addTask
+    let deleteInfo: ContextSaveContextualInfo = .deleteTask
+    
     private let logger = Logger.Category.persistence.logger
     
     // MARK: Tasks Data

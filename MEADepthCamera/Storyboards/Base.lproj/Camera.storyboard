@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
-    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <device id="ipad11_0rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
@@ -13,7 +13,7 @@
             <objects>
                 <navigationController storyboardIdentifier="CameraNavigationController" modalPresentationStyle="fullScreen" id="BVm-lt-oCP" customClass="PortraitLockedNavigationController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="YBr-RP-ooK">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="24" width="834" height="50"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -29,21 +29,21 @@
             <objects>
                 <viewController storyboardIdentifier="CameraViewController" modalPresentationStyle="fullScreen" id="BYZ-38-t0r" customClass="CameraViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BrA-k0-goQ" customClass="PreviewMetalView" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="44" width="414" height="818"/>
+                                <rect key="frame" x="0.0" y="24" width="834" height="1150"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <label hidden="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TrueDepth Camera Unavailable" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2hN-4O-nJT">
-                                <rect key="frame" x="46.5" y="438.5" width="321" height="29"/>
+                                <rect key="frame" x="256.5" y="584.5" width="321" height="29"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fWx-1M-8GV">
-                                <rect key="frame" x="134.5" y="432.5" width="145" height="41"/>
+                                <rect key="frame" x="344.5" y="578.5" width="145" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                 <state key="normal" title="Tap to resume"/>
                                 <connections>
@@ -51,7 +51,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleAspectFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cK1-YN-reQ">
-                                <rect key="frame" x="177" y="762.5" width="60" height="59"/>
+                                <rect key="frame" x="387" y="1074.5" width="60" height="59"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="DuG-0a-dXR"/>
                                     <constraint firstAttribute="width" constant="60" id="fLV-fd-BLt"/>
@@ -64,7 +64,7 @@
                                 </connections>
                             </button>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kVo-r9-gFf" userLabel="Audio Visualizer Container View">
-                                <rect key="frame" x="0.0" y="44" width="414" height="190"/>
+                                <rect key="frame" x="0.0" y="24" width="834" height="190"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="190" id="Aih-HR-5Vf"/>
                                 </constraints>
@@ -73,7 +73,7 @@
                                 </connections>
                             </containerView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QjP-lc-C4y" customClass="FaceGuideView" customModule="MEADepthCamera" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="254" width="414" height="488"/>
+                                <rect key="frame" x="0.0" y="314" width="834" height="660"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                         </subviews>
@@ -83,9 +83,9 @@
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="centerY" secondItem="6Tk-OE-BBY" secondAttribute="centerY" id="0uL-fu-Tjt"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="BrA-k0-goQ" secondAttribute="bottom" id="32t-N6-N4P"/>
                             <constraint firstItem="BrA-k0-goQ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="4FS-g0-YcH"/>
-                            <constraint firstItem="cK1-YN-reQ" firstAttribute="top" secondItem="QjP-lc-C4y" secondAttribute="bottom" constant="20" id="9PO-e7-pst"/>
+                            <constraint firstItem="cK1-YN-reQ" firstAttribute="top" secondItem="QjP-lc-C4y" secondAttribute="bottom" constant="100" id="9PO-e7-pst"/>
                             <constraint firstItem="fWx-1M-8GV" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="Doz-gE-rzT"/>
-                            <constraint firstItem="QjP-lc-C4y" firstAttribute="top" secondItem="kVo-r9-gFf" secondAttribute="bottom" constant="20" id="Foo-5C-vnh"/>
+                            <constraint firstItem="QjP-lc-C4y" firstAttribute="top" secondItem="kVo-r9-gFf" secondAttribute="bottom" constant="100" id="Foo-5C-vnh"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="cK1-YN-reQ" secondAttribute="bottom" constant="40" id="PIw-UZ-QAw"/>
                             <constraint firstItem="QjP-lc-C4y" firstAttribute="centerX" secondItem="BrA-k0-goQ" secondAttribute="centerX" id="R3k-Ar-CLY"/>
                             <constraint firstItem="2hN-4O-nJT" firstAttribute="centerX" secondItem="6Tk-OE-BBY" secondAttribute="centerX" id="TXn-BQ-14k"/>
@@ -118,7 +118,7 @@
             <objects>
                 <viewController id="ypE-oR-1Yr" customClass="AudioVisualizerViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="WxV-fT-LPT">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="190"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="190"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="dpq-ut-d2b"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -133,7 +133,7 @@
             <objects>
                 <collectionViewController storyboardIdentifier="TaskDetailVC" id="L1L-53-PAo" customClass="TaskStartViewController" customModule="MEADepthCamera" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="G4a-O6-PVu">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="vUG-lD-xPs">
